@@ -11,6 +11,7 @@ resources:
   - hajimari-charts.yaml
   - infracloudio-charts.yaml
   - jetstack-charts.yaml
+  - longhorn-charts.yaml
   - k8s-at-home-charts.yaml
   - metallb-charts.yaml
   - metrics-server-charts.yaml
