@@ -1,21 +1,23 @@
-# ---
-# apiVersion: cert-manager.io/v1
-# kind: ClusterIssuer
-# metadata:
-#   name: letsencrypt-production
-# spec:
-#   acme:
-#     server: https://acme-v02.api.letsencrypt.org/directory
-#     email: "${SECRET_CLOUDFLARE_EMAIL}"
-#     privateKeySecretRef:
-#       name: letsencrypt-production
-#     solvers:
-#       - dns01:
-#           cloudflare:
-#             email: "${SECRET_CLOUDFLARE_EMAIL}"
-#             apiKeySecretRef:
-#               name: cloudflare-api-key
-#               key: api-key
-#         selector:
-#           dnsZones:
-#             - ${SECRET_DOMAIN}
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: "${SECRET_OVH_EMAIL}"
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+      - dns01:
+          webhook:
+            groupName: "${SECRET_DOMAIN}"
+            solverName: ovh
+            config:
+              endpoint: ovh-eu
+              applicationKey: "${OVH_APPLICATION_KEY}"
+              applicationSecretRef:
+                key: applicationSecret
+                name: ovh-credentials
+              consumerKey: "${OVH_CONSUMER_KEY}"

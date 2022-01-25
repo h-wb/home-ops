@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespaces
   - cert-manager
+  - cert-manager-webhook-ovh
   - longhorn-system
   - metallb-system
   - system-upgrade

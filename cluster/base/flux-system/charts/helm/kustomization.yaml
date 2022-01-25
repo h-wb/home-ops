@@ -24,3 +24,4 @@ resources:
   - stakater-charts.yaml
   - traefik-charts.yaml
   - weaveworks-kured-charts.yaml
+  - cert-manager-webhook-ovh-charts.yaml
