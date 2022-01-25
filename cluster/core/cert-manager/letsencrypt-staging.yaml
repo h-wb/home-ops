@@ -18,6 +18,6 @@ spec:
               endpoint: ovh-eu
               applicationKey: "${OVH_APPLICATION_KEY}"
               applicationSecretRef:
-                key: applicationSecret
+                key: api-key
                 name: ovh-credentials
               consumerKey: "${OVH_CONSUMER_KEY}"
