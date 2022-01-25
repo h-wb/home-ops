@@ -1,0 +1,37 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: prowlarr
+      version: 4.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    image:
+      repository: ghcr.io/k8s-at-home/prowlarr
+      tag: v0.1.2.1045
+    env:
+      TZ: UTC
+    podSecurityContext:
+      fsGroup: 568
+      runAsGroup: 568
+      runAsUser: 568
+    persistence:
+      config:
+        enabled: true
+        existingClaim: prowlarr-config-v1
+    service:
+      main:
+        ports:
+          http:
+            port: 9696
+        type: LoadBalancer
