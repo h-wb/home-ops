@@ -8,7 +8,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://charts.jetstack.io/
+      # renovate: registryUrl=https://h-wb.github.io/cert-manager-webhook-ovh/
       chart: cert-manager-webhook-ovh
       version: v0.3.0
       sourceRef:
