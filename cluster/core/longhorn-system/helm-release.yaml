@@ -19,6 +19,7 @@ spec:
   values:
     defaultSettings:
       defaultReplicaCount: 1
+      defaultLonghornStaticStorageClass: longhorn
       main:
         enabled: true
         ingressClassName: "traefik"
