@@ -8,7 +8,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://helm.traefik.io/traefik
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: blocky
       version: 10.1.0
       sourceRef:
