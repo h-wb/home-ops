@@ -1,0 +1,10 @@
+---
+version: "3"
+
+tasks:
+  gen:
+    desc: Generate age-keygen
+    cmds:
+      - age-keygen -o age.agekey
+      - mkdir -p ~/.config/sops/age
+      - mv age.agekey ~/.config/sops/age/keys.txt

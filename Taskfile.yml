@@ -17,3 +17,4 @@ includes:
   format: .taskfiles/format.yml
   lint: .taskfiles/lint.yml
   pre-commit: .taskfiles/pre-commit.yml
+  sops: .taskfiles/sops.yml
