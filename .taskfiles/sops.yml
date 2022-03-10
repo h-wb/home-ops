@@ -8,3 +8,9 @@ tasks:
       - age-keygen -o age.agekey
       - mkdir -p ~/.config/sops/age
       - mv age.agekey ~/.config/sops/age/keys.txt
+
+  update:
+    desc: update sops-age secret
+    cmds:
+      - kubectl --kubeconfig=./provision/kubeconfig -n flux-system delete secret sops-age --ignore-not-found
+      - cat ~/.config/sops/age/keys.txt | kubectl --kubeconfig=./provision/kubeconfig -n flux-system create secret generic sops-age --from-file=age.agekey=/dev/stdin

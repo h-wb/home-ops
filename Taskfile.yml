@@ -11,6 +11,8 @@ vars:
 env:
   KUBECONFIG: "{{.PROJECT_DIR}}/provision/kubeconfig"
 
+dotenv: ['.config.env']
+
 includes:
   ansible: .taskfiles/ansible.yml
   flux: .taskfiles/flux.yml
@@ -18,3 +20,4 @@ includes:
   lint: .taskfiles/lint.yml
   pre-commit: .taskfiles/pre-commit.yml
   sops: .taskfiles/sops.yml
+  ssh: .taskfiles/ssh.yml
