@@ -34,10 +34,11 @@ spec:
       dns-tcp:
         enabled: true
         type: LoadBalancer
+        loadBalancerIP: "${BLOCKY_ADDR}"
         annotations:
           metallb.universe.tf/allow-shared-ip: dns
-        externalIPs:
-          - "${BLOCKY_ADDR}"
+        # externalIPs:
+        #   - "${BLOCKY_ADDR}"
         ports:
           dns-tcp:
             enabled: true
@@ -47,10 +48,11 @@ spec:
       dns-udp:
         enabled: true
         type: LoadBalancer
+        loadBalancerIP: "${BLOCKY_ADDR}"
         annotations:
           metallb.universe.tf/allow-shared-ip: dns
-        externalIPs:
-          - "${BLOCKY_ADDR}"
+        # externalIPs:
+        #   - "${BLOCKY_ADDR}"
         ports:
           dns-udp:
             enabled: true
