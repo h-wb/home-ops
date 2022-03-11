@@ -27,6 +27,7 @@ spec:
           - default
           - networking
           - media
+          - longhorn-system
       name: "you"
       customApps:
         - name: Some External Cluster Service
