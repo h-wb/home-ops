@@ -58,7 +58,7 @@ spec:
         tls:
           - hosts:
               - "sonarr.${SECRET_DOMAIN}"
-            secretName: "hajimari-tls"
+            secretName: "sonarr-tls"
     resources:
       requests:
         memory: 250Mi
