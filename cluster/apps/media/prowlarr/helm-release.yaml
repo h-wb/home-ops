@@ -30,9 +30,21 @@ spec:
       config:
         enabled: true
         existingClaim: prowlarr-config-v1
-    service:
+    ingress:
       main:
-        ports:
-          http:
-            port: 9696
-        type: LoadBalancer
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "format-list-bulleted-square"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: "prowlarr.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "prowlarr.${SECRET_DOMAIN}"
+            secretName: "prowlarr-tls"
