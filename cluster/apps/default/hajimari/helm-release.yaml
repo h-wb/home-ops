@@ -26,6 +26,7 @@ spec:
         matchNames:
           - default
           - networking
+          - media
       name: "you"
       customApps:
         - name: Some External Cluster Service
