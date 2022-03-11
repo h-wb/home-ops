@@ -40,8 +40,17 @@ spec:
         volumeSpec:
           nfs:
             server: 192.168.1.13
-            path: /mnt/nas
-        mountPath: /media
+            path: /mnt/nas/hugo
+        mountPath: /media/hugo
+        readOnly: true
+      media2:
+        enabled: true
+        type: custom
+        volumeSpec:
+          nfs:
+            server: 192.168.1.13
+            path: /mnt/nas/papa
+        mountPath: /media/papa
         readOnly: true
       transcode:
         enabled: true
