@@ -34,6 +34,8 @@ spec:
       dns-tcp:
         enabled: true
         type: LoadBalancer
+        annotations:
+          metallb.universe.tf/allow-shared-ip: dns
         externalIPs:
           - "${BLOCKY_ADDR}"
         ports:
@@ -45,6 +47,8 @@ spec:
       dns-udp:
         enabled: true
         type: LoadBalancer
+        annotations:
+          metallb.universe.tf/allow-shared-ip: dns
         externalIPs:
           - "${BLOCKY_ADDR}"
         ports:
