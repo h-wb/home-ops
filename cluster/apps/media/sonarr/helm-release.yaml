@@ -41,12 +41,24 @@ spec:
             server: 192.168.1.13
             path: /mnt/nas/hugo
         mountPath: /media
-    service:
+    ingress:
       main:
-        ports:
-          http:
-            port: 8989
-        type: LoadBalancer
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "television-classic"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: "sonarr.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "sonarr.${SECRET_DOMAIN}"
+            secretName: "hajimari-tls"
     resources:
       requests:
         memory: 250Mi
