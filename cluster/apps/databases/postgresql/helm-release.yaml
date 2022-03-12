@@ -25,11 +25,11 @@ spec:
       tag: 14.2.0
 
 
-    postgresql:
-      # user: set by values Form
-      # password: set by values Form
-      existingSecret: postgresql
-      database: nextcloud
+    # postgresql:
+    #   # user: set by values Form
+    #   # password: set by values Form
+    #   existingSecret: postgresql
+    #   database: nextcloud
 
     primary:
       persistence:
