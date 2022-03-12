@@ -28,10 +28,10 @@ spec:
       existingSecret: postgresql
       database: nextcloud
 
-    persistence:
-      size: 10Gi
-      existingClaim: postgresql-config-v1
+    primary:
+      persistence:
+        existingClaim: postgresql-config-v1
 
-    service:
-      type: LoadBalancer
-      loadBalancerIP: 192.168.1.198
+      service:
+        type: LoadBalancer
+        loadBalancerIP: 192.168.1.198
