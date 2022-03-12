@@ -1,0 +1,29 @@
+# yamllint disable
+apiVersion: v1
+kind: Secret
+metadata:
+    name: postgresql
+    namespace: default
+stringData:
+    admin_user: ENC[AES256_GCM,data:0qjDug==,iv:LoST9W6wVYDJYXwEGL5dvNS7R8XRMDc0gcRNjBgREuA=,tag:Y1LVtiLIE+3eZhq6KUZmbA==,type:str]
+    admin_password: ENC[AES256_GCM,data:zuNcfWrLjOa2XzAdTyp0K1lwFi2KCXRHB5PtU9VJ,iv:MQXhag7xHtipfS+QxdJmlZ9zvYRyfrLdgHeqxpq9niw=,tag:QyNAKVdUdx7szHxFghVBbw==,type:str]
+sops:
+    kms: []
+    gcp_kms: []
+    azure_kv: []
+    hc_vault: []
+    age:
+        - recipient: age1cu2z3syq630c8w6gz7k4qfgld2kk8ydgejl2q04le0fd7yc6gs0sq3ftwl
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBEcjVXVzBYbzJqVTRkQzZP
+            amVxNWtXZzZCakl3NU1Ocis4VGFGb21IRVFBCkNmU1FyM0JVYzQ2c2hZNGVhSVFB
+            QzI0RVR3WmR3K05RU2VUcDgvVjF3c28KLS0tIGZCTmlld3pGODk4RzU0SEg0SVdL
+            VWZZU1NFN3NVMytVNnBLWmMrWjA1dTgK+Q4KbyZlWcedjVsVBCGNWy0P/PTKeNKs
+            IVgjlOAMSH44ekevQzSgdDb/vJBlJ2jVYaJoY1iNyuc/FuTb27w8yQ==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2022-03-12T17:03:54Z"
+    mac: ENC[AES256_GCM,data:GZoXUuR90XeYG1tNeEe1bDGjGrChfjWlqeLs4aTypJXt36/M2jXeQ8Xbhf1PHQhgXbPrZAXiY7BUAtGsnaOmF4yYaQwA2eGiajGvFHB7SI7LjgKN30GaJCAyN2b1Q3ecWZkR+p4yxlYlq2Yb1LbHh+HMMZ7GnEet9FmFSCjjn5w=,iv:LHSQfPx2xKGls9KXZUBujETkZKAqrs5eFyCyCy8JCGM=,tag:IaCj+8lEY6lusfzSVxBwqg==,type:str]
+    pgp: []
+    encrypted_regex: ^(data|stringData)$
+    version: 3.7.1
