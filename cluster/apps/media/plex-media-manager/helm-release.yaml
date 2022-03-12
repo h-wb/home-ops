@@ -19,7 +19,7 @@ spec:
               env:
                 # source and destination files
                 - name: JINJA_SRC_FILE
-                  value: /config_src/tv.yaml
+                  value: config_src/tv.yaml
                 - name: JINJA_DEST_FILE
                   value: /config/tv.yaml
                 # let's be verbose
@@ -49,10 +49,10 @@ spec:
                   mountPath: /config
                 - name: pmm-config
                   mountPath: /config/config.yml
-                  subPath: config.yml
+                  subPath: config/config.yml
                 - name: movie-config
                   mountPath: /config/movies.yaml
-                  subPath: movies.yaml
+                  subPath: config/movies.yaml
           volumes:
             - name: config
               persistentVolumeClaim:
