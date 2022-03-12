@@ -3,7 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgresql-config-v1
-  namespace: media
+  namespace: databases
 spec:
   accessModes:
     - ReadWriteOnce
