@@ -41,12 +41,12 @@ spec:
 
   valuesFrom:
     - kind: Secret
-      name: "postgresql"
+      name: postgresql
       valuesKey: user
       targetPath: postgresql.user
       optional: false
     - kind: Secret
-      name: "postgresql"
+      name: postgresql
       valuesKey: password
       targetPath: postgresql.password
       optional: false
