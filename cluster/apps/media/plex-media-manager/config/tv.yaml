@@ -7,7 +7,7 @@ data:
         smart_label: originally_available.desc
         sync_mode: sync
         imdb_list:
-          url: https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries&release_date=1980-01-01,{{ now().strftime('%Y-%m-%d') }}
+          url: https://www.imdb.com/search/title/?title_type=tv_series,tv_miniseries
           limit: 10
         summary: The 10 most popular shows across the internet
         sonarr_add_missing: true
@@ -22,5 +22,5 @@ data:
           list_size: 10
 kind: ConfigMap
 metadata:
-  name: tv-config-jinja-template
+  name: tv-config
   namespace: media
