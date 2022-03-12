@@ -61,7 +61,7 @@ spec:
                 pathType: Prefix
         tls:
           - hosts:
-              - "cloud.${SECRET_DOMAIN}"
+              - "cloud.${SECRET_DO  MAIN}"
             secretName: "cloud-tls"
 
     resources:
