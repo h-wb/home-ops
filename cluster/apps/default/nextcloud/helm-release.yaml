@@ -33,17 +33,8 @@ spec:
         - 100
 
     persistence:
-      config:
-        enabled: true
-        existingClaim: nextcloud-config-v1
-      data:
-        enabled: true
-        type: custom
-        volumeSpec:
-          nfs:
-            server: 192.168.1.13
-            path: /mnt/nas/hugo
-        mountPath: /data
+      enabled: true
+      existingClaim: nextcloud-config-v1
 
     ingress:
       enabled: true
