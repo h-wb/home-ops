@@ -24,7 +24,8 @@ spec:
       repository: bitnami/postgresql
       tag: 14.2.0
 
-    auth:
+
+    postgresql:
       # user: set by values Form
       # password: set by values Form
       existingSecret: postgresql
@@ -42,10 +43,10 @@ spec:
     - kind: Secret
       name: "postgresql"
       valuesKey: user
-      targetPath: auth.user
+      targetPath: postgresql.user
       optional: false
     - kind: Secret
       name: "postgresql"
       valuesKey: password
-      targetPath: auth.password
+      targetPath: postgresql.password
       optional: false
