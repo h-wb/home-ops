@@ -64,6 +64,16 @@ spec:
     nextcloud:
       host: cloud.${SECRET_DOMAIN}
 
+      extraEnv:
+        - name: NEXTCLOUD_TRUSTED_DOMAINS
+          value: cloud.${SECRET_DOMAIN}
+
+      extraVolumes:
+        - name: data
+          nfs:
+            server: 192.168.1.13
+            path: /mnt/nas/hugo
+
       existingSecret:
         enabled: true
         secretName: nextcloud
@@ -74,11 +84,11 @@ spec:
         proxy.config.php: |-
           <?php
           $CONFIG = array (
-            'trusted_proxies' => array('192.168.1.0/24'),
-            'forwarded_for_headers' =>
-            array (
-              0 => 'HTTP_X_FORWARDED_FOR',
+            'trusted_proxies' => array(
+              0 => '127.0.0.1',
+              1 => '192.168.1.0/24',
             ),
+            'forwarded_for_headers' => array('HTTP_X_FORWARDED_FOR'),
           );
     internalDatabase:
       enabled: false
