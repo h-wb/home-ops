@@ -25,12 +25,17 @@ spec:
       TZ: UTC
       PHP_MEMORY_LIMIT: 256M
 
-    podSecurityContext:
-      fsGroup: 568
-      runAsGroup: 568
-      runAsUser: 568
-      supplementalGroups:
-        - 100
+    # podSecurityContext:
+    #   fsGroup: 568
+    #   runAsGroup: 568
+    #   runAsUser: 568
+    #   supplementalGroups:
+    #     - 100
+
+    livenessProbe:
+      enabled: false
+    readinessProbe:
+      enabled: false
 
     persistence:
       enabled: true
@@ -69,7 +74,11 @@ spec:
         proxy.config.php: |-
           <?php
           $CONFIG = array (
-            'trusted_proxies' => array('192.168.1.0/24')
+            'trusted_proxies' => array('192.168.1.0/24'),
+            'forwarded_for_headers' =>
+            array (
+              0 => 'HTTP_X_FORWARDED_FOR',
+            ),
           );
     internalDatabase:
       enabled: false
@@ -88,6 +97,8 @@ spec:
 
     cronjob:
       enabled: true
+      failedJobsHistoryLimit: 1
+      successfulJobsHistoryLimit: 1
 
     redis:
       enabled: true
