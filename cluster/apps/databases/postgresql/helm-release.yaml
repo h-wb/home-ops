@@ -39,14 +39,14 @@ spec:
         type: LoadBalancer
         loadBalancerIP: 192.168.1.198
 
-  valuesFrom:
-    - kind: Secret
-      name: postgresql
-      valuesKey: user
-      targetPath: postgresql.user
-      optional: false
-    - kind: Secret
-      name: postgresql
-      valuesKey: password
-      targetPath: postgresql.password
-      optional: false
+  # valuesFrom:
+  #   - kind: Secret
+  #     name: postgresql
+  #     valuesKey: user
+  #     targetPath: postgresql.user
+  #     optional: false
+  #   - kind: Secret
+  #     name: postgresql
+  #     valuesKey: password
+  #     targetPath: postgresql.password
+  #     optional: false
