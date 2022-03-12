@@ -53,9 +53,6 @@ spec:
                 - name: movie-config
                   mountPath: /config/movies.yaml
                   subPath: movies.yaml
-                - name: tv-config
-                  mountPath: /config/tv.yaml
-                  subPath: tv.yaml
           volumes:
             - name: config
               persistentVolumeClaim:
