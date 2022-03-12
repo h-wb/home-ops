@@ -72,7 +72,7 @@ spec:
         memory: 1500Mi
 
     nextcloud:
-      host: cloud.${SECRET_DOMAIN}"
+      host: cloud.${SECRET_DOMAIN}
 
       existingSecret:
         enabled: true
