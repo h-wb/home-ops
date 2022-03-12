@@ -6,3 +6,4 @@ resources:
   - networking.yaml
   - longhorn-system.yaml
   - media.yaml
+  - databases.yaml
