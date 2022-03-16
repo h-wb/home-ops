@@ -98,11 +98,8 @@ spec:
       type: postgresql
       host: nextcloud-postgresql.default.svc.cluster.local
       database: nextcloud
-      existingSecret:
-        enabled: true
-        secretName: postgresql
-        usernameKey: admin_user
-        passwordKey: admin_password
+      user: nextcloud
+      # password: set by valuesFrom
 
 
     cronjob:
@@ -115,7 +112,7 @@ spec:
     postgresql:
       enabled: true
 
-      existingSecret: postgresql
+      postgresqlUsername: nextcloud
       # postgresqlPassword: set by valuesFrom
       postgresqlDatabase: nextcloud
 
@@ -146,3 +143,15 @@ spec:
             memory: 128Mi
           limits:
             memory: 256Mi
+
+  valuesFrom:
+    - kind: Secret
+      name: nextcloud
+      valuesKey: postgresql_password
+      targetPath: postgresql.postgresqlPassword
+      optional: false
+    - kind: Secret
+      name: nextcloud
+      valuesKey: postgresql_password
+      targetPath: externalDatabase.password
+      optional: false
