@@ -7,6 +7,7 @@ metadata:
 stringData:
     admin_user: ENC[AES256_GCM,data:YGTN+1u9GUY=,iv:7686cQDmAq+dsO1/4Ngo/6l1AUz/XREk3AMPgF1GBVs=,tag:aq8rZYHahgpRm0q3RP+EZA==,type:str]
     admin_password: ENC[AES256_GCM,data:zuNcfWrLjOa2XzAdTyp0K1lwFi2KCXRHB5PtU9VJ,iv:MQXhag7xHtipfS+QxdJmlZ9zvYRyfrLdgHeqxpq9niw=,tag:QyNAKVdUdx7szHxFghVBbw==,type:str]
+    postgres-password: ENC[AES256_GCM,data:IxgH/LS8FhEVeShvb8uDsiMUJst6yMp3AbEe186D,iv:rYNOQGrTLWRScT5uDH8ldWKVyM9PznFyOTx54A7ITgc=,tag:k5hHcM5a8QWapES8qPbCiA==,type:str]
 sops:
     kms: []
     gcp_kms: []
@@ -22,8 +23,8 @@ sops:
             VWZZU1NFN3NVMytVNnBLWmMrWjA1dTgK+Q4KbyZlWcedjVsVBCGNWy0P/PTKeNKs
             IVgjlOAMSH44ekevQzSgdDb/vJBlJ2jVYaJoY1iNyuc/FuTb27w8yQ==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2022-03-12T22:31:20Z"
-    mac: ENC[AES256_GCM,data:m9g1E+qc9bDFk08OuqvZd/srQAkL9eEeNwDad7ECkSGBi676q6jQJbcJLZJlCYxU9iLINCll366ZTTYJHkflMYRta7QS2Vqf1UZ4PIryOoaDJvjmHnBREsqnr7K3BCwgtWJ77foDmfkjbWAB1rAuPHbfbZWVuq86n9tO7p+nT7g=,iv:lOfDOUJnrDk4gzLhj7fO6DruW5VSYi3GSfb3iiDrBvU=,tag:LcOsSxAOl20dQ/aC1091wQ==,type:str]
+    lastmodified: "2022-03-16T21:52:58Z"
+    mac: ENC[AES256_GCM,data:h6ZPie49FWiaN266B5Nm3M+9/kOjLN7FtAF5gdEusZQVp2VZFBKO0iMfhast5JL2MM0gAzTHoQ9tFBIK9lj+Bc16xg7tXn58v3A64Ah4Z6wCwJ8cZhASgOnRJAZ8hrTXCoYbwWq2zh5eJEVwU3LtC8MQN5XEZnbXvGvExxI9LMk=,iv:uwc3PgXs/1BYPtHx+1lGflGX9nLNu+CmYWuojntgZnc=,tag:Bh1Xt549ZhHWb0JdP/bhTA==,type:str]
     pgp: []
     encrypted_regex: ^(data|stringData)$
     version: 3.7.1

@@ -64,9 +64,9 @@ spec:
     nextcloud:
       host: cloud.${SECRET_DOMAIN}
 
-      extraEnv:
-        - name: NEXTCLOUD_TRUSTED_DOMAINS
-          value: cloud.${SECRET_DOMAIN}
+      # extraEnv:
+      #   - name: NEXTCLOUD_TRUSTED_DOMAINS
+      #     value: cloud.${SECRET_DOMAIN}
 
       extraVolumes:
         - name: data
@@ -80,23 +80,23 @@ spec:
         usernameKey: admin_user
         passwordKey: admin_password
 
-      # configs:
-      #   proxy.config.php: |-
-      #     <?php
-      #     $CONFIG = array (
-      #       'trusted_proxies' => array(
-      #         0 => '127.0.0.1',
-      #         1 => '192.168.1.0/24',
-      #       ),
-      #       'forwarded_for_headers' => array('HTTP_X_FORWARDED_FOR'),
-      #     );
+      configs:
+        proxy.config.php: |-
+          <?php
+          $CONFIG = array (
+            'trusted_proxies' => array(
+              0 => '127.0.0.1',
+              1 => '192.168.1.0/24',
+            ),
+            'forwarded_for_headers' => array('HTTP_X_FORWARDED_FOR'),
+          );
     internalDatabase:
       enabled: false
 
     externalDatabase:
       enabled: true
       type: postgresql
-      host: postgresql.databases.svc.cluster.local
+      host: nextcloud-postgresql.default.svc.cluster.local
       database: nextcloud
       existingSecret:
         enabled: true
@@ -109,6 +109,25 @@ spec:
       enabled: true
       failedJobsHistoryLimit: 1
       successfulJobsHistoryLimit: 1
+      curlInsecure:
+
+
+    postgresql:
+      enabled: true
+
+      existingSecret: postgresql
+      # postgresqlPassword: set by valuesFrom
+      postgresqlDatabase: nextcloud
+
+      persistence:
+        enabled: true
+        existingClaim: nextcloud-postgresql-config-v1
+
+      resources:
+        requests:
+          memory: 256Mi
+        limits:
+          memory: 1024Mi
 
     redis:
       enabled: false
