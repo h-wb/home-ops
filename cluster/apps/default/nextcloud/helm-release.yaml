@@ -64,15 +64,14 @@ spec:
     nextcloud:
       host: cloud.${SECRET_DOMAIN}
 
-      # extraEnv:
-      #   - name: NEXTCLOUD_TRUSTED_DOMAINS
-      #     value: cloud.${SECRET_DOMAIN}
-
       extraVolumes:
         - name: data
           nfs:
             server: 192.168.1.13
             path: /mnt/nas/hugo
+      extraVolumeMounts:
+        - name: data
+          mountPath: /data
 
       existingSecret:
         enabled: true
