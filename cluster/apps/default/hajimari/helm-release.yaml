@@ -30,9 +30,12 @@ spec:
           - longhorn-system
       name: "you"
       customApps:
-        - name: Some External Cluster Service
-          url: http://192.168.1.100:5000
-          icon: test-tube
+        - name: Proxmox
+          url: https://192.168.1.157:8006
+          icon: alpha-x-box
+        - name: Truenas
+          url: http://truenas.local
+          icon: alpha-x-box
       groups:
         - name: Communicate
           links:
