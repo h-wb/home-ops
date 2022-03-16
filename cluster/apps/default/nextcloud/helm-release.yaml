@@ -25,12 +25,12 @@ spec:
       TZ: UTC
       PHP_MEMORY_LIMIT: 256M
 
-    # podSecurityContext:
-    #   fsGroup: 568
-    #   runAsGroup: 568
-    #   runAsUser: 568
-    #   supplementalGroups:
-    #     - 100
+    podSecurityContext:
+      fsGroup: 568
+      runAsGroup: 568
+      runAsUser: 568
+      supplementalGroups:
+        - 100
 
     livenessProbe:
       enabled: false
