@@ -26,6 +26,7 @@ spec:
       config:
         enabled: true
         existingClaim: tautulli-config-v1
+        mountPath: /config
     ingress:
       main:
         enabled: true
