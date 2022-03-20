@@ -22,6 +22,12 @@ spec:
       tag: v2.9.4
     env:
       TZ: UTC
+    podSecurityContext:
+      fsGroup: 568
+      runAsGroup: 568
+      runAsUser: 568
+      supplementalGroups:
+        - 100
     persistence:
       config:
         enabled: true
