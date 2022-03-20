@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - sonarr
   - radarr
+  - lidarr
   - flood
   - prowlarr
   - plex
