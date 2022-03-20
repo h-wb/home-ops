@@ -36,7 +36,7 @@ spec:
       data:
         enabled: true
         existingClaim: nfs-data-pvc
-        subPath: '/Literature/Manga'
+        subPath: 'Literature/Manga'
         mountPath: /data
     ingress:
       main:
