@@ -57,15 +57,9 @@ spec:
             - name: config
               persistentVolumeClaim:
                 claimName: plex-media-manager-config-v1
-            # - configMap:
-            #     name: pmm-config
             - name: pmm-config
               secret:
                 secretName: plex-media-manager
-              # valueFrom:
-              #   secretKeyRef:
-              #     name: plex-media-manager
-              #     key: config.yml
             - configMap:
                 name: movie-config
               name: movie-config
