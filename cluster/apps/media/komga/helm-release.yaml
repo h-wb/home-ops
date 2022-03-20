@@ -33,11 +33,14 @@ spec:
         enabled: true
         existingClaim: komga-config-v1
         mountPath: /config
-      data:
+      media:
         enabled: true
-        existingClaim: nfs-data-pvc
-        subPath: 'Literature/Manga'
-        mountPath: /data
+        type: custom
+        volumeSpec:
+          nfs:
+            server: 192.168.1.13
+            path: /mnt/nas/hugo
+        mountPath: /media
     ingress:
       main:
         enabled: true
