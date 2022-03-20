@@ -7,6 +7,7 @@ resources:
   - lidarr
   - flood
   - prowlarr
+  - komga
   - plex
   - plex-media-manager
   - tautulli
