@@ -31,7 +31,7 @@ spec:
           #         mountPath: /config
           containers:
             - name: plex-media-manager
-              image: meisnate12/plex-meta-manager:v1.15.1
+              image: meisnate12/plex-meta-manager:v1.16.2
               imagePullPolicy: IfNotPresent
               args: ["--run", "--read-only-config"]
               resources:
