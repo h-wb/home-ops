@@ -60,10 +60,12 @@ spec:
             # - configMap:
             #     name: pmm-config
             - name: pmm-config
-              valueFrom:
-                secretKeyRef:
-                  name: plex-media-manager
-                  key: config.yml
+              secret:
+                secretName: plex-media-manager
+              # valueFrom:
+              #   secretKeyRef:
+              #     name: plex-media-manager
+              #     key: config.yml
             - configMap:
                 name: movie-config
               name: movie-config
