@@ -54,9 +54,6 @@ spec:
                   mountPath: /config/tv.yaml
                   subPath: tv.yaml
           volumes:
-            - name: config
-              persistentVolumeClaim:
-                claimName: plex-media-manager-config-v1
             - name: pmm-config
               secret:
                 secretName: plex-media-manager
