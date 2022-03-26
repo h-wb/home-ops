@@ -23,9 +23,7 @@ spec:
     env:
       TZ: UTC
     podSecurityContext:
-      fsGroup: 568
-      runAsGroup: 568
-      runAsUser: 568
+
       supplementalGroups:
         - 100
         - 44
@@ -39,8 +37,8 @@ spec:
         type: custom
         volumeSpec:
           nfs:
-            server: 192.168.1.13
-            path: /mnt/nas/hugo
+            server: 192.168.1.24
+            path: /mnt/tank/hwe
         mountPath: /media/hugo
         readOnly: true
       media2:
@@ -48,8 +46,8 @@ spec:
         type: custom
         volumeSpec:
           nfs:
-            server: 192.168.1.13
-            path: /mnt/nas/papa
+            server: 192.168.1.24
+            path: /mnt/tank/fwe
         mountPath: /media/papa
         readOnly: true
       transcode:
