@@ -167,6 +167,7 @@ spec:
     podSecurityContext:
 
       supplementalGroups:
+        - 100
         - 1000
         - 1001
     resources:
