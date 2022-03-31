@@ -23,7 +23,6 @@ spec:
     env:
       TZ: UTC
     podSecurityContext:
-
       supplementalGroups:
         - 100
         - 44
@@ -54,6 +53,11 @@ spec:
         enabled: true
         type: emptyDir
         medium: Memory
+    service:
+      main:
+        enabled: true
+        type: LoadBalancer
+        loadBalancerIP: "${PLEX_ADDR}"
     ingress:
       main:
         enabled: true
