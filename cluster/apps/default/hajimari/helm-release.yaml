@@ -31,11 +31,14 @@ spec:
       name: "you"
       customApps:
         - name: Proxmox
-          url: https://192.168.1.157:8006
+          url: https://192.168.1.171:8006
           icon: alpha-x-box
         - name: Truenas
-          url: http://truenas.local
+          url: http://192.168.1.161
           icon: alpha-x-box
+        - name: Freebox
+          url: http://mafreebox.freebox.fr
+          icon: network-strength-4-cog
       groups:
         - name: Communicate
           links:
@@ -113,14 +116,14 @@ spec:
           hajimari.io/icon: "weather-sunset"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: "hajimari.${SECRET_DOMAIN}"
+          - host: "home.${SECRET_DOMAIN}"
             paths:
               - path: /
                 pathType: Prefix
         tls:
           - hosts:
-              - "hajimari.${SECRET_DOMAIN}"
-            secretName: "hajimari-tls"
+              - "home.${SECRET_DOMAIN}"
+            secretName: "home-tls"
     persistence:
       data:
         enabled: true
