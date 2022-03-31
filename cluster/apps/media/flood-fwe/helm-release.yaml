@@ -1,0 +1,228 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: flood-fwe
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: rtorrent-flood
+      version: 9.2.0
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    config: >
+      session.use_lock.set = no
+
+      method.insert = cfg.basedir,  private|const|string,
+      (cat,(fs.homedir),"/.local/share/rtorrent/")
+
+      method.insert = cfg.download, private|const|string,
+      (cat,"/media/Downloads/rtorrent/","download/")
+
+      method.insert = cfg.logs,     private|const|string,
+      (cat,"/media/Downloads/rtorrent/","log/")
+
+      method.insert = cfg.logfile,  private|const|string,
+      (cat,(cfg.logs),"rtorrent-",(system.time),".log")
+
+      method.insert = cfg.session,  private|const|string,
+      (cat,(cfg.basedir),".session/")
+
+      method.insert = cfg.watch,    private|const|string,
+      (cat,"/media/Downloads/rtorrent/","watch/")
+
+      fs.mkdir.recursive = (cat,(cfg.basedir))
+
+      fs.mkdir = (cat,(cfg.download))
+
+      fs.mkdir = (cat,"/media/Downloads/rtorrent/complete")
+
+      fs.mkdir = (cat,"/media/Downloads/rtorrent/complete/_unsorted")
+
+      fs.mkdir = (cat,(cfg.logs))
+
+      fs.mkdir = (cat,(cfg.session))
+
+      fs.mkdir = (cat,(cfg.watch))
+
+      fs.mkdir = (cat,(cfg.watch),"/load")
+
+      fs.mkdir = (cat,(cfg.watch),"/start")
+
+      schedule2 = watch_load, 11, 10, ((load.verbose, (cat, (cfg.watch),
+      "load/*.torrent")))
+
+      schedule2 = watch_start, 10, 10, ((load.start_verbose, (cat, (cfg.watch),
+      "start/*.torrent")))
+
+      dht.add_bootstrap = dht.transmissionbt.com:6881
+
+      dht.add_bootstrap = dht.libtorrent.org:25401
+
+      throttle.max_uploads.set = 100
+
+      throttle.max_uploads.global.set = 250
+
+      throttle.min_peers.normal.set = 20
+
+      throttle.max_peers.normal.set = 60
+
+      throttle.min_peers.seed.set = 30
+
+      throttle.max_peers.seed.set = 80
+
+      trackers.numwant.set = 80
+
+      network.port_range.set = 6881-6881
+
+      network.max_open_files.set = 600
+
+      network.max_open_sockets.set = 300
+
+      pieces.memory.max.set = 1800M
+
+      session.path.set = (cat, (cfg.session))
+
+      directory.default.set = (cat, (cfg.download))
+
+      log.execute = (cat, (cfg.logs), "execute.log")
+
+      encoding.add = utf8
+
+      system.daemon.set = true
+
+      system.umask.set = 0002
+
+      system.cwd.set = (directory.default)
+
+      network.http.max_open.set = 50
+
+      network.http.dns_cache_timeout.set = 25
+
+      network.scgi.open_local = (cat,(cfg.basedir),rtorrent.sock)
+
+      print = (cat, "Logging to ", (cfg.logfile))
+
+      log.open_file = "log", (cfg.logfile)
+
+      log.add_output = "info", "log"
+
+      method.insert = d.get_finished_dir, simple,
+      "cat=/media/Downloads/rtorrent/complete/,$d.custom1="
+
+      method.insert = d.data_path, simple, "if=(d.is_multi_file),
+      (cat,(d.directory),/), (cat,(d.directory),/,(d.name))"
+
+      method.insert = d.move_to_complete, simple, "d.directory.set=$argument.1=;
+      execute=mkdir,-p,$argument.1=; execute=mv,$argument.0=,$argument.1=;
+      d.save_full_session="
+
+      method.set_key =
+      event.download.finished,move_complete,"d.move_to_complete=$d.data_path=,$d.get_finished_dir="
+    env:
+      FLOOD_OPTION_ALLOWEDPATH: /media/Downloads/rtorrent
+      FLOOD_OPTION_HOST: 0.0.0.0
+      FLOOD_OPTION_PORT: '3000'
+      FLOOD_OPTION_RTORRENT: 'true'
+      HOME: /config
+      TZ: UTC
+    image:
+      pullPolicy: IfNotPresent
+      repository: jesec/rtorrent-flood
+      tag: >-
+        latest@sha256:de5647654ccee0cdff817f08b4f20590cd1d0c484dda4ddcae2a11ed05308b37
+    initContainers:
+      remove-session-lock:
+        command:
+          - sh
+          - '-c'
+          - rm -rf /config/.local/share/rtorrent/.session/rtorrent.lock
+          - '&&'
+          - chown -R 568:568 /config
+        image: busybox
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+          - mountPath: /config
+            name: config
+    persistence:
+      config:
+        enabled: true
+        existingClaim: rtorrent-fwe-config-v1
+      media:
+        enabled: true
+        mountPath: /media
+        type: custom
+        volumeSpec:
+          nfs:
+            path: /mnt/tank/fwe
+            server: ${NFS_ADDR}
+    podSecurityContext:
+      fsGroup: 568
+      runAsGroup: 568
+      runAsUser: 568
+      supplementalGroups:
+        - 1000
+        - 1001
+    resources:
+      limits:
+        memory: 4000Mi
+      requests:
+        cpu: 500m
+        memory: 250Mi
+    service:
+      bittorrent:
+        enabled: true
+        ports:
+          bittorrent:
+            enabled: true
+            port: 6881
+            protocol: TCP
+            targetPort: 6881
+        type: LoadBalancer
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "file-download"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: "flood-fwe.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "flood-fwe.${SECRET_DOMAIN}"
+            secretName: "flood-fwe-tls"
+    addons:
+      vpn:
+        enabled: true
+        type: wireguard
+        securityContext:
+          runAsUser: 568
+          runAsGroup: 568
+
+        env:
+          KILLSWITCH: "true"
+
+        configFileSecret: flood-fwe
+
+        scripts:
+          up: |-
+            #!/bin/bash
+            echo "connected" > /shared/vpnstatus
+
+          down: |-
+            #!/bin/bash
+            echo "disconnected" > /shared/vpnstatus

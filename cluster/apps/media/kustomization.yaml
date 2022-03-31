@@ -7,6 +7,7 @@ resources:
   - radarr
   - lidarr
   - flood
+  - flood-fwe
   - prowlarr
   - komga
   - plex
