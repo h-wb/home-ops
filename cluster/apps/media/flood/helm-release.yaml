@@ -163,7 +163,7 @@ spec:
         volumeSpec:
           nfs:
             path: /mnt/tank/hwe
-            server: 192.168.1.24
+            server: ${NFS_ADDR}
     podSecurityContext:
       fsGroup: 568
       runAsGroup: 568

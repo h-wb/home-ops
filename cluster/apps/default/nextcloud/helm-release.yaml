@@ -65,7 +65,7 @@ spec:
       extraVolumes:
         - name: data
           nfs:
-            server: 192.168.1.24
+            server: ${NFS_ADDR}
             path: /mnt/tank/hwe
       extraVolumeMounts:
         - name: data
