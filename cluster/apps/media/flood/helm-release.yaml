@@ -162,12 +162,13 @@ spec:
         type: custom
         volumeSpec:
           nfs:
-            path: /mnt/tank/hwe
+            path: /mnt/nas/hugo
             server: 192.168.1.24
     podSecurityContext:
-
+      fsGroup: 568
+      runAsGroup: 568
+      runAsUser: 568
       supplementalGroups:
-        - 100
         - 1000
         - 1001
     resources:
