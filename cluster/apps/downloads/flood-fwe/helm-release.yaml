@@ -188,6 +188,8 @@ spec:
             protocol: TCP
             targetPort: 6881
         type: LoadBalancer
+    podAnnotations:
+      setGateway: "true"
     ingress:
       main:
         enabled: true
