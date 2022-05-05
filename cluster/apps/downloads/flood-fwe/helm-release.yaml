@@ -206,15 +206,3 @@ spec:
           - hosts:
               - "flood-fwe.${SECRET_DOMAIN}"
             secretName: "flood-fwe-tls"
-    addons:
-      vpn:
-        enabled: true
-        type: wireguard
-        securityContext:
-          runAsUser: 568
-          runAsGroup: 568
-
-        env:
-          KILLSWITCH: "true"
-
-        configFileSecret: flood-fwe
