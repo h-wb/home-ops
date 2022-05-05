@@ -27,6 +27,7 @@ spec:
           - default
           - networking
           - media
+          - downloads
           - longhorn-system
       name: "you"
       customApps:

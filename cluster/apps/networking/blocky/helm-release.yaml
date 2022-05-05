@@ -31,30 +31,17 @@ spec:
         ports:
           http:
             port: 4000
-      dns-tcp:
+      dns:
         enabled: true
         type: LoadBalancer
         loadBalancerIP: "${BLOCKY_ADDR}"
-        annotations:
-          metallb.universe.tf/allow-shared-ip: dns
-        # externalIPs:
-        #   - "${BLOCKY_ADDR}"
         ports:
-          dns-tcp:
+          tcp:
             enabled: true
             port: 53
             protocol: TCP
             targetPort: 53
-      dns-udp:
-        enabled: true
-        type: LoadBalancer
-        loadBalancerIP: "${BLOCKY_ADDR}"
-        annotations:
-          metallb.universe.tf/allow-shared-ip: dns
-        # externalIPs:
-        #   - "${BLOCKY_ADDR}"
-        ports:
-          dns-udp:
+          udp:
             enabled: true
             port: 53
             protocol: UDP
@@ -62,30 +49,20 @@ spec:
         externalTrafficPolicy: Local
     config: |
       upstream:
-        default:
-          - tcp+udp:192.168.1.1
+        externalResolvers:
+        - tcp+udp:1.1.1.1
+        - tcp+udp:8.8.8.8
+        - tcp+udp:8.8.4.4
       conditional:
         mapping:
           ${SECRET_DOMAIN}: tcp+udp:192.168.1.201
       blocking:
         blackLists:
           ads:
-            - https://raw.githubusercontent.com/ookangzheng/dbl-oisd-nl/master/dbl.txt
-            - |
-              /^ad([sxv]?[0-9]*|system)[_.-]([^.[:space:]]+\.){1,}|[_.-]ad([sxv]?[0-9]*|system)[_.-]/
-              /^(.+[_.-])?adse?rv(er?|ice)?s?[0-9]*[_.-]/
-              /^(.+[_.-])?telemetry[_.-]/
-              /^adim(age|g)s?[0-9]*[_.-]/
-              /^adtrack(er|ing)?[0-9]*[_.-]/
-              /^advert(s|is(ing|ements?))?[0-9]*[_.-]/
-              /^aff(iliat(es?|ion))?[_.-]/
-              /^analytics?[_.-]/
-              /^banners?[_.-]/
-              /^beacons?[0-9]*[_.-]/
-              /^count(ers?)?[0-9]*[_.-]/
-              /^mads\./
-              /^pixels?[-.]/
-              /^stat(s|istics)?[0-9]*[_.-]/
+          - https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+          - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
+          - http://sysctl.org/cameleon/hosts
+          - https://s3.amazonaws.com/lists.disconnect.me/simple_tracking.txt
         whiteLists:
           ads:
             - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
@@ -93,11 +70,10 @@ spec:
           default:
             - ads
       clientLookup:
-        upstream: tcp+udp:192.168.1.1
+        upstream: tcp+udp:192.168.1.201
       prometheus:
         enable: true
         path: /metrics
-      bootstrapDns: tcp:1.1.1.1
       httpPort: 4000
       logFormat: json
       logLevel: info
