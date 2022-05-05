@@ -30,19 +30,16 @@ spec:
         IP: 10 # must be an integer between 2 and VXLAN_GATEWAY_FIRST_DYNAMIC_IP (20 by default)
         ports:
           - type: udp
-            port: ${SECRET_VPN_FORWARDED_PORT_1}
+            port: ${VPN_FORWARDED_PORT_1}
           - type: tcp
-            port: ${SECRET_VPN_FORWARDED_PORT_1}
+            port: ${VPN_FORWARDED_PORT_1}
 
     settings:
       VPN_INTERFACE: wg0
-      VXLAN_ID: 43
-      VXLAN_IP_NETWORK: 172.16.1
-      VPN_BLOCK_OTHER_TRAFFIC: false
-      VPN_TRAFFIC_PORT: ${VPN_PORT}
+      VPN_BLOCK_OTHER_TRAFFIC: true
+      VPN_TRAFFIC_PORT: ${VPN_GATEWAY_VPN_PORT}
       NOT_ROUTED_TO_GATEWAY_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_POD_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_SERVERS_CIDR}"
       VPN_LOCAL_CIDRS: "172.16.0.0/12 ${NETWORK_K8S_POD_CIDR} ${NETWORK_K8S_SERVICE_CIDR} ${NETWORK_SERVERS_CIDR}"
-      VXLAN_GATEWAY_FIRST_DYNAMIC_IP: 20
 
     webhook:
       image:
@@ -88,10 +85,10 @@ spec:
 
         resources:
           requests:
-            cpu: "0.001"
-            memory: 64Mi
-          limits:
+            cpu: 100m
             memory: 128Mi
+          limits:
+            memory: 512Mi
 
         livenessProbe:
           exec:
@@ -112,7 +109,7 @@ spec:
                 - ipBlock:
                     cidr: 0.0.0.0/0
               ports:
-                - port: ${VPN_PORT}
+                - port: ${VPN_GATEWAY_VPN_PORT}
                   protocol: UDP
             - to:
                 - namespaceSelector: {}
