@@ -8,3 +8,4 @@ resources:
   - media.yaml
   - downloads.yaml
   - databases.yaml
+  - system-upgrade.yaml
