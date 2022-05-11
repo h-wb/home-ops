@@ -172,8 +172,6 @@ spec:
       supplementalGroups:
         - 1000
         - 1001
-        - 65536
-        - 0
     resources:
       limits:
         memory: 4000Mi
