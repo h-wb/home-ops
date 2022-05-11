@@ -31,7 +31,7 @@ spec:
           #         mountPath: /config
           containers:
             - name: plex-media-manager
-              image: meisnate12/plex-meta-manager:v1.16.5
+              image: meisnate12/plex-meta-manager:nightly
               imagePullPolicy: IfNotPresent
               args: ["--run", "--read-only-config"]
               resources:
@@ -50,6 +50,9 @@ spec:
                 - name: movie-config
                   mountPath: /config/movies.yaml
                   subPath: movies.yaml
+                - name: movie-overlay-config
+                  mountPath: /config/movies_overlays.yaml
+                  subPath: movies_overlays.yaml
                 - name: tv-config
                   mountPath: /config/tv.yaml
                   subPath: tv.yaml
@@ -63,6 +66,9 @@ spec:
             - configMap:
                 name: movie-config
               name: movie-config
+            - configMap:
+                name: movie-overlay-config
+              name: movie-overlay-config
             - configMap:
                 name: tv-config
               name: tv-config

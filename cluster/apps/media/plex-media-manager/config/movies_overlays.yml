@@ -1,0 +1,38 @@
+---
+apiVersion: v1
+data:
+  movies_overlays.yaml: |
+    overlays:
+      PLEX:
+        tautulli_popular:
+          list_days: 30
+          list_size: 30
+          list_buffer: 30
+        tautulli_watched:
+          list_days: 30
+          list_size: 30
+          list_buffer: 30
+
+      TMDB:
+        overlay:
+          name: TMDB
+          url: https://i.imgur.com/gmWvZP3.png
+        trakt_trending: 40
+        tmdb_trending_daily: 40
+        tmdb_trending_weekly: 40
+
+      IMDB:
+        overlay:
+          name: IMDB
+          url: https://i.imgur.com/gmWvZP3.png
+        imdb_chart: top_movies
+
+      TMDB1:
+        overlay:
+          name: TMDB1
+          url: https://i.imgur.com/ORagwZN.png
+        trakt_watched_yearly: 250
+kind: ConfigMap
+metadata:
+  name: movie-overlay-config
+  namespace: media
