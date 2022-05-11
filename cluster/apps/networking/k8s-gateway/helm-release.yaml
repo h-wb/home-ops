@@ -14,7 +14,10 @@ spec:
         name: k8s-gateway-charts
         namespace: flux-system
   values:
+    fullnameOverride: k8s-gateway
     domain: ${SECRET_DOMAIN}
     service:
       type: LoadBalancer
-      loadBalancerIP: 192.168.1.201
+      port: 53
+      loadBalancerIP: "${METALLB_K8S_GATEWAY_ADDR}"
+    externalTrafficPolicy: Local
