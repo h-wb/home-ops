@@ -138,7 +138,7 @@ spec:
       pullPolicy: IfNotPresent
       repository: jesec/rtorrent-flood
       tag: >-
-        latest@sha256:2050aa149775249657411e7394ce8d963135311be7c1f3f12f38df4c2a851e86
+        latest@sha256:7b315a8ac6d4636eec624f2fa318424fb7d484f2ea12f99dc1c32fe3e8c8425a
     initContainers:
       remove-session-lock:
         command:
