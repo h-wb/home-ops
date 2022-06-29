@@ -3,7 +3,8 @@ version: "3"
 
 tasks:
   sync:
-    desc: Sync flux-system with the Git Repository
+    desc: Sync flux-system with the Git Repository and reconcile
     cmds:
       - flux reconcile source git flux-system
+      - flux reconcile kustomization apps
     silent: true
