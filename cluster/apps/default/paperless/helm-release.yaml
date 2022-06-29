@@ -24,7 +24,10 @@ spec:
       TZ: UTC
       PAPERLESS_TIME_ZONE: UTC
       PAPERLESS_REDIS: redis://redis-master.databases.svc.cluster.local:6379
-      USERMAP_GID: 65543
+      USERMAP_GID: 65534
+    envFrom:
+      - secretRef:
+          name: paperless
     persistence:
       data:
         enabled: true
@@ -49,7 +52,8 @@ spec:
             secretName: "paperless-tls"
     resources:
       requests:
-        memory: 250Mi
-        cpu: 10m
+        cpu: 200m
+        memory: 128M
       limits:
-        memory: 2000Mi
+        cpu: 1000m
+        memory: 800M
