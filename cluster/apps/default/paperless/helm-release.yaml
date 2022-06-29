@@ -23,7 +23,7 @@ spec:
     env:
       TZ: UTC
       PAPERLESS_TIME_ZONE: UTC
-      PAPERLESS_REDIS: redis://redis.databases.svc.cluster.local:6379
+      PAPERLESS_REDIS: redis://redis-master.databases.svc.cluster.local:6379
       USERMAP_GID: 65543
     persistence:
       data:
