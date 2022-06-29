@@ -18,14 +18,8 @@ spec:
   values:
     architecture: standalone
     auth:
-      password: ${SECRET_REDIS_PASSWORD}
-
-    # master:
-    #   service:
-    #     annotations:
-    #       prometheus.io/probe: "true"
-    #       prometheus.io/protocol: tcp
-
-    replica:
+      enabled: false
+    master:
+      kind: Deployment
       persistence:
-        enabled: false
+        enabled: falses
