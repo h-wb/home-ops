@@ -22,4 +22,4 @@ spec:
     master:
       kind: Deployment
       persistence:
-        enabled: falses
+        enabled: false
