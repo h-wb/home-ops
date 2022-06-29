@@ -52,13 +52,6 @@ spec:
             - "cloud.${SECRET_DOMAIN}"
           secretName: "cloud-tls"
 
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 500m
-      limits:
-        memory: 1500Mi
-
     nextcloud:
       host: cloud.${SECRET_DOMAIN}
 
@@ -117,29 +110,8 @@ spec:
         enabled: true
         existingClaim: nextcloud-postgresql-config-v1
 
-      resources:
-        requests:
-          memory: 256Mi
-        limits:
-          memory: 1024Mi
-
     redis:
       enabled: false
-
-      master:
-        resources:
-          requests:
-            memory: 128Mi
-          limits:
-            memory: 256Mi
-
-      replica:
-        replicaCount: 1
-        resources:
-          requests:
-            memory: 128Mi
-          limits:
-            memory: 256Mi
 
   valuesFrom:
     - kind: Secret

@@ -172,12 +172,12 @@ spec:
       supplementalGroups:
         - 1000
         - 1001
-    resources:
-      limits:
-        memory: 4000Mi
-      requests:
-        cpu: 500m
-        memory: 250Mi
+    # resources:
+    #   requests:
+    #     cpu: 50m
+    #     memory: 250Mi
+    #   limits:
+    #     memory: 4000Mi
     service:
       bittorrent:
         enabled: true
