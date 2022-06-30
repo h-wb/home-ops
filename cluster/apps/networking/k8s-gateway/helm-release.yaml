@@ -13,6 +13,15 @@ spec:
         kind: HelmRepository
         name: k8s-gateway-charts
         namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+    cleanupOnFail: true
   values:
     fullnameOverride: k8s-gateway
     domain: ${SECRET_DOMAIN}

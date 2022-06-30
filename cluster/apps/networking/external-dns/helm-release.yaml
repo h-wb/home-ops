@@ -18,6 +18,13 @@ spec:
       interval: 5m
   install:
     createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+    cleanupOnFail: true
   values:
     interval: 5m
     logLevel: debug

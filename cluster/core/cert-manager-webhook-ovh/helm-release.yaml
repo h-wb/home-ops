@@ -15,5 +15,14 @@ spec:
         kind: HelmRepository
         name: cert-manager-webhook-ovh-charts
         namespace: flux-system
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+    cleanupOnFail: true
   values:
     groupName: "${SECRET_DOMAIN}"
