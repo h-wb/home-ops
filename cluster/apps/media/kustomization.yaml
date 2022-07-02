@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - flaresolverr
   - sonarr
+  - sonarr-anm
   - radarr
   - lidarr
   - flood
