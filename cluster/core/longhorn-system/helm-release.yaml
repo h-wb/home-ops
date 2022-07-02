@@ -26,24 +26,32 @@ spec:
       remediateLastFailure: true
     cleanupOnFail: true
   values:
+    persistence:
+      defaultClass: true
+      defaultClassReplicaCount: 1
+      reclaimPolicy: Retain
     defaultSettings:
+      backupstorePollInterval: 300
+      backupTarget: nfs://192.168.1.161:/mnt/tank/backup/longhorn
+      createDefaultDiskLabeledNodes: true
+      defaultDataLocality: best-effort
+      nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+      concurrentAutomaticEngineUpgradePerNodeLimit: 1
+      storageMinimalAvailablePercentage: 10
       defaultReplicaCount: 1
       defaultLonghornStaticStorageClass: longhorn
     ingress:
-      main:
-        enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "air-horn"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        hosts:
-          - host: "longhorn.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
-        tls:
-          - hosts:
-              - "longhorn.${SECRET_DOMAIN}"
-            secretName: "longhorn-tls"
+      enabled: true
+      host: "longhorn.${SECRET_DOMAIN}"
+      path: /
+      tls: true
+      tlsSecret: longhorn-tls
+      annotations:
+        coredns.io/hostname: "longhorn.${SECRET_DOMAIN}"
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        kubernetes.io/ingress.class: traefik
+        hajimari.io/enable: "true"
+        hajimari.io/icon: cow
+        hajimari.io/group: storage
+        hajimari.io/appName: longhorn
