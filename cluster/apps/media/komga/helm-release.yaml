@@ -28,7 +28,7 @@ spec:
   values:
     image:
       repository: gotson/komga
-      tag: 0.154.4
+      tag: 0.155.0
     env:
       TZ: UTC
     podSecurityContext:
