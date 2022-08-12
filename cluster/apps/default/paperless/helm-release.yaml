@@ -30,10 +30,18 @@ spec:
       repository: ghcr.io/paperless-ngx/paperless-ngx
       tag: 1.8.0
     env:
-      TZ: UTC
-      PAPERLESS_TIME_ZONE: UTC
+      COMPOSE_PROJECT_NAME: paperless
+      PAPERLESS_CONSUMER_POLLING: "60"
+      PAPERLESS_CONSUMER_RECURSIVE: "true"
+      PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
+      PAPERLESS_OCR_LANGUAGES: nld
+      PAPERLESS_OCR_LANGUAGE: nld
+      PAPERLESS_PORT: 8000
       PAPERLESS_REDIS: redis://redis-master.databases.svc.cluster.local:6379
-      USERMAP_GID: 65534
+      PAPERLESS_TASK_WORKERS: 2
+      PAPERLESS_TIME_ZONE: UTC
+      PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
+      USERMAP_GID: 65543
     envFrom:
       - secretRef:
           name: paperless
@@ -61,8 +69,7 @@ spec:
             secretName: "paperless-tls"
     resources:
       requests:
-        cpu: 200m
-        memory: 128M
+        cpu: 23m
+        memory: 2975M
       limits:
-        cpu: 1000m
-        memory: 800M
+        memory: 6572M
