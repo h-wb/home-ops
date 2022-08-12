@@ -50,6 +50,15 @@ spec:
       data:
         enabled: true
         existingClaim: paperless-data
+      media:
+        enabled: true
+        existingClaim: paperless-media-v1
+      consume:
+        enabled: true
+        existingClaim: paperless-consume-v1
+      export:
+        enabled: true
+        existingClaim: paperless-export-v1
     ingress:
       main:
         enabled: true
