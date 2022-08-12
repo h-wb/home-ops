@@ -42,6 +42,7 @@ spec:
       PAPERLESS_TIME_ZONE: UTC
       PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
       USERMAP_GID: 65534
+      USERMAP_UID: 65534
     envFrom:
       - secretRef:
           name: paperless
