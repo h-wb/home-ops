@@ -49,16 +49,28 @@ spec:
     persistence:
       data:
         enabled: true
-        existingClaim: paperless-data
+        mountPath: /usr/src/paperless/data
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe/Documents/Paperless/data
       media:
         enabled: true
-        existingClaim: paperless-media-v1
+        mountPath: /usr/src/paperless/media
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe/Documents/Paperless/media
       consume:
         enabled: true
-        existingClaim: paperless-consume-v1
+        mountPath: /usr/src/paperless/consume
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe/Documents/Paperless/incoming
       export:
         enabled: true
-        existingClaim: paperless-export-v1
+        mountPath: /usr/src/paperless/export
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe/Documents/Paperless/export
     ingress:
       main:
         enabled: true
