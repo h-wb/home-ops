@@ -1,0 +1,96 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app flood-vpn
+  namespace: downloads
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: flood
+      version: 6.4.2
+      sourceRef:
+        kind: HelmRepository
+        name: k8s-at-home-charts
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+    cleanupOnFail: true
+  values:
+    hostname: flood-vpn
+    env:
+      FLOOD_OPTION_auth: "none"
+      FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media"
+      FLOOD_OPTION_rtsocket: "/sock/rtorrent.sock"
+      FLOOD_OPTION_rtconfig: "/rc/rtorrent.rc"
+      FLOOD_OPTION_port: &port 80
+      TZ: UTC
+    image:
+      repository: flood
+      tag: >-
+        latest@sha256:bfab4ee0e69d7ccff97f772179f7c382b4d53594ae664b942bde92c71e8bc36f
+    persistence:
+      config:
+        enabled: true
+        existingClaim: rtorrent-fwe-config-v1
+      rtorrent-rc:
+        enabled: true
+        type: configMap
+        name: *app
+        subPath: rtorrent.rc
+        mountPath: /rc/rtorrent.rc
+      rtorrent-sock:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        mountPath: /sock
+      media:
+        enabled: true
+        mountPath: /media
+        type: custom
+        volumeSpec:
+          nfs:
+            path: /mnt/tank/fwe
+            server: ${NFS_ADDR}
+    podSecurityContext:
+      fsGroup: 568
+      runAsGroup: 568
+      runAsUser: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
+    podAnnotations:
+      setGateway: "true"
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "file-download"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: "flood-vpn.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - "flood-vpn.${SECRET_DOMAIN}"
+            secretName: "flood-vpn-tls"
