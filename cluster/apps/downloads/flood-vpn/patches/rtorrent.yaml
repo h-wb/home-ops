@@ -2,8 +2,8 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: rtorrent-flood
-  namespace: media
+  name: rtorrent-vpn
+  namespace: downloads
 spec:
   values:
     additionalContainers:
