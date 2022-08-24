@@ -35,9 +35,8 @@ spec:
       FLOOD_OPTION_port: &port 80
       TZ: UTC
     image:
-      repository: flood
-      tag: >-
-        latest@sha256:bfab4ee0e69d7ccff97f772179f7c382b4d53594ae664b942bde92c71e8bc36f
+      repository: ghcr.io/onedr0p/flood
+      tag: 4.7.0@sha256:db34c7d3047289675b0dee4b99a766f7321a5b4129feb0229082f8478ed0eae5
     persistence:
       config:
         enabled: true
