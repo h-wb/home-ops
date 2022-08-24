@@ -42,12 +42,12 @@ spec:
           - type: tcp
             port: ${VPN_FORWARDED_PORT_1}
 
-    DNS: 172.16.0.1
+    DNS: 172.16.1.1
 
     settings:
       VPN_INTERFACE: wg0
       VXLAN_ID: 43
-      VXLAN_IP_NETWORK: 172.16.0
+      VXLAN_IP_NETWORK: 172.16.1
       VXLAN_GATEWAY_FIRST_DYNAMIC_IP: 20
       VPN_BLOCK_OTHER_TRAFFIC: true
       VPN_TRAFFIC_PORT: ${VPN_GATEWAY_VPN_PORT}
@@ -92,7 +92,7 @@ spec:
         env:
           TZ: UTC
           IPTABLES_BACKEND: nft
-          KILLSWITCH: true
+          KILLSWITCH: false
 
         configFileSecret: vpnconfig
 
