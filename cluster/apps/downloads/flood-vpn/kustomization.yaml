@@ -8,7 +8,7 @@ namespace: downloads
 patchesStrategicMerge:
   - patches/rtorrent.yaml
 configMapGenerator:
-  - name: rtorrent-flood
+  - name: rtorrent-vpn
     files:
       - rtorrent.rc
 generatorOptions:
