@@ -28,7 +28,7 @@ spec:
   values:
     image:
       repository: nextcloud
-      tag: "24.0.4"
+      tag: "24.0.5"
 
     env:
       TZ: UTC
