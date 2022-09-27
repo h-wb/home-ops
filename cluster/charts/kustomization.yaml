@@ -28,3 +28,5 @@ resources:
   - weaveworks-kured-charts.yaml
   - cert-manager-webhook-ovh-charts.yaml
   - nextcloud-charts.yaml
+  - bjw-s-charts.yaml
+  - cloudnative-pg-charts.yaml
