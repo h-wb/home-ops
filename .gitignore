@@ -6,8 +6,7 @@ Thumbs.db
 # k8s
 kubeconfig
 # vscode-sops
-.decrypted~*.yml
-.decrypted~*.yaml
+.decrypted~*
 .config.env
 *.agekey
 # Ansible

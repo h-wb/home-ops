@@ -16,6 +16,7 @@ spec:
         name: bitnami-charts
         namespace: flux-system
       interval: 5m
+
   install:
     createNamespace: true
     remediation:
@@ -25,6 +26,7 @@ spec:
       retries: 3
       remediateLastFailure: true
     cleanupOnFail: true
+
   values:
     architecture: standalone
     auth:

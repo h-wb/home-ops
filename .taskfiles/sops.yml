@@ -14,3 +14,13 @@ tasks:
     cmds:
       - kubectl --kubeconfig=./provision/kubeconfig -n flux-system delete secret sops-age --ignore-not-found
       - cat ~/.config/sops/age/keys.txt | kubectl --kubeconfig=./provision/kubeconfig -n flux-system create secret generic sops-age --from-file=age.agekey=/dev/stdin
+
+  encrypt:
+    desc: encrypt sops file 'to use must include -- before path to file.' eg "task sops:encrypt -- file.yml"
+    cmds:
+      - sops --encrypt --in-place {{.CLI_ARGS}}
+
+  decrypt:
+    desc: decrypt sops file 'to use must include -- before path to file.'  eg "task sops:decrypt -- file.yml"
+    cmds:
+      - sops --decrypt --in-place {{.CLI_ARGS}}
