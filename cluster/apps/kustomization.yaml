@@ -6,5 +6,6 @@ resources:
   - kube-system
   - networking
   - system-upgrade
+  - security
   - media
   - downloads
