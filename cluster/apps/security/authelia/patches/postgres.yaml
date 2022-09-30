@@ -11,7 +11,7 @@ spec:
         image: ghcr.io/onedr0p/postgres-initdb:14.5@sha256:c2964bfb8cb3d3f8bf27271c6648c95c8c097ae7bdc03796b1504cf6e1411206
         env:
           - name: POSTGRES_HOST
-            value: postgres.databases.svc.cluster.local
+            value: postgres-rw.databases.svc.cluster.local
           - name: POSTGRES_DB
             value: authelia
           - name: POSTGRES_SUPER_PASS
