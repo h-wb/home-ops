@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   # renovate: registryUrl=https://github.com/rancher/system-upgrade-controller
   - https://github.com/rancher/system-upgrade-controller/releases/download/v0.9.1/crd.yaml
+  - system-upgrade-controller
