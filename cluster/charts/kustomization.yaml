@@ -16,6 +16,7 @@ resources:
   - k8s-gateway-charts.yaml
   - k8s-at-home-charts.yaml
   - metallb-charts.yaml
+  - dysnix-charts.yaml
   - metrics-server-charts.yaml
   - minecraft-server-charts.yaml
   - minio-charts.yaml
