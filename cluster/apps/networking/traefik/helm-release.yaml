@@ -72,11 +72,6 @@ spec:
         tls:
           enabled: true
           options: "default"
-          domains:
-            - main: "${SECRET_DOMAIN}"
-              sans:
-                - "*.${SECRET_DOMAIN}"
-          stores: networking-default@kubernetescrd
       metrics:
         port: 8082
         expose: true
