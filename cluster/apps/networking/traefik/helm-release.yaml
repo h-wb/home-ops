@@ -76,7 +76,7 @@ spec:
             - main: "${SECRET_DOMAIN}"
               sans:
                 - "*.${SECRET_DOMAIN}"
-          stores: traefik-system-default@kubernetescrd
+          stores: networking-default@kubernetescrd
       metrics:
         port: 8082
         expose: true
