@@ -46,7 +46,7 @@ spec:
 
     persistence:
       enabled: true
-      existingClaim: nextcloud-config-v1
+      existingClaim: nextcloud-config-v2
 
     ingress:
       enabled: true
@@ -117,7 +117,7 @@ spec:
 
       persistence:
         enabled: true
-        existingClaim: nextcloud-postgresql-config-v1
+        existingClaim: nextcloud-postgresql-config-v2
 
     redis:
       enabled: false

@@ -59,7 +59,7 @@ spec:
           volumes:
             - name: config
               persistentVolumeClaim:
-                claimName: plex-media-manager-config-v1
+                claimName: plex-media-manager-config-v2
             - name: pmm-config
               secret:
                 secretName: plex-media-manager

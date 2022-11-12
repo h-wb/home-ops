@@ -41,6 +41,9 @@ spec:
       config:
         enabled: true
         existingClaim: rtorrent-fwe-config-v1
+      config2:
+        enabled: true
+        existingClaim: rtorrent-fwe-config-v2
       rtorrent-rc:
         enabled: true
         type: configMap

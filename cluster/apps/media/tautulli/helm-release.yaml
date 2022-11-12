@@ -40,6 +40,10 @@ spec:
         enabled: true
         existingClaim: tautulli-config-v1
         mountPath: /config
+      config2:
+        enabled: true
+        existingClaim: tautulli-config-v2
+        mountPath: /config2
     ingress:
       main:
         enabled: true

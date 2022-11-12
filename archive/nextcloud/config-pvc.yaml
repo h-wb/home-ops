@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nextcloud-config-v1
+  name: nextcloud-config-v2
   namespace: default
 spec:
   accessModes:
@@ -10,12 +10,12 @@ spec:
   resources:
     requests:
       storage: 5Gi
-  storageClassName: longhorn
+  storageClassName: local-path
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: nextcloud-postgresql-config-v1
+  name: nextcloud-postgresql-config-v2
   namespace: default
 spec:
   accessModes:
@@ -23,4 +23,4 @@ spec:
   resources:
     requests:
       storage: 8Gi
-  storageClassName: longhorn
+  storageClassName: local-path

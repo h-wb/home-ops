@@ -37,6 +37,9 @@ spec:
       config:
         enabled: true
         existingClaim: prowlarr-config-v1
+      config2:
+        enabled: true
+        existingClaim: prowlarr-config-v2
     ingress:
       main:
         enabled: true

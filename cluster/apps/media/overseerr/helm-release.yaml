@@ -40,6 +40,10 @@ spec:
         enabled: true
         existingClaim: overseerr-config-v1
         mountPath: /app/config
+      config2:
+        enabled: true
+        existingClaim: overseerr-config-v2
+        mountPath: /app/config2
     ingress:
       main:
         enabled: true

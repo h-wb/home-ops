@@ -40,6 +40,10 @@ spec:
         enabled: true
         existingClaim: radarr-config-v1
         mountPath: /config
+      config2:
+        enabled: true
+        existingClaim: radarr-config-v2
+        mountPath: /config2
       media:
         enabled: true
         type: custom
