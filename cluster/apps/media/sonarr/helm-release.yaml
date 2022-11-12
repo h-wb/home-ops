@@ -40,6 +40,10 @@ spec:
         enabled: true
         existingClaim: sonarr-config-v1
         mountPath: /config
+      config2:
+        enabled: true
+        existingClaim: sonarr-config-v2
+        mountPath: /config2
       media:
         enabled: true
         type: custom
