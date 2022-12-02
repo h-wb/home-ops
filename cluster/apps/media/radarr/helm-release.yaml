@@ -52,6 +52,14 @@ spec:
             server: ${NFS_ADDR}
             path: /mnt/tank/fwe
         mountPath: /media
+      media2:
+        enabled: true
+        type: custom
+        volumeSpec:
+          nfs:
+            server: ${NFS_ADDR}
+            path: /mnt/tank/hwe
+        mountPath: /media2
     ingress:
       main:
         enabled: true
