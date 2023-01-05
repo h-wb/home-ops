@@ -164,9 +164,6 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: rtorrent-config-v1
-      config2:
-        enabled: true
         existingClaim: rtorrent-config-v2
       media:
         enabled: true
