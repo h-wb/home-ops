@@ -40,12 +40,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: rtorrent-fwe-config-v1
-        mountPath: /config
-      config2:
-        enabled: true
         existingClaim: rtorrent-vpn-config-v2
-        mountPath: /config2
       rtorrent-rc:
         enabled: true
         type: configMap
