@@ -38,12 +38,8 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: overseerr-config-v1
-        mountPath: /app/config
-      config2:
-        enabled: true
         existingClaim: overseerr-config-v2
-        mountPath: /app/config2
+        mountPath: /app/config
     ingress:
       main:
         enabled: true
