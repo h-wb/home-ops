@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: rtorrent-fwe-config-v2
+  name: rtorrent-vpn-config-v2
   namespace: downloads
 spec:
   accessModes:

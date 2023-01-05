@@ -44,7 +44,7 @@ spec:
         mountPath: /config
       config2:
         enabled: true
-        existingClaim: rtorrent-fwe-config-v2
+        existingClaim: rtorrent-vpn-config-v2
         mountPath: /config2
       rtorrent-rc:
         enabled: true
