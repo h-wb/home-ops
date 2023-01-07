@@ -3,7 +3,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
-  name: flux-system
+  name: home-ops-kubernetes
   namespace: flux-system
 spec:
   interval: 30m
@@ -20,7 +20,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: flux-system
+  name: cluster
   namespace: flux-system
 spec:
   interval: 30m
@@ -29,7 +29,7 @@ spec:
   wait: false
   sourceRef:
     kind: GitRepository
-    name: flux-system
+    name: home-ops-kubernetes
   decryption:
     provider: sops
     secretRef:
