@@ -20,9 +20,20 @@ spec:
       repository: ghcr.io/onedr0p/lidarr-develop
       tag: 1.1.1.2762@sha256:bdc206db6d9684e854662910a1b3548af17c468eba3a8e6066503554d8988eb2
 
+    env:
+      LIDARR__INSTANCE_NAME: Lidarr
+      LIDARR__PORT: &port 80
+      LIDARR__LOG_LEVEL: info
+
     podSecurityContext:
       supplementalGroups:
         - 100
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
 
     persistence:
       config:

@@ -20,6 +20,15 @@ spec:
       repository: gotson/komga
       tag: 0.157.4
 
+    env:
+      SERVER_PORT: &port 8080
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+
     podSecurityContext:
       supplementalGroups:
         - 100

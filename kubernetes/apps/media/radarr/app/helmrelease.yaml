@@ -25,6 +25,11 @@ spec:
       supplementalGroups:
         - 100
 
+    env:
+      RADARR__INSTANCE_NAME: Radarr
+      RADARR__PORT: &port 80
+      RADARR__LOG_LEVEL: info
+
     persistence:
       config:
         enabled: true
@@ -60,6 +65,12 @@ spec:
           - hosts:
               - *host
             secretName: "radarr-tls"
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
 
     resources:
       requests:
