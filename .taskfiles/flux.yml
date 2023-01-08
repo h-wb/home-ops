@@ -25,7 +25,7 @@ tasks:
   sync:
     desc: Sync flux-system with the Git Repository and reconcile
     cmds:
-      - flux reconcile source git flux-system
+      - flux reconcile source git home-ops-kubernetes
       - flux reconcile kustomization cluster-apps
     silent: true
 
