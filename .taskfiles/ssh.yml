@@ -5,11 +5,11 @@ tasks:
   gen:
     desc: Generate ssh-key
     cmds:
-       - ssh-keygen -f ~/.ssh/"$BOOTSTRAP_ANSIBLE_DEFAULT_CONTROL_NODE_HOSTNAME_PREFIX"0
-       - ssh-copy-id -i ~/.ssh/"$BOOTSTRAP_ANSIBLE_DEFAULT_CONTROL_NODE_HOSTNAME_PREFIX"0.pub "$BOOTSTRAP_ANSIBLE_SSH_USERNAME_0"@"$BOOTSTRAP_ANSIBLE_HOST_ADDR_0"
+      - ssh-keygen -f ~/.ssh/"$BOOTSTRAP_ANSIBLE_DEFAULT_CONTROL_NODE_HOSTNAME_PREFIX"0
+      - ssh-copy-id -i ~/.ssh/"$BOOTSTRAP_ANSIBLE_DEFAULT_CONTROL_NODE_HOSTNAME_PREFIX"0.pub "$BOOTSTRAP_ANSIBLE_SSH_USERNAME_0"@"$BOOTSTRAP_ANSIBLE_HOST_ADDR_0"
 
   kubeconfig:
     desc: Get kubeconfig from remote
-    cmds: 
+    cmds:
       - scp "$BOOTSTRAP_ANSIBLE_SSH_USERNAME_0"@"$BOOTSTRAP_ANSIBLE_HOST_ADDR_0":/etc/rancher/k3s/k3s.yaml provision/kubeconfig
       - sed -i '' "s/127.0.0.1/"$BOOTSTRAP_ANSIBLE_HOST_ADDR_0"/g" provision/kubeconfig
