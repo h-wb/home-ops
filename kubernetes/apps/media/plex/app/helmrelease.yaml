@@ -54,6 +54,10 @@ spec:
         enabled: true
         type: LoadBalancer
         loadBalancerIP: "${PLEX_ADDR}"
+        externalTrafficPolicy: Local
+        ports:
+          http:
+            port: 32400
 
     ingress:
       main:
