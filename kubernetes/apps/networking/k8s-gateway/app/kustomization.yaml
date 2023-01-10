@@ -6,9 +6,3 @@ namespace: networking
 resources:
   - ./rbac.yaml
   - ./helmrelease.yaml
-configMapGenerator:
-  - name: k8s-gateway-configmap
-    files:
-      - ./Corefile
-generatorOptions:
-  disableNameSuffixHash: true
