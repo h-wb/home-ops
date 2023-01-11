@@ -11,7 +11,7 @@ spec:
       chart: k8s-gateway
       sourceRef:
         kind: HelmRepository
-        name: k8s-gateway-charts
+        name: k8s-gateway
         namespace: flux-system
   install:
     createNamespace: true
