@@ -43,7 +43,7 @@ spec:
       rtorrent-rc:
         enabled: true
         type: configMap
-        name: *app
+        name: rtorrent-flood-configmap
         subPath: rtorrent.rc
         mountPath: /rc/rtorrent.rc
       rtorrent-sock:
