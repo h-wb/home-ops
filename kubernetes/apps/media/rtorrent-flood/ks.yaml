@@ -8,7 +8,7 @@ metadata:
   labels:
     substitution.flux.home.arpa/enabled: "true"
 spec:
-  path: ./kubernetes/apps/default/rtorrent-flood/app
+  path: ./kubernetes/apps/media/rtorrent-flood/app
   prune: true
   sourceRef:
     kind: GitRepository
