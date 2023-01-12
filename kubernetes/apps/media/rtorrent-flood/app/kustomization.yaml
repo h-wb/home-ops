@@ -5,7 +5,7 @@ kind: Kustomization
 resources:
   - ./pvc.yaml
   - ./helmrelease.yaml
-namespace: downloads
+namespace: media
 patchesStrategicMerge:
   - ./patches/rtorrent.yaml
 configMapGenerator:
