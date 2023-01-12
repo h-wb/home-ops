@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "packageRules": [
+    {
+      "description": "Flux Helm Chart",
+      "groupName": "Flux",
+      "matchPackagePatterns": ["fluxcd/flux2", "flux-installation"],
+      "matchDatasources": ["helm", "kustomization", "docker"],
+      "group": { "commitMessageTopic": "{{{groupName}}} group" },
+      "separateMinorPatch": true
+    }
+  ]
+}
