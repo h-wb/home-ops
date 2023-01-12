@@ -25,7 +25,7 @@ spec:
       PROWLARR__INSTANCE_NAME: Prowlarr
       PROWLARR__PORT: &port 9696
       PROWLARR__LOG_LEVEL: info
-      PROWLARR__AUTHENTICATION_METHOD: Disabled
+      PROWLARR__AUTHENTICATION_METHOD: External
 
     service:
       main:
