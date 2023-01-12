@@ -10,6 +10,7 @@ resources:
   - ./recyclarr/ks.yaml
   - ./radarr/ks.yaml
   - ./radarr-uhd/ks.yaml
+  - ./prowlarr/ks.yaml
   - ./plex/ks.yaml
   - ./overseerr/ks.yaml
   - ./lidarr/ks.yaml
