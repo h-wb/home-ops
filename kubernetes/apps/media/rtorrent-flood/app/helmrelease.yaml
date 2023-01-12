@@ -1,0 +1,98 @@
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: &app rtorrent-flood
+  namespace: media
+spec:
+  interval: 5m
+  chart:
+    spec:
+      # renovate: registryUrl=https://k8s-at-home.com/charts/
+      chart: app-template
+      version: 1.2.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+      interval: 5m
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+      remediateLastFailure: true
+    cleanupOnFail: true
+  values:
+    env:
+      FLOOD_OPTION_auth: "none"
+      FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media"
+      FLOOD_OPTION_rtsocket: "/sock/rtorrent.sock"
+      FLOOD_OPTION_rtconfig: "/rc/rtorrent.rc"
+      FLOOD_OPTION_port: &port 3000
+      TZ: UTC
+    image:
+      repository: ghcr.io/onedr0p/flood
+      tag: 4.7.0@sha256:8671dbb7ea3938dd1ea4282758d628bcfb146aded2682a2b768f53b56b82320a
+    persistence:
+      config:
+        enabled: true
+        existingClaim: rtorrent-config-v2
+      rtorrent-rc:
+        enabled: true
+        type: configMap
+        name: *app
+        subPath: rtorrent.rc
+        mountPath: /rc/rtorrent.rc
+      rtorrent-sock:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        mountPath: /sock
+      media:
+        enabled: true
+        mountPath: /media
+        type: nfs
+        path: /mnt/tank/hwe
+        server: ${NFS_ADDR}
+    podSecurityContext:
+      fsGroup: 568
+      runAsGroup: 568
+      runAsUser: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups:
+        - 100
+    podAnnotations:
+      setGateway: "true"
+
+    service:
+      main:
+        ports:
+          http:
+            port: *port
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: "traefik"
+        annotations:
+          cert-manager.io/cluster-issuer: "letsencrypt-production"
+          hajimari.io/enable: "true"
+          hajimari.io/icon: "file-download"
+          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        hosts:
+          - host: &host flood.${SECRET_DOMAIN}
+            paths:
+              - path: /
+                pathType: Prefix
+        tls:
+          - hosts:
+              - *host
+            secretName: "flood-tls"
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 1200Mi
