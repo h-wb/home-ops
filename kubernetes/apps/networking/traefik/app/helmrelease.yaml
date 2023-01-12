@@ -96,7 +96,7 @@ spec:
       kubernetesIngress:
         enabled: true
         publishedService:
-          enabled: false
+          enabled: true
     resources:
       requests:
         memory: 100Mi
