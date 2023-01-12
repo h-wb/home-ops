@@ -34,7 +34,7 @@ spec:
 
     env:
       LIDARR__INSTANCE_NAME: Lidarr
-      LIDARR__PORT: &port 80
+      LIDARR__PORT: &port 8080
       LIDARR__LOG_LEVEL: info
 
     podSecurityContext:
