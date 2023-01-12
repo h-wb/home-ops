@@ -8,7 +8,6 @@ resources:
   - ./bitnami.yaml
   - ./deliveryhero.yaml
   - ./descheduler.yaml
-  - ./emberstack.yaml
   - ./external-dns.yaml
   - ./grafana.yaml
   - ./hajimari.yaml
@@ -28,7 +27,6 @@ resources:
   - ./rook-ceph.yaml
   - ./stakater.yaml
   - ./traefik.yaml
-  - ./weaveworks-kured.yaml
   - ./cert-manager-webhook-ovh.yaml
   - ./nextcloud.yaml
   - ./bjw-s.yaml
