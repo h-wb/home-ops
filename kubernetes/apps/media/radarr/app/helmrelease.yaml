@@ -22,6 +22,10 @@ spec:
       tag: 4.3.2.6857@sha256:3505169067b62bdeb722aea4dd55446592307a24eec7298bd88001e0b7510007
 
     podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
       supplementalGroups:
         - 100
 
