@@ -9,6 +9,7 @@ resources:
   - ./sonarr/ks.yaml
   - ./recyclarr/ks.yaml
   - ./radarr/ks.yaml
+  - ./radarr-uhd/ks.yaml
   - ./plex/ks.yaml
   - ./overseerr/ks.yaml
   - ./lidarr/ks.yaml
