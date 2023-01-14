@@ -26,6 +26,9 @@ spec:
       SONARR__PORT: &port 8989
       SONARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET__DOMAIN}"
       SONARR__LOG_LEVEL: info
+    envFrom:
+      - secretRef:
+          name: *app
 
     podSecurityContext:
       runAsUser: 568
