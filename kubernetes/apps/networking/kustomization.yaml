@@ -8,3 +8,4 @@ resources:
   - ./metallb/ks.yaml
   - ./k8s-gateway/ks.yaml
   - ./external-dns/ks.yaml
+  - ./flaresolverr/ks.yaml
