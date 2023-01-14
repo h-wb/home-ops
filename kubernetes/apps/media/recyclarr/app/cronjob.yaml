@@ -17,8 +17,8 @@ spec:
             - name: init-config
               image: ghcr.io/onedr0p/alpine:3.17.1
               envFrom:
-                # - secretRef:
-                #     name: radarr-secret
+                - secretRef:
+                    name: radarr
                 - secretRef:
                     name: sonarr
               command: ["/bin/bash", "-c"]
