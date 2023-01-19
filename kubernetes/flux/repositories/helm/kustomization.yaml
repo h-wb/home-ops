@@ -32,3 +32,4 @@ resources:
   - ./bjw-s.yaml
   - ./cloudnative-pg.yaml
   - ./weave-gitops.yaml
+  - ./jameswynn.yaml
