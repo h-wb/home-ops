@@ -8,22 +8,31 @@ spec:
   interval: 15m
   chart:
     spec:
-      chart: app-template
-      version: 1.2.1
+      chart: homepage
+      version: 0.0.5
+      interval: 10m0s
       sourceRef:
         kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
-  values:
-    global:
-      # nameOverride: homepage
-      annotations:
-        reloader.stakater.com/search: "true"
+        name: jameswynn
+        namespace: apps
 
+  values:
     image:
-      repository: ghcr.io/benphelps/homepage
-      tag: nightly
+      repository: ghcr.io/jameswynn/homepage
       pullPolicy: IfNotPresent
+      tag: kubernetes@sha256:aba1848045c44e13b74607d3bfcef016b1b9b5c954a46805c5937ab79c4ec918
+
+    enableRbac: true
+    config:
+      kubernetes:
+        mode: cluster
+      widgets:
+        - resources:
+            backend: kubernetes
+            expanded: true
+            cpu: true
+            memory: true
+
 
     ingress:
       main:

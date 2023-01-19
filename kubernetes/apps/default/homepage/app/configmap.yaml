@@ -43,7 +43,12 @@ data:
         # headerStyle: boxed
   widgets.yaml: |
     ---
-    # - logo:
+    - resources:
+        # change backend to 'kubernetes' to use Kubernetes integration. Requires RBAC.
+        backend: kubernetes
+        expanded: true
+        cpu: true
+        memory: true
     - search:
         provider: duckduckgo
         target: _blank
@@ -175,4 +180,4 @@ data:
     ---
   kubernetes.yaml: |
     ---
-    mode: enable
+    mode: cluster
