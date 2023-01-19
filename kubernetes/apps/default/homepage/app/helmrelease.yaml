@@ -18,20 +18,13 @@ spec:
 
   values:
     image:
-      repository: ghcr.io/jameswynn/homepage
+      repository: ghcr.io/benphelps/homepage
+      tag: nightly
       pullPolicy: IfNotPresent
-      tag: kubernetes@sha256:aba1848045c44e13b74607d3bfcef016b1b9b5c954a46805c5937ab79c4ec918
 
     enableRbac: true
     config:
-      kubernetes:
-        mode: cluster
-      widgets:
-        - resources:
-            backend: kubernetes
-            expanded: true
-            cpu: true
-            memory: true
+      useExistingConfigMap: homepage-config
 
 
     ingress:
