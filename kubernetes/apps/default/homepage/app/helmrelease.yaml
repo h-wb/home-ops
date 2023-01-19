@@ -8,12 +8,12 @@ spec:
   interval: 15m
   chart:
     spec:
-      chart: homepage
-      version: 0.0.5
-      interval: 10m0s
+      chart: app-template
+      version: 1.2.1
+      interval: 30m
       sourceRef:
         kind: HelmRepository
-        name: jameswynn
+        name: bjw-s
         namespace: flux-system
 
   values:
@@ -22,9 +22,9 @@ spec:
       tag: nightly
       pullPolicy: IfNotPresent
 
-    enableRbac: true
-    # config:
-    #   useExistingConfigMap: homepage-config
+    # enableRbac: true
+    # # config:
+    # #   useExistingConfigMap: homepage-config
 
 
     ingress:
