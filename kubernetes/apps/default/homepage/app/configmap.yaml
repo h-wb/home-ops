@@ -1,0 +1,178 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: default
+  labels:
+    app.kubernetes.io/name: homepage
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  settings.yaml: |
+    ---
+    title: Dashboard
+    #favicon: https://raw.githubusercontent.com/ahgraber/homelab-gitops-k3s/main/cluster/apps/services/homepage/icons/favicon.png
+    theme: dark
+    color: slate
+    layout: # key by group name in services.yaml
+      Infrastructure:
+        # style: row
+        # columns: 3
+        # icon: home-assistant.png
+        # headerStyle: boxed
+      Monitoring:
+        # style: row
+        # columns: 3
+        # icon: home-assistant.png
+        # headerStyle: boxed
+      Home:
+        # style: row
+        # columns: 4
+        # icon: home-assistant.png
+        # headerStyle: boxed
+      Cloud:
+        # style: row
+        # columns: 3
+        # icon: home-assistant.png
+        # headerStyle: boxed
+      Services:
+        # style: row
+        # columns: 3
+        # icon: home-assistant.png
+        # headerStyle: boxed
+  widgets.yaml: |
+    ---
+    # - logo:
+    - search:
+        provider: duckduckgo
+        target: _blank
+        # focus: true # Optional, will set focus to the search bar on page load
+    - openmeteo:
+        label: Home # optional
+        latitude: 50.9096219
+        longitude: 6.8081935
+        units: metric # or metric
+        cache: 5 # Time in minutes to cache API responses, to stay within limits
+  services.yaml: |
+    ---
+    - Infrastructure:
+        - Router:
+            href: https://192.168.178.1
+            icon: avmfritzbox.png
+            description: WAN Connection
+        - Athena:
+            href: https://athena.${SECRET_DOMAIN}
+            icon: synology.png
+            description: NAS
+        - pve-01:
+            href: https://192.168.178.24:8006
+            icon: proxmox.png
+            description: Proxmox Hypervisor-01
+        - pve-02:
+            href: https://192.168.178.25:8006
+            icon: proxmox.png
+            description: Proxmox Hypervisor-02
+        - Longhorn:
+            href: https://longhorn.${SECRET_DOMAIN}
+            icon: longhorn.png
+            description: HCI Storage
+        - MinIO:
+            href: https://minio.${SECRET_DOMAIN}
+            icon: minio.png
+            description: Backup Storage
+    - Monitoring:
+        - Uptime-Kuma:
+            href: https://uptime.${SECRET_DOMAIN}
+            icon: uptime-kuma.png
+            description: Service Monitoring
+        - Grafana:
+            href: https://grafana.${SECRET_DOMAIN}
+            icon: grafana.png
+            description: Metric Monitoring
+        - Alertmanager:
+            href: https://alertmanager.${SECRET_DOMAIN}
+            icon: alertmanager.png
+            description: Metric Altering
+        - Prometheus:
+            href: https://prometheus.${SECRET_DOMAIN}
+            icon: prometheus.png
+            description: Metric Database
+    - Services & Apps:
+        - Jellyfin:
+            href: https://jelly.${SECRET_DOMAIN}
+            icon: jellyfin.png
+            description: Mediaserver
+            widget:
+              type: jellyfin
+              url: https://jelly.${SECRET_DOMAIN}
+              key: ${JELLYFIN_API_KEY}
+        - Vaultwarden:
+            href: https://pw.${SECRET_DOMAIN}
+            icon: bitwarden.png
+            description: Passworttool
+        - HomeAssistant:
+            href: https://hass.${SECRET_DOMAIN}
+            icon: home-assistant-circle.png
+            description: Heimautomatisierung
+        - Zigbee:
+            href: https://zigbee.${SECRET_DOMAIN}
+            icon: zigbee2mqtt.png
+            description: Zigbee2mqtt
+        - Pihole:
+            href: https://pihole.${SECRET_DOMAIN}
+            icon: pihole.png
+            description: Add-Blocking
+            widget:
+              type: pihole
+              url: https://pihole.int.swalb.io
+    - Cloud:
+        - Mailcow:
+            href: https://mail.${SECRET_FAM_DOMAIN}
+            icon: mailcow.png
+            description: Domain Admininterface
+        - Mail:
+            href: https://mail.${SECRET_FAM_DOMAIN}/sogo
+            icon: mailcowsogo.png
+            description: SOGo Webmail
+        - RSS:
+            href: https://rss.${SECRET_FAN_DOMAIN}
+            icon: freshrss.png
+            description: RSS Aggregator
+        - Nextcloud:
+            href: https://cloud.${SECRET_FAM_DOMAIN}
+            icon: nextcloud.png
+            description: Cloudstorage
+        - Wiki:
+            href: https://wiki.${SECRET_FAM_DOMAIN}
+            icon: wikijs.png
+            description: Dokumentation
+  bookmarks.yaml: |
+    ---
+        - Cloud-Access:
+            - Hetzner:
+                - icon: awx.png
+                  href: https://www.hetzner.com/
+            - Cloudflare:
+                - icon: cloudflare.png
+                  href: https://www.cloudflare.com/
+        - Developer:
+            - Github:
+                - abbr: GH
+                  href: https://github.com/
+        - Social:
+            - Reddit:
+                - icon: reddit.png
+                  href: https://reddit.com/
+            - Twitter:
+                - icon: twitter.png
+                  href: https://twitter.com
+        - Entertainment:
+            - YouTube:
+                - abbr: YT
+                  href: https://youtube.com/
+  docker.yaml: |
+    ---
+  kubernetes.yaml: |
+    ---
+    mode: enable

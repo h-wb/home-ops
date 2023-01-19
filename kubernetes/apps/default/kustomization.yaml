@@ -6,4 +6,5 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./hajimari/ks.yaml
+  - ./homepage/ks.yaml
   - ./paperless/ks.yaml
