@@ -23,8 +23,8 @@ spec:
       pullPolicy: IfNotPresent
 
     enableRbac: true
-    config:
-      useExistingConfigMap: homepage-config
+    # config:
+    #   useExistingConfigMap: homepage-config
 
 
     ingress:
