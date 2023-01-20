@@ -18,7 +18,7 @@ spec:
   values:
     image:
       repository: gotson/komga
-      tag: 0.157.4
+      tag: 0.160.0
 
     env:
       SERVER_PORT: &port 8080
