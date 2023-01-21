@@ -21,7 +21,7 @@
   "repositories": ["h-wb/home-ops"],
   "onboarding": false,
   "requireConfig": "optional",
-  "gitAuthor": "rosey-bot <wlab-bot[bot]@users.noreply.github.com>",
+  "gitAuthor": "wlab-bot <wlab-bot[bot]@users.noreply.github.com>",
   "dependencyDashboardTitle": "Renovate Dashboard 🤖",
   "suppressNotifications": ["prIgnoreNotification"],
   "rebaseWhen": "conflicted",
