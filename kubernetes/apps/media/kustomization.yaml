@@ -8,6 +8,7 @@ resources:
   - ./tautulli/ks.yaml
   - ./sonarr/ks.yaml
   - ./recyclarr/ks.yaml
+  - ./bazarr/ks.yaml
   - ./radarr/ks.yaml
   - ./radarr-uhd/ks.yaml
   - ./prowlarr/ks.yaml
