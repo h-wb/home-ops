@@ -34,9 +34,10 @@ spec:
       RADARR__PORT: &port 7878
       RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET__DOMAIN}"
       RADARR__LOG_LEVEL: info
-    envFrom:
-      - secretRef:
+      RADARR__API_KEY:
+        secretKeyRef:
           name: *app
+          key: RADARR__API_KEY
 
     persistence:
       config:
