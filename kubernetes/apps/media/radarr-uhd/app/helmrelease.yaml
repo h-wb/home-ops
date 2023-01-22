@@ -65,7 +65,7 @@ spec:
           gethomepage.dev/name: "Radarr UHD"
           gethomepage.dev/group: Downloads
           gethomepage.dev/icon: radarr.png
-          gethomepage.dev/widget.type: flood
+          gethomepage.dev/widget.type: radarr
           gethomepage.dev/widget.url: "http://radarr.media.svc.cluster.local:7879"
           gethomepage.dev/widget.key: "${RADARR__API_KEY}"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
