@@ -2,30 +2,31 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: homepage
+  name: &app homepage
   namespace: home
 spec:
   interval: 15m
   chart:
     spec:
-      chart: app-template
-      version: 1.2.1
-      interval: 30m
+      chart: homepage
+      version: 1.0.0
+      interval: 10m0s
       sourceRef:
         kind: HelmRepository
-        name: bjw-s
+        name: jameswynn
         namespace: flux-system
 
   values:
     image:
       repository: ghcr.io/benphelps/homepage
-      tag: v0.6.2
       pullPolicy: IfNotPresent
 
-    # enableRbac: true
-    # # config:
-    # #   useExistingConfigMap: homepage-config
+    enableRbac: true
+    config:
+      useExistingConfigMap: homepage-config
 
+    podAnnotations:
+      configmap.reloader.stakater.com/reload: *app
 
     ingress:
       main:
@@ -51,29 +52,29 @@ spec:
             port: 3000
             targetPort: 3000
 
-    persistence:
-      config:
-        enabled: true
-        # type: configmap
-        # name: homepage-config
-        # mountPath: /app/config
-        type: custom
-        volumeSpec:
-          configMap:
-            name: homepage-config
-        subPath:
-          - path: settings.yaml
-            mountPath: /app/config/settings.yaml
-          - path: widgets.yaml
-            mountPath: /app/config/widgets.yaml
-          - path: services.yaml
-            mountPath: /app/config/services.yaml
-          - path: bookmarks.yaml
-            mountPath: /app/config/bookmarks.yaml
-          - path: docker.yaml
-            mountPath: /app/config/docker.yaml
-          - path: kubernetes.yaml
-            mountPath: /app/config/kubernetes.yaml
+    # persistence:
+    #   config:
+    #     enabled: true
+    #     # type: configmap
+    #     # name: homepage-config
+    #     # mountPath: /app/config
+    #     type: custom
+    #     volumeSpec:
+    #       configMap:
+    #         name: homepage-config
+    #     subPath:
+    #       - path: settings.yaml
+    #         mountPath: /app/config/settings.yaml
+    #       - path: widgets.yaml
+    #         mountPath: /app/config/widgets.yaml
+    #       - path: services.yaml
+    #         mountPath: /app/config/services.yaml
+    #       - path: bookmarks.yaml
+    #         mountPath: /app/config/bookmarks.yaml
+    #       - path: docker.yaml
+    #         mountPath: /app/config/docker.yaml
+    #       - path: kubernetes.yaml
+    #         mountPath: /app/config/kubernetes.yaml
 
     resources:
       requests:
