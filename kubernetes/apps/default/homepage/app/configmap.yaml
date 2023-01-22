@@ -63,95 +63,17 @@ data:
     ---
     - Infrastructure:
         - Router:
-            href: https://192.168.178.1
+            href: http://192.168.1.1
             icon: avmfritzbox.png
             description: WAN Connection
-        - Athena:
-            href: https://athena.${SECRET_DOMAIN}
-            icon: synology.png
+        - Truenas:
+            href: http:/http://192.168.1.161
+            icon: truenas-scale.png
             description: NAS
-        - pve-01:
-            href: https://192.168.178.24:8006
+        - vcom1:
+            href: https://192.168.1.171:8006/
             icon: proxmox.png
-            description: Proxmox Hypervisor-01
-        - pve-02:
-            href: https://192.168.178.25:8006
-            icon: proxmox.png
-            description: Proxmox Hypervisor-02
-        - Longhorn:
-            href: https://longhorn.${SECRET_DOMAIN}
-            icon: longhorn.png
-            description: HCI Storage
-        - MinIO:
-            href: https://minio.${SECRET_DOMAIN}
-            icon: minio.png
-            description: Backup Storage
-    - Monitoring:
-        - Uptime-Kuma:
-            href: https://uptime.${SECRET_DOMAIN}
-            icon: uptime-kuma.png
-            description: Service Monitoring
-        - Grafana:
-            href: https://grafana.${SECRET_DOMAIN}
-            icon: grafana.png
-            description: Metric Monitoring
-        - Alertmanager:
-            href: https://alertmanager.${SECRET_DOMAIN}
-            icon: alertmanager.png
-            description: Metric Altering
-        - Prometheus:
-            href: https://prometheus.${SECRET_DOMAIN}
-            icon: prometheus.png
-            description: Metric Database
-    - Services & Apps:
-        - Jellyfin:
-            href: https://jelly.${SECRET_DOMAIN}
-            icon: jellyfin.png
-            description: Mediaserver
-            widget:
-              type: jellyfin
-              url: https://jelly.${SECRET_DOMAIN}
-              key: ${JELLYFIN_API_KEY}
-        - Vaultwarden:
-            href: https://pw.${SECRET_DOMAIN}
-            icon: bitwarden.png
-            description: Passworttool
-        - HomeAssistant:
-            href: https://hass.${SECRET_DOMAIN}
-            icon: home-assistant-circle.png
-            description: Heimautomatisierung
-        - Zigbee:
-            href: https://zigbee.${SECRET_DOMAIN}
-            icon: zigbee2mqtt.png
-            description: Zigbee2mqtt
-        - Pihole:
-            href: https://pihole.${SECRET_DOMAIN}
-            icon: pihole.png
-            description: Add-Blocking
-            widget:
-              type: pihole
-              url: https://pihole.int.swalb.io
-    - Cloud:
-        - Mailcow:
-            href: https://mail.${SECRET_FAM_DOMAIN}
-            icon: mailcow.png
-            description: Domain Admininterface
-        - Mail:
-            href: https://mail.${SECRET_FAM_DOMAIN}/sogo
-            icon: mailcowsogo.png
-            description: SOGo Webmail
-        - RSS:
-            href: https://rss.${SECRET_FAN_DOMAIN}
-            icon: freshrss.png
-            description: RSS Aggregator
-        - Nextcloud:
-            href: https://cloud.${SECRET_FAM_DOMAIN}
-            icon: nextcloud.png
-            description: Cloudstorage
-        - Wiki:
-            href: https://wiki.${SECRET_FAM_DOMAIN}
-            icon: wikijs.png
-            description: Dokumentation
+            description: Proxmox Hypervisor
   bookmarks.yaml: |
     ---
         - Cloud-Access:
