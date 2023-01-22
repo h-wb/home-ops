@@ -51,7 +51,3 @@ spec:
         cert-manager.io/cluster-issuer: letsencrypt-production
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         kubernetes.io/ingress.class: traefik
-        hajimari.io/enable: "true"
-        hajimari.io/icon: cow
-        hajimari.io/group: storage
-        hajimari.io/appName: longhorn

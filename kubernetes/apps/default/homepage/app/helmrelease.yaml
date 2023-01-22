@@ -52,30 +52,6 @@ spec:
             port: 3000
             targetPort: 3000
 
-    # persistence:
-    #   config:
-    #     enabled: true
-    #     # type: configmap
-    #     # name: homepage-config
-    #     # mountPath: /app/config
-    #     type: custom
-    #     volumeSpec:
-    #       configMap:
-    #         name: homepage-config
-    #     subPath:
-    #       - path: settings.yaml
-    #         mountPath: /app/config/settings.yaml
-    #       - path: widgets.yaml
-    #         mountPath: /app/config/widgets.yaml
-    #       - path: services.yaml
-    #         mountPath: /app/config/services.yaml
-    #       - path: bookmarks.yaml
-    #         mountPath: /app/config/bookmarks.yaml
-    #       - path: docker.yaml
-    #         mountPath: /app/config/docker.yaml
-    #       - path: kubernetes.yaml
-    #         mountPath: /app/config/kubernetes.yaml
-
     resources:
       requests:
         cpu: 25m

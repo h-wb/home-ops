@@ -53,8 +53,6 @@ spec:
       className: "traefik"
       annotations:
         cert-manager.io/cluster-issuer: "letsencrypt-production"
-        hajimari.io/enable: "true"
-        hajimari.io/icon: "apple-icloud"
         traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
       tls:
         - hosts:

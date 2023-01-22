@@ -41,8 +41,13 @@ spec:
         ingressClassName: "traefik"
         annotations:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "graph-outline"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Tautulli
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: tautulli.png
+          gethomepage.dev/widget.type: tautulli
+          gethomepage.dev/widget.url: "http://tautulli.media.svc.cluster.local:8181"
+          gethomepage.dev/widget.key: ${TAUTULLI__API_KEY}
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: &host tautulli.${SECRET_DOMAIN}

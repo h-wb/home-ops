@@ -64,7 +64,7 @@ data:
     - Infrastructure:
         - Router:
             href: http://192.168.1.1
-            icon: avmfritzbox.png
+            icon: router.png
             description: WAN Connection
         - Truenas:
             href: http:/http://192.168.1.161
