@@ -78,7 +78,7 @@ spec:
           gethomepage.dev/icon: bazarr.png
           gethomepage.dev/widget.type: bazarr
           gethomepage.dev/widget.url: "http://bazarr.media.svc.cluster.local:7878"
-          gethomepage.dev/widget.key: "${BAZARR__API_KEY}"
+          # gethomepage.dev/widget.key: "${BAZARR__API_KEY}"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: &host "bazarr.${SECRET_DOMAIN}"
