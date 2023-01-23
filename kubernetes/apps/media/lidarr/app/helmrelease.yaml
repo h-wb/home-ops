@@ -68,8 +68,12 @@ spec:
         ingressClassName: "traefik"
         annotations:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "music"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: "Lidarr"
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/icon: lidarr.png
+          gethomepage.dev/widget.type: lidarr
+          gethomepage.dev/widget.url: "http://lidarr.media.svc.cluster.local:8080"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: &host "lidarr.${SECRET_DOMAIN}"

@@ -50,8 +50,10 @@ spec:
         ingressClassName: "traefik"
         annotations:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "book"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: "Komga"
+          gethomepage.dev/group: Media
+          gethomepage.dev/icon: komga.png
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: &host "komga.${SECRET_DOMAIN}"

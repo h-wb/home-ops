@@ -31,7 +31,6 @@ spec:
       className: traefik
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-staging
-        hajimari.io/icon: sawtooth-wave
       hosts:
         - host: &host "gitops.${SECRET_DOMAIN}"
           paths:

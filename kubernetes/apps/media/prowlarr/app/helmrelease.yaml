@@ -44,8 +44,13 @@ spec:
         ingressClassName: "traefik"
         annotations:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "format-list-bulleted-square"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: "Prowlarr"
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/icon: prowlarr.png
+          gethomepage.dev/widget.type: prowlarr
+          gethomepage.dev/widget.url: "http://prowlarr.media.svc.cluster.local:9696"
+          # gethomepage.dev/widget.key: "${RADARR__API_KEY}"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: &host prowlarr.${SECRET_DOMAIN}
