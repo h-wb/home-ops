@@ -41,7 +41,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: radarr-config-v2
+        existingClaim: radarr-config-v1
       media:
         enabled: true
         type: nfs

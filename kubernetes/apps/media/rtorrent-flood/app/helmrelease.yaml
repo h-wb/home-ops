@@ -39,7 +39,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: rtorrent-config-v2
+        existingClaim: rtorrent-config-v1
       rtorrent-rc:
         enabled: true
         type: configMap

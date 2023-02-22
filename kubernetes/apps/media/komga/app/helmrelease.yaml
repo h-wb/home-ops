@@ -36,7 +36,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: komga-config-v2
+        existingClaim: komga-config-v1
       media:
         enabled: true
         type: nfs
