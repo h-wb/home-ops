@@ -9,6 +9,6 @@ spec:
   primaryUpdateStrategy: unsupervised
   storage:
     size: 10Gi
-    storageClass: local-path
+    storageClass: longhorn
   superuserSecret:
     name: postgres-superuser

@@ -3,7 +3,7 @@ apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: longhorn
-  namespace: longhorn-system
+  namespace: storage
 spec:
   interval: 5m
   chart:
@@ -28,7 +28,7 @@ spec:
   values:
     persistence:
       defaultClass: true
-      defaultClassReplicaCount: 1
+      defaultClassReplicaCount: 2
       reclaimPolicy: Retain
     defaultSettings:
       backupstorePollInterval: 300
@@ -38,7 +38,7 @@ spec:
       nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
       concurrentAutomaticEngineUpgradePerNodeLimit: 1
       storageMinimalAvailablePercentage: 10
-      defaultReplicaCount: 1
+      defaultReplicaCount: 2
       defaultLonghornStaticStorageClass: longhorn
     ingress:
       enabled: true
