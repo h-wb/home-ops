@@ -71,8 +71,8 @@
         - kind: Deployment
           name: tigera-operator
           namespace: tigera-operator
-        # - kind: DaemonSet
-        #   name: kube-vip
+        - kind: DaemonSet
+          name: kube-vip
           namespace: kube-system
         - kind: Installation
           name: default
@@ -117,3 +117,16 @@
         path: "{{ k3s_server_manifests_dir }}/{{ item.filename }}"
         state: absent
       loop: "{{ k3s_server_manifests_urls | default([]) }}"
+
+    - name: Fix DNS for ubuntu
+      block:
+        - name: Stop and disable service which messes with DNS
+          service:
+            name: "systemd-resolved"
+            state: stopped
+            enabled: false
+        - name: Setup nameserver
+          blockinfile: |
+            dest=/etc/resolv.conf
+            content="nameserver 1.1.1.1"
+        when: ansible_facts['distribution'] == 'Ubuntu'
