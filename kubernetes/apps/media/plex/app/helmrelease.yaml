@@ -61,7 +61,7 @@ spec:
         externalTrafficPolicy: Local
         ports:
           http:
-            port: 32400
+            port: 32401
 
     ingress:
       main:
