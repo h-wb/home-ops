@@ -17,15 +17,19 @@ spec:
         namespace: flux-system
 
   values:
+    controller:
+      type: statefulset
+
     image:
       repository: ghcr.io/onedr0p/plex
       tag: 1.30.2.6563-3d4dc0cce@sha256:d0d3e5e75f5ed86843d123cd84bb1f54a0593ec26c908410548862607af880bf
 
     podSecurityContext:
-      supplementalGroups:
-        - 100
-        - 44
-        - 109
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: "OnRootMismatch"
+      supplementalGroups: [44, 109, 10000]
 
     persistence:
       config:
