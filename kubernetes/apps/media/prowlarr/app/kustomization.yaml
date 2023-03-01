@@ -5,7 +5,4 @@ kind: Kustomization
 namespace: media
 resources:
   - ./helmrelease.yaml
-labels:
-  - pairs:
-      app.kubernetes.io/name: prowlarr
-      app.kubernetes.io/instance: prowlarr
+  - ./pvc.yaml
