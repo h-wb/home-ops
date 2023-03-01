@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -9,17 +10,33 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.2.1
+      version: 1.3.2
       interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
 
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+
   values:
+    controller:
+      type: statefulset
+      annotations:
+        reloader.stakater.com/auto: "true"
+
     image:
-      repository: ghcr.io/onedr0p/prowlarr-nightly
-      tag: 1.3.2.2843@sha256:04e058e1994f348279c98e8e8d04a3e336c48a6adc548771a4713cd629f9ba95
+      repository: ghcr.io/onedr0p/prowlarr-develop
+      tag: 1.3.1.2796@sha256:8d282ee537ac239fb4b6e31ce86f5ec1cb260eeaa7f30f27a360a22d37bbe60f
 
     env:
       PROWLARR__INSTANCE_NAME: Prowlarr
@@ -33,10 +50,18 @@ spec:
           http:
             port: *port
 
-    persistence:
-      config:
-        enabled: true
-        existingClaim: prowlarr-config-v1
+    podSecurityContext:
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
+
+    volumeClaimTemplates:
+      - name: config
+        mountPath: /config
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        storageClass: longhorn
 
     ingress:
       main:
