@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -16,14 +17,28 @@ spec:
         name: bjw-s
         namespace: flux-system
 
+  maxHistory: 3
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+
   values:
     image:
       repository: ghcr.io/onedr0p/tautulli
       tag: 2.11.1@sha256:7eed9224c97af9c4da9d00c0b637a37c15a4412d6d5a409631f17ad5a7e96cc4
 
     podSecurityContext:
-      supplementalGroups:
-        - 100
+      runAsUser: 568
+      runAsGroup: 568
+      fsGroup: 568
+      fsGroupChangePolicy: OnRootMismatch
 
     service:
       main:
