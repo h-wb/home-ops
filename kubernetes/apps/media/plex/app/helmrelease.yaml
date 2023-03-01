@@ -59,8 +59,6 @@ spec:
         ports:
           http:
             port: 32400
-          remote:
-            port: 32401
 
     ingress:
       main:
