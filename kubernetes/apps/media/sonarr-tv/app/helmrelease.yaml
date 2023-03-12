@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: &app sonarr
+  name: &app sonarr-tv
   namespace: media
 spec:
   interval: 5m
@@ -22,8 +22,8 @@ spec:
       tag: 4.0.0.362@sha256:d4e52af4fa1e0b31a8c7cb1244d31c85a382c7133402e2d5dc904b6852255d0d
 
     env:
-      SONARR__INSTANCE_NAME: Sonarr
-      SONARR__PORT: &port 8989
+      SONARR__INSTANCE_NAME: Sonarr-TV
+      SONARR__PORT: &port 8991
       SONARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET__DOMAIN}"
       SONARR__LOG_LEVEL: info
     envFrom:
@@ -47,12 +47,12 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: sonarr-config-v1
+        existingClaim: sonarr-tv-config-v1
       media:
         enabled: true
         type: nfs
         server: "${NFS_ADDR}"
-        path: /mnt/tank/hwe
+        path: /mnt/tank/fwe
         mountPath: /media
 
     ingress:
@@ -62,7 +62,7 @@ spec:
         annotations:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/name: Sonarr
+          gethomepage.dev/name: Sonarr TV
           gethomepage.dev/description: TV Series collection manager
           gethomepage.dev/group: Downloads
           gethomepage.dev/icon: sonarr.png
@@ -75,7 +75,7 @@ spec:
         tls:
           - hosts:
               - *host
-            secretName: "sonarr-tls"
+            secretName: "sonarr-tv-tls"
 
     resources:
       requests:
