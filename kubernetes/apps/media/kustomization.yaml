@@ -6,7 +6,8 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./tautulli/ks.yaml
-  - ./sonarr/ks.yaml
+  - ./sonarr-anm/ks.yaml
+  - ./sonarr-tv/ks.yaml
   - ./recyclarr/ks.yaml
   - ./bazarr/ks.yaml
   - ./radarr/ks.yaml
