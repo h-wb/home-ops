@@ -48,11 +48,17 @@ spec:
       config:
         enabled: true
         existingClaim: sonarr-tv-config-v1
-      media:
+      shared:
         enabled: true
         type: nfs
         server: "${NFS_ADDR}"
         path: /mnt/tank/fwe
+        mountPath: /shared
+      media:
+        enabled: true
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe
         mountPath: /media
 
     ingress:
