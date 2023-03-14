@@ -10,7 +10,8 @@ metadata:
 spec:
   dependsOn:
     - name: cluster-apps-radarr
-    - name: cluster-apps-sonarr
+    - name: cluster-apps-sonarr-tv
+    - name: cluster-apps-sonarr-anm
   path: ./kubernetes/apps/media/recyclarr/app
   prune: true
   sourceRef:
