@@ -20,7 +20,7 @@ spec:
                 - secretRef:
                     name: radarr
                 - secretRef:
-                    name: sonarr
+                    name: sonarr-tv
               command: ["/bin/bash", "-c"]
               args: ["envsubst < /config/recyclarr.yml > /shared/recyclarr.yml"]
               volumeMounts:
