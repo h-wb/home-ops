@@ -30,3 +30,5 @@ spec:
             mountPath: /sock
           - name: media
             mountPath: /media
+          - name: download
+            mountPath: /download
