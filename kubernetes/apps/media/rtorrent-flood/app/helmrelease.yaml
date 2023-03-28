@@ -51,6 +51,9 @@ spec:
         type: emptyDir
         medium: Memory
         mountPath: /sock
+      download:
+        enabled: true
+        type: emptyDir
       media:
         enabled: true
         mountPath: /media

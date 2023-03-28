@@ -1,7 +1,7 @@
 ## Define directories
 method.insert                      = cfg.basedir,  private|const|string, (cat, "/config/")
 method.insert                      = cfg.session,  private|const|string, (cat, (cfg.basedir), "session/")
-method.insert                      = cfg.download, private|const|string, (cat, (cfg.basedir), "download/")
+method.insert                      = cfg.download, private|const|string, (cat, "/download/")
 method.insert                      = cfg.homedir,  private|const|string, (cat, "/media/Downloads/rtorrent/")
 method.insert                      = cfg.complete, private|const|string, (cat, (cfg.homedir), "complete/")
 
@@ -52,9 +52,13 @@ trackers.use_udp.set               = no
 
 ## Log all messages to stdout
 method.insert                      = cfg.logfile,  private|const|string, (cat, "/dev/stdout")
-log.open_file                      = "log", (cfg.logfile)
+log.open_file                       = "log", (cfg.logfile)
 log.add_output                     = "info", "log"
 log.add_output                     = "warn", "log"
 log.add_output                     = "critical", "log"
 log.add_output                     = "torrent_info", "log"
 log.add_output                     = "debug", "log"
+
+## Downloads settings
+max_downloads_global               = 2
+d.max_file_size.set                 = 200G
