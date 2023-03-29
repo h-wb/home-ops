@@ -54,6 +54,7 @@ spec:
       download:
         enabled: true
         type: emptyDir
+        mountPath: /download
       media:
         enabled: true
         mountPath: /media
