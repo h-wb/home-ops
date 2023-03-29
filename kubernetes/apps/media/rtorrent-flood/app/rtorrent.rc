@@ -61,4 +61,4 @@ log.add_output                     = "debug", "log"
 
 ## Downloads settings
 max_downloads_global               = 2
-d.max_file_size.set                 = 200G
+system.file.max_size.set            = 200G
