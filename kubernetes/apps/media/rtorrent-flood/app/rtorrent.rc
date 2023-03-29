@@ -9,7 +9,7 @@ method.insert                      = cfg.complete, private|const|string, (cat, (
 fs.mkdir.recursive                 = (cat,(cfg.basedir))
 fs.mkdir                           = (cat, (cfg.session))
 fs.mkdir.recursive                 = (cat,(cfg.homedir))
-fs.mkdir                           = (cat, (cfg.download))
+fs.mkdir.recursive                 = (cat, (cfg.download))
 fs.mkdir                           = (cat, (cfg.complete))
 
 ## Set default paths
