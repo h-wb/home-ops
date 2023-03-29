@@ -31,4 +31,4 @@ spec:
           - name: media
             mountPath: /media
           - name: download
-            mountPath: /download/incomplete
+            mountPath: /download
