@@ -8,7 +8,7 @@ spec:
   values:
     initContainers:
       init-db:
-        image: ghcr.io/onedr0p/postgres-initdb:14.6@sha256:f2d6d7a172ce0c427bda01f4f68b8730b906fba96db3b34c2ec363d3693166c3
+        image: ghcr.io/onedr0p/postgres-initdb:14.8@sha256:d9512db71f25c905cf44a9b336800fbfa1dde48a1aadfbf4f64888ef0a0c2d66
         env:
           - name: POSTGRES_HOST
             value: postgres-rw.databases.svc.cluster.local
