@@ -9,7 +9,7 @@ spec:
     additionalContainers:
       rtorrent:
         name: rtorrent
-        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:106169e753b6aaf2686dd4d267b4ea8e5096e4110c2043dc5d7b197ecd6200d2
+        image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:06cd8227ae5680562c921febe3a3729ab61952e9901796f051edb5342ff5ecf6
         env:
           - name: RTORRENT__DEFAULT_CONFIG
             value: "false"

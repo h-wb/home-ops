@@ -32,7 +32,7 @@ spec:
   values:
     image:
       repository: ghcr.io/onedr0p/tautulli
-      tag: 2.12.0@sha256:c3a48db978e3886817c6c8b7895136a720e2667ae037f5c52500fd404b2a9233
+      tag: 2.12.3@sha256:6049e9877a7ac505a33c134ad58ca5b29dfbc34c1505e5df7d7784428942a9d0
 
     podSecurityContext:
       runAsUser: 568
