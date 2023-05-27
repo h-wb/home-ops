@@ -111,6 +111,13 @@
               net.bridge.bridge-nf-call-ip6tables: 1
               fs.inotify.max_user_watches: 524288
               fs.inotify.max_user_instances: 512
+        - name: System Configuration (2) | Append to /etc/multipath.conf
+          ansible.builtin.blockinfile:
+            path: /etc/multipath.conf
+            block: |
+              blacklist {
+                  devnode "^sd[a-z0-9]+"
+              }
         - name: System Configuration (2) | Disable swap | Fedora
           ansible.builtin.dnf:
             name: zram-generator-defaults
