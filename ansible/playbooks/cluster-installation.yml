@@ -129,4 +129,4 @@
           blockinfile: |
             dest=/etc/resolv.conf
             content="nameserver 1.1.1.1"
-        when: ansible_facts['distribution'] == 'Ubuntu'
+          when: ansible_facts['distribution'] == 'Ubuntu'
