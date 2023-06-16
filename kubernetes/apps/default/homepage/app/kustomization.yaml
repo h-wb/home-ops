@@ -13,3 +13,5 @@ configMapGenerator:
       - ./config/bookmarks.yaml
       - ./config/docker.yaml
       - ./config/kubernetes.yaml
+generatorOptions:
+  disableNameSuffixHash: true
