@@ -23,7 +23,7 @@ spec:
 
     enableRbac: true
     config:
-      useExistingConfigMap: homepage-config
+      useExistingConfigMap: *app
 
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
