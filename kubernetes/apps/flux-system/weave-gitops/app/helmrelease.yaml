@@ -31,6 +31,8 @@ spec:
       className: traefik
       annotations:
         cert-manager.io/cluster-issuer: letsencrypt-staging
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/group: Services
       hosts:
         - host: &host "gitops.${SECRET_DOMAIN}"
           paths:
