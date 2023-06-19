@@ -68,6 +68,7 @@ spec:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
+          gethomepage.dev/icon: plex.png
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
           - host: &host "plex.${SECRET_DOMAIN}"
