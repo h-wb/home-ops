@@ -27,9 +27,9 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
-  dependsOn:
-    - name: local-path-provisioner
-      namespace: kube-system
+  # dependsOn:
+  #   - name: local-path-provisioner
+  #     namespace: kube-system
   values:
     cleanPrometheusOperatorObjectNames: true
     alertmanager:
@@ -40,13 +40,12 @@ spec:
           cert-manager.io/cluster-issuer: "letsencrypt-production"
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - &host-alert-manager alert-manager.${SECRET_DOMAIN}
-        paths:
-          - /
-        pathType: Prefix
+          - &host-alerts "alerts.${SECRET_DOMAIN}"
         tls:
           - hosts:
-              - *host-alert-manager
+              - *host-alerts
+            secretName: "alerts-tls"
+
       alertManagerSpec:
         storage:
           volumeClaimTemplate:
@@ -140,10 +139,11 @@ spec:
           traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         pathType: Prefix
         hosts:
-          - &host prometheus.${SECRET_DOMAIN}
+          - &host "prometheus.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
+            secretName: "prometheus-tls"
       # thanosService:
       #   enabled: false
       # thanosServiceMonitor:
