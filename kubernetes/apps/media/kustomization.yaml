@@ -18,6 +18,7 @@ resources:
   - ./lidarr/ks.yaml
   - ./komga/ks.yaml
   - ./rtorrent-flood/ks.yaml
+  - ./autobrr/ks.yaml
 
 
   # - ./plex-media-manager/ks.yaml
