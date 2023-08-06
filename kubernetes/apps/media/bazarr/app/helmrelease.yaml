@@ -31,7 +31,7 @@ spec:
   values:
     image:
       repository: ghcr.io/onedr0p/bazarr
-      tag: 1.2.2@sha256:9656191a1347e44de7fc883912bb00d6a8d5c190dbd0dd77d5ba1ba075095b65
+      tag: 1.2.4@sha256:80fbe89f5806015d67aa78c60bf64c068998507d08db5ea05ac7b9916dabb880
 
     podSecurityContext:
       runAsUser: 568
