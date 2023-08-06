@@ -9,6 +9,7 @@ resources:
   - ./deliveryhero.yaml
   - ./descheduler.yaml
   - ./external-dns.yaml
+  - ./external-secrets.yaml
   - ./grafana.yaml
   - ./hajimari.yaml
   - ./infracloudio.yaml
