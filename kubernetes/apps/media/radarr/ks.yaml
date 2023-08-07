@@ -16,3 +16,7 @@ spec:
     kind: GitRepository
     name: home-ops-kubernetes
   wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: radarr
