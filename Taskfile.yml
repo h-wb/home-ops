@@ -22,6 +22,7 @@ includes:
   pre-commit: .taskfiles/pre-commit.yml
   sops: .taskfiles/sops.yml
   ssh: .taskfiles/ssh.yml
+  secret: .taskfiles/secret.yml
 
 tasks:
 
