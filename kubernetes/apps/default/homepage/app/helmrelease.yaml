@@ -15,11 +15,21 @@ spec:
         kind: HelmRepository
         name: jameswynn
         namespace: flux-system
+  install:
+    remediation:
+      retries: 5
+  upgrade:
+    remediation:
+      retries: 5
 
   values:
     image:
       repository: ghcr.io/benphelps/homepage
       tag: v0.6.28
+
+    envFrom:
+      - secretRef:
+          name: homepage-secret
 
     enableRbac: true
     config:
