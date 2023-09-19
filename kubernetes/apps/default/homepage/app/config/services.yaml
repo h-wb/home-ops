@@ -5,11 +5,11 @@
         icon: router.png
         description: WAN Connection
     - Supermicro:
-        href: http:/http://192.168.1.160
+        href: http://192.168.1.160
         icon: supermicro.png
         description: IPMI
     - Truenas:
-        href: http:/http://192.168.1.161
+        href: http://192.168.1.161
         icon: truenas-scale.png
         description: NAS
     - vcom1:
