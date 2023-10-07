@@ -2,66 +2,59 @@
 version: "3"
 
 vars:
-  PROJECT_DIR:
-    sh: "git rev-parse --show-toplevel"
-  KUBERNETES_DIR: "{{.PROJECT_DIR}}/kubernetes"
-  ANSIBLE_DIR: "{{.PROJECT_DIR}}/ansible"
-  TERRAFORM_DIR: "{{.PROJECT_DIR}}/terraform"
-
-dotenv: [".config.env"]
+  PYTHON_BIN: python3
+  BOOTSTRAP_DIR: "{{.ROOT_DIR}}/bootstrap"
+  ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
+  KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
 
 env:
-  KUBECONFIG: "{{.PROJECT_DIR}}/kubeconfig"
+  KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+  SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
+  PATH: "{{.ROOT_DIR}}/.venv/bin:$PATH"
+  VIRTUAL_ENV: "{{.ROOT_DIR}}/.venv"
+  ANSIBLE_COLLECTIONS_PATH: "{{.ROOT_DIR}}/.venv/galaxy"
+  ANSIBLE_ROLES_PATH: "{{.ROOT_DIR}}/.venv/galaxy/ansible_roles"
+  ANSIBLE_VARS_ENABLED: "host_group_vars,community.sops.sops"
+  K8S_AUTH_KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
 
 includes:
-  ansible: .taskfiles/ansible.yml
-  cluster: .taskfiles/cluster.yml
-  flux: .taskfiles/flux.yml
-  format: .taskfiles/format.yml
-  lint: .taskfiles/lint.yml
-  pre-commit: .taskfiles/pre-commit.yml
-  sops: .taskfiles/sops.yml
-  ssh: .taskfiles/ssh.yml
-  secret: .taskfiles/secret.yml
+  ansible: .taskfiles/AnsibleTasks.yaml
+  brew: .taskfiles/BrewTasks.yaml
+  cluster: .taskfiles/ClusterTasks.yaml
 
 tasks:
 
+  default: task -l
+
+  deps:
+    desc: Create a Python virtual env and install required packages
+    cmds:
+      - "{{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv"
+      - .venv/bin/python3 -m pip install --upgrade pip setuptools wheel
+      - .venv/bin/python3 -m pip install --upgrade --requirement "{{.ROOT_DIR}}/requirements.txt"
+      - .venv/bin/ansible-galaxy install --role-file "{{.ROOT_DIR}}/requirements.yaml" --force
+
   init:
-    desc: Initialize workstation dependencies with Brew
+    desc: Initialize configuration files
+    dir: "{{.BOOTSTRAP_DIR}}"
     cmds:
-      - brew install {{.DEPS}} {{.CLI_ARGS}}
-    preconditions:
-      - sh: command -v brew
-        msg: |
-          Homebrew is not installed. Using MacOS, Linux or WSL?
-          Head over to https://brew.sh to get up and running.
-    vars:
-      DEPS: >-
-        age
-        ansible
-        direnv
-        fluxcd/tap/flux
-        go-task/tap/go-task
-        helm
-        ipcalc
-        jq
-        kubernetes-cli
-        kustomize
-        pre-commit
-        prettier
-        sops
-        stern
-        terraform
-        tflint
-        weaveworks/tap/gitops
-        yamllint
-        yq
-  verify:
-    desc: Verify env settings
-    cmds:
-      - ./configure --verify
+      - cp -n vars/addons.sample.yaml vars/addons.yaml
+      - cp -n vars/config.sample.yaml vars/config.yaml
+      - cmd: echo "=== Configuration files copied ==="
+        silent: true
+      - cmd: echo "Proceed with updating the configuration files..."
+        silent: true
+      - cmd: echo "{{.BOOTSTRAP_DIR}}/vars/config.yaml"
+        silent: true
+      - cmd: echo "{{.BOOTSTRAP_DIR}}/vars/addons.yaml"
+        silent: true
+    status:
+      - test -f "{{.BOOTSTRAP_DIR}}/vars/addons.yaml"
+      - test -f "{{.BOOTSTRAP_DIR}}/vars/config.yaml"
 
   configure:
-    desc: Configure repository from env settings
-    cmds:
-      - ./configure
+    desc: Configure repository from Ansible vars
+    dir: "{{.BOOTSTRAP_DIR}}"
+    cmd: ansible-playbook configure.yaml
+    env:
+      ANSIBLE_DISPLAY_SKIPPED_HOSTS: "false"
