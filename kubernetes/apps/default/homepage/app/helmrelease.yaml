@@ -30,10 +30,6 @@ spec:
       - secretRef:
           name: homepage-secret
 
-    enableRbac: true
-    config:
-      useExistingConfigMap: *app
-
     podAnnotations:
       configmap.reloader.stakater.com/reload: *app
 
@@ -56,11 +52,34 @@ spec:
         ports:
           http:
             port: 3000
-            targetPort: 3000
+
+    persistence:
+      config:
+        enabled: true
+        type: custom
+        volumeSpec:
+          configMap:
+            name: homepage-config
+        subPath:
+          - path: bookmarks.yaml
+            mountPath: /app/config/bookmarks.yaml
+          - path: docker.yaml
+            mountPath: /app/config/docker.yaml
+          - path: kubernetes.yaml
+            mountPath: /app/config/kubernetes.yaml
+          - path: services.yaml
+            mountPath: /app/config/services.yaml
+          - path: settings.yaml
+            mountPath: /app/config/settings.yaml
+          - path: widgets.yaml
+            mountPath: /app/config/widgets.yaml
+
+    serviceAccount:
+      create: true
 
     resources:
       requests:
-        cpu: 25m
-        memory: 105M
+        cpu: 15m
+        memory: 200M
       limits:
-        memory: 225M
+        memory: 2G

@@ -5,14 +5,15 @@ namespace: default
 resources:
   - ./external-secret.yaml
   - ./helmrelease.yaml
+  - ./rbac.yaml
 configMapGenerator:
-  - name: homepage
+  - name: homepage-config
     files:
-      - ./config/settings.yaml
-      - ./config/widgets.yaml
-      - ./config/services.yaml
       - ./config/bookmarks.yaml
       - ./config/docker.yaml
       - ./config/kubernetes.yaml
+      - ./config/services.yaml
+      - ./config/settings.yaml
+      - ./config/widgets.yaml
 generatorOptions:
   disableNameSuffixHash: true
