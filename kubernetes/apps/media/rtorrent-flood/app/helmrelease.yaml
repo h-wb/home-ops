@@ -35,7 +35,7 @@ spec:
       TZ: UTC
     image:
       repository: ghcr.io/onedr0p/flood
-      tag: 4.7.0@sha256:6d82f8d77aca632f2361bd3bd61baa663f5e5c7bf79d17a5b2bc8548ad29efe9
+      tag: 4.7.0@sha256:36a5669ac86618e9b8134aa940679aa768feaa2c0126ac8963423ef79a61a0bb
     persistence:
       config:
         enabled: true
