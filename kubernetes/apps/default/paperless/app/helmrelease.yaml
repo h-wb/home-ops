@@ -78,7 +78,10 @@ spec:
           gethomepage.dev/widget.username: ""
           gethomepage.dev/widget.password: ""
         hosts:
-          - &host "paperless.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host

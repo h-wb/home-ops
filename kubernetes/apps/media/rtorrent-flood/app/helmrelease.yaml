@@ -87,7 +87,10 @@ spec:
           gethomepage.dev/widget.type: flood
           gethomepage.dev/widget.url: "http://rtorrent-flood.media.svc.cluster.local:3000"
         hosts:
-          - &host "flood.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host

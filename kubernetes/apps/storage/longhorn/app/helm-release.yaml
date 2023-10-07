@@ -42,10 +42,9 @@ spec:
       defaultLonghornStaticStorageClass: longhorn
     ingress:
       enabled: true
-      host: "longhorn.${SECRET_DOMAIN}"
-      path: /
+      ingressClassName: "internal"
       tls: true
-      tlsSecret: longhorn-tls
+      tlsSecret: "longhorn.${SECRET_DOMAIN}"
+      host: "longhorn.${SECRET_DOMAIN}"
       annotations:
         coredns.io/hostname: "longhorn.${SECRET_DOMAIN}"
-        kubernetes.io/ingress.class: internal

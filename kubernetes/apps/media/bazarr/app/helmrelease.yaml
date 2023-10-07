@@ -79,7 +79,10 @@ spec:
           gethomepage.dev/widget.url: "http://bazarr.media.svc.cluster.local:7878"
           # gethomepage.dev/widget.key: "${BAZARR__API_KEY}"
         hosts:
-          - &host "bazarr.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host

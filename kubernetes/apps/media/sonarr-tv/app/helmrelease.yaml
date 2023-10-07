@@ -72,7 +72,10 @@ spec:
           gethomepage.dev/group: Downloads
           gethomepage.dev/icon: sonarr.png
         hosts:
-          - &host "sonarr-tv.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host

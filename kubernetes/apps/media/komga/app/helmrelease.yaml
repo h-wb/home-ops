@@ -54,7 +54,10 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/icon: komga.png
         hosts:
-          - &host "komga.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host

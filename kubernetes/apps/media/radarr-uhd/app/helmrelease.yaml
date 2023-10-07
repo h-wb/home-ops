@@ -68,7 +68,10 @@ spec:
           gethomepage.dev/widget.url: "http://radarr.media.svc.cluster.local:7879"
           # gethomepage.dev/widget.key: "${RADARR__API_KEY}"
         hosts:
-          - &host "radarr-uhd.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host

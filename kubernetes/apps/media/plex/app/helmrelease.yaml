@@ -69,7 +69,10 @@ spec:
           gethomepage.dev/group: Media
           gethomepage.dev/icon: plex.png
         hosts:
-          - &host "plex.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host
