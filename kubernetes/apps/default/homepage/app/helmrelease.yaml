@@ -8,12 +8,11 @@ spec:
   interval: 15m
   chart:
     spec:
-      chart: homepage
-      version: 1.2.1
-      interval: 10m0s
+      chart: app-template
+      version: 1.5.1
       sourceRef:
         kind: HelmRepository
-        name: jameswynn
+        name: bjw-s
         namespace: flux-system
   install:
     remediation:
@@ -25,7 +24,7 @@ spec:
   values:
     image:
       repository: ghcr.io/benphelps/homepage
-      tag: v0.6.35
+      tag: v0.7.0
 
     envFrom:
       - secretRef:
@@ -44,7 +43,10 @@ spec:
         ingressClassName: internal
         # annotations:
         hosts:
-          - &host "home.${SECRET_DOMAIN}"
+          - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                pathType: Prefix
         tls:
           - hosts:
               - *host
