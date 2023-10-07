@@ -5,7 +5,7 @@ metadata:
   name: longhorn
   namespace: storage
 spec:
-  interval: 5m
+  interval: 30m
   chart:
     spec:
       # renovate: registryUrl=https://charts.longhorn.io
@@ -47,6 +47,9 @@ spec:
     ingress:
       enabled: true
       ingressClassName: internal
+      host: longhorn.${SECRET_DOMAIN}
+      tls: true
+      tlsSecret: longhorn.${SECRET_DOMAIN}
       annotations:
         gethomepage.dev/enabled: "true"
         gethomepage.dev/icon: longhorn.png
@@ -54,5 +57,3 @@ spec:
         gethomepage.dev/group: Storage
         # gethomepage.dev/widget.type: longhorn
         # gethomepage.dev/widget.url: http://longhorn-frontend.storage
-      host: longhorn.${SECRET_DOMAIN}
-      tls: true
