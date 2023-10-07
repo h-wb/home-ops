@@ -78,25 +78,19 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: internal
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Flood
           gethomepage.dev/group: Downloads
           gethomepage.dev/icon: flood.png
           gethomepage.dev/widget.type: flood
           gethomepage.dev/widget.url: "http://rtorrent-flood.media.svc.cluster.local:3000"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: &host flood.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "flood.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
-            secretName: "flood-tls"
     resources:
       requests:
         cpu: 10m

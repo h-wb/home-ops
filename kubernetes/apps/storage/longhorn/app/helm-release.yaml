@@ -48,6 +48,4 @@ spec:
       tlsSecret: longhorn-tls
       annotations:
         coredns.io/hostname: "longhorn.${SECRET_DOMAIN}"
-        cert-manager.io/cluster-issuer: letsencrypt-production
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        kubernetes.io/ingress.class: traefik
+        kubernetes.io/ingress.class: internal

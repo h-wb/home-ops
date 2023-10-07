@@ -44,25 +44,19 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: internal
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Autobrr"
           gethomepage.dev/group: Downloads
           gethomepage.dev/icon: autobrr.png
           gethomepage.dev/widget.type: autobrr
           gethomepage.dev/widget.url: "http://autobrr.media.svc.cluster.local:8080"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: &host "autobrr.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "autobrr.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
-            secretName: "autobrr-tls"
 
     podSecurityContext:
       runAsUser: 568

@@ -41,19 +41,13 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        ingressClassName: internal
+        # annotations:
         hosts:
-          - host: &host "home.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "home.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
-            secretName: "home-tls"
 
     service:
       main:

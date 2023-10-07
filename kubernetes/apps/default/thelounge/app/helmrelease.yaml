@@ -36,23 +36,17 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: internal
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "The Lounge"
           gethomepage.dev/group: Services
           gethomepage.dev/icon: thelounge.png
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: &host "lounge.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "lounge.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
-            secretName: "lounge-tls"
     # podSecurityContext:
     #   runAsUser: 568
     #   runAsGroup: 568

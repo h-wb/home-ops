@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: external-dns
+  name: &app external-dns
   namespace: networking
 spec:
   interval: 5m
@@ -10,7 +10,7 @@ spec:
     spec:
       # renovate: registryUrl=https://kubernetes-sigs.github.io/external-dns
       chart: external-dns
-      version: 1.12.2
+      version: 1.13.1
       sourceRef:
         kind: HelmRepository
         name: external-dns
@@ -18,6 +18,7 @@ spec:
       interval: 5m
 
   values:
+    fullnameOverride: *app
     interval: 5m
     logLevel: debug
     provider: ovh
@@ -32,11 +33,16 @@ spec:
       - name: OVH_CONSUMER_KEY
         value: "${OVH_CONSUMER_KEY}"
     extraArgs:
-      - --annotation-filter=external-dns/is-public in (true)
+      - --ingress-class=external
+      - --crd-source-apiversion=externaldns.k8s.io/v1alpha1
+      - --crd-source-kind=DNSEndpoint
     policy: sync
-    sources:
-      - ingress
-    txtPrefix: "k8s."
-    txtOwnerId: "default"
+    sources: ["crd", "ingress"]
+    txtPrefix: k8s.
+    txtOwnerId: default
     domainFilters:
       - "${SECRET_DOMAIN}"
+    serviceMonitor:
+      enabled: true
+    podAnnotations:
+      secret.reloader.stakater.com/reload: ovh-credentials

@@ -58,9 +58,8 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: internal
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Radarr"
           gethomepage.dev/group: Downloads
@@ -68,16 +67,11 @@ spec:
           gethomepage.dev/widget.type: radarr
           gethomepage.dev/widget.url: "http://radarr.media.svc.cluster.local:7878"
           gethomepage.dev/widget.key: "{{HOMEPAGE_VAR_RADARR_TOKEN}}"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: &host "radarr.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "radarr.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
-            secretName: "radarr-tls"
 
     service:
       main:

@@ -69,9 +69,8 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: internal
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Bazarr"
           gethomepage.dev/group: Downloads
@@ -79,16 +78,11 @@ spec:
           gethomepage.dev/widget.type: bazarr
           gethomepage.dev/widget.url: "http://bazarr.media.svc.cluster.local:7878"
           # gethomepage.dev/widget.key: "${BAZARR__API_KEY}"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: &host "bazarr.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "bazarr.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
-            secretName: "bazarr-tls"
 
     service:
       main:

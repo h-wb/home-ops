@@ -44,9 +44,8 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: internal
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Overseerr"
           gethomepage.dev/group: Downloads
@@ -54,16 +53,11 @@ spec:
           gethomepage.dev/widget.type: overseerr
           gethomepage.dev/widget.url: "http://overseerr.media.svc.cluster.local:80"
           # gethomepage.dev/widget.key: "${RADARR__API_KEY}"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: &host "overseerr.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "overseer.${SECRET_DOMAIN}"
         tls:
           - hosts:
               - *host
-            secretName: "overseerr-tls"
 
     resources:
       requests:

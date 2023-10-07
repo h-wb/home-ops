@@ -67,9 +67,8 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
+        ingressClassName: internal
         annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Paperless"
           gethomepage.dev/group: Others
@@ -78,16 +77,11 @@ spec:
           gethomepage.dev/widget.url: "http://paperless.default.svc.cluster.local:8000"
           gethomepage.dev/widget.username: ""
           gethomepage.dev/widget.password: ""
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
         hosts:
-          - host: "paperless.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "paperless.${SECRET_DOMAIN}"
         tls:
           - hosts:
-              - "paperless.${SECRET_DOMAIN}"
-            secretName: "paperless-tls"
+              - *host
     resources:
       requests:
         cpu: 23m

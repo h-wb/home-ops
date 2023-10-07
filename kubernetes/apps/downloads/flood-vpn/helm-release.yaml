@@ -78,18 +78,10 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: "traefik"
-        annotations:
-          cert-manager.io/cluster-issuer: "letsencrypt-production"
-          hajimari.io/enable: "true"
-          hajimari.io/icon: "file-download"
-          traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        ingressClassName: internal
+        # annotations:
         hosts:
-          - host: "flood-vpn.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                pathType: Prefix
+          - &host "flood-vpn.${SECRET_DOMAIN}"
         tls:
           - hosts:
-              - "flood-vpn.${SECRET_DOMAIN}"
-            secretName: "flood-vpn-tls"
+              - *host

@@ -4,13 +4,13 @@ kind: Kustomization
 metadata:
   name: cluster-apps-k8s-gateway
   namespace: flux-system
-  labels:
-    substitution.flux.home.arpa/enabled: "true"
 spec:
-  interval: 10m
-  path: "./kubernetes/apps/networking/k8s-gateway/app"
+  path: ./kubernetes/apps/networking/k8s-gateway/app
   prune: true
   sourceRef:
     kind: GitRepository
-    name: home-ops-kubernetes
-  wait: true
+    name: home-kubernetes
+  wait: false
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m

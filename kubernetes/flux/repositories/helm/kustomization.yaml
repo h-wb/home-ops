@@ -1,5 +1,4 @@
 ---
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -34,3 +33,6 @@ resources:
   - ./cloudnative-pg.yaml
   - ./weave-gitops.yaml
   - ./jameswynn.yaml
+  - ./cilium.yaml
+  - ./coredns.yaml
+  - ./ingress-nginx.yaml
