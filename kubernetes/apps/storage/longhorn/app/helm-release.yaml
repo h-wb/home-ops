@@ -30,7 +30,7 @@ spec:
       enabled: true
       createPrometheusRules: true
     defaultSettings:
-      backupTarget: nfs://192.168.1.161:/mnt/tank/backup/longhorn
+      backupTarget: nfs://192.168.1.161:/mnt/tank/backup
       defaultReplicaCount: 3
       backupstorePollInterval: 0
       createDefaultDiskLabeledNodes: true
