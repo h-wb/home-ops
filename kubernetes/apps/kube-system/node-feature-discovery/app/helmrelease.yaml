@@ -3,17 +3,17 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: intel-device-plugin-operator
+  name: node-feature-discovery
   namespace: kube-system
 spec:
   interval: 30m
   chart:
     spec:
-      chart: intel-device-plugins-operator
-      version: 0.28.0
+      chart: node-feature-discovery
+      version: 0.14.1
       sourceRef:
         kind: HelmRepository
-        name: intel
+        name: node-feature-discovery
         namespace: flux-system
   maxHistory: 2
   install:
@@ -27,6 +27,14 @@ spec:
       retries: 3
   uninstall:
     keepHistory: false
-  dependsOn:
-    - name: node-feature-discovery
-      namespace: kube-system
+  values:
+    worker:
+      config:
+        core:
+          sources: ["custom", "pci", "usb"]
+        sources:
+          usb:
+            deviceClassWhitelist: ["02", "03", "0e", "ef", "fe", "ff"]
+            deviceLabelFields: ["class", "vendor", "device"]
+    prometheus:
+      enable: true
