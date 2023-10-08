@@ -16,6 +16,12 @@ spec:
         name: bjw-s
         namespace: flux-system
 
+  dependsOn:
+    - name: intel-device-plugin-gpu
+      namespace: kube-system
+    - name: longhorn
+      namespace: storage
+
   values:
     image:
       repository: ghcr.io/onedr0p/plex
@@ -50,6 +56,9 @@ spec:
         enabled: true
         type: emptyDir
 
+    nodeSelector:
+      intel.feature.node.kubernetes.io/gpu: "true"
+
     service:
       main:
         enabled: true
@@ -79,7 +88,9 @@ spec:
 
     resources:
       requests:
+        gpu.intel.com/i915: 1 
         memory: 2000Mi
         cpu: 100m
       limits:
+        gpu.intel.com/i915: 1
         memory: 10000Mi
