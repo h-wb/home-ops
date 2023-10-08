@@ -36,3 +36,4 @@ resources:
   - ./cilium.yaml
   - ./coredns.yaml
   - ./ingress-nginx.yaml
+  - ./intel.yaml
