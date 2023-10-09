@@ -81,8 +81,9 @@ spec:
       main:
         enabled: true
         type: LoadBalancer
-        loadBalancerIP: "${PLEX_ADDR}"
-        externalTrafficPolicy: Local
+        annotations:
+          io.cilium/lb-ipam-ips: "${PLEX_ADDR}"
+        externalTrafficPolicy: Cluster
         ports:
           http:
             port: 32400
