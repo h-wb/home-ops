@@ -17,6 +17,11 @@
 
     - name: Packages
       block:
+        - name: Packages | Add non-free repository
+          ansible.builtin.apt_repository:
+            repo: deb http://deb.debian.org/debian/ stable main contrib non-free
+            filename: non-free
+            update_cache: true
         - name: Packages | Install
           ansible.builtin.apt:
             name: apt-transport-https,ca-certificates,conntrack,curl,dirmngr,gdisk,gnupg,hdparm,htop,
