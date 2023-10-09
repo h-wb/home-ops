@@ -55,9 +55,6 @@ spec:
         path: /mnt/tank/hwe
         mountPath: /media
 
-    nodeSelector:
-      intel.feature.node.kubernetes.io/gpu: "true"
-      
     ingress:
       main:
         enabled: true
@@ -80,9 +77,7 @@ spec:
 
     resources:
       requests:
-        gpu.intel.com/i915: 1 
         memory: 250Mi
         cpu: 10m
       limits:
-        gpu.intel.com/i915: 1 
         memory: 2000Mi
