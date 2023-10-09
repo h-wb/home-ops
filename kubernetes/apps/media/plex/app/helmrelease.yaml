@@ -27,6 +27,24 @@ spec:
       repository: ghcr.io/onedr0p/plex-beta
       tag: 1.32.7.7571-13cdc68dc@sha256:59d99221e5560d57ecb1e8550c330bb7dd5ccb77cd0ecab3832125a6608b3207
 
+    env:
+      ADVERTISE_IP: "https://plex.${SECRET_DOMAIN}:443/,http://${PLEX_ADDR}:32400/"
+      #PLEX_CLAIM: set in secret:
+      # # NOTE: Plex preference options are camelCase and CASE SENSITIVE!
+      # # You can do horrible things to your Plex configuration if you are not careful
+      # # See a full list at https://support.plex.tv/articles/201105343-advanced-hidden-server-settings/
+      # PLEX_PREFERENCE_1: "FriendlyName=plex-kubernetes"
+      # PLEX_PREFERENCE_2: "EnableIPv6=0"
+      # PLEX_PREFERENCE_3: "logDebug=0"
+      # PLEX_PREFERENCE_4: "DisableTLSv1_0=1"
+      # PLEX_PREFERENCE_5: "LanNetworksBandwidth=xxx.xxx.xxx.0/18\,xxx.xxx.xxx.0/24\,xxx.xxx.xxx.0/24"
+      # PLEX_PREFERENCE_6: "TranscoderQuality=2"
+      # PLEX_PREFERENCE_7: "TreatWanIpAsLocal=0"
+      # PLEX_PREFERENCE_8: "TranscoderH264BackgroundPreset=fast"
+
+    # -- Enable devices to be discoverable
+    hostNetwork: true
+
     podSecurityContext:
       runAsUser: 568
       runAsGroup: 568
