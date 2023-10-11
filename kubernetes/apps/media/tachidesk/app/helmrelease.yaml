@@ -51,16 +51,17 @@ spec:
         - 100
         - 1000
 
-    # persistence:
-    #   config:
-    #     enabled: true
-    #     existingClaim: komga-config-v1
-    #   media:
-    #     enabled: true
-    #     type: nfs
-    #     server: "${NFS_ADDR}"
-    #     path: /mnt/tank/hwe
-    #     mountPath: /media
+    persistence:
+      data:
+        enabled: true
+        mountPath: /home/suwayomi/.local/share/Tachidesk
+        existingClaim: tachidesk-config-v1
+      # media:
+      #   enabled: true
+      #   type: nfs
+      #   server: "${NFS_ADDR}"
+      #   path: /mnt/tank/hwe
+      #   mountPath: /media
 
     ingress:
       main:
