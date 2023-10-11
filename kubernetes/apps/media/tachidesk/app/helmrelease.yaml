@@ -42,9 +42,9 @@ spec:
           http:
             port: *port
 
-    # podSecurityContext:
-    #   runAsUser: 568
-    #   runAsGroup: 568
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
     #   fsGroup: 568
     #   fsGroupChangePolicy: "OnRootMismatch"
     #   supplementalGroups:
