@@ -5,7 +5,7 @@ kind: Kustomization
 namespace: media
 resources:
   - ./helmrelease.yaml
-  - ./secret.sops.yaml
+  - ./external-secret.yaml
   - ./pvc.yaml
 patchesStrategicMerge:
   - ./patches/subcleaner.yaml
