@@ -4,4 +4,4 @@ kind: Kustomization
 namespace: selfhosted
 resources:
   - ./helmrelease.yaml
-  - ./external-sercret.yaml
+  - ./external-secret.yaml
