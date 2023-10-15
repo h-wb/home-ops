@@ -26,9 +26,9 @@ spec:
 
   dependsOn:
     - name: postgres
-      namespace: databases
+      namespace: database
     - name: redis
-      namespace: databases
+      namespace: database
 
   values:
     controller:

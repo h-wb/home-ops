@@ -27,7 +27,7 @@ spec:
       PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: "true"
       PAPERLESS_OCR_LANGUAGE: fra+eng
       PAPERLESS_PORT: 8000
-      PAPERLESS_REDIS: redis://redis-master.databases.svc.cluster.local:6379
+      PAPERLESS_REDIS: redis://redis-master.database.svc.cluster.local:6379
       PAPERLESS_TASK_WORKERS: 2
       PAPERLESS_TIME_ZONE: UTC
       PAPERLESS_URL: https://paperless.${SECRET_DOMAIN}
