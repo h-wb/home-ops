@@ -5,7 +5,8 @@ resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
   # Flux-Kustomizations
-  - ./nginx/ks.yaml
+  - ./cloudflared/ks.yaml
   - ./k8s-gateway/ks.yaml
   - ./external-dns/ks.yaml
   - ./flaresolverr/ks.yaml
+  - ./nginx/ks.yaml
