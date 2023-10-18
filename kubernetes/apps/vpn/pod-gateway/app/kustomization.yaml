@@ -4,4 +4,4 @@ kind: Kustomization
 namespace: vpn
 resources:
   - ./helmrelease.yaml
-  - ./secret.sops.yaml
+  - ./external-secret.yaml
