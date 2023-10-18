@@ -5,30 +5,18 @@
       "description": "Auto merge container digests",
       "matchDatasources": ["docker"],
       "automerge": true,
-      "automergeType": "branch",
       "ignoreTests": true,
-      "requiredStatusChecks": null,
+      "automergeType": "branch",
       "matchUpdateTypes": ["digest"],
-      "matchPackagePatterns": ["ghcr.io/onedr0p"]
-    },
-    {
-      "description": "Auto merge containers",
-      "matchDatasources": ["docker"],
-      "automerge": true,
-      "automergeType": "branch",
-      "ignoreTests": true,
-      "requiredStatusChecks": null,
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchPackageNames": ["ghcr.io/onedr0p/prowlarr-nightly"]
+      "matchPackagePatterns": ["ghcr.io/bjw-s", "ghcr.io/onedr0p"]
     },
     {
       "description": "Auto merge GitHub Actions",
       "matchManagers": ["github-actions"],
       "matchDatasources": ["github-tags"],
       "automerge": true,
-      "automergeType": "branch",
       "ignoreTests": true,
-      "requiredStatusChecks": null,
+      "automergeType": "branch",
       "matchUpdateTypes": ["minor", "patch"]
     }
   ]

@@ -3,8 +3,13 @@
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["immich"],
+      "matchPackagePatterns": ["kopia"],
       "allowedVersions": "<10"
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackagePatterns": ["postgresql"],
+      "allowedVersions": "<15"
     }
   ]
 }
