@@ -12,11 +12,7 @@
         href: http://192.168.1.161
         icon: truenas-scale.png
         description: NAS
-    - vcom1:
-        href: https://192.168.1.171:8006/
-        icon: proxmox.png
-        description: Proxmox Hypervisor
-    - vcom2:
-        href: https://192.168.1.172:8006/
-        icon: proxmox.png
-        description: Proxmox Hypervisor
+    - PiKVM:
+        href: https://192.168.1.48/
+        icon: pikvm.png
+        description: PiKVM
