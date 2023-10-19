@@ -54,6 +54,12 @@ spec:
         server: "${NFS_ADDR}"
         path: /mnt/tank/fwe
         mountPath: /media
+      shared:
+        enabled: true
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe
+        mountPath: /shared
 
     ingress:
       main:
