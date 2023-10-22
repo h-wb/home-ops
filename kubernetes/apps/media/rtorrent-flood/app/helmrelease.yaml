@@ -58,7 +58,7 @@ spec:
         enabled: true
         mountPath: /media
         type: nfs
-        path: /mnt/tank/hwe
+        path: /mnt/tank/fwe
         server: ${NFS_ADDR}
     podSecurityContext:
       fsGroup: 568
