@@ -14,6 +14,10 @@
       "labels": ["type/patch"]
     },
     {
+      "matchUpdateTypes": ["digest"],
+      "labels": ["type/digest"]
+    },
+    {
       "matchDatasources": ["docker"],
       "addLabels": ["renovate/container"]
     },
@@ -40,6 +44,10 @@
     {
       "matchDatasources": ["pypi"],
       "addLabels": ["renovate/pip"]
+    },
+    {
+      "matchDatasources": ["grafana-dashboards", "custom.grafana-dashboards"],
+      "addLabels": ["renovate/grafana-dashboard"]
     }
   ]
 }
