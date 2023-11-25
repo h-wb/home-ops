@@ -10,8 +10,6 @@ collections:
     version: 1.6.7
   - name: kubernetes.core
     version: 2.4.0
-  - name: onepassword.connect
-    version: 2.2.3
 roles:
   - name: xanmanning.k3s
     version: v3.4.2
