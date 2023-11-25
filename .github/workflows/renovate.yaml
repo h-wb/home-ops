@@ -17,7 +17,6 @@ on:
   push:
     branches: ["main"]
     paths:
-      - .github/renovate-bot.json5
       - .github/renovate.json5
       - .github/renovate/**.json5
 

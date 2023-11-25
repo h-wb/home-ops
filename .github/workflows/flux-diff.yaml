@@ -1,43 +1,52 @@
 ---
-name: Schedule - Update Flux
+name: "Flux Diff"
 
-on: # yamllint disable-line rule:truthy
-  workflow_dispatch:
-  schedule:
-    - cron: "0 12 * * *"
+on:
+  pull_request:
+    branches: ["main"]
+    paths: ["kubernetes/**.yaml"]
 
 jobs:
-  flux-upgrade:
-    runs-on: ubuntu-22.04
+  flux-diff:
+    name: Flux Diff
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    strategy:
+      matrix:
+        path: ["kubernetes"]
+        resource: ["helmrelease", "kustomization"]
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+      - name: Generate Token
+        uses: tibdex/github-app-token@3beb63f4bd073e61482598c45c71c1019b59b73a # v2.1.0
+        id: generate-token
         with:
-          fetch-depth: 1
+          app_id: "${{ secrets.BOT_APP_ID }}"
+          private_key: "${{ secrets.BOT_APP_PRIVATE_KEY }}"
 
-      - name: Setup Flux CLI
-        uses: fluxcd/flux2/action@main
-
-      - name: Upgrade Flux
-        id: upgrade
-        run: |
-          CLI_VERSION="$(flux -v)"
-          VERSION="v${CLI_VERSION#*flux version }"
-          flux install --version="${VERSION}" \
-            --network-policy=false \
-            --export > ./cluster/base/flux-system/gotk-components.yaml
-          echo "::set-output name=flux_version::$VERSION"
-
-      - name: Create pull request for Flux upgrade
-        uses: peter-evans/create-pull-request@153407881ec5c347639a548ade7d8ad1d6740e38 # v5
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: "flux/upgrade-${{ steps.upgrade.outputs.flux_version }}"
-          delete-branch: true
-          title: "chore(deps): upgrade flux components to ${{ steps.upgrade.outputs.flux_version }}"
-          signoff: false
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          commit-message: "chore(deps): upgrade flux components to ${{ steps.upgrade.outputs.flux_version }}"
-          body: |
-            Release notes: https://github.com/fluxcd/flux2/releases/tag/${{ steps.upgrade.outputs.flux_version }}
-          labels: flux/upgrade
+          registry: ghcr.io
+          username: "${{ secrets.BOT_APP_ID }}"
+          password: "${{ steps.generate-token.outputs.token }}"
+
+      - name: Diff Resources
+        uses: allenporter/flux-local/action/diff@efbe055c6dc2a63d1102db582632d2aa03696664 # 3.1.1
+        id: diff
+        with:
+          sources: home-kubernetes
+          path: "${{ matrix.path }}"
+          resource: "${{ matrix.resource }}"
+
+      - if: ${{ steps.diff.outputs.diff != '' }}
+        name: Add comment
+        uses: mshick/add-pr-comment@7c0890544fb33b0bdd2e59467fbacb62e028a096 # v2.8.1
+        with:
+          repo-token: "${{ steps.generate-token.outputs.token }}"
+          message-id: "${{ github.event.pull_request.number }}/${{ matrix.path }}/${{ matrix.resource }}"
+          message-failure: Diff was not successful
+          message: |
+            ```diff
+            ${{ steps.diff.outputs.diff }}
+            ```
