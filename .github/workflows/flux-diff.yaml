@@ -14,7 +14,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        path: ["kubernetes"]
+        path: ["kubernetes/main", "kubernetes/storage"]
         resource: ["helmrelease", "kustomization"]
     steps:
       - name: Generate Token
@@ -32,7 +32,7 @@ jobs:
         uses: allenporter/flux-local/action/diff@flux-build
         id: diff
         with:
-          sources: home-kubernetes
+          sources: home-ops-kubernetes
           path: "${{ matrix.path }}"
           resource: "${{ matrix.resource }}"
 
