@@ -33,7 +33,7 @@ spec:
 
     image:
       repository: ghcr.io/autobrr/autobrr
-      tag: v1.33.0
+      tag: v1.34.0
 
     service:
       main:
