@@ -44,7 +44,7 @@ spec:
     ingress:
       main:
         enabled: true
-        ingressClassName: internal
+        ingressClassName: external
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Overseerr"
@@ -53,6 +53,7 @@ spec:
           gethomepage.dev/widget.type: overseerr
           gethomepage.dev/widget.url: "http://overseerr.media.svc.cluster.local:80"
           # gethomepage.dev/widget.key: "${RADARR__API_KEY}"
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
