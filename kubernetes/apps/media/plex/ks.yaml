@@ -12,7 +12,7 @@ spec:
     labels:
       app.kubernetes.io/name: *appname
   interval: 10m
-  path: "./kubernetes/main/apps/media/plex/app"
+  path: "./kubernetes/apps/media/plex/app"
   prune: true
   sourceRef:
     kind: GitRepository
@@ -34,7 +34,7 @@ spec:
     labels:
       app.kubernetes.io/name: *appname
   interval: 10m
-  path: "./kubernetes/main/apps/media/plex/plex-auto-languages"
+  path: "./kubernetes/apps/media/plex/plex-auto-languages"
   prune: true
   sourceRef:
     kind: GitRepository
