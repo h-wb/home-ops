@@ -40,7 +40,7 @@ spec:
               PLEX_TOKEN:
                 valueFrom:
                   secretKeyRef:
-                    name: plex-auto-languages-secret
+                    name: plex-auto-languages
                     key: PLEX_TOKEN
             probes:
               liveness:
