@@ -8,7 +8,7 @@ metadata:
     substitution.flux.home.arpa/enabled: "true"
 spec:
   dependsOn:
-    - name: cluster-apps-external-secrets-stores
+    - name: external-secrets-stores
   interval: 10m
   path: "./kubernetes/apps/media/radarr/app"
   prune: true
