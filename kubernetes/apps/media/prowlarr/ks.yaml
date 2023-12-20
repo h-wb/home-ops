@@ -13,6 +13,7 @@ spec:
   dependsOn:
     # - name: cloudnative-pg-cluster
     - name: external-secrets-stores
+    - name: longhorn
   path: ./kubernetes/apps/media/prowlarr/app
   prune: true
   sourceRef:

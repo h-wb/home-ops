@@ -1,4 +1,5 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
@@ -9,7 +10,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.4.0
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -17,48 +18,46 @@ spec:
         namespace: flux-system
 
   values:
-    image:
-      repository: ghcr.io/onedr0p/radarr-develop
-      tag: 5.2.3.8303@sha256:bdc6980e8320b1cedf30852202d2ced17d8ddc43da2206472dafda57219d1f14
+    controllers:
+      main:
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+            supplementalGroups:
+              - 100
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/radarr-develop
+              tag: 5.2.3.8303@sha256:bdc6980e8320b1cedf30852202d2ced17d8ddc43da2206472dafda57219d1f14
+            env:
+              RADARR__INSTANCE_NAME: Radarr
+              RADARR__PORT: &port 7878
+              RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET__DOMAIN}"
+              RADARR__LOG_LEVEL: info
+            envFrom:
+              - secretRef:
+                  name: *app
+            resources:
+              requests:
+                memory: 250Mi
+                cpu: 10m
+              limits:
+                memory: 2000Mi
 
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: "OnRootMismatch"
-      supplementalGroups:
-        - 100
-
-    env:
-      RADARR__INSTANCE_NAME: Radarr
-      RADARR__PORT: &port 7878
-      RADARR__APPLICATION_URL: "https://{{ .Release.Name }}.${SECRET__DOMAIN}"
-      RADARR__LOG_LEVEL: info
-    envFrom:
-      - secretRef:
-          name: *app
-
-    persistence:
-      config:
-        enabled: true
-        existingClaim: radarr-config-v1
-      media:
-        enabled: true
-        type: nfs
-        server: "${NFS_ADDR}"
-        path: /mnt/tank/fwe
-        mountPath: /media
-      media2:
-        enabled: true
-        type: nfs
-        server: "${NFS_ADDR}"
-        path: /mnt/tank/hwe
-        mountPath: /media2
+    service:
+      main:
+        ports:
+          http:
+            port: *port
 
     ingress:
       main:
+        className: internal
         enabled: true
-        ingressClassName: internal
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Radarr"
@@ -71,20 +70,28 @@ spec:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
 
-    service:
-      main:
-        ports:
-          http:
-            port: *port
-
-    resources:
-      requests:
-        memory: 250Mi
-        cpu: 10m
-      limits:
-        memory: 2000Mi
+    persistence:
+      config:
+        enabled: true
+        existingClaim: radarr-config-v1
+      media:
+        enabled: true
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/fwe
+        globalMounts:
+          - path: /media
+      media2:
+        enabled: true
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe
+        globalMounts:
+          - path: /media2
