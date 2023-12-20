@@ -14,9 +14,7 @@ spec:
         kind: HelmRepository
         name: external-secrets
         namespace: flux-system
-  maxHistory: 2
   install:
-    createNamespace: true
     remediation:
       retries: 3
   upgrade:
@@ -27,6 +25,7 @@ spec:
     keepHistory: false
   values:
     installCRDs: true
+    replicaCount: 2
     serviceMonitor:
       enabled: true
       interval: 1m
