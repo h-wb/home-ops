@@ -1,81 +1,63 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: plex
-  namespace: media
 spec:
   interval: 5m
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.4.0
       interval: 30m
       sourceRef:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
-
-  dependsOn:
-    - name: intel-device-plugin-gpu
-      namespace: kube-system
-    - name: longhorn
-      namespace: storage
-
   values:
-    image:
-      repository: ghcr.io/onedr0p/plex
-      tag: 1.32.8.7639-fb6452ebf@sha256:637fe10cef736f249d96cb004c12f81646c81ca17ddce22374ea8782aa6646c2
-
-    env:
-      ADVERTISE_IP: "https://plex.${SECRET_DOMAIN}:443/,http://${PLEX_ADDR}:32400/"
-      #PLEX_CLAIM: set in secret:
-      # # NOTE: Plex preference options are camelCase and CASE SENSITIVE!
-      # # You can do horrible things to your Plex configuration if you are not careful
-      # # See a full list at https://support.plex.tv/articles/201105343-advanced-hidden-server-settings/
-      # PLEX_PREFERENCE_1: "FriendlyName=plex-kubernetes"
-      # PLEX_PREFERENCE_2: "EnableIPv6=0"
-      # PLEX_PREFERENCE_3: "logDebug=0"
-      # PLEX_PREFERENCE_4: "DisableTLSv1_0=1"
-      # PLEX_PREFERENCE_5: "LanNetworksBandwidth=xxx.xxx.xxx.0/18\,xxx.xxx.xxx.0/24\,xxx.xxx.xxx.0/24"
-      # PLEX_PREFERENCE_6: "TranscoderQuality=2"
-      # PLEX_PREFERENCE_7: "TreatWanIpAsLocal=0"
-      # PLEX_PREFERENCE_8: "TranscoderH264BackgroundPreset=fast"
-
-    # -- Enable devices to be discoverable
-    hostNetwork: true
-
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: "OnRootMismatch"
-      supplementalGroups: [44, 105, 10000]
-
-    persistence:
-      config:
-        enabled: true
-        existingClaim: plex-config-v1
-      media:
-        enabled: true
-        type: nfs
-        server: "${NFS_ADDR}"
-        path: /mnt/tank/hwe
-        mountPath: /media/hugo
-        readOnly: true
-      media2:
-        enabled: true
-        type: nfs
-        server: "${NFS_ADDR}"
-        path: /mnt/tank/fwe
-        mountPath: /media/papa
-        readOnly: true
-      transcode:
-        enabled: true
-        type: emptyDir
-
-    nodeSelector:
-      intel.feature.node.kubernetes.io/gpu: "true"
+    controllers:
+      main:
+        hostNetwork: true
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+            supplementalGroups: [44, 105, 10000]
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/plex
+              tag: 1.32.8.7639-fb6452ebf@sha256:637fe10cef736f249d96cb004c12f81646c81ca17ddce22374ea8782aa6646c2
+            env:
+              ADVERTISE_IP: "https://plex.${SECRET_DOMAIN}:443/,http://${PLEX_ADDR}:32400/"
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /identity
+                    port: 32400
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: false
+            resources:
+              requests:
+                gpu.intel.com/i915: 1 
+                memory: 2000Mi
+                cpu: 100m
+              limits:
+                gpu.intel.com/i915: 1
+                memory: 10000Mi
+        nodeSelector:
+          intel.feature.node.kubernetes.io/gpu: "true"
 
     service:
       main:
@@ -90,8 +72,8 @@ spec:
 
     ingress:
       main:
+        className: internal
         enabled: true
-        ingressClassName: internal
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Media
@@ -100,16 +82,33 @@ spec:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
 
-    resources:
-      requests:
-        gpu.intel.com/i915: 1 
-        memory: 2000Mi
-        cpu: 100m
-      limits:
-        gpu.intel.com/i915: 1
-        memory: 10000Mi
+    persistence:
+      config:
+        enabled: true
+        existingClaim: plex-config-v1
+      media:
+        enabled: true
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/hwe
+        globalMounts:
+          - path: /media/hugo
+            readOnly: true
+      media2:
+        enabled: true
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/fwe
+        globalMounts:
+          - path: /media/papa
+            readOnly: true
+      transcode:
+        enabled: true
+        type: emptyDir
