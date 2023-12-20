@@ -2,8 +2,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: plex-media-manager
-  namespace: media
+  name: plex-meta-manager
 spec:
   schedule: "0 0 * * *"
   jobTemplate:
@@ -30,7 +29,7 @@ spec:
           #       - name: config
           #         mountPath: /config
           containers:
-            - name: plex-media-manager
+            - name: plex-meta-manager
               image: meisnate12/plex-meta-manager:nightly
               imagePullPolicy: IfNotPresent
               args: ["--run", "--read-only-config"]
@@ -59,10 +58,10 @@ spec:
           volumes:
             - name: config
               persistentVolumeClaim:
-                claimName: plex-media-manager-config-v1
+                claimName: plex-meta-manager-config-v1
             - name: pmm-config
               secret:
-                secretName: plex-media-manager
+                secretName: plex-meta-manager
             - configMap:
                 name: movie-config
               name: movie-config

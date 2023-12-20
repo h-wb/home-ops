@@ -22,4 +22,4 @@ resources:
   - ./autobrr/ks.yaml
 
 
-  # - ./plex-media-manager/ks.yaml
+  # - ./plex-meta-manager/ks.yaml
