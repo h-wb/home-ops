@@ -7,5 +7,3 @@ resources:
   - ./helmrelease.yaml
   - ./external-secret.yaml
   - ./pvc.yaml
-patchesStrategicMerge:
-  - ./patches/subcleaner.yaml
