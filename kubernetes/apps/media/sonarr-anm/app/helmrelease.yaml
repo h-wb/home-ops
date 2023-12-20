@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: sonarr-anm
+  name: &app sonarr-anm
 spec:
   interval: 30m
   chart:
