@@ -1,16 +1,15 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.devbu.io/helmrelease_v2beta1.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
   name: prowlarr
-  namespace: media
 spec:
   interval: 5m
   chart:
     spec:
       chart: app-template
-      version: 1.5.1
+      version: 2.4.0
       interval: 30m
       sourceRef:
         kind: HelmRepository
@@ -18,7 +17,6 @@ spec:
         namespace: flux-system
 
   install:
-    createNamespace: true
     remediation:
       retries: 3
   upgrade:
@@ -29,15 +27,30 @@ spec:
     keepHistory: false
 
   values:
-    image:
-      repository: ghcr.io/onedr0p/prowlarr-develop
-      tag: 1.11.2.4160@sha256:12c58192e978bf04695cab64abd071ba323b9967b25abf51f79ab0e57f782cb6
-
-    env:
-      PROWLARR__INSTANCE_NAME: Prowlarr
-      PROWLARR__PORT: &port 9696
-      PROWLARR__LOG_LEVEL: info
-      PROWLARR__AUTHENTICATION_METHOD: External
+    controllers:
+      main:
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 568
+            fsGroup: 568
+            fsGroupChangePolicy: OnRootMismatch
+        containers:
+          main:
+            image:
+              repository: ghcr.io/onedr0p/prowlarr-develop
+              tag: 1.11.2.4160@sha256:12c58192e978bf04695cab64abd071ba323b9967b25abf51f79ab0e57f782cb6
+            env:
+              PROWLARR__INSTANCE_NAME: Prowlarr
+              PROWLARR__PORT: &port 9696
+              PROWLARR__LOG_LEVEL: info
+              PROWLARR__AUTHENTICATION_METHOD: External
+            resources:
+              requests:
+                cpu: 10m
+                memory: 100Mi
+              limits:
+                memory: 500Mi
 
     service:
       main:
@@ -45,21 +58,10 @@ spec:
           http:
             port: *port
 
-    podSecurityContext:
-      runAsUser: 568
-      runAsGroup: 568
-      fsGroup: 568
-      fsGroupChangePolicy: OnRootMismatch
-
-    persistence:
-      config:
-        enabled: true
-        existingClaim: prowlarr-config-v1
-
     ingress:
       main:
+        className: internal
         enabled: true
-        ingressClassName: internal
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: "Prowlarr"
@@ -67,19 +69,18 @@ spec:
           gethomepage.dev/icon: prowlarr.png
           gethomepage.dev/widget.type: prowlarr
           gethomepage.dev/widget.url: "http://prowlarr.media.svc.cluster.local:9696"
-          # gethomepage.dev/widget.key: "${RADARR__API_KEY}"
         hosts:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
 
-    resources:
-      requests:
-        cpu: 10m
-        memory: 100Mi
-      limits:
-        memory: 500Mi
+    persistence:
+      config:
+        enabled: true
+        existingClaim: prowlarr-config-v1
