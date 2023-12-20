@@ -6,7 +6,7 @@ metadata:
   name: &app local-path-provisioner
   namespace: flux-system
 spec:
-  targetNamespace: storage
+  targetNamespace: kube-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
