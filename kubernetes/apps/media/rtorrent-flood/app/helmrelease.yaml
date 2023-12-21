@@ -1,16 +1,15 @@
 ---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: &app rtorrent-flood
-  namespace: media
+  name: rtorrent-flood
 spec:
   interval: 5m
   chart:
     spec:
-      # renovate: registryUrl=https://k8s-at-home.com/charts/
       chart: app-template
-      version: 1.5.1
+      version: 2.4.0
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -26,50 +25,34 @@ spec:
       remediateLastFailure: true
     cleanupOnFail: true
   values:
-    env:
-      FLOOD_OPTION_auth: "none"
-      FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media,/download"
-      FLOOD_OPTION_rtsocket: "/sock/rtorrent.sock"
-      FLOOD_OPTION_rtconfig: "/rc/rtorrent.rc"
-      FLOOD_OPTION_port: &port 3000
-      TZ: UTC
-    image:
-      repository: ghcr.io/onedr0p/flood
-      tag: 4.7.0@sha256:2cb7bc81ea185f3043a4ff8c2409a49011220dd51fc147271dcac5d3099a02dd
-    persistence:
-      config:
-        enabled: true
-        existingClaim: rtorrent-config-v1
-      rtorrent-rc:
-        enabled: true
-        type: configMap
-        name: rtorrent-flood-configmap
-        subPath: rtorrent.rc
-        mountPath: /rc/rtorrent.rc
-      rtorrent-sock:
-        enabled: true
-        type: emptyDir
-        medium: Memory
-        mountPath: /sock
-      download:
-        enabled: true
-        type: emptyDir
-      media:
-        enabled: true
-        mountPath: /media
-        type: nfs
-        path: /mnt/tank/fwe
-        server: ${NFS_ADDR}
-    podSecurityContext:
-      fsGroup: 568
-      runAsGroup: 568
-      runAsUser: 568
-      fsGroupChangePolicy: "OnRootMismatch"
-      supplementalGroups:
-        - 100
-    podAnnotations:
-      setGateway: "true"
-
+    controllers:
+      main:
+        pod:
+          securityContext:
+            fsGroup: 568
+            runAsGroup: 568
+            runAsUser: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+            supplementalGroups:
+              - 100
+        containers:
+          main:
+            image:
+              repository: jesec/flood
+              tag: master@sha256:9a924ee932b8edb6bcc293a696097cc17bd632e5305bb4e7fcd45294785c88ca
+            env:
+              FLOOD_OPTION_auth: "none"
+              FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media,/download"
+              FLOOD_OPTION_rtsocket: "/sock/rtorrent.sock"
+              FLOOD_OPTION_rtconfig: "/rc/rtorrent.rc"
+              FLOOD_OPTION_port: &port 3000
+              TZ: UTC
+            resources:
+              requests:
+                cpu: 10m
+                memory: 100Mi
+              limits:
+                memory: 1200Mi
     service:
       main:
         ports:
@@ -77,8 +60,8 @@ spec:
             port: *port
     ingress:
       main:
+        className: internal
         enabled: true
-        ingressClassName: internal
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Flood
@@ -90,13 +73,41 @@ spec:
           - host: &host "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
-                pathType: Prefix
+                service:
+                  name: main
+                  port: http
         tls:
           - hosts:
               - *host
-    resources:
-      requests:
-        cpu: 10m
-        memory: 100Mi
-      limits:
-        memory: 1200Mi
+    persistence:
+      config:
+        enabled: true
+        existingClaim: rtorrent-config-v1
+        globalMounts:
+          - path: /config
+      rtorrent-rc:
+        enabled: true
+        type: configMap
+        name: rtorrent-flood-configmap
+        subPath: rtorrent.rc
+        globalMounts:
+          - path: /rc/rtorrent.rc
+      rtorrent-sock:
+        enabled: true
+        type: emptyDir
+        medium: Memory
+        globalMounts:
+          - path: /sock
+      download:
+        enabled: true
+        type: emptyDir
+        globalMounts:
+          - path: /download
+      media:
+        enabled: true
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/fwe
+        globalMounts:
+          - path: /media
+
