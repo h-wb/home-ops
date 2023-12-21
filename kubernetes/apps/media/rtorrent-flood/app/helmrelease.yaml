@@ -54,8 +54,9 @@ spec:
               limits:
                 memory: 1200Mi
           rtorrent:
-            name: rtorrent
-            image: ghcr.io/onedr0p/rtorrent:0.9.8-r16@sha256:ea4689bc9bd9e5cf18e122fca121c94e6065bcd7b185650a0f1b9ce4c8018390
+            image:
+              repository: ghcr.io/onedr0p/rtorrent
+              tag: 0.9.8-r16@sha256:ea4689bc9bd9e5cf18e122fca121c94e6065bcd7b185650a0f1b9ce4c8018390
             env:
               - name: RTORRENT__DEFAULT_CONFIG
                 value: "false"
