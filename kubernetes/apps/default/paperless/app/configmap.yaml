@@ -13,9 +13,9 @@ data:
 
   # Configure folders
   PAPERLESS_CONSUMPTION_DIR: /data/nas/consume
-  PAPERLESS_DATA_DIR: /data/local/data
+  PAPERLESS_DATA_DIR: /data/nas/data
   PAPERLESS_EXPORT_DIR: /data/nas/export
-  PAPERLESS_MEDIA_ROOT: /data/local/media
+  PAPERLESS_MEDIA_ROOT: /data/nas/media
 
   # Configure folder importer
   PAPERLESS_CONSUMER_POLLING: "60"
