@@ -13,7 +13,7 @@ spec:
   dependsOn:
     - name: longhorn
     - name: external-secrets-stores
-  path: ./kubernetes/apps/media/sonarr/app
+  path: ./kubernetes/apps/media/sonarr-anm/app
   prune: true
   sourceRef:
     kind: GitRepository
