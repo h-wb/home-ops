@@ -79,6 +79,10 @@ spec:
       config:
         enabled: true
         existingClaim: sonarr-tv-config-v1
+      media:
+        type: nfs
+        server: "${NFS_ADDR}"
+        path: /mnt/tank/fwe
         globalMounts:
           - path: /media
       shared:
