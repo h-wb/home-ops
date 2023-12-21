@@ -66,18 +66,6 @@ spec:
                 value: "/sock/rtorrent.sock"
               - name: RTORRENT__BT_PORT
                 value: "50415"
-            volumeMounts:
-              - name: config
-                mountPath: /config
-              - name: rtorrent-rc
-                mountPath: /rc/rtorrent.rc
-                subPath: rtorrent.rc
-              - name: rtorrent-sock
-                mountPath: /sock
-              - name: media
-                mountPath: /media
-              - name: download
-                mountPath: /download
     service:
       main:
         ports:
@@ -114,9 +102,9 @@ spec:
         enabled: true
         type: configMap
         name: rtorrent-flood-configmap
-        subPath: rtorrent.rc
         globalMounts:
           - path: /rc/rtorrent.rc
+            subPath: rtorrent.rc
       rtorrent-sock:
         enabled: true
         type: emptyDir
