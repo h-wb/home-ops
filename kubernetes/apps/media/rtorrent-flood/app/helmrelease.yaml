@@ -38,8 +38,8 @@ spec:
         containers:
           main:
             image:
-              repository: jesec/flood
-              tag: master@sha256:9a924ee932b8edb6bcc293a696097cc17bd632e5305bb4e7fcd45294785c88ca
+              repository: ghcr.io/onedr0p/flood
+              tag: 4.7.0@sha256:2cb7bc81ea185f3043a4ff8c2409a49011220dd51fc147271dcac5d3099a02dd
             env:
               FLOOD_OPTION_auth: "none"
               FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media,/download"
@@ -56,7 +56,7 @@ spec:
           rtorrent:
             image:
               repository: ghcr.io/onedr0p/rtorrent
-              tag: 0.9.8-r16@sha256:ea4689bc9bd9e5cf18e122fca121c94e6065bcd7b185650a0f1b9ce4c8018390
+              tag: 0.9.8-r16@sha256:ea4689bc9bd9e5cf18e122fca121c94e6065bcd7b185650a0f1b9ce4c8018390git 
             env:
               - name: RTORRENT__DEFAULT_CONFIG
                 value: "false"
