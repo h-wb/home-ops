@@ -62,7 +62,7 @@ spec:
     persistence:
       config:
         enabled: true
-        type: custom
+        type: configMap
         volumeSpec:
           configMap:
             name: homepage-config
