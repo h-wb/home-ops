@@ -1,61 +1,30 @@
 ---
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+# TODO: Clean up `--context` usage
+# https://github.com/go-task/task/issues/1038
+
 vars:
-  PYTHON_BIN: python3
-  BOOTSTRAP_DIR: "{{.ROOT_DIR}}/bootstrap"
   ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
 
 env:
-  KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+  KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/kubeconfig"
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
-  PATH: "{{.ROOT_DIR}}/.venv/bin:$PATH"
-  VIRTUAL_ENV: "{{.ROOT_DIR}}/.venv"
-  ANSIBLE_COLLECTIONS_PATH: "{{.ROOT_DIR}}/.venv/galaxy"
-  ANSIBLE_ROLES_PATH: "{{.ROOT_DIR}}/.venv/galaxy/ansible_roles"
-  ANSIBLE_VARS_ENABLED: "host_group_vars,community.sops.sops"
-  K8S_AUTH_KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+  cluster: "default"
 
 includes:
-  ansible: .taskfiles/AnsibleTasks.yaml
-  brew: .taskfiles/BrewTasks.yaml
-  cluster: .taskfiles/ClusterTasks.yaml
-  flux: .taskfiles/FluxTasks.yaml
+  ansible: .taskfiles/Ansible/Taskfile.yaml
+  brew: .taskfiles/Brew/Taskfile.yaml
+  external-secrets: .taskfiles/ExternalSecrets/Taskfile.yaml
+  flux: .taskfiles/Flux/Taskfile.yaml
+  kubernetes: .taskfiles/Kubernetes/Taskfile.yaml
+  sops: .taskfiles/Sops/Taskfile.yaml
+  # volsync: .taskfiles/VolSync/Taskfile.yaml
 
 tasks:
 
-  default: task -l
-
-  deps:
-    desc: Create a Python virtual env and install required packages
-    cmds:
-      - "{{.PYTHON_BIN}} -m venv {{.ROOT_DIR}}/.venv"
-      - .venv/bin/python3 -m pip install --upgrade pip setuptools wheel
-      - .venv/bin/python3 -m pip install --upgrade --requirement "{{.ROOT_DIR}}/requirements.txt"
-      - .venv/bin/ansible-galaxy install --role-file "{{.ROOT_DIR}}/requirements.yaml" --force
-
-  init:
-    desc: Initialize configuration files
-    dir: "{{.BOOTSTRAP_DIR}}"
-    cmds:
-      - cp -n vars/addons.sample.yaml vars/addons.yaml
-      - cp -n vars/config.sample.yaml vars/config.yaml
-      - cmd: echo "=== Configuration files copied ==="
-        silent: true
-      - cmd: echo "Proceed with updating the configuration files..."
-        silent: true
-      - cmd: echo "{{.BOOTSTRAP_DIR}}/vars/config.yaml"
-        silent: true
-      - cmd: echo "{{.BOOTSTRAP_DIR}}/vars/addons.yaml"
-        silent: true
-    status:
-      - test -f "{{.BOOTSTRAP_DIR}}/vars/addons.yaml"
-      - test -f "{{.BOOTSTRAP_DIR}}/vars/config.yaml"
-
-  configure:
-    desc: Configure repository from Ansible vars
-    dir: "{{.BOOTSTRAP_DIR}}"
-    cmd: ansible-playbook configure.yaml
-    env:
-      ANSIBLE_DISPLAY_SKIPPED_HOSTS: "false"
+  default:
+    silent: true
+    cmd: task -l
