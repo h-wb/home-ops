@@ -1,0 +1,114 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  labels:
+    app.kubernetes.io/name: homepage
+data:
+  bookmarks.yaml: |
+    - Cloud-Access:
+          - OVH:
+                - icon: ovh.png
+                  href: https://www.ovh.com/
+    - Developer:
+          - Github:
+                - icon: github.png
+                  href: https://github.com/
+          - k8s-at-home:
+                - href: "https://nanne.dev/k8s-at-home-search/"
+    - Social:
+          - Reddit:
+                - icon: reddit.png
+                  href: https://reddit.com/
+    - Entertainment:
+          - YouTube:
+                - icon: youtube.png
+                  href: https://youtube.com/
+  docker.yaml: ""
+  kubernetes.yaml: |
+    mode: cluster
+  services.yaml: |
+    - Infrastructure:
+        - Router:
+            href: http://192.168.1.1
+            icon: router.png
+            description: WAN Connection
+        - Supermicro:
+            href: http://192.168.1.160
+            icon: supermicro.png
+            description: IPMI
+        - Truenas:
+            href: http://192.168.1.161
+            icon: truenas-scale.png
+            description: NAS
+        - PiKVM:
+            href: https://192.168.1.48/
+            icon: pikvm.png
+            description: PiKVM
+  settings.yaml: |
+    title: Dashboard
+    theme: dark
+    color: slate
+    headerStyle: clean
+    layout:
+      Media:
+        style: row
+        columns: 4
+        icon: mdi-play-circle
+      Infrastructure:
+        style: row
+        columns: 4
+        icon: mdi-harddisk
+      Home:
+        style: row
+        columns: 4
+        icon: mdi-home-analytics
+      Monitoring:
+        style: row
+        columns: 4
+        icon: mdi-chart-line
+      Downloads:
+        style: row
+        columns: 4
+        icon: mdi-download-circle
+      Services & Apps:
+        style: row
+        columns: 4
+      Cloud:
+        style: row
+        columns: 4
+    providers:
+      longhorn:
+        url: http://longhorn.storage
+  widgets.yaml: |
+    - search:
+        provider: [google, duckduckgo]
+        focus: false
+        target: _blank
+    - greeting:
+        text_size: xl
+        text: "Greetings Citizen!"
+    - kubernetes:
+        cluster:
+          cpu: true
+          label: cluster
+          memory: true
+          show: true
+          showLabel: true
+        nodes:
+          cpu: true
+          memory: true
+          show: false
+          showLabel: true
+    - longhorn:
+        expanded: false
+        total: true
+        labels: true
+        nodes: false
+    - datetime:
+        text_size: l
+        format:
+          dateStyle: long
+          timeStyle: short
+          hourCycle: h23
