@@ -67,17 +67,17 @@ spec:
           configMap:
             name: homepage-config
         globalMounts:
-          - path: bookmarks.yaml
-            mountPath: /app/config/bookmarks.yaml
-          - path: docker.yaml
-            mountPath: /app/config/docker.yaml
-          - path: kubernetes.yaml
-            mountPath: /app/config/kubernetes.yaml
-          - path: services.yaml
-            mountPath: /app/config/services.yaml
-          - path: settings.yaml
-            mountPath: /app/config/settings.yaml
-          - path: widgets.yaml
-            mountPath: /app/config/widgets.yaml
+          - subPath: bookmarks.yaml
+            path: /app/config/bookmarks.yaml
+          - subPath: docker.yaml
+            path: /app/config/docker.yaml
+          - subPath: kubernetes.yaml
+            path: /app/config/kubernetes.yaml
+          - subPath: services.yaml
+            path: /app/config/services.yaml
+          - subPath: settings.yaml
+            path: /app/config/settings.yaml
+          - subPath: widgets.yaml
+            path: /app/config/widgets.yaml
     serviceAccount:
       create: true
