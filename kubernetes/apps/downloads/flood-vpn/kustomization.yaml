@@ -4,7 +4,6 @@ kind: Kustomization
 resources:
   - config-pvc.yaml
   - helm-release.yaml
-namespace: downloads
 patchesStrategicMerge:
   - patches/rtorrent.yaml
 configMapGenerator:

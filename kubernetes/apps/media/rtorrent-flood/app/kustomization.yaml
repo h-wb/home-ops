@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - ./pvc.yaml
   - ./helmrelease.yaml
-namespace: media
 configMapGenerator:
   - name: rtorrent-flood-configmap
     files:
