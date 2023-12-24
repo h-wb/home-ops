@@ -22,4 +22,3 @@ data:
 kind: ConfigMap
 metadata:
   name: movie-config
-  namespace: media

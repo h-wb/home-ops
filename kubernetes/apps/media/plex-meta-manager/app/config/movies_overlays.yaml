@@ -35,4 +35,3 @@ data:
 kind: ConfigMap
 metadata:
   name: movie-overlay-config
-  namespace: media
