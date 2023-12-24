@@ -31,7 +31,7 @@ resources:
   - ./nextcloud.yaml
   - ./bjw-s.yaml
   - ./cloudnative-pg.yaml
-  - ./weave-gitops.yaml
+  - ./weaveworks.yaml
   - ./jameswynn.yaml
   - ./cilium.yaml
   - ./coredns.yaml
