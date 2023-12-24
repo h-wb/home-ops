@@ -82,13 +82,13 @@ spec:
         existingClaim: sonarr-config-v1
       media:
         type: nfs
-        server: "${NFS_ADDR}"
+        server: ${NFS_ADDR:=temp}
         path: /mnt/tank/fwe
         globalMounts:
           - path: /media
       shared:
         type: nfs
-        server: "${NFS_ADDR}"
+        server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe
         globalMounts:
           - path: /shared

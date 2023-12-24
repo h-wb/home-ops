@@ -58,7 +58,7 @@ spec:
         volumeSpec:
           nfs:
             path: /mnt/tank/fwe
-            server: ${NFS_ADDR}
+            server: ${NFS_ADDR:=temp}
     podSecurityContext:
       fsGroup: 568
       runAsGroup: 568

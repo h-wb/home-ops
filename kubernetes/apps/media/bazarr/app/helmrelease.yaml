@@ -111,14 +111,14 @@ spec:
       media:
         enabled: true
         type: nfs
-        server: "${NFS_ADDR}"
+        server: ${NFS_ADDR:=temp}
         path: /mnt/tank/fwe
         globalMounts:
           - path: /media
       media2:
         enabled: true
         type: nfs
-        server: "${NFS_ADDR}"
+        server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe
         globalMounts:
           - path: /media2

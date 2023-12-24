@@ -98,7 +98,7 @@ spec:
       nas:
         enabled: true
         type: nfs
-        server: "${NFS_ADDR}"
+        server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe/Documents/Paperless
         advancedMounts:
           main:
