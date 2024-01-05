@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: recyclarr
+  name: &app recyclarr
 spec:
   interval: 30m
   chart:
@@ -14,6 +14,7 @@ spec:
         kind: HelmRepository
         name: bjw-s
         namespace: flux-system
+  maxHistory: 2
   install:
     remediation:
       retries: 3
@@ -26,31 +27,18 @@ spec:
   values:
     controllers:
       main:
-        type: cronjob
         annotations:
           reloader.stakater.com/auto: "true"
-        cronjob:
-          schedule: "@daily"
         containers:
           main:
             image:
               repository: ghcr.io/recyclarr/recyclarr
-              tag: 6.0.2@sha256:02add40feae0569401b5020528e06419b47046723d0bb4bef1e82325e9eefdad
+              tag: 6.0.2
             env:
-              # https://github.com/Radarr/Radarr/issues/7030#issuecomment-1039689518
-              # https://github.com/dotnet/runtime/issues/9336
-              COMPlus_EnableDiagnostics: "0"
-              TZ: America/New_York
+              TZ: ${TIMEZONE}
             envFrom:
               - secretRef:
-                  name: radarr
-              - secretRef:
-                  name: sonarr-tv
-            args: ["sync"]
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+                  name: recyclarr-secret
             resources:
               requests:
                 cpu: 10m
@@ -61,7 +49,6 @@ spec:
           securityContext:
             runAsUser: 568
             runAsGroup: 568
-            runAsNonRoot: true
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
     service:
@@ -70,7 +57,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: recyclarr
+        existingClaim: *app
       config-file:
         type: configMap
         name: recyclarr-configmap
