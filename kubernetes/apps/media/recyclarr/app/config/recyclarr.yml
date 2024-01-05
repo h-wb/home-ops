@@ -193,12 +193,31 @@ sonarr:
       type: anime
 
     quality_profiles:
-      - name: HD
+      - name: HD - Remux
         reset_unmatched_scores:
           enabled: true
         upgrade:
           allowed: true
           until_quality: Bluray-1080p
+          until_score: 10000
+        min_format_score: 100
+        quality_sort: top
+        qualities:
+          - name: Bluray-1080p
+            qualities:
+              - Bluray-1080p Remux
+              - Bluray-1080p
+          - name: WEB 1080p
+            qualities:
+              - WEBDL-1080p
+              - WEBRip-1080p
+              - HDTV-1080p
+      - name: HD 
+        reset_unmatched_scores:
+          enabled: true
+        upgrade:
+          allowed: true
+          until_quality: WEB 1080p
           until_score: 10000
         min_format_score: 100
         quality_sort: top
@@ -266,6 +285,7 @@ sonarr:
           - 1284d18e693de8efe0fe7d6b3e0b9170  # FUNi
           - 44a8ee6403071dd7b8a3a8dd3fe8cb20  # VRV
         quality_profiles:
+          - name: HD - Remux
           - name: HD
           - name: SD
 
@@ -274,6 +294,8 @@ sonarr:
       - trash_ids:
           - 89358767a60cc28783cdc3d0be9388a4  # DSNP
         quality_profiles:
+          - name: HD - Remux
+            score: 5  # required as this differs from the standard scoring
           - name: HD
             score: 5  # required as this differs from the standard scoring
           - name: SD
@@ -282,6 +304,8 @@ sonarr:
       - trash_ids:
           - d34870697c9db575f17700212167be23  # NF
         quality_profiles:
+          - name: HD - Remux
+            score: 3  # required as this differs from the standard scoring
           - name: HD
             score: 3  # required as this differs from the standard scoring
           - name: SD
@@ -290,6 +314,8 @@ sonarr:
       - trash_ids:
           - d660701077794679fd59e8bdf4ce3a29  # AMZN
         quality_profiles:
+          - name: HD - Remux
+            score: 3  # required as this differs from the standard scoring
           - name: HD
             score: 3  # required as this differs from the standard scoring
           - name: SD
@@ -298,6 +324,8 @@ sonarr:
       - trash_ids:
           - d54cd2bf1326287275b56bccedb72ee2  # ADN
         quality_profiles:
+          - name: HD - Remux
+            score: 1  # required as this differs from the standard scoring
           - name: HD
             score: 1  # required as this differs from the standard scoring
           - name: SD
@@ -308,6 +336,8 @@ sonarr:
           - 4c67ff059210182b59cdd41697b8cb08  # Bilibili
           - 570b03b3145a25011bf073274a407259  # HIDIVE
         quality_profiles:
+          - name: HD - Remux
+            score: 0  # required as this differs from the standard scoring
           - name: HD
             score: 0  # required as this differs from the standard scoring
           - name: SD
@@ -318,6 +348,8 @@ sonarr:
           - 15a05bc7c1a36e2b57fd628f8977e2fc  # AV1
           - 07a32f77690263bb9fda1842db7e273f  # VOSTFR
         quality_profiles:
+          - name: HD - Remux
+            score: -10000
           - name: HD
             score: -10000
           - name: SD
@@ -327,6 +359,8 @@ sonarr:
       - trash_ids:
           - 9965a052eb87b0d10313b1cea89eb451  # Remux Tier 01
         quality_profiles:
+          - name: HD - Remux
+            score: 1050  # required as this differs from the standard scoring
           - name: HD
             score: 1050  # required as this differs from the standard scoring
           - name: SD
@@ -334,6 +368,8 @@ sonarr:
       - trash_ids:
           - 8a1d0c3d7497e741736761a1da866a2e  # Remux Tier 02
         quality_profiles:
+          - name: HD - Remux
+            score: 1000  # required as this differs from the standard scoring
           - name: HD
             score: 1000  # required as this differs from the standard scoring
           - name: SD
@@ -343,6 +379,8 @@ sonarr:
       - trash_ids:
           - e6258996055b9fbab7e9cb2f75819294  # WEB Tier 01
         quality_profiles:
+          - name: HD - Remux
+            score: 450  # required as this differs from the standard scoring
           - name: HD
             score: 450  # required as this differs from the standard scoring
           - name: SD
@@ -350,6 +388,8 @@ sonarr:
       - trash_ids:
           - 58790d4e2fdcd9733aa7ae68ba2bb503  # WEB Tier 02
         quality_profiles:
+          - name: HD - Remux
+            score: 400  # required as this differs from the standard scoring
           - name: HD
             score: 400  # required as this differs from the standard scoring
           - name: SD
@@ -357,6 +397,8 @@ sonarr:
       - trash_ids:
           - d84935abd3f8556dcd51d4f27e22d0a6  # WEB Tier 03
         quality_profiles:
+          - name: HD - Remux
+            score: 350  # required as this differs from the standard scoring
           - name: HD
             score: 350  # required as this differs from the standard scoring
           - name: SD
@@ -366,6 +408,8 @@ sonarr:
       - trash_ids:
           - b4a1b3d705159cdca36d71e57ca86871  # Anime Raws
         quality_profiles:
+          - name: HD - Remux
+            score: -10000  # Adjust scoring as desired
           - name: HD
             score: -10000  # Adjust scoring as desired
           - name: SD
@@ -374,6 +418,8 @@ sonarr:
       - trash_ids:
           - 026d5aadd1a6b4e550b134cb6c72b3ca  # Uncensored
         quality_profiles:
+          - name: HD - Remux
+            score: 0  # Adjust scoring as desired
           - name: HD
             score: 0  # Adjust scoring as desired
           - name: SD
@@ -382,6 +428,8 @@ sonarr:
       - trash_ids:
           - b2550eb333d27b75833e25b8c2557b38  # 10bit
         quality_profiles:
+          - name: HD - Remux
+            score: 0  # Adjust scoring as desired
           - name: HD
             score: 0  # Adjust scoring as desired
           - name: SD
@@ -390,6 +438,8 @@ sonarr:
       - trash_ids:
           - 418f50b10f1907201b6cfdf881f467b7  # Anime Dual Audio
         quality_profiles:
+          - name: HD - Remux
+            score: 20  # Adjust scoring as desired
           - name: HD
             score: 20  # Adjust scoring as desired
           - name: SD
@@ -398,6 +448,8 @@ sonarr:
       - trash_ids:
           - 9c14d194486c4014d422adc64092d794  # Dubs Only
         quality_profiles:
+          - name: HD - Remux
+            score: -10000  # Adjust scoring as desired
           - name: HD
             score: -10000  # Adjust scoring as desired
           - name: SD
@@ -462,8 +514,6 @@ radarr:
               - WEBDL-720p
               - WEBRip-720p
               - HDTV-720p
-        reset_unmatched_scores:
-          enabled: true
       - name: HD - Anime
         reset_unmatched_scores:
           enabled: true
