@@ -9,6 +9,14 @@ sonarr:
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
 
+    media_naming:
+      season: default
+      series: jellyfin
+      episodes:
+        rename: true
+        standard: default
+        daily: default
+
     quality_definition:
       type: series
 
@@ -188,6 +196,13 @@ sonarr:
     # Custom Format Configuration
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
+
+    media_naming:
+      season: default
+      series: jellyfin
+      episodes:
+        rename: true
+        anime: default
 
     quality_definition:
       type: anime
@@ -463,6 +478,12 @@ radarr:
     # Custom Format Configuration
     delete_old_custom_formats: true
     replace_existing_custom_formats: true
+
+    media_naming:
+      folder: jellyfin
+      movie:
+        rename: true
+        standard: default
 
     quality_definition:
       type: movie
