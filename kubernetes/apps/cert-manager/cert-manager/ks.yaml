@@ -24,7 +24,7 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app cert-manager-webhook-ovh
+  name: &app cert-manager-issuers
   namespace: flux-system
 spec:
   targetNamespace: cert-manager
@@ -33,8 +33,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: cert-manager
-    - name: external-secrets-stores
-  path: ./kubernetes/apps/cert-manager/cert-manager/webhook-ovh
+  path: ./kubernetes/apps/cert-manager/cert-manager/issuers
   prune: true
   sourceRef:
     kind: GitRepository

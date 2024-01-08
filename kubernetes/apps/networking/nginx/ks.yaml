@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: cert-manager-webhook-ovh
+    - name: cert-manager-issuers
   path: ./kubernetes/apps/networking/nginx/certificates
   prune: true
   sourceRef:
