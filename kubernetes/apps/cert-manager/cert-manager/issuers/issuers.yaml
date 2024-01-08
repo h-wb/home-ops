@@ -13,8 +13,7 @@ spec:
     solvers:
       - dns01:
           cloudflare:
-            email: "${SECRET_CLOUDFLARE_EMAIL}"
-            apiKeySecretRef:
+            apiTokenSecretRef:
               name: cloudflare-secret
               key: CLOUDFLARE_API_TOKEN
         selector:
@@ -35,8 +34,7 @@ spec:
     solvers:
       - dns01:
           cloudflare:
-            email: "${SECRET_CLOUDFLARE_EMAIL}"
-            apiKeySecretRef:
+            apiTokenSecretRef:
               name: cloudflare-secret
               key: CLOUDFLARE_API_TOKEN
         selector:
