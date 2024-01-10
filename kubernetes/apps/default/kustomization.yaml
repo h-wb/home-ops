@@ -9,4 +9,3 @@ resources:
   - ./homepage/ks.yaml
   - ./paperless/ks.yaml
   - ./thelounge/ks.yaml
-  - ./misc-ingress/ks.yaml
