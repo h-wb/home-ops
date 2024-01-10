@@ -38,3 +38,4 @@ resources:
   - ./coredns.yaml
   - ./ingress-nginx.yaml
   - ./intel.yaml
+  - ./shulker.yaml
