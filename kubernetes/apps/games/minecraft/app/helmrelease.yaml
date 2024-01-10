@@ -1,0 +1,109 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ishioni/CRDs-catalog/main/helm.toolkit.fluxcd.io/helmrelease_v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app minecraft
+spec:
+  chart:
+    spec:
+      chart: minecraft
+      version: 4.14.0
+      sourceRef:
+        kind: HelmRepository
+        name: minecraft-server
+        namespace: flux-system
+  interval: 30m
+  values:
+    deploymentAnnotations:
+      secret.reloader.stakater.com/reload: &secret minecraft
+    image:
+      repository: itzg/minecraft-server
+      tag: 2024.1.0-java17
+    resources:
+      limits:
+        memory: 3000Mi
+      requests:
+        cpu: 1000m
+        memory: 2000Mi
+    securityContext:
+      runAsUser: &uid 568
+      fsGroup: *uid
+    livenessProbe:
+      enabled: false
+    readinessProbe:
+      enabled: false
+    startupProbe:
+      enabled: false
+    extraEnv:
+      TZ: "${TIMEZONE}"
+      ENABLE_ROLLING_LOGS: true
+    persistence:
+      dataDir:
+        enabled: true
+        existingClaim: *app
+    serviceAnnotations:
+      io.cilium/lb-ipam-ips: "${CONFIG_MINECRAFT_IP}"
+    minecraftServer:
+      eula: true
+      version: 1.20.2
+      type: PAPER
+      difficulty: normal
+      whitelist: "Sahru"
+      ops: "Sahru"
+      pvp: true
+      motd: "Welcome"
+      worldSaveName: Kubeworld
+      viewDistance: 12
+      forceReDownload: true
+      memory: ""
+      jvmXXOpts: "-XX:MaxRAMPercentage=75"
+      spigetResources:
+        - 36618
+      #   # Dynmap
+      #   - 274
+      rcon:
+        enabled: true
+        serviceType: ClusterIP
+      serviceType: LoadBalancer
+      extraPorts:
+        - name: metrics
+          containerPort: 9225
+          protocol: TCP
+          service:
+            enabled: true
+            embedded: false
+            type: ClusterIP
+            port: 9225
+          ingress:
+            enabled: false
+        - name: map
+          containerPort: 8123
+          protocol: TCP
+          service:
+            enabled: true
+            embedded: false
+            type: ClusterIP
+            port: 8123
+          ingress:
+            ingressClassName: public
+            enabled: true
+            annotations:
+              gethomepage.dev/enabled: "true"
+              gethomepage.dev/group: Games
+              gethomepage.dev/name: Minecraft
+              gethomepage.dev/icon: minecraft.svg
+              gethomepage.dev/widget.type: minecraft
+              gethomepage.dev/widget.url: udp://minecraft-minecraft.games:25565
+            hosts:
+              - name: &host "minecraft.${SECRET_DOMAIN}"
+                path: /
+            tls:
+              - secretName: *host
+                hosts:
+                  - *host
+  valuesFrom:
+    - kind: Secret
+      name: *secret
+      valuesKey: RCON_PASSWORD
+      targetPath: minecraftServer.rcon.password
