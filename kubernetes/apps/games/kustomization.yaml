@@ -6,4 +6,5 @@ resources:
   - ./namespace.yaml
   # Flux-Kustomizations
   - ./minecraft/ks.yaml
+  - ./shulker/ks.yaml
 

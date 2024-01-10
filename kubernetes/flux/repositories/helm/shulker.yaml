@@ -1,0 +1,10 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: shulker
+  namespace: flux-system
+spec:
+  interval: 15m
+  url: https://h-wb.github.io/Shulker/
+  timeout: 3m
