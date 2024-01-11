@@ -7,5 +7,4 @@ resources:
   # Flux-Kustomizations
   - ./minecraft/ks.yaml
   - ./agones/ks.yaml
-  - ./shulker/ks.yaml
 
