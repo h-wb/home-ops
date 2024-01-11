@@ -9,6 +9,8 @@ spec:
   service:
     type: LoadBalancer
     externalTrafficPolicy: Local
+    annotations:
+      io.cilium/lb-ipam-ips: "${SVC_MINECRAFT_ADDR_2}"
   template:
     spec:
       version:
