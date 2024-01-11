@@ -39,3 +39,4 @@ resources:
   - ./ingress-nginx.yaml
   - ./intel.yaml
   - ./shulker.yaml
+  - ./agones.yaml
