@@ -15,6 +15,9 @@ spec:
         namespace: flux-system
   interval: 30m
   values:
+    agones:
+      controller:
+        replicas: 1
     gameservers:
       namespaces:
       - games
