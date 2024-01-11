@@ -4,7 +4,7 @@ metadata:
   name: public
 spec:
   clusterRef:
-    name: minecraft-cluster
+    name: getting-started
   replicas: 1
   service:
     type: LoadBalancer
