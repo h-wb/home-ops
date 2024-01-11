@@ -4,12 +4,12 @@ metadata:
   name: lobby
 spec:
   clusterRef:
-    name: getting-started
+    name: minecraft-cluster
   replicas: 1
   template:
     spec:
       clusterRef:
-        name: getting-started
+        name: minecraft-cluster
       tags:
         - lobby
       version:
