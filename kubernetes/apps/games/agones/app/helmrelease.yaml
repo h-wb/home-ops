@@ -30,7 +30,7 @@ spec:
 
     gameservers:
       namespaces:
-      - games
+      - shulker-system
       # minPort: 7000
       # maxPort: 8000
       # podPreserveUnknownFields: false

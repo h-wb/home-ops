@@ -6,14 +6,14 @@ metadata:
   name: &app shulker
   namespace: flux-system
 spec:
-  targetNamespace: games
+  targetNamespace: shulker-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
     - name: longhorn
-  path: ./kubernetes/apps/games/shulker/app
+  path: ./kubernetes/apps/shulker-system/shulker/app
   prune: true
   sourceRef:
     kind: GitRepository
