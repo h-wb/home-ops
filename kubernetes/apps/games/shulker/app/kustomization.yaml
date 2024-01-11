@@ -5,9 +5,9 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./minecraft/secret.sops.yaml
-  - ./minecraft/cluster.yaml
-  - ./minecraft/proxy.yaml
-  - ./minecraft/minecraftserver.yaml
+  # - ./minecraft/cluster.yaml
+  # - ./minecraft/proxy.yaml
+  # - ./minecraft/minecraftserver.yaml
   # - ./externalname.yaml
   # - ./externalsecret.yaml
   # - ./pvc.yaml
