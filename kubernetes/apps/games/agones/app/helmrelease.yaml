@@ -25,6 +25,9 @@ spec:
         replicas: 1
       allocator:
         replicas: 1
+        service:
+          serviceType: ClusterIP
+
     gameservers:
       namespaces:
       - games

@@ -14,4 +14,25 @@ spec:
         name: shulker
         namespace: flux-system
   interval: 30m
-  # values:
+  values:
+    operator:
+      image:
+        repository: ghcr.io/jeremylvln/shulker-operator
+        pullPolicy: Always
+        # Overrides the image tag whose default is the chart appVersion.
+        tag: ""
+
+      # Additional command line flags to pass.
+      extraArgs: []
+
+      # Additional environment variables to add to the pod.
+      extraEnv:
+        []
+        # - name: MY_ENV_KEY
+        #   value: 'my value'
+
+      agones:
+        allocator:
+          host: agones-allocator.games
+          grpcPort: 443
+          mtlsSecretName: allocator-client.default
