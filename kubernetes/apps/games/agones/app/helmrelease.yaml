@@ -18,6 +18,13 @@ spec:
     agones:
       controller:
         replicas: 1
+      extensions:
+        replicas: 1
+      ping:
+        install: false
+        replicas: 1
+      allocator:
+        replicas: 1
     gameservers:
       namespaces:
       - games
