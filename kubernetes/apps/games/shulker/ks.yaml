@@ -30,10 +30,10 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app shulker
+  name: &app minecraft-cluster
   namespace: flux-system
 spec:
-  targetNamespace: minecraft
+  targetNamespace: games
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
