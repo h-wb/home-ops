@@ -6,5 +6,5 @@ metadata:
   namespace: flux-system
 spec:
   interval: 15m
-  url: https://h-wb.github.io/Shulker/
+  url: https://shulker.jeremylvln.fr/helm-charts
   timeout: 3m
