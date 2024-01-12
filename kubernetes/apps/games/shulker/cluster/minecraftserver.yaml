@@ -1,26 +1,30 @@
 apiVersion: shulkermc.io/v1alpha1
-kind: MinecraftServerFleet
+kind: MinecraftServer
 metadata:
-  name: lobby
+  name: lobby2
 spec:
   clusterRef:
     name: minecraft-cluster
-  replicas: 1
-  template:
-    spec:
-      clusterRef:
-        name: minecraft-cluster
-      podOverrides: 
-        volumeMounts:
-          - name: minecraft-lobby
-            mountPath: /data
-        volumes:
-          - name: minecraft-lobby
-            persistentVolumeClaim:
-              claimName: minecraft-lobby
-      tags:
-        - lobby
-      version:
-        channel: Paper
-        name: '1.20.2'
-      config: {}
+  tags:
+    - lobby2
+  version:
+    channel: Paper
+    name: '1.20.2'
+  podOverrides: 
+    volumeMounts:
+      - name: lobby
+        mountPath: /mnt/path
+    volumes:
+      - name: lobby
+        persistentVolumeClaim:
+          claimName: minecraft-lobby
+    env: 
+      - name: DIFFICULTY
+        value: "hard"
+    image:
+      imagePullSecrets: []
+      name: "itzg/minecraft-server:2024.1.0-java17"
+  config:
+    serverProperties:
+      difficulty: normal
+      white-list: "true"

@@ -6,4 +6,5 @@ resources:
   - ./secret.sops.yaml
   - ./cluster.yaml
   - ./proxy.yaml
+  # - ./minecraftserverfleet.yaml
   - ./minecraftserver.yaml
