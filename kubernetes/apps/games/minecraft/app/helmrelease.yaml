@@ -50,7 +50,8 @@ spec:
       version: 1.20.2
       type: PAPER
       difficulty: normal
-      ops: "Sahru"
+      whitelist: "Sahru, Sendzo"
+      ops: "Sahru, Sendzo"
       pvp: true
       motd: "Welcome"
       worldSaveName: Kubeworld
