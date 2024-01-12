@@ -8,12 +8,11 @@ spec:
   replicas: 1
   service:
     type: LoadBalancer
-    annotations:
-      io.cilium/lb-ipam-ips: "${SVC_MINECRAFT_ADDR_2}"
+    # annotations:
+    #   io.cilium/lb-ipam-ips: "${SVC_MINECRAFT_ADDR_2}"
   template:
     spec:
       version:
         channel: Velocity
         name: latest
-      config: 
-        proxyProtocol: true
+      config: {}
