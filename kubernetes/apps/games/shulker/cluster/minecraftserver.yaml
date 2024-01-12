@@ -1,23 +1,23 @@
 apiVersion: shulkermc.io/v1alpha1
 kind: MinecraftServer
 metadata:
-  name: lobby2
+  name: survival
 spec:
   clusterRef:
     name: minecraft-cluster
   tags:
-    - lobby2
+    - survival
   version:
     channel: Paper
     name: '1.20.2'
-  podOverrides: 
-    volumeMounts:
-      - name: lobby
-        mountPath: /mnt/path
-    volumes:
-      - name: lobby
-        persistentVolumeClaim:
-          claimName: minecraft-lobby
+  # podOverrides: 
+  #   volumeMounts:
+  #     - name: lobby
+  #       mountPath: /mnt/path
+  #   volumes:
+  #     - name: lobby
+  #       persistentVolumeClaim:
+  #         claimName: minecraft-lobby
     env: 
       - name: DIFFICULTY
         value: "hard"
