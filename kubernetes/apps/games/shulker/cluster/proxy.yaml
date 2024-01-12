@@ -1,7 +1,7 @@
 apiVersion: shulkermc.io/v1alpha1
 kind: ProxyFleet
 metadata:
-  name: public
+  name: proxy
 spec:
   clusterRef:
     name: minecraft-cluster
@@ -16,4 +16,5 @@ spec:
       version:
         channel: Velocity
         name: latest
-      config: {}
+      config: 
+        proxyProtocol: true
