@@ -10,6 +10,14 @@ spec:
     spec:
       clusterRef:
         name: minecraft-cluster
+      podOverrides: 
+        volumeMounts:
+          - name: minecraft-lobby
+            mountPath: /data
+        volumes:
+          - name: minecraft-lobby
+            persistentVolumeClaim:
+              claimName: minecraft-lobby
       tags:
         - lobby
       version:

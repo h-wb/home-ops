@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: minecraft
+  name: minecraft-lobby
 spec:
   accessModes:
     - ReadWriteOnce
