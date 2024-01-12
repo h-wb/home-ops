@@ -50,7 +50,6 @@ spec:
       version: 1.20.2
       type: PAPER
       difficulty: normal
-      whitelist: "Sahru"
       ops: "Sahru"
       pvp: true
       motd: "Welcome"
