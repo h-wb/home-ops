@@ -21,6 +21,8 @@ spec:
         env: 
           - name: DIFFICULTY
             value: "hard"
+          - name: ENABLE_WHITELIST
+            value: "true"
         image:
           imagePullSecrets: []
           name: "itzg/minecraft-server:2024.1.0-java17"

@@ -1,30 +1,40 @@
 apiVersion: shulkermc.io/v1alpha1
 kind: MinecraftServer
 metadata:
-  name: survival
+  name: lobby-survival
 spec:
   clusterRef:
     name: minecraft-cluster
   tags:
-    - survival
+    - lobby
   version:
     channel: Paper
     name: '1.20.2'
-  # podOverrides: 
-  #   volumeMounts:
-  #     - name: lobby
-  #       mountPath: /mnt/path
-  #   volumes:
-  #     - name: lobby
-  #       persistentVolumeClaim:
-  #         claimName: minecraft-lobby
+  podOverrides: 
+    volumeMounts:
+      - name: lobby
+        mountPath: /mnt/path
+    volumes:
+      - name: lobby
+        persistentVolumeClaim:
+          claimName: minecraft-lobby
     env: 
       - name: DIFFICULTY
         value: "hard"
     image:
       imagePullSecrets: []
       name: "itzg/minecraft-server:2024.1.0-java17"
+    resources:
+      requests:
+        memory: 2000Mi
+        cpu: 100m
+      limits:
+        memory: 4000Mi
+        # cpu: 1000m
   config:
+    # plugins:
+    #  - url: https://hangarcdn.papermc.io/plugins/jmp/TabTPS/versions/1.3.21/PAPER/tabtps-spigot-1.3.21.jar
     serverProperties:
-      difficulty: normal
-      white-list: "true"
+      enforce-whitelist: "true"
+
+    

@@ -36,3 +36,16 @@ spec:
           host: agones-allocator.games
           grpcPort: 443
           mtlsSecretName: allocator-client.default
+
+      securityContext:
+        runAsNonRoot: false
+        seccompProfile:
+          type: RuntimeDefault
+
+      containerSecurityContext:
+        allowPrivilegeEscalation: true
+        readOnlyRootFilesystem: false
+        capabilities:
+          drop:
+            - ALL
+
