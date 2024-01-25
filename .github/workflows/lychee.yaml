@@ -45,7 +45,7 @@ jobs:
           labels: "${{ env.WORKFLOW_ISSUE_LABEL }}"
 
       - name: Update Issue
-        uses: peter-evans/create-issue-from-file@v4
+        uses: peter-evans/create-issue-from-file@v5
         with:
           token: "${{ steps.app-token.outputs.token }}"
           title: Link Checker Dashboard 🔗
