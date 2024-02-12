@@ -5,7 +5,7 @@ resources:
   # Pre Flux-Kustomizations
   - ./namespace.yaml
   # Flux-Kustomizations
-  - ./minecraft/ks.yaml
+  # - ./minecraft/ks.yaml
   # - ./agones/ks.yaml
   # - ./shulker/ks.yaml
 
