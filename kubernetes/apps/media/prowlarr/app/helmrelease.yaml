@@ -39,7 +39,7 @@ spec:
           main:
             image:
               repository: ghcr.io/onedr0p/prowlarr-develop
-              tag: 1.13.0.4217@sha256:bbc16bdf446f784ed4f4955fdc41a3b5f2a3e60f1c94151110e6e12bc6de2817
+              tag: 1.13.3.4273@sha256:ca264d9629d35fef799c403fa1fe0625de6dabf6aec08d43ca981867ca8810c2
             env:
               PROWLARR__INSTANCE_NAME: Prowlarr
               PROWLARR__PORT: &port 9696
