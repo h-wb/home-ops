@@ -26,7 +26,7 @@ spec:
       strategy: RollingUpdate
     image:
       repository: docker.io/glauth/glauth
-      tag: v2.3.1
+      tag: v2.3.2
     command: ["/app/glauth", "-c", "/config"]
     service:
       main:
