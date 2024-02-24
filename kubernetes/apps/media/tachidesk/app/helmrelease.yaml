@@ -38,7 +38,7 @@ spec:
           main:
             image:
               repository: ghcr.io/suwayomi/tachidesk
-              tag: preview
+              tag: v1.0.0-r1498
             env:
               BIND_PORT: &port 4567
               WEB_UI_CHANNEL: "preview"
