@@ -40,3 +40,5 @@ resources:
   - ./intel.yaml
   - ./shulker.yaml
   - ./agones.yaml
+  - ./backube.yaml
+  - ./piraeus.yaml
