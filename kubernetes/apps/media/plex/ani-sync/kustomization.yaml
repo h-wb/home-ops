@@ -7,7 +7,7 @@ resources:
 configMapGenerator:
   - name: plex-ani-sync-configmap
     files:
-      - ./config/config.yaml
+      - ./config/custom_mappings.yaml
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
