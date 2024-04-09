@@ -38,8 +38,8 @@ spec:
         containers:
           main:
             image:
-              repository: jesec/flood
-              tag: master
+              repository: ghcr.io/cftechwiz/flood
+              tag: 4.7.0
             env:
               FLOOD_OPTION_auth: "none"
               FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media,/download"
@@ -55,8 +55,8 @@ spec:
                 memory: 1200Mi
           rtorrent:
             image:
-              repository: ghcr.io/onedr0p/rtorrent
-              tag: 0.9.8-r16@sha256:ea4689bc9bd9e5cf18e122fca121c94e6065bcd7b185650a0f1b9ce4c8018390
+              repository: ghcr.io/cftechwiz/rtorrent
+              tag: 0.9.8-r16
             env:
               - name: RTORRENT__DEFAULT_CONFIG
                 value: "false"
