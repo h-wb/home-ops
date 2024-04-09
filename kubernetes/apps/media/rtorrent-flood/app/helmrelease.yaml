@@ -38,8 +38,8 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/vaskozl/flood-git
-              tag: 4.7.0.r55.gce4b523d@sha256:68df4bb18afb305cf68a94973e3702e7f130427bd359fd345b3834eebe4341f7
+              repository: jesec/flood
+              tag: master@sha256:67203d2838eed158b469ed2a66edfe28df90eb530e2649852d575aedf00c7821
             env:
               FLOOD_OPTION_auth: "none"
               FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media,/download"
