@@ -38,8 +38,8 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/cftechwiz/flood
-              tag: 4.7.0
+              repository: ghcr.io/vaskozl/flood-git
+              tag: 4.7.0.r55.gce4b523d@sha256:68df4bb18afb305cf68a94973e3702e7f130427bd359fd345b3834eebe4341f7
             env:
               FLOOD_OPTION_auth: "none"
               FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media,/download"
