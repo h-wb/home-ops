@@ -29,12 +29,13 @@ spec:
       main:
         pod:
           securityContext:
-            fsGroup: 568
-            runAsGroup: 568
-            runAsUser: 568
+            fsGroup: 1001
+            runAsGroup: 1001
+            runAsUser: 1001
             fsGroupChangePolicy: "OnRootMismatch"
             supplementalGroups:
               - 100
+              - 568
         containers:
           main:
             image:
