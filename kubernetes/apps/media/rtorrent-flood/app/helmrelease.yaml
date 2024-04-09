@@ -38,8 +38,8 @@ spec:
         containers:
           main:
             image:
-              repository: ghcr.io/onedr0p/flood
-              tag: 4.7.0@sha256:2cb7bc81ea185f3043a4ff8c2409a49011220dd51fc147271dcac5d3099a02dd
+              repository: jesec/flood
+              tag: master
             env:
               FLOOD_OPTION_auth: "none"
               FLOOD_OPTION_allowedpath: "/config,/sock,/rc,/media,/download"
