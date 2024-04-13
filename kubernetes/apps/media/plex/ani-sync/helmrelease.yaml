@@ -33,7 +33,7 @@ spec:
           main:
             image:
               repository: ghcr.io/rickdb/plexanisync
-              tag: 1.4.0
+              tag: 1.4.1
             env:
               PLEX_SECTION: Anime
               PLEX_URL: http://plex.media.svc.cluster.local:32400
