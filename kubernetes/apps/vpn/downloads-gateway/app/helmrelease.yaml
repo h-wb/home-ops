@@ -42,28 +42,14 @@ spec:
             value: "off"
           - name: HEALTH_VPN_DURATION_INITIAL
             value: 30s
-          - name: WIREGUARD_PUBLIC_KEY
-            valueFrom:
-              secretKeyRef:
-                name: downloads-gateway
-                key: WIREGUARD_PUBLIC_KEY
-          - name: WIREGUARD_PRIVATE_KEY
-            valueFrom:
-              secretKeyRef:
-                name: downloads-gateway
-                key: WIREGUARD_PRIVATE_KEY
-          - name: WIREGUARD_ADDRESSES
-            valueFrom:
-              secretKeyRef:
-                name: downloads-gateway
-                key: WIREGUARD_ADDRESSES
-          - name: VPN_ENDPOINT_IP
-            valueFrom:
-              secretKeyRef:
-                name: downloads-gateway
-                key: VPN_ENDPOINT_IP
           - name: VPN_ENDPOINT_PORT
             value: 51820
+          - name: LOG_LEVEL
+            value: debug
+
+        envFrom:
+          - secretRef:
+              name: downloads-gateway
 
         securityContext:
           capabilities:
@@ -81,9 +67,9 @@ spec:
       - IP: 10
         hostname: qbittorrent-vpn
         ports:
-          - port: 56956
+          - port: 28163
             type: udp
-          - port: 56956
+          - port: 28163
             type: tcp
 
     routed_namespaces:
