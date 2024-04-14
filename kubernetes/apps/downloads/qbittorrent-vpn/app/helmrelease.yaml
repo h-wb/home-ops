@@ -33,7 +33,7 @@ spec:
         setGateway: "true"
 
     controllers:
-      qbittorrent:
+      qbittorrent-vpn:
         annotations:
           reloader.stakater.com/auto: "true"
           setGateway: "true"
@@ -111,7 +111,7 @@ spec:
             fsGroup: 568
             fsGroupChangePolicy: OnRootMismatch
             supplementalGroups: [10000]
-          hostname: qbittorrent
+          hostname: qbittorrent-vpn
     service:
       app:
         controller: qbittorrent-vpn
