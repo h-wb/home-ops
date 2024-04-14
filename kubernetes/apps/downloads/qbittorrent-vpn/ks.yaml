@@ -3,14 +3,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app pod-gateway
+  name: &app qbittorrent-vpn
   namespace: flux-system
 spec:
-  targetNamespace: networking
+  targetNamespace: media
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/vpn/pod-gateway/app
+  dependsOn:
+    - name: longhorn
+    - name: external-secrets-stores
+  path: ./kubernetes/apps/downloads/qbittorrent-vpn/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -19,3 +22,6 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
+  postBuild:
+    substitute:
+      APP: *app

@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: qbittorrent
+  name: qbittorrent-vpn
 spec:
   interval: 30m
   chart:
@@ -114,10 +114,10 @@ spec:
           hostname: qbittorrent
     service:
       app:
-        controller: qbittorrent
+        controller: qbittorrent-vpn
         type: LoadBalancer
         annotations:
-          io.cilium/lb-ipam-ips: 192.168.1.52
+          io.cilium/lb-ipam-ips: 192.168.1.53
         ports:
           http:
             port: *port
@@ -131,12 +131,12 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: qBittorrent
+          gethomepage.dev/name: qBittorrentVPN
           gethomepage.dev/icon: qbittorrent.png
           gethomepage.dev/widget.type: qbittorrent
-          gethomepage.dev/widget.url: "http://qbittorrent.media.svc.cluster.local:8080"
+          gethomepage.dev/widget.url: "http://qbittorrent-vpn.media.svc.cluster.local"
         hosts:
-          - host: &host qb.${SECRET_DOMAIN}
+          - host: &host qbvpn.${SECRET_DOMAIN}
             paths:
               - path: /
                 service:
@@ -147,7 +147,7 @@ spec:
               - *host
     persistence:
       config:
-        existingClaim: qbittorrent
+        existingClaim: qbittorrent-vpn
       add-ons:
         enabled: true
         type: emptyDir
