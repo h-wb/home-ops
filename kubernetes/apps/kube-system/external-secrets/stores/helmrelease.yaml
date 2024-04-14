@@ -32,7 +32,7 @@ spec:
           main:
             image:
               repository: ghcr.io/larivierec/bitwarden-cli
-              tag: latest
+              tag: 2024.3.1@sha256:4205c5377ddebd5f0c75dc80413b0efff88946a37f620f73ce4d5dad3fb5f4f1
             envFrom:
               - secretRef:
                   name: bitwarden-cli
