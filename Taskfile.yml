@@ -10,7 +10,7 @@ vars:
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
 
 env:
-  KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/kubeconfig"
+  KUBECONFIG: "~/.kube/homelab.kubeconfig"
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
   cluster: "default"
 

@@ -12,8 +12,6 @@ tasks:
         ns: Namespace the externalsecret is in (default: default)
         secret: Secret to sync (required)
     cmd: kubectl --context {{.cluster}} -n {{.ns}} annotate externalsecret {{.secret}} force-sync=$(date +%s) --overwrite
-    env:
-      KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
     vars:
       ns: '{{.ns | default "default"}}'
       secret: '{{ or .secret (fail "Argument (secret) is required") }}'
@@ -33,8 +31,6 @@ tasks:
           cluster: '{{.cluster}}'
           ns: '{{$a := split "|" .ITEM}}{{$a._0}}'
           secret: '{{$a := split "|" .ITEM}}{{$a._1}}'
-    env:
-      KUBECONFIG: "{{.KUBERNETES_DIR}}/{{.cluster}}/kubeconfig"
     vars:
       secrets:
         sh: kubectl --context {{.cluster}} get externalsecret --all-namespaces --no-headers -A | awk '{print $1 "|" $2}'
