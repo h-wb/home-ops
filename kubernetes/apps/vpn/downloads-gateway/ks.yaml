@@ -6,7 +6,7 @@ metadata:
   name: &app downloads-gateway
   namespace: flux-system
 spec:
-  targetNamespace: networking
+  targetNamespace: vpn
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
