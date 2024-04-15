@@ -91,8 +91,8 @@ spec:
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe
         advancedMounts:
-          main:
-            syncthing:
+          syncthing:
+            app:
               - path: "/Documents/syncthing"
         globalMounts:
           - path: /var/syncthing
