@@ -46,15 +46,39 @@ spec:
             value: 51820
           - name: LOG_LEVEL
             value: debug
+          - name: DNS_ADDRESS
+            value: 1.1.1.1
 
         envFrom:
           - secretRef:
               name: downloads-gateway
 
+        livenessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - if [ $(wget -q -O- https://ipinfo.io/country) == 'LU' ]; then exit 0; else exit $?; fi
+          initialDelaySeconds: 30
+          periodSeconds: 60
+          failureThreshold: 3
+
         securityContext:
           capabilities:
             add:
               - NET_ADMIN
+
+        networkPolicy:
+          enabled: true
+          egress:
+            - to:
+                - ipBlock:
+                    cidr: 0.0.0.0/0
+              ports:
+                - port: 51820
+                  protocol: UDP
+            - to:
+                - namespaceSelector: {}
 
       netshoot:
         enabled: true
