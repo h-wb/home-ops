@@ -6,13 +6,14 @@ metadata:
   name: &app qbittorrent-vpn
   namespace: flux-system
 spec:
-  targetNamespace: media
+  targetNamespace: downloads
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: longhorn
     - name: external-secrets-stores
+    - name: downloads-gateway
   path: ./kubernetes/apps/downloads/qbittorrent-vpn/app
   prune: true
   sourceRef:
