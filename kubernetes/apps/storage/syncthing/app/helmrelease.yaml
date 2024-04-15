@@ -92,7 +92,7 @@ spec:
         path: /mnt/tank/hwe
         advancedMounts:
           main:
-            main:
+            syncthing:
               - path: "/Documents/syncthing"
         globalMounts:
           - path: /var/syncthing
