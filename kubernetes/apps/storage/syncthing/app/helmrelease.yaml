@@ -76,6 +76,11 @@ spec:
     ingress:
       app:
         className: internal
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Storage
+          gethomepage.dev/name: Syncthing
+          gethomepage.dev/icon: syncthing.png
         hosts:
           - host: &host sync.${SECRET_DOMAIN}
             paths:
