@@ -160,6 +160,6 @@ spec:
         path: /mnt/tank/fwe
         globalMounts:
           - path: /media
-      incomplete:
+      download:
         enabled: true
         type: emptyDir
