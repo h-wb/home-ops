@@ -89,10 +89,10 @@ spec:
       data:
         type: nfs
         server: ${NFS_ADDR:=temp}
-        path: /mnt/tank/hwe
-        advancedMounts:
-          syncthing:
-            app:
-              - path: "/Documents/syncthing"
+        path: /mnt/tank/hwe/Documents/syncthing
+        # advancedMounts:
+        #   syncthing:
+        #     app:
+        #       - path: "/Documents/syncthing"
         globalMounts:
           - path: /var/syncthing
