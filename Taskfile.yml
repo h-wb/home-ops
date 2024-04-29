@@ -10,9 +10,10 @@ vars:
   KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
 
 env:
-  KUBECONFIG: "~/.kube/homelab.kubeconfig"
+  # KUBECONFIG: "~/.kube/homelab.kubeconfig"
+  # KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
+  KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/main/kubeconfig"
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
-  cluster: "default"
 
 includes:
   ansible: .taskfiles/Ansible/Taskfile.yaml
@@ -21,6 +22,7 @@ includes:
   flux: .taskfiles/Flux/Taskfile.yaml
   kubernetes: .taskfiles/Kubernetes/Taskfile.yaml
   sops: .taskfiles/Sops/Taskfile.yaml
+  talos: .taskfiles/Talos/Taskfile.yaml
   # volsync: .taskfiles/VolSync/Taskfile.yaml
 
 tasks:

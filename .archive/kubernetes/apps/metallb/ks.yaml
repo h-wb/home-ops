@@ -8,7 +8,7 @@ metadata:
     substitution.flux.home.arpa/enabled: "true"
 spec:
   interval: 10m
-  path: "./kubernetes/apps/networking/metallb/app"
+  path: "./kubernetes/main/apps/networking/metallb/app"
   prune: true
   sourceRef:
     kind: GitRepository
@@ -26,7 +26,7 @@ spec:
   dependsOn:
     - name: cluster-apps-metallb
   interval: 10m
-  path: "./kubernetes/apps/networking/metallb/config"
+  path: "./kubernetes/main/apps/networking/metallb/config"
   prune: true
   sourceRef:
     kind: GitRepository
