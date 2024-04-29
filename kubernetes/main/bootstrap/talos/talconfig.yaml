@@ -158,6 +158,16 @@ patches:
   - '@./patches/patch-longhorn.yaml'
 
 controlPlane:
+  schematic:
+    customization:
+      extraKernelArgs:
+        - net.ifnames=0
+      systemExtensions:
+        officialExtensions:
+          - siderolabs/qemu-guest-agent
+          - siderolabs/iscsi-tools
+          - siderolabs/nut-client
+          - siderolabs/util-linux-tools
   patches:
     # Cluster configuration
     - |-
@@ -183,6 +193,8 @@ controlPlane:
           advertisedSubnets:
             - "192.168.1.0/24"
 
+
+
     # Disable default API server admission plugins.
     - |-
       - op: remove
@@ -199,3 +211,4 @@ controlPlane:
             allowedKubernetesNamespaces:
               - kube-tools
               - system-upgrade
+
