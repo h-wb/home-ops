@@ -25,10 +25,10 @@ nodes:
     ipAddress: "192.168.1.191"
     installDisk: "/dev/sdb"
     machineDisks:
-    - device: "/dev/nvme0n1"
-      partitions:
-        - mountpoint: "/var/mnt/sata"
-    talosImageURL: factory.talos.dev/installer/376567988ad370138ad8b2698212367b8edcb69b5fd68c80be1f2ec7d603b4ba
+      - device: /dev/nvme0n1
+        partitions:
+          - mountpoint: /var/lib/longhorn
+    talosImageURL: factory.talos.dev/installer/4c4acaf75b4a51d6ec95b38dc8b49fb0af5f699e7fbd12fbf246821c649b5312
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -155,19 +155,35 @@ patches:
       install:
         wipe: true
 
-  - '@./patches/patch-longhorn.yaml'
+  # Mount Longhorn disk in kubelet
+  - |-
+    machine:
+      kubelet:
+        extraMounts:
+          - destination: /var/lib/longhorn
+            type: bind
+            source: /var/lib/longhorn
+            options: ["bind", "rshared", "rw"]
 
 controlPlane:
-  schematic:
-    customization:
-      extraKernelArgs:
-        - net.ifnames=0
-      systemExtensions:
-        officialExtensions:
-          - siderolabs/qemu-guest-agent
-          - siderolabs/iscsi-tools
-          - siderolabs/nut-client
-          - siderolabs/util-linux-tools
+  # schematic:
+  #   customization:
+  #     extraKernelArgs:
+  #       - net.ifnames=0
+  #     systemExtensions:
+  #       officialExtensions:
+  #         - siderolabs/qemu-guest-agent
+  #         - siderolabs/iscsi-tools
+  #         - siderolabs/util-linux-tools
+  #         - siderolabs/intel-ucode
+  #         - siderolabs/i915-ucode
+          # Enable where needed
+          # - siderolabs/nut-client
+          # - siderolabs/amd-ucode
+          # - siderolabs/bnx2-bnx2x
+          # - siderolabs/drbd
+          # - siderolabs/gasket-driver
+          # - siderolabs/thunderbolt
   patches:
     # Cluster configuration
     - |-

@@ -23,6 +23,7 @@ tasks:
     prompt: Bootstrap Talos on the '{{.cluster}}' cluster ... continue?
     dir: "{{.KUBERNETES_DIR}}/{{.cluster}}/bootstrap/talos/"
     cmds:
+      - task: genconfig
       - task: config-apply
         vars: &vars
           cluster: "{{.cluster}}"
