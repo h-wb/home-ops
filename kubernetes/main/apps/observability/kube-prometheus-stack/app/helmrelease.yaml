@@ -31,6 +31,12 @@ spec:
     crds:
       enabled: true
     cleanPrometheusOperatorObjectNames: true
+    securityContext:
+      runAsGroup: 65534
+      runAsNonRoot: true
+      runAsUser: 65534
+      # set fsGroup equal to runAsGroup
+      fsGroup: 65534
     alertmanager:
       enabled: false
       prometheus:
@@ -117,6 +123,10 @@ spec:
           - auto-gomemlimit
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
+        image:
+          registry: quay.io
+          repository: prometheus/prometheus
+          tag: v2.51.0-dedupelabels
         retention: 2d
         retentionSize: 15GB
         externalLabels:
@@ -126,7 +136,6 @@ spec:
             cpu: 100m
           limits:
             memory: 1500Mi
-        image:
         storageSpec:
           volumeClaimTemplate:
             spec:
@@ -169,6 +178,8 @@ spec:
       forceDeployDashboards: true
       sidecar:
         dashboards:
+          annotations:
+            grafana_folder: Kubernetes
           multicluster:
             etcd:
               enabled: true
