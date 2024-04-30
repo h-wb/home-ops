@@ -23,12 +23,14 @@ cniConfig:
 nodes:
   - hostname: "k3s-1"
     ipAddress: "192.168.1.191"
-    installDisk: "/dev/sdb"
+    installDiskSelector:
+      size: "<= 256GB"
+      model: "NT-128 2242"
     machineDisks:
       - device: /dev/nvme0n1
         partitions:
           - mountpoint: /var/lib/longhorn
-    talosImageURL: factory.talos.dev/installer/4c4acaf75b4a51d6ec95b38dc8b49fb0af5f699e7fbd12fbf246821c649b5312
+    talosImageURL: factory.talos.dev/installer/41a046b5b377f90db27b3e5189cbaaf3216982aa22ca3e6c1dd2becd4b1037d3
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
