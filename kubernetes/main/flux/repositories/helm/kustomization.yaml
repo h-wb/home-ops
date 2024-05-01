@@ -40,3 +40,4 @@ resources:
   - ./intel.yaml
   - ./shulker.yaml
   - ./agones.yaml
+  - ./postfinance.yaml
