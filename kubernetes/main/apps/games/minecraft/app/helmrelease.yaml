@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: minecraft
-      version: 4.17.0
+      version: 4.19.0
       sourceRef:
         kind: HelmRepository
         name: minecraft-server
@@ -19,7 +19,7 @@ spec:
       secret.reloader.stakater.com/reload: &secret minecraft
     image:
       repository: itzg/minecraft-server
-      tag: 2024.4.1-java17
+      tag: 2024.5.0-java17
     resources:
       limits:
         memory: 3000Mi
