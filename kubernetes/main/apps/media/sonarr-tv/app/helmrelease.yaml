@@ -31,7 +31,7 @@ spec:
           main:
             image:
               repository: ghcr.io/onedr0p/sonarr-develop
-              tag: 4.0.4.1699@sha256:944d35fab9e0efbc87976750e031d22f641d1a8a099f26e410cff029502577d6
+              tag: 4.0.5.1801@sha256:5c4022bd2b0d5c751b8dcb262abc61df917e778405cf4739d5f3d77b81e2f8a3
             env:
               SONARR__INSTANCE_NAME: Sonarr-TV
               SONARR__PORT: &port 8991
