@@ -1,0 +1,4 @@
+---
+providerRegex: ^(hyperv1)$
+bypassDnsResolution: true
+replicas: 1
