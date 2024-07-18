@@ -10,9 +10,7 @@ vars:
   PIP_REQUIREMENTS_FILE: "{{.ANSIBLE_DIR}}/requirements.txt"
 
 env:
-  # KUBECONFIG: "~/.kube/homelab.kubeconfig"
-  # KUBECONFIG: "{{.ROOT_DIR}}/kubeconfig"
-  KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/main/kubeconfig"
+  KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/main/kubeconfig:{{.KUBERNETES_DIR}}/kubernetes/pi/kubeconfig"
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
 
 
