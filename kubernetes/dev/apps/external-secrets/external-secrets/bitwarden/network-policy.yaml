@@ -3,7 +3,6 @@ apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
   name: external-secrets-to-bw-cli
-  namespace: kube-system
 spec:
   endpointSelector:
     matchLabels:
@@ -14,4 +13,3 @@ spec:
         - matchLabels:
             app.kubernetes.io/instance: external-secrets
             app.kubernetes.io/name: external-secrets
-            k8s:io.kubernetes.pod.namespace: kube-system
