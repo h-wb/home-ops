@@ -8,4 +8,4 @@ resources:
   # Flux-Kustomizations
   # - ./kube-prometheus-stack/ks.yaml
   - ./prometheus-operator-crds/ks.yaml
-  - ./smartctl-exporter/ks.yaml
+  # - ./smartctl-exporter/ks.yaml
