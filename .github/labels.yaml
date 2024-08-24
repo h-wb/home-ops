@@ -10,6 +10,13 @@
   color: "0e8a16"
 - name: area/taskfile
   color: "0e8a16"
+- name: area/terraform
+  color: "0e8a16"
+# Clusters
+- name: cluster/main
+  color: "ffc300"
+- name: cluster/dev
+  color: "ffc300"
 # Renovate Types
 - name: renovate/ansible
   color: "027fa0"
@@ -22,6 +29,8 @@
 - name: renovate/github-release
   color: "027fa0"
 - name: renovate/helm
+  color: "027fa0"
+- name: renovate/terraform
   color: "027fa0"
 # Semantic Types
 - name: type/digest

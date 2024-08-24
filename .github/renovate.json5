@@ -9,9 +9,10 @@
     ":dependencyDashboard",
     ":semanticCommits",
     ":skipStatusChecks",
-    ":timezone(America/New_York)",
+    ":timezone(America/Toronto)",
     "github>h-wb/home-ops//.github/renovate/allowedVersions.json5",
     "github>h-wb/home-ops//.github/renovate/autoMerge.json5",
+    "github>h-wb/home-ops//.github/renovate/clusters.json5",
     "github>h-wb/home-ops//.github/renovate/commitMessage.json5",
     "github>h-wb/home-ops//.github/renovate/customManagers.json5",
     "github>h-wb/home-ops//.github/renovate/grafanaDashboards.json5",
@@ -30,7 +31,8 @@
   "ignorePaths": [
     "**/*.sops.*",
     "**/.archive/**",
-    "**/resources/**"
+    "**/resources/**",
+    "**/kubernetes/main/**" //TO-DO: remove when main is updated
   ],
   "flux": {
     "fileMatch": [
