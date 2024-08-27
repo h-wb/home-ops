@@ -47,7 +47,7 @@ spec:
       ingressClassName: internal
       annotations:
         external-dns.alpha.kubernetes.io/target: internal-dev.${SECRET_DOMAIN}
-      host: longhorn.${SECRET_DOMAIN}
+      host: longhorn-dev.${SECRET_DOMAIN}
       tls: true
     metrics:
       serviceMonitor:
