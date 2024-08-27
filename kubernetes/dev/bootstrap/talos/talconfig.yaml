@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/budimanjojo/talhelper/master/pkg/config/schemas/talconfig.json
 ---
 # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
-talosVersion: v1.7.5
+talosVersion: v1.7.6
 # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
 kubernetesVersion: v1.30.3
 
@@ -25,11 +25,7 @@ nodes:
     installDiskSelector:
       size: "<= 256GB"
       model: "Virtual Disk"
-    # machineDisks:
-    #   - device: /dev/nvme0n1
-    #     partitions:
-    #       - mountpoint: /var/lib/longhorn
-    talosImageURL: factory.talos.dev/installer/743d53d3c9cc1942e0a3fc7167565665ea25823e6261d82bf022e9a9e50ed84d
+    talosImageURL: factory.talos.dev/installer/613e1592b2da41ae5e265e8789429f22e121aab91cb4deb6bc3c0b6262961245
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
@@ -110,18 +106,25 @@ patches:
         net.core.rmem_max: "2500000"
         net.core.wmem_max: "2500000"
 
-  # Mount longhorn in kubelet
+  # Mount openebs-hostpath in kubelet
   - |-
     machine:
       kubelet:
         extraMounts:
-          - destination: /var/lib/longhorn
+          - destination: /var/openebs/local
             type: bind
-            source: /var/lib/longhorn
-            options:
-              - bind
-              - rshared
-              - rw
+            source: /var/openebs/local
+            options: ["bind", "rshared", "rw"]
+
+  # Mount Longhorn storage in kubelet
+  - |-
+    machine:
+      kubelet:
+        extraMounts:
+          - destination: /var/mnt/longhorn
+            type: bind
+            source: /var/mnt/longhorn
+            options: ["bind", "rshared", "rw"]
 
   # # Disable predictable NIC naming
   # - |-
