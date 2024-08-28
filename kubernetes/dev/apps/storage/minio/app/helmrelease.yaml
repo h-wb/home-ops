@@ -113,7 +113,7 @@ spec:
     persistence:
       config:
         type: nfs
-        server: 192.168.1.4
-        path: /Users/hugo/NFS
+        server: 192.168.1.32
+        path: /nfsshare
         globalMounts:
           - path: /data
