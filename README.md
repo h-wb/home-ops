@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/h-wb/home-ops/main/docs/src/assets/logo.png" align="center" width="144px" height="144px"/>
+<img src="https://raw.githubusercontent.com/h-wb/home-ops/main/docs/src/assets/icons/logo.png" align="center" width="144px" height="144px"/>
 
 
 ### My Homelab Repository
@@ -20,6 +20,17 @@ This was built with the purpose of learning Kubernetes and Gitops while serving 
 ---
 
 ## Kubernetes
+
+There is a template over at [onedr0p/cluster-template](https://github.com/onedr0p/cluster-template) if you want to try and follow along with some of the practices I use here.
+
+I would recommend looking at [onedr0p/home-ops](https://github.com/onedr0p/home-ops) or [joryirving/home-ops](https://github.com/joryirving/home-ops) for more polished repositories.
+
+You could find this one useful if you're looking for informations about:
+- Longhorn
+- OVH (*archived*)
+- Bitwarden (CLI)
+
+### Installation
 
 My Kubernetes cluster is deployed with [Talos](https://www.talos.dev). This is a semi-hyper-converged cluster - workloads and block storage are sharing the same available resources on my nodes while I have a separate [TrueNAS SCALE](https://www.truenas.com/truenas-scale/) server with ZFS for NFS/SMB shares, bulk file storage and backups.
 
