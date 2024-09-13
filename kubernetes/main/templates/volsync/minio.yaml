@@ -3,9 +3,10 @@
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
-  name: minio
+  name: "${APP}-volsync"
 spec:
   target:
+    name: "${APP}-volsync-secret"
     deletionPolicy: Delete
     template:
       type: Opaque
