@@ -30,7 +30,7 @@ spec:
           main:
             image:
               repository: ghcr.io/gethomepage/homepage
-              tag: v0.8.13
+              tag: v0.9.9
             envFrom:
               - secretRef:
                   name: homepage-secret
