@@ -6,7 +6,7 @@ talosVersion: v1.7.6
 kubernetesVersion: v1.30.3
 
 
-clusterName: &cluster dev
+clusterName: &cluster main
 endpoint: https://192.168.1.253:6443
 clusterPodNets:
   - "10.42.0.0/16"
@@ -20,16 +20,16 @@ cniConfig:
   name: none
 
 nodes:
-  - hostname: "hyperv1"
-    ipAddress: "192.168.1.24"
+  - hostname: "tal0s"
+    ipAddress: "192.168.1.190"
     installDiskSelector:
       size: "<= 256GB"
-      model: "Virtual Disk"
-    talosImageURL: factory.talos.dev/installer/64aaafe59b7c9ab49ca9699451375fbe8daec6dea30f2a7ad9f7836008e01b3d
+      model: "TS128GMTS430S"
+    talosImageURL: factory.talos.dev/installer/ebdfa27a8d6272acf806ac6a5c968c3c284a47ce880273cecb19442c11bf0474
     controlPlane: true
     networkInterfaces:
       - deviceSelector:
-          hardwareAddr: "00:15:5d:e0:9d:15"
+          hardwareAddr: "48:21:0b:55:7a:92"
         dhcp: true
         mtu: 1500
         vip:
@@ -125,6 +125,14 @@ patches:
             type: bind
             source: /var/mnt/longhorn
             options: ["bind", "rshared", "rw"]
+
+  # # Mount 2nd disk for Longhorn Storage
+  - |-
+    machine:
+      disks:
+      - device: /dev/nvme0n1
+        partitions:
+          - mountpoint: /var/mnt/longhorn
 
   # # Disable predictable NIC naming
   # - |-

@@ -31,9 +31,9 @@ spec:
       enabled: true
       className: internal
       annotations:
-        external-dns.alpha.kubernetes.io/target: internal-dev.${SECRET_DOMAIN}
+        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
       hosts:
-        - host: gitops-dev.${SECRET_DOMAIN}
+        - host: gitops.${SECRET_DOMAIN}
           paths:
             - path: /
               pathType: Prefix

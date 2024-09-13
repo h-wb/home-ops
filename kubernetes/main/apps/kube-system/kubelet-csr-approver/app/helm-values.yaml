@@ -1,4 +1,3 @@
 ---
-providerRegex: ^(hyperv1)$
+providerRegex: ^(tal0s|tal1s|tal2s)$
 bypassDnsResolution: true
-replicas: 1

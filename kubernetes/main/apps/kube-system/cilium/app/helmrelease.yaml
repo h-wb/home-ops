@@ -63,7 +63,7 @@ spec:
             gethomepage.dev/name: Hubble
             gethomepage.dev/group: Observability
             gethomepage.dev/description: Network Monitoring Dashboard
-          hosts: ["hubble-dev.${SECRET_DOMAIN}"]
+          hosts: ["hubble.${SECRET_DOMAIN}"]
     operator:
       replicas: 1
       prometheus:
