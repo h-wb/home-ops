@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/dev/apps/external-secrets/external-secrets/certs
+  path: ./kubernetes/main/apps/external-secrets/external-secrets/certs
   prune: true
   sourceRef:
     kind: GitRepository
@@ -35,7 +35,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-certificates
-  path: ./kubernetes/dev/apps/external-secrets/external-secrets/app
+  path: ./kubernetes/main/apps/external-secrets/external-secrets/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -58,7 +58,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets
-  path: ./kubernetes/dev/apps/external-secrets/external-secrets/stores
+  path: ./kubernetes/main/apps/external-secrets/external-secrets/stores
   prune: true
   sourceRef:
     kind: GitRepository

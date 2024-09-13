@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: longhorn
-  path: ./kubernetes/dev/apps/storage/snapshot-controller/app
+  path: ./kubernetes/main/apps/storage/snapshot-controller/app
   prune: true
   sourceRef:
     kind: GitRepository
