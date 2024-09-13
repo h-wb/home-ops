@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: shulker-operator
-      version: 0.8.1
+      version: 0.11.0
       sourceRef:
         kind: HelmRepository
         name: shulker
