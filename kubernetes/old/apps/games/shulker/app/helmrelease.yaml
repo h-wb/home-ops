@@ -20,7 +20,7 @@ spec:
         repository: ghcr.io/jeremylvln/shulker-operator
         pullPolicy: Always
         # Overrides the image tag whose default is the chart appVersion.
-        tag: 0.8.1
+        tag: 0.11.0
 
       # Additional command line flags to pass.
       extraArgs: []
