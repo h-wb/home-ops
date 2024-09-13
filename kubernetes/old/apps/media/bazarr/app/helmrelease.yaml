@@ -45,7 +45,7 @@ spec:
           main:
             image:
               repository: ghcr.io/onedr0p/bazarr
-              tag: 1.4.2@sha256:d67bf3863db168aff960344d3c85f8518aa69cc7182dc55b2a43ae38bc8d3235
+              tag: 1.4.3@sha256:4fab44133c913d3988d7b8b38b22170117db128201eb7e2ca99ca63c56dd9d08
             envFrom:
               - secretRef:
                   name: *app
