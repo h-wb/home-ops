@@ -114,6 +114,6 @@ spec:
       config:
         type: nfs
         server: ${NFS_ADDR:=temp}
-        path: /mnt/tank/backup
+        path: /mnt/tank/backup/minio
         globalMounts:
           - path: /data
