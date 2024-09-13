@@ -6,7 +6,7 @@ metadata:
   name: "${APP}-volsync"
 spec:
   target:
-    name: "${APP}-volsync-secret"
+    name: "${APP}-volsync"
     deletionPolicy: Delete
     template:
       type: Opaque
