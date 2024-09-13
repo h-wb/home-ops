@@ -5,8 +5,12 @@ metadata:
   name: cluster-settings
   namespace: flux-system
 data:
-  TIMEZONE: "America/Toronto"
+  TIMEZONE: "Europe/Paris"
+
   CLUSTER_CIDR: "10.42.0.0/16"
   NODE_CIDR: "192.168.1.0/24"
+
   K8S_GATEWAY_ADDR: "192.168.1.200"
-  CLUSTER_NAME: dev
+  NFS_ADDR: "192.168.1.161"
+
+  CLUSTER_NAME: main

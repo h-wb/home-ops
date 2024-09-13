@@ -114,6 +114,6 @@ spec:
       config:
         type: nfs
         server: ${NFS_ADDR:=temp}
-        path: /nfsshare
+        path: /mnt/tank/backup
         globalMounts:
           - path: /data
