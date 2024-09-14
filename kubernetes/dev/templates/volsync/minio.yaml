@@ -53,7 +53,7 @@ spec:
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-longhorn-snapclass}"
     cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-longhorn-cache}"
     cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-8Gi}"
+    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
     storageClassName: "${VOLSYNC_STORAGECLASS:-longhorn-snapshot}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
     moverSecurityContext:
@@ -75,7 +75,7 @@ spec:
     pruneIntervalDays: 10
     repository: "${APP}-volsync"
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:-longhorn-snapclass}"
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-8Gi}"
+    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:-4Gi}"
     cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:-longhorn-cache}"
     cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:-ReadWriteOnce}"]
     storageClassName: "${VOLSYNC_STORAGECLASS:-longhorn-snapshot}"

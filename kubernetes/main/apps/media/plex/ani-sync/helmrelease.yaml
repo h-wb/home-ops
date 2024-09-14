@@ -1,0 +1,83 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/fluxcd-community/flux2-schemas/main/helmrelease-helm-v2beta2.json
+apiVersion: helm.toolkit.fluxcd.io/v2beta2
+kind: HelmRelease
+metadata:
+  name: &app plex-ani-sync
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 3.4.0
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  interval: 30m
+  values:
+    controllers:
+      plex-ani-sync:
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 5658
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/rickdb/plexanisync
+              tag: 1.4.1
+            env:
+              PLEX_SECTION: Anime
+              PLEX_URL: http://plex.media.svc.cluster.local:32400
+              PLEX_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: plex-secret
+                    key: PLEX_TOKEN
+              ANI_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: plex-secret
+                    key: ANI_USERNAME
+              ANI_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: plex-secret
+                    key: ANI_TOKEN
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 5m
+                memory: 101M
+              limits:
+                memory: 101M
+
+    service:
+      main:
+        enabled: false
+
+    ingress:
+      main:
+        enabled: false
+
+    persistence:
+      config-yaml:
+        type: configMap
+        name: plex-ani-sync-configmap
+        globalMounts:
+          - path: /plexanisync/custom_mappings.yaml
+            subPath: custom_mappings.yaml
+            readOnly: true

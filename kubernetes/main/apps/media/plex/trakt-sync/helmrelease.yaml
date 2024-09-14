@@ -1,0 +1,84 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: plex-trakt-sync
+spec:
+  chart:
+    spec:
+      chart: app-template
+      version: 3.4.0
+      interval: 30m
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  interval: 30m
+  values:
+    controllers:
+      plex-trakt-sync:
+        annotations:
+          reloader.stakater.com/auto: "true"
+
+        pod:
+          securityContext:
+            runAsUser: 568
+            runAsGroup: 5658
+            fsGroup: 568
+            fsGroupChangePolicy: "OnRootMismatch"
+
+        containers:
+          app:
+            image:
+              repository: ghcr.io/taxel/plextraktsync
+              tag: 0.31.13
+            args:
+              - watch
+            env:
+              PLEX_BASEURL: http://plex.media.svc.cluster.local:32400
+              PLEX_LOCALURL: http://plex.media.svc.cluster.local:32400
+              PLEX_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: plex-secret
+                    key: PLEX_TOKEN
+              PLEX_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: plex-secret
+                    key: PLEX_USERNAME
+              TRAKT_USERNAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: plex-secret
+                    key: TRAKT_USERNAME
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+              startup:
+                enabled: false
+            resources:
+              requests:
+                cpu: 5m
+                memory: 101M
+              limits:
+                memory: 101M
+
+    persistence:
+      config:
+        enabled: true
+        existingClaim: plex-trakt-sync-config
+        advancedMounts:
+          plex-trakt-sync:
+            app:
+              - path: /app/config
+      config-yaml:
+        type: configMap
+        name: plex-tract-sync-configmap
+        globalMounts:
+          - path: /app/config/config.yml
+            subPath: config.yml
+            readOnly: true
