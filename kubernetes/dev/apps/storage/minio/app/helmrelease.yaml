@@ -30,7 +30,7 @@ spec:
           app:
             image:
               repository: quay.io/minio/minio
-              tag: RELEASE.2024-09-09T16-59-28Z@sha256:1ca1b68b0d8bff8eda22e11eafb9243d65b143e4c3e3f63bcf412c5df8464125
+              tag: RELEASE.2024-09-13T20-26-02Z@sha256:f436b7792ca5ea9dbd7aecfbf327efa92c56e531111c6fe85a85b7f9b27a7f31
             env:
               MINIO_API_CORS_ALLOW_ORIGIN: "https://minio-dev.${SECRET_DOMAIN},https://s3-dev.${SECRET_DOMAIN}"
               MINIO_BROWSER_REDIRECT_URL: "https://minio-dev.${SECRET_DOMAIN}"
