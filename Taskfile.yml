@@ -24,7 +24,7 @@ includes:
   talos: .taskfiles/Talos/Taskfile.yaml
   workstation: .taskfiles/Workstation/Taskfile.yaml
   storage: .taskfiles/Storage/Taskfile.yaml
-  # volsync: .taskfiles/VolSync/Taskfile.yaml
+  volsync: .taskfiles/VolSync/Taskfile.yaml
 
 tasks:
   default:
