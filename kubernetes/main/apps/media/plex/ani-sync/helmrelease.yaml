@@ -65,14 +65,6 @@ spec:
               limits:
                 memory: 101M
 
-    service:
-      main:
-        enabled: false
-
-    ingress:
-      main:
-        enabled: false
-
     persistence:
       config-yaml:
         type: configMap
