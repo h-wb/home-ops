@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: plex-trakt-sync
+  name: &app plex-trakt-sync
 spec:
   chart:
     spec:
@@ -70,7 +70,7 @@ spec:
     persistence:
       config:
         enabled: true
-        existingClaim: plex-trakt-sync-config
+        existingClaim: *app
         advancedMounts:
           plex-trakt-sync:
             app:
