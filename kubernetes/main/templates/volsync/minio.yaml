@@ -5,41 +5,24 @@ kind: ExternalSecret
 metadata:
   name: "${APP}-volsync"
 spec:
+  secretStoreRef:
+    name: bitwarden-secrets-manager
+    kind: ClusterSecretStore
+  refreshInterval: 15m
   target:
     name: "${APP}-volsync"
-    deletionPolicy: Delete
     template:
-      type: Opaque
+      engineVersion: v2
       data:
         RESTIC_REPOSITORY: "s3:http://minio.storage.svc.cluster.local:9000/volsync/${APP}"
         RESTIC_PASSWORD: "{{ .RESTIC_PASSWORD }}"
         AWS_ACCESS_KEY_ID: "{{ .MINIO_ROOT_USER }}"
         AWS_SECRET_ACCESS_KEY: "{{ .MINIO_ROOT_PASSWORD }}"
-  data:
-    - secretKey: MINIO_ROOT_USER
-      sourceRef:
-        storeRef:
-          name: bitwarden-login
-          kind: ClusterSecretStore
-      remoteRef:
-        key: d5c1ebdc-ceea-4995-8e18-b1d90164adf2
-        property: username
-    - secretKey: MINIO_ROOT_PASSWORD
-      sourceRef:
-        storeRef:
-          name: bitwarden-login
-          kind: ClusterSecretStore
-      remoteRef:
-        key: d5c1ebdc-ceea-4995-8e18-b1d90164adf2
-        property: password
-    - secretKey: RESTIC_PASSWORD
-      sourceRef:
-        storeRef:
-          name: bitwarden-fields
-          kind: ClusterSecretStore
-      remoteRef:
-        key: d5c1ebdc-ceea-4995-8e18-b1d90164adf2
-        property: RESTIC_PASSWORD
+  dataFrom:
+    - extract:
+        key: minio
+    - extract:
+        key: volsync-minio-template
 ---
 apiVersion: volsync.backube/v1alpha1
 kind: ReplicationDestination
