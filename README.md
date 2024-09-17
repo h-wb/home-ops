@@ -28,7 +28,7 @@ I would recommend looking at [onedr0p/home-ops](https://github.com/onedr0p/home-
 You could find this one useful if you're looking for informations about:
 - Longhorn
 - OVH (*archived*)
-- Bitwarden (CLI)
+- [Bitwarden Secrets Manager](https://external-secrets.io/latest/provider/bitwarden-secrets-manager/)
 
 ### Installation
 
