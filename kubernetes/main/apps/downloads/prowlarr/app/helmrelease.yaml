@@ -91,6 +91,7 @@ spec:
               port: http
     persistence:
       config:
-        type: emptyDir
+        enabled: true
+        existingClaim: *app
       tmp:
         type: emptyDir
