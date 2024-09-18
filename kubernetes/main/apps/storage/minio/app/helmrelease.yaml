@@ -44,7 +44,7 @@ spec:
               MINIO_UPDATE: "off"
             envFrom:
               - secretRef:
-                  name: minio
+                  name: minio-secret
             args: ["server", "/data", "--console-address", ":9001"]
             probes:
               liveness: &probes
