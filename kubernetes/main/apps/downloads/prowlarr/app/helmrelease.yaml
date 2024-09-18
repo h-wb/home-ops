@@ -95,3 +95,6 @@ spec:
         existingClaim: *app
       tmp:
         type: emptyDir
+      test:
+        enabled: true
+        existingClaim: prowlarr-config-v1
