@@ -107,7 +107,7 @@ spec:
             port: 32400
     ingress:
       app:
-        className: external
+        className: internal
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Video
@@ -117,7 +117,7 @@ spec:
           gethomepage.dev/widget.type: plex
           gethomepage.dev/widget.url: http://plex.media:32400
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_PLEX_TOKEN}}` }}"
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
           nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
