@@ -119,6 +119,3 @@ spec:
         path: /mnt/tank/fwe
         globalMounts:
         - path: /data
-      test:
-        enabled: true
-        existingClaim: sonarr-tv-config-v1
