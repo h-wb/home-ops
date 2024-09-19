@@ -3,7 +3,7 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app radarr
+  name: &app radarr-uhd
   namespace: flux-system
 spec:
   targetNamespace: downloads
@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: external-secrets-stores
-  path: ./kubernetes/main/apps/downloads/radarr/app
+  path: ./kubernetes/main/apps/downloads/radarr-uhd/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -24,4 +24,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 15Gi
+      VOLSYNC_CAPACITY: 10Gi
