@@ -113,8 +113,8 @@ tasks:
     cmds:
       - task: .suspend
         vars: *env
-      - task: .wipe
-        vars: *env
+      # - task: .wipe
+      #   vars: *env
       - task: .restore
         vars: *env
       - task: .resume
