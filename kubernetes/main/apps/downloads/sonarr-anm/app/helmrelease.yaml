@@ -119,3 +119,6 @@ spec:
         path: /mnt/tank/fwe
         globalMounts:
         - path: /data
+      test:
+        enabled: true
+        existingClaim: sonarr-config-v1
