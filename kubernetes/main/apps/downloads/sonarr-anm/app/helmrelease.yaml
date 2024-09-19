@@ -2,7 +2,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app radarr
+  name: &app sonarr-anm
 spec:
   interval: 30m
   chart:
@@ -28,7 +28,7 @@ spec:
     namespace: storage
   values:
     controllers:
-      radarr:
+      sonarr-anm:
         labels:
           nfsMount: "true"
         annotations:
@@ -36,21 +36,21 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/onedr0p/radarr-develop
-              tag: 5.10.3.9178@sha256:751c19ed421afe5cec92f48c39f225ad7a2a420425da8e4f9ea121e489e53f05
+              repository: ghcr.io/onedr0p/sonarr-develop
+              tag: 4.0.9.2386@sha256:b70ad0004892e4f5fe24e79840e010dbe4eed11aef99a084521600bdc69e216d
             env:
-              RADARR__APP__INSTANCENAME: Radarr
-              RADARR__APP__THEME: dark
-              RADARR__AUTH__METHOD: External
-              RADARR__AUTH__REQUIRED: DisabledForLocalAddresses
-              RADARR__LOG__DBENABLED: "False"
-              RADARR__LOG__LEVEL: info
-              RADARR__SERVER__PORT: &port 80
-              RADARR__UPDATE__BRANCH: develop
+              SONARR__APP__INSTANCENAME: Sonarr-ANM
+              SONARR__APP__THEME: dark
+              SONARR__AUTH__METHOD: External
+              SONARR__AUTH__REQUIRED: DisabledForLocalAddresses
+              SONARR__LOG__DBENABLED: "False"
+              SONARR__LOG__LEVEL: info
+              SONARR__SERVER__PORT: &port 80
+              SONARR__UPDATE__BRANCH: develop
               TZ: ${TIMEZONE}
             envFrom:
             - secretRef:
-                name: radarr-secret
+                name: sonarr-anm-secret
             probes:
               liveness: &probes
                 enabled: true
@@ -94,12 +94,12 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: Radarr
-          gethomepage.dev/icon: radarr.png
-          gethomepage.dev/description: Movie Downloads
-          gethomepage.dev/widget.type: radarr
-          gethomepage.dev/widget.url: http://radarr.downloads
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_RADARR_TOKEN}}` }}"
+          gethomepage.dev/name: Sonarr ANM
+          gethomepage.dev/icon: sonarr.png
+          gethomepage.dev/description: Series Downloads
+          gethomepage.dev/widget.type: sonarr
+          gethomepage.dev/widget.url: http://sonarr-anm.downloads
+          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_SONARR_ANM_TOKEN}}` }}"
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         hosts:
         - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
