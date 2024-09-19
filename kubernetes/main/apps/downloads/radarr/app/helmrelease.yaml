@@ -119,6 +119,3 @@ spec:
         path: /mnt/tank/fwe
         globalMounts:
         - path: /data
-      test:
-        enabled: true
-        existingClaim: radarr-config-v1
