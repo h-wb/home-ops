@@ -121,4 +121,4 @@ spec:
         - path: /data
       test:
         enabled: true
-        existingClaim: radarr-uhd-config-v1
+        existingClaim: radarr-config-v1
