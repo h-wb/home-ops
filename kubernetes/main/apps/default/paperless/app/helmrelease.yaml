@@ -118,9 +118,21 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /data/local
+      # nas:
+      #   type: nfs
+      #   server: ${NFS_ADDR:=temp}
+      #   path: /mnt/tank/hwe/Documents/Paperless
+      #   globalMounts:
+      #     - path: /data/nas
+
       nas:
         type: nfs
-        server: ${NFS_ADDR:=temp}
+        server: "${CORE_NFS_SERVER:=nas0}"
         path: /mnt/tank/hwe/Documents/Paperless
-        globalMounts:
-          - path: /data/nas
+        advancedMounts:
+          paperless:
+            app:
+              - subPath: consume
+                path: /data/nas/consume
+              - subPath: export
+                path: /data/nas/export
