@@ -76,6 +76,8 @@ spec:
                 cpu: 15m
               limits:
                 memory: 2048Mi
+            securityContext:
+              supplementalGroups: ["568"]
     service:
       app:
         controller: *app
