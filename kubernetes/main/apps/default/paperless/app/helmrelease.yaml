@@ -78,6 +78,15 @@ spec:
                 memory: 2048Mi
             securityContext:
               supplementalGroups: ["568"]
+    defaultPodOptions:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        runAsGroup: 568
+        fsGroup: 568
+        supplementalGroups: [65534]
+        fsGroupChangePolicy: "OnRootMismatch"
     service:
       app:
         controller: *app
