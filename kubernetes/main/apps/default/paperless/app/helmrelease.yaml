@@ -127,7 +127,7 @@ spec:
 
       nas:
         type: nfs
-        server: "${CORE_NFS_SERVER:=nas0}"
+        server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe/Documents/Paperless
         advancedMounts:
           paperless:
