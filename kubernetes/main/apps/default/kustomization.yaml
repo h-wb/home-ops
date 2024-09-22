@@ -8,4 +8,5 @@ resources:
   # Flux-Kustomizations
   # - ./actual/ks.yaml
   - ./homepage/ks.yaml
-  - ./paperless/ks.yaml
+  # - ./paperless/ks.yaml
+  - ./syncthing/ks.yaml
