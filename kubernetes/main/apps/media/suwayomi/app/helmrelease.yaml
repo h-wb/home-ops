@@ -41,6 +41,7 @@ spec:
               tag: v1.1.1-r1599
             env:
               TZ: ${TIMEZONE}
+              BIND_PORT: &port 4567
               WEB_UI_CHANNEL: "preview"
               AUTO_DOWNLOAD_CHAPTERS: true
               FLARESOLVERR_ENABLED: true
