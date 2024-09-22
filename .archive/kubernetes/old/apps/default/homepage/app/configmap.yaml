@@ -80,7 +80,7 @@ data:
         columns: 4
     providers:
       longhorn:
-        url: http://longhorn.storage
+        url: http://longhorn-frontend.storage
   widgets.yaml: |
     - search:
         provider: [google, duckduckgo]
