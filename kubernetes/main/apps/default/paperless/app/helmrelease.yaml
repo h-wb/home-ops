@@ -114,16 +114,12 @@ spec:
               identifier: app
               port: http
     persistence:
-      config:
+      data:
         existingClaim: *app
-        globalMounts:
-          - path: /data/local
-      # nas:
-      #   type: nfs
-      #   server: ${NFS_ADDR:=temp}
-      #   path: /mnt/tank/hwe/Documents/Paperless
-      #   globalMounts:
-      #     - path: /data/nas
+        advancedMounts:
+          paperless:
+            app:
+              - path: /data/local
       nas:
         type: nfs
         server: ${NFS_ADDR:=temp}
@@ -131,7 +127,4 @@ spec:
         advancedMounts:
           paperless:
             app:
-              - subPath: consume
-                path: /data/nas/consume
-              - subPath: export
-                path: /data/nas/export
+              - path: /data/nas
