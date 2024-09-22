@@ -29,7 +29,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      komga:
+      suwayomi:
         labels:
           nfsMount: "true"
         annotations:
