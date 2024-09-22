@@ -6,11 +6,11 @@ metadata:
   name: &app syncthing
   namespace: flux-system
 spec:
-  targetNamespace: storage
+  targetNamespace: default
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/main/apps/storage/syncthing/app
+  path: ./kubernetes/main/apps/default/syncthing/app
   prune: true
   sourceRef:
     kind: GitRepository
