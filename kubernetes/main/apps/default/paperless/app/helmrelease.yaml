@@ -124,7 +124,6 @@ spec:
       #   path: /mnt/tank/hwe/Documents/Paperless
       #   globalMounts:
       #     - path: /data/nas
-
       nas:
         type: nfs
         server: ${NFS_ADDR:=temp}
