@@ -128,8 +128,6 @@ data:
       longhorn:
         url: http://longhorn-frontend.storage
   widgets.yaml: |
-    - logo:
-        icon: https://raw.githubusercontent.com/joryirving/home-ops/main/docs/src/assets/icons/lds-transparent.png
     - search:
         provider: [duckduckgo, google]
         focus: false
