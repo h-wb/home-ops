@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app komga
+  name: &app suwayomi
 spec:
   interval: 30m
   chart:
@@ -37,17 +37,20 @@ spec:
         containers:
           app:
             image:
-              repository: gotson/komga
-              tag: "1.13.0@sha256:9d2413e74ddd6158dfb478d8f1997359fcf2b81c89772497b86d58f637165c2c"
+              repository: ghcr.io/suwayomi/tachidesk
+              tag: v1.1.1-r1599
             env:
               TZ: ${TIMEZONE}
-              SERVER_PORT: &port 8080
+              WEB_UI_CHANNEL: "preview"
+              AUTO_DOWNLOAD_CHAPTERS: true
+              FLARESOLVERR_ENABLED: true
+              FLARESOLVERR_URL: http://flaresolverr.downloads
             resources:
               requests:
-                cpu: 15m
-                memory: 1Gi
+                memory: 250Mi
+                cpu: 500m
               limits:
-                memory: 4Gi
+                memory: 1500Mi
     service:
       app:
         controller: *app
@@ -60,13 +63,9 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Books
-          gethomepage.dev/name: Komga
+          gethomepage.dev/name: Suwayomi
           gethomepage.dev/icon: komga.png
           gethomepage.dev/description: Comic/Ebook Web Reader
-          gethomepage.dev/widget.type: komga
-          gethomepage.dev/widget.url: http://komga.media:8080
-          gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_KOMGA_USERNAME}}` }}"
-          gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_KOMGA_PASSWORD}}` }}"
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
@@ -78,3 +77,12 @@ spec:
     persistence:
       config:
         existingClaim: *app
+        globalMounts:
+          - path: /home/suwayomi/.local/share/Tachidesk
+      downloads:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared/Literature/Manga
+        globalMounts:
+          - path: /home/suwayomi/.local/share/Tachidesk/
+            subPath: downloads
