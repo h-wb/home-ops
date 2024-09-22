@@ -93,9 +93,9 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /home/suwayomi/.local/share/Tachidesk
-      downloads:
-        type: nfs
-        server: ${NFS_ADDR:=temp}
-        path: /mnt/tank/shared/Literature/Manga
-        globalMounts:
-          - path: /home/suwayomi/.local/share/Tachidesk/downloads
+      # downloads:
+      #   type: nfs
+      #   server: ${NFS_ADDR:=temp}
+      #   path: /mnt/tank/shared/Literature/Manga
+      #   globalMounts:
+      #     - path: /home/suwayomi/.local/share/Tachidesk/downloads
