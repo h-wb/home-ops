@@ -85,5 +85,4 @@ spec:
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/shared/Literature/Manga
         globalMounts:
-          - path: /home/suwayomi/.local/share/Tachidesk/
-            subPath: downloads
+          - path: /home/suwayomi/.local/share/Tachidesk/downloads
