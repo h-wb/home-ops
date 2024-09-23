@@ -209,3 +209,6 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /data
+      test:
+        enabled: true
+        existingClaim: qbvpn
