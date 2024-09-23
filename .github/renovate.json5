@@ -31,8 +31,7 @@
   "ignorePaths": [
     "**/*.sops.*",
     "**/.archive/**",
-    "**/resources/**",
-    "**/kubernetes/main/**" //TO-DO: remove when main is updated
+    "**/resources/**"
   ],
   "flux": {
     "fileMatch": [
