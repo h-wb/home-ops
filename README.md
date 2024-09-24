@@ -87,7 +87,8 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | [OVH](https://www.ovhcloud.com)             | Domain registrar                                                  | 3.58€/yr        |
 | [Cloudflare](https://www.cloudflare.com/)     | Domain and Tunnels                                                | Free       |
 | [GitHub](https://github.com/)               | Hosting this repository and continuous integration/deployments    | Free           |
-|                                             |                                                                   | Total: 3.58€/yr |
+| [Hetzner](https://www.hetzner.com/)               | Backup with [Storage box](https://www.hetzner.com/storage/storage-box/)    | 46.08€/yr          |
+|                                             |                                                                   | Total: 49.66€/yr |
 
 ---
 
