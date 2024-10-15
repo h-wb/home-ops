@@ -32,10 +32,13 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/flaresolverr/flaresolverr
-              tag: v3.3.21
+              repository: 21hsmw/flaresolverr
+              tag: nodriver
             env:
               LANG: fr-FR
+              LOG_LEVEL: debug
+              TZ: Europe/Paris
+              DRIVER: nodriver
             resources:
               requests:
                 cpu: 15m
