@@ -81,8 +81,8 @@ spec:
           gethomepage.dev/group: Home
           gethomepage.dev/name: Syncthing
           gethomepage.dev/icon: syncthing.png
-          gethomepage.dev/widget.type: strelaysrv
-          gethomepage.dev/widget.url: http://syncthing-app.default:8384
+          # gethomepage.dev/widget.type: strelaysrv
+          # gethomepage.dev/widget.url: http://syncthing-app.default:8384
         hosts:
           - host: &host sync.${SECRET_DOMAIN}
             paths:
