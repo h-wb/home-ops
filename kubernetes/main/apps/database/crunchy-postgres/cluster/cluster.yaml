@@ -100,9 +100,9 @@ spec:
     #     type: AlphaNumeric
   backups:
     pgbackrest:
-      configuration: &backupConfig
-        - secret:
-            name: crunchy-pgo-secret
+      # configuration: &backupConfig
+      #   - secret:
+      #       name: crunchy-pgo-secret
       global: &backupFlag
         # Global
         compress-type: "bz2"
@@ -165,7 +165,7 @@ spec:
   dataSource:
     pgbackrest:
       stanza: db
-      configuration: *backupConfig
+      # configuration: *backupConfig
       global: *backupFlag
       repo:
         name: repo3
