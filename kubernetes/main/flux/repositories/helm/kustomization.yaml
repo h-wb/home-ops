@@ -10,6 +10,7 @@ resources:
   - ./cilium.yaml
   - ./coredns.yaml
   - ./crunchydata.yaml
+  - ./userinit-controller.yaml
   - ./descheduler.yaml
   - ./external-dns.yaml
   - ./external-secrets.yaml
