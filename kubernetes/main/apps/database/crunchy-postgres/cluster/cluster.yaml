@@ -50,6 +50,10 @@ spec:
       password:
         type: AlphaNumeric
     # Applications
+    - name: monica
+      databases: ["monica"]
+      password:
+        type: AlphaNumeric
     # - name: "atuin"
     #   databases: ["atuin"]
     #   password:
