@@ -8,7 +8,7 @@ spec:
     storage: 1Mi
   accessModes: ["ReadWriteMany"]
   nfs:
-    server: ${NFS_ADDR:=temp}
+    server: 192.168.1.161
     path: /mnt/tank/postgres
   mountOptions:
     - nfsvers=4.2
