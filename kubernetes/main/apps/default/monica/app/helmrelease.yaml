@@ -1,0 +1,88 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app monica
+spec:
+  releaseName: monica
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      monica:
+        containers:
+          app: &bapp
+            image:
+              repository: ghcr.io/monicahq/monica-next
+              tag: main
+            env:
+              TZ: "${TZ}"
+              APP_ENV: production
+              APP_URL: https://monica.${SECRET_DOMAIN}
+              CACHE_DRIVER: redis
+              DEFAULT_MAX_STORAGE_SIZE: 4096
+              MAIL_MAILER: log
+              QUEUE_CONNECTION: redis
+              REDIS_HOST: dragonfly.database.svc.cluster.local
+              DB_CONNECTION: pgsql
+              DB_HOST: "{{ .PAPERLESS_ADMIN_PASSWORD }}"
+              DB_PORT: 3306
+            envFrom:
+              - secretRef:
+                  name: monica-secret
+          cron:
+            <<: *bapp
+            command:
+              - cron.sh
+          queue:
+            <<: *bapp
+            command:
+              - queue.sh
+
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: 80
+    ingress:
+      app:
+        className: internal
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home
+          gethomepage.dev/name: Monica
+          gethomepage.dev/icon: monica.png
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        hosts:
+        - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            service:
+              identifier: app
+              port: http
+    persistence:
+      config:
+        enabled: true
+        existingClaim: *app
+        globalMounts:
+          - path: /config
