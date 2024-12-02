@@ -17,7 +17,7 @@
     100
   ],
   "editor.stickyScroll.enabled": false,
-  "explorer.autoReveal": false,
+  "explorer.autoReveal": true,
   "files.associations": {
       "*.json5": "jsonc",
       "./ansible/**/*.yaml": "ansible",
