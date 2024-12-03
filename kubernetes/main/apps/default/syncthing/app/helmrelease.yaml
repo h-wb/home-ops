@@ -33,7 +33,7 @@ spec:
           app:
             image:
               repository: syncthing/syncthing
-              tag: 1.28.0
+              tag: 1.28.1
             env:
               PUID: 568
               PGID: 568
