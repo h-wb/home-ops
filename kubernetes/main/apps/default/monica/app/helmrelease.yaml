@@ -38,6 +38,7 @@ spec:
               TZ: "${TZ}"
               APP_ENV: production
               APP_URL: https://monica.${SECRET_DOMAIN}
+              APP_TRUSTED_PROXIES: "*"
               CACHE_DRIVER: redis
               DEFAULT_MAX_STORAGE_SIZE: 4096
               MAIL_MAILER: log
