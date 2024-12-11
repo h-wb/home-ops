@@ -32,8 +32,10 @@ spec:
         containers:
           app: &bapp
             image:
-              repository: ghcr.io/monicahq/monica-next
-              tag: main
+              # repository: ghcr.io/monicahq/monica-next
+              # tag: main
+              repository: monica
+              tag: 5.0.0-beta.4-apache
             env:
               TZ: "${TZ}"
               APP_ENV: production
