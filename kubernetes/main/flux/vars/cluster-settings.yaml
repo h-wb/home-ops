@@ -13,4 +13,4 @@ data:
   K8S_GATEWAY_ADDR: "192.168.1.200"
   NFS_ADDR: "192.168.1.161"
 
-  CLUSTER_NAME: main
+  CLUSTER: main
