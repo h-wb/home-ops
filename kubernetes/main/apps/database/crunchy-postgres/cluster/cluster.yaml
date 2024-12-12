@@ -74,10 +74,10 @@ spec:
     #   databases: ["lubelog"]
     #   password:
     #     type: AlphaNumeric
-    # - name: "gatus"
-    #   databases: ["gatus"]
-    #   password:
-    #     type: AlphaNumeric
+    - name: "gatus"
+      databases: ["gatus"]
+      password:
+        type: AlphaNumeric
     # - name: "grafana"
     #   databases: ["grafana"]
     #   password:
