@@ -88,6 +88,7 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | [Cloudflare](https://www.cloudflare.com/)     | Domain and Tunnels                                                | Free       |
 | [GitHub](https://github.com/)               | Hosting this repository and continuous integration/deployments    | Free           |
 | [Hetzner](https://www.hetzner.com/)               | Backup with [Storage box](https://www.hetzner.com/storage/storage-box/)    | 46.08€/yr          |
+| [Healthchecks.io](https://healthchecks.io/) | Monitoring internet connectivity and external facing applications | Free          |
 |                                             |                                                                   | Total: 49.66€/yr |
 
 ---
