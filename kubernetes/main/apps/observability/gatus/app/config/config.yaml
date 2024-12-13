@@ -36,7 +36,7 @@ endpoints:
     alerts: [{ type: pushover }]
   - name: PiKVM
     group: ICMP
-    url: icmp://192.168.1.48
+    url: http://192.168.1.48
     conditions: ["[STATUS] == 404"]
     alerts: [{ type: pushover }]
 # remote:
