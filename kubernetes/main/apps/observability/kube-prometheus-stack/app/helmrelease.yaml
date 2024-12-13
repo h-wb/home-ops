@@ -33,26 +33,28 @@ spec:
   values:
     crds:
       enabled: false
-    # alertmanager:
-    #   ingress:
-    #     enabled: true
-    #     pathType: Prefix
-    #     ingressClassName: internal
-    #     annotations:
-    #       external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-    #     hosts:
-    #       - alertmanager.${SECRET_DOMAIN}
-    #   alertmanagerSpec:
-    #     replicas: 2
-    #     useExistingSecret: true
-    #     configSecret: alertmanager-secret
-    #     storage:
-    #       volumeClaimTemplate:
-    #         spec:
-    #           storageClassName: ceph-filesystem
-    #           resources:
-    #             requests:
-    #               storage: 1Gi
+    alertmanager:
+      ingress:
+        enabled: true
+        pathType: Prefix
+        ingressClassName: internal
+        annotations:
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        hosts:
+          - alertmanager.${SECRET_DOMAIN}
+      alertmanagerSpec:
+        alertmanagerConfiguration:
+          name: alertmanager
+          global:
+            resolveTimeout: 5m
+        externalUrl: https://alertmanager.${SECRET_DOMAIN}
+        storage:
+          volumeClaimTemplate:
+            spec:
+              storageClassName: longhorn
+              resources:
+                requests:
+                  storage: 1Gi
     grafana:
       enabled: false
       forceDeployDashboards: true
