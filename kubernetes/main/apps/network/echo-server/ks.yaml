@@ -22,4 +22,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: echo-sever
+      GATUS_SUBDOMAIN: echo-server
