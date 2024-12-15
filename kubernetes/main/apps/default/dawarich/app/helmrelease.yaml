@@ -28,7 +28,7 @@ spec:
     keepHistory: false
   values:
     controllers:
-      monica:
+      dawarich:
         containers:
           app: &bapp
             image:
