@@ -1,0 +1,97 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app dawarich
+spec:
+  releaseName: dawarich
+  interval: 30m
+  chart:
+    spec:
+      chart: app-template
+      version: 3.5.1
+      sourceRef:
+        kind: HelmRepository
+        name: bjw-s
+        namespace: flux-system
+  maxHistory: 2
+  install:
+    createNamespace: true
+    remediation:
+      retries: 3
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  uninstall:
+    keepHistory: false
+  values:
+    controllers:
+      monica:
+        containers:
+          app: &bapp
+            image:
+              repository: freikin/dawarich
+              tag: 0.19.7
+            env:
+              TIME_ZONE: "${TZ}"
+              REDIS_URL: dragonfly.database.svc.cluster.local
+              APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
+            envFrom:
+              # - secretRef:
+              #     name: monica-secret
+              - secretRef:
+                  name: dawarich-db-secret
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "250m"
+              limits:
+                memory: "3Gi"
+                cpu: "2000m"
+            command:
+              - "dev-entrypoint.sh"
+            args:
+              - "bin/rails server -p 3000 -b 0.0.0.0"
+          sidekick:
+            <<: *bapp
+            command:
+              - "dev-entrypoint.sh"
+            args:
+              - "sidekiq"
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "250m"
+              limits:
+                memory: "3Gi"
+                cpu: "1500m"
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: 3000
+    ingress:
+      app:
+        className: internal
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home
+          gethomepage.dev/name: Dawarich
+          gethomepage.dev/icon: dawarich.png
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        hosts:
+        - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          paths:
+          - path: /
+            service:
+              identifier: app
+              port: http
+    # persistence:
+    #   config:
+    #     enabled: true
+    #     existingClaim: *app
+    #     globalMounts:
+    #       - path: /config

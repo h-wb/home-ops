@@ -78,6 +78,10 @@ spec:
       databases: ["gatus"]
       password:
         type: AlphaNumeric
+    - name: "dawarich"
+      databases: ["dawarich"]
+      password:
+        type: AlphaNumeric
     # - name: "grafana"
     #   databases: ["grafana"]
     #   password:
