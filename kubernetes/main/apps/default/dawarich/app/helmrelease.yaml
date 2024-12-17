@@ -36,7 +36,7 @@ spec:
               tag: 0.20.1
             env:
               TIME_ZONE: "${TIMEZONE}"
-              REDIS_URL: dragonfly.database.svc.cluster.local
+              REDIS_URL: redis://dragonfly.database.svc.cluster.local
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
             envFrom:
               - secretRef:
