@@ -35,12 +35,10 @@ spec:
               repository: freikin/dawarich
               tag: 0.20.1
             env:
-              TIME_ZONE: "${TZ}"
+              TIME_ZONE: "${TIMEZONE}"
               REDIS_URL: dragonfly.database.svc.cluster.local
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
             envFrom:
-              # - secretRef:
-              #     name: monica-secret
               - secretRef:
                   name: dawarich-db-secret
             resources:
