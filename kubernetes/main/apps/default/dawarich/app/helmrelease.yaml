@@ -78,7 +78,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Home
           gethomepage.dev/name: Dawarich
-          gethomepage.dev/icon: dawarich.png
+          gethomepage.dev/icon: google-maps.png
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         hosts:
         - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
