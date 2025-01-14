@@ -49,15 +49,15 @@ spec:
                 memory: "3Gi"
                 cpu: "2000m"
             command:
-              - "dev-entrypoint.sh"
+              - "web-entrypoint.sh"
             args:
               - "bin/rails server -p 3000 -b 0.0.0.0"
           sidekick:
             <<: *bapp
             command:
-              - "dev-entrypoint.sh"
+              - "sidekiq-entrypoint.sh"
             args:
-              - "sidekiq"
+              - "bundle exec sidekiq"
             resources:
               requests:
                 memory: "1Gi"
