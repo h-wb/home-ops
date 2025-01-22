@@ -12,7 +12,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: certificates
+    - name: cert-manager-issuers
   path: ./kubernetes/main/apps/network/nginx/external
   prune: true
   sourceRef:
@@ -35,7 +35,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
-    - name: certificates
+    - name: cert-manager-issuers
   path: ./kubernetes/main/apps/network/nginx/internal
   prune: true
   sourceRef:
