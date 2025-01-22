@@ -49,6 +49,7 @@ spec:
               RESCAN_ON_FILESYSTEM_CHANGE_DELAY: 5
               REDIS_HOST: dragonfly.database.svc.cluster.local
               REDIS_PORT: 6379
+              ROMM_DB_DRIVER: postgresql
             envFrom:
               - secretRef:
                   name: romm-db-secret
