@@ -47,11 +47,16 @@ spec:
               # ENABLE_SCHEDULED_UPDATE_MAME_XML: "false"
               ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: "true"
               RESCAN_ON_FILESYSTEM_CHANGE_DELAY: 5
+              REDIS_HOST: dragonfly.database.svc.cluster.local
+              REDIS_PORT: 6379
             envFrom:
               - secretRef:
                   name: romm-db-secret
               - secretRef:
                   name: romm-secret
+            ports:
+              - name: http
+                containerPort: &port 8080
             resources:
               requests:
                 memory: 350Mi
