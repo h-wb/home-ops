@@ -9,3 +9,4 @@ resources:
   - ./plex/ks.yaml
   - ./suwayomi/ks.yaml
   - ./komga/ks.yaml
+  - ./romm/ks.yaml
