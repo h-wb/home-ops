@@ -58,6 +58,10 @@ spec:
       databases: ["monica"]
       password:
         type: AlphaNumeric
+    - name: romm
+      databases: ["romm"]
+      password:
+        type: AlphaNumeric
     # - name: "atuin"
     #   databases: ["atuin"]
     #   password:
