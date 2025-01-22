@@ -29,7 +29,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      komga:
+      romm:
         labels:
           nfsMount: "true"
         annotations:
