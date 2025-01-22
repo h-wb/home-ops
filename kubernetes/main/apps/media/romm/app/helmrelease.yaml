@@ -104,6 +104,10 @@ spec:
     persistence:
       romm:
         existingClaim: *app
+        globalMounts:
+          - path: /romm
+            readOnly: false
+
 
       configuration:
         type: configMap
