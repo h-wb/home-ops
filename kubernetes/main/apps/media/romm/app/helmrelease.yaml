@@ -73,7 +73,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile: { type: RuntimeDefault }
         supplementalGroups:
-          - 1568
+          - 1000
     service:
       app:
         controller: *app
