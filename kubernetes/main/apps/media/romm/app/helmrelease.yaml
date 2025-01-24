@@ -123,3 +123,11 @@ spec:
         medium: Memory
         globalMounts:
           - path: /tmp
+      media:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /roms
+            subPath: Games
+            readOnly: true
