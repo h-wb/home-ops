@@ -126,8 +126,8 @@ spec:
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
-        path: /mnt/tank/shared
+        path: /mnt/tank/shared/Games
         globalMounts:
           - path: /roms
-            subPath: Games/Library
-            readOnly: true
+            # subPath: Games/Library
+            # readOnly: true
