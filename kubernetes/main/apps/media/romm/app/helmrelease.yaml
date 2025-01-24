@@ -101,21 +101,21 @@ spec:
                 service:
                   identifier: app
                   port: http
-    # persistence:
-    #   romm:
-    #     existingClaim: *app
-    #     globalMounts:
-    #       - path: /romm
-    #         readOnly: false
+    persistence:
+      # romm:
+      #   existingClaim: *app
+      #   globalMounts:
+      #     - path: /romm
+      #       readOnly: false
 
 
-    #   configuration:
-    #     type: configMap
-    #     name: romm-config
-    #     globalMounts:
-    #       - path: /romm/config/config.yml
-    #         subPath: config.yml
-    #     defaultMode: 0664
+      configuration:
+        type: configMap
+        name: romm-config
+        globalMounts:
+          - path: /romm/config/config.yml
+            subPath: config.yml
+        defaultMode: 0664
 
     #   tmp:
     #     type: emptyDir
