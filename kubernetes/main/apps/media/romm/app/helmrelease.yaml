@@ -129,5 +129,5 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /roms
-            subPath: Games
+            subPath: Games/Library
             readOnly: true
