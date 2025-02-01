@@ -78,3 +78,10 @@ spec:
     persistence:
       config:
         existingClaim: *app
+      media:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /data
+            readOnly: true
