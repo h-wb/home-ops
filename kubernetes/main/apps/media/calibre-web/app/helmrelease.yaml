@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app calibre-web-automated
+  name: &app calibre-web
 spec:
   interval: 30m
   chart:
@@ -29,7 +29,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      calibre-web-automated:
+      calibre-web:
         labels:
           nfsMount: "true"
         annotations:
