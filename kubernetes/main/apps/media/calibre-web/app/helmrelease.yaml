@@ -29,7 +29,7 @@ spec:
       namespace: storage
   values:
     controllers:
-      calibre-web:
+      calibre-web-automated:
         labels:
           nfsMount: "true"
         annotations:
