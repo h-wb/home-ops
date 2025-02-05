@@ -128,6 +128,6 @@ spec:
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/shared
         globalMounts:
-          - path: /roms
+          - path: /romm/library
             subPath: Games/Library
             # readOnly: true
