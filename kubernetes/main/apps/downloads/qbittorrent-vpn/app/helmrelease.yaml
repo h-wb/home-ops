@@ -34,7 +34,7 @@ spec:
           annotations:
             reloader.stakater.com/auto: "true"
           securityContext:
-            fsGroup: 568
+            fsGroup: 1000
             fsGroupChangePolicy: "OnRootMismatch"
         containers:
           app:
@@ -62,8 +62,8 @@ spec:
                   failureThreshold: 30
                   periodSeconds: 5
             securityContext:
-              runAsUser: 568
-              runAsGroup: 568
+              runAsUser: 1000
+              runAsGroup: 1000
               runAsNonRoot: true
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -91,9 +91,9 @@ spec:
               limits:
                 memory: 50Mi
             securityContext:
-              runAsUser: 568
-              runAsGroup: 568
-              fsGroup: 568
+              runAsUser: 1000
+              runAsGroup: 1000
+              fsGroup: 1000
               fsGroupChangePolicy: OnRootMismatch
               supplementalGroups: [65542]
 
@@ -132,8 +132,8 @@ spec:
               CRON_SCHEDULE: "*/5 * * * *"
               LOG_TIMESTAMP: false
             securityContext:
-              runAsUser: 568
-              runAsGroup: 568
+              runAsUser: 1000
+              runAsGroup: 1000
               runAsNonRoot: true
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

@@ -41,9 +41,9 @@ spec:
     storageClassName: "${VOLSYNC_STORAGECLASS:-longhorn-snapshot}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
     moverSecurityContext:
-      runAsUser: "${VOLSYNC_UID:-568}"
-      runAsGroup: "${VOLSYNC_GID:-568}"
-      fsGroup: "${VOLSYNC_GID:-568}"
+      runAsUser: "${VOLSYNC_UID:-1000}"
+      runAsGroup: "${VOLSYNC_GID:-1000}"
+      fsGroup: "${VOLSYNC_GID:-1000}"
     capacity: "${VOLSYNC_CAPACITY}"
 ---
 apiVersion: volsync.backube/v1alpha1
@@ -65,9 +65,9 @@ spec:
     storageClassName: "${VOLSYNC_STORAGECLASS:-longhorn-snapshot}"
     accessModes: ["${VOLSYNC_ACCESSMODES:-ReadWriteOnce}"]
     moverSecurityContext:
-      runAsUser: "${VOLSYNC_UID:-568}"
-      runAsGroup: "${VOLSYNC_GID:-568}"
-      fsGroup: "${VOLSYNC_GID:-568}"
+      runAsUser: "${VOLSYNC_UID:-1000}"
+      runAsGroup: "${VOLSYNC_GID:-1000}"
+      fsGroup: "${VOLSYNC_GID:-1000}"
     retain:
       hourly: 24
       daily: 10

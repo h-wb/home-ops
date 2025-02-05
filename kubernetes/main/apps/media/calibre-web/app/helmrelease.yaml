@@ -43,8 +43,8 @@ spec:
               CACHE_DIR: /cache
               CALIBRE_PORT: &port 8083
               TZ: America/New_York
-              PUID: 568
-              PGID: 568
+              PUID: 1000
+              PGID: 1000
               DOCKER_MODS: >-
                 {{- $items := list
                   "// renovate: lsio-docker-mod"
@@ -85,6 +85,12 @@ spec:
           external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
+          - host: "ebooks.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:
