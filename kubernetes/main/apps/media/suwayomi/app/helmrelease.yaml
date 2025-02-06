@@ -93,10 +93,10 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /home/suwayomi/.local/share/Tachidesk
-      #TO-DO: add NFS
-      # downloads:
-      #   type: nfs
-      #   server: ${NFS_ADDR:=temp}
-      #   path: /mnt/tank/shared/Literature/Manga
-      #   globalMounts:
-      #     - path: /home/suwayomi/.local/share/Tachidesk/downloads
+      downloads:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /home/suwayomi/.local/share/Tachidesk/downloads
+            subPath: Literature/Manga

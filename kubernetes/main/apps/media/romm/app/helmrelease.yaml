@@ -130,4 +130,3 @@ spec:
         globalMounts:
           - path: /romm/library
             subPath: Games/Library
-            # readOnly: true
