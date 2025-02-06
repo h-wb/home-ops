@@ -99,4 +99,4 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /home/suwayomi/.local/share/Tachidesk/downloads/mangas
-            subPath: Literature/Manga
+            subPath: Literature/Manga/Sources
