@@ -84,4 +84,4 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /data
-            readOnly: true
+            subPath: Literature
