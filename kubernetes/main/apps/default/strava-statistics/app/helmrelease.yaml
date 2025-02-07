@@ -32,8 +32,8 @@ spec:
         containers:
           app:
             image:
-              repository: robiningelbrecht/strava-statistics
-              tag: v0.4.11
+              repository: foxxmd/strava-statistics
+              tag: runfix
             env:
               UNIT_SYSTEM: metric
               PUID: 1000
