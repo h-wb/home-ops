@@ -48,14 +48,14 @@ spec:
             ports:
               - name: http
                 containerPort: &port 8080
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
+    # defaultPodOptions:
+    #   securityContext:
+    #     runAsNonRoot: true
+    #     runAsUser: 1000
+    #     runAsGroup: 1000
+    #     fsGroup: 1000
+    #     fsGroupChangePolicy: OnRootMismatch
+    #     seccompProfile: { type: RuntimeDefault }
     service:
       app:
         controller: *app
@@ -69,7 +69,7 @@ spec:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Home
           gethomepage.dev/name: Strava Stats
-          gethomepage.dev/icon: strava.png
+          gethomepage.dev/icon: mdi-run
         hosts:
           - host: &host strava.${SECRET_DOMAIN}
             paths:
