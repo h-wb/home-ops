@@ -12,4 +12,4 @@ resources:
   - ./dawarich/ks.yaml
   # - ./paperless/ks.yaml
   - ./syncthing/ks.yaml
-  - ./strava-statistics/ks.yaml
+  # - ./strava-statistics/ks.yaml
