@@ -9,5 +9,6 @@ resources:
   - ./plex/ks.yaml
   - ./suwayomi/ks.yaml
   - ./komga/ks.yaml
+  - ./komf/ks.yaml
   - ./calibre-web/ks.yaml
   - ./romm/ks.yaml
