@@ -6,6 +6,7 @@ komga:
     libraries: [ ]  # Will send notifications if any notification source is enabled. If empty will send notifications for all libraries
   metadataUpdate:
     default:
+      libraryType: "MANGA"
       updateModes: [ API ] # can use multiple options at once. available options are API, COMIC_INFO
       aggregate: true # if enabled will search and aggregate metadata from all configured providers
       mergeTags: true # if true and aggregate is enabled will merge tags from all providers
@@ -21,9 +22,13 @@ komga:
           - "ja"
           - "ja-ro"
         orderBooks: true # will order books using parsed volume or chapter number
-        scoreTag: true # adds score tag of format "score: 8" only uses integer part of rating. Can be used in search using query: tag:"score: 8" in komga
+        scoreTagName: "score" # adds score tag of format "score: 8" only uses integer part of rating. Can be used in search using query: tag:"score: 8" in komga
         readingDirectionValue: # override reading direction for all series. should be one of these: LEFT_TO_RIGHT, RIGHT_TO_LEFT, VERTICAL, WEBTOON
         languageValue: # set default language for series. Must use BCP 47 format e.g. "en"
+        originalPublisherTagName:
+        #publisherTagNames:
+        #  - tagName: "English Publisher"
+        #    language: "en"
 
 database:
   file: ./database.sqlite # database file location.
