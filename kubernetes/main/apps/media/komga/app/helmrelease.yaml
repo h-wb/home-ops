@@ -42,7 +42,7 @@ spec:
             env:
               TZ: ${TIMEZONE}
               SERVER_PORT: &port 8080
-              KOMGA_CORS_ALLOWED_ORIGINS: http://komf.media.svc.cluster.local:8085
+              KOMGA_CORS_ALLOWED_ORIGINS: https://komf.${SECRET_DOMAIN}
             resources:
               requests:
                 cpu: 15m

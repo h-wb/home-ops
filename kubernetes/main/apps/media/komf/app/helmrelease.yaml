@@ -56,6 +56,23 @@ spec:
         ports:
           http:
             port: 8085
+    ingress:
+      app:
+        className: internal
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Books
+          gethomepage.dev/name: Komf
+          gethomepage.dev/icon: komga.png
+          gethomepage.dev/description: Komga Metadata Analyser
+          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+        hosts:
+          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+            paths:
+              - path: /
+                service:
+                  identifier: app
+                  port: http
     persistence:
       config:
         enabled: true
