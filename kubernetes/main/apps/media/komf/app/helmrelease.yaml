@@ -85,5 +85,5 @@ spec:
         name: komf-configmap
         globalMounts:
           - path: /config/application.yml
-            readOnly: true
+            # readOnly: true
             subPath: application.yml
