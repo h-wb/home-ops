@@ -31,7 +31,7 @@ spec:
           app:
             image:
               repository: ghcr.io/jkcoxson/jitstreamer-eb
-              tag: sha256-13bd9c941c9312edcd285eb225eb4f2debe3c1c52f468bf3fab33add0c40c422.sig
+              tag: sha256:96003c76a241e92878f010de92487cd41fd567737271ab6d26f3f69f9876f4db
             env:
               RUST_LOG: info
               RUNNER_COUNT: 1
