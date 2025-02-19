@@ -37,7 +37,7 @@ spec:
               tag: latest
             command:
               - sleep
-              - 80000
+              - "80000"
             env:
               RUST_LOG: info
               RUNNER_COUNT: 1
