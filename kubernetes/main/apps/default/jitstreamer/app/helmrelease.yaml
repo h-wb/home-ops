@@ -29,9 +29,12 @@ spec:
           reloader.stakater.com/auto: "true"
         containers:
           app:
+            # image:
+            #   repository: ghcr.io/jkcoxson/jitstreamer-eb
+            #   tag: master
             image:
-              repository: ghcr.io/jkcoxson/jitstreamer-eb
-              tag: master
+              repository: busybox
+              tag: latest
             env:
               RUST_LOG: info
               RUNNER_COUNT: 1
