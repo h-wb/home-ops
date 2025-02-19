@@ -29,15 +29,15 @@ spec:
           reloader.stakater.com/auto: "true"
         containers:
           app:
-            # image:
-            #   repository: ghcr.io/jkcoxson/jitstreamer-eb
-            #   tag: master
             image:
-              repository: debian
-              tag: latest
-            command:
-              - sleep
-              - "80000"
+              repository: ghcr.io/jkcoxson/jitstreamer-eb
+              tag: master
+            # image:
+            #   repository: debian
+            #   tag: latest
+            # command:
+            #   - sleep
+            #   - "80000"
             env:
               RUST_LOG: info
               RUNNER_COUNT: 1
@@ -77,6 +77,6 @@ spec:
         enabled: true
         existingClaim: *app
         globalMounts:
-          - path: /app
-            # subPath: jitstreamer.db
+          - path: /app/jitstreamer.db
+            subPath: jitstreamer.db
             readOnly: false
