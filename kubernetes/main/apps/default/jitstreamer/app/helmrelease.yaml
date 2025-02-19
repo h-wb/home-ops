@@ -34,6 +34,7 @@ spec:
             #   tag: master
             image:
               repository: debian
+              tag: latest
             env:
               RUST_LOG: info
               RUNNER_COUNT: 1
