@@ -35,6 +35,8 @@ spec:
             image:
               repository: debian
               tag: latest
+            command:
+              - bash
             env:
               RUST_LOG: info
               RUNNER_COUNT: 1
