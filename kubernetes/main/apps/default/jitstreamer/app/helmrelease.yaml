@@ -67,9 +67,9 @@ spec:
         existingClaim: jitstreamer-plist
         globalMounts:
           - path: /var/lib/lockdown
-      app:
-        enabled: true
-        existingClaim: *app
-        globalMounts:
-          - path: /app
-            readOnly: false
+      # app:
+      #   enabled: true
+      #   existingClaim: *app
+      #   globalMounts:
+      #     - path: /app
+      #       readOnly: false
