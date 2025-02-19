@@ -13,3 +13,4 @@ resources:
   # - ./paperless/ks.yaml
   - ./syncthing/ks.yaml
   # - ./strava-statistics/ks.yaml
+  - ./jitstreamer/ks.yaml
