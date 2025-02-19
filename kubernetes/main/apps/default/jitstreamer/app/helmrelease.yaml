@@ -30,8 +30,8 @@ spec:
         containers:
           app:
             image:
-              repository: jkcoxson/jitstreamer-eb
-              tag: latest
+              repository: ghcr.io/jkcoxson/jitstreamer-eb
+              tag: sha256-13bd9c941c9312edcd285eb225eb4f2debe3c1c52f468bf3fab33add0c40c422.sig
             env:
               RUST_LOG: info
               RUNNER_COUNT: 1
