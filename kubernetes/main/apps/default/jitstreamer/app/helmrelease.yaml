@@ -30,7 +30,7 @@ spec:
         containers:
           app:
             image:
-              repository: sardine0006/jitstreamer-eb
+              repository: jkcoxson/jitstreamer-eb
               tag: latest
             env:
               RUST_LOG: info
