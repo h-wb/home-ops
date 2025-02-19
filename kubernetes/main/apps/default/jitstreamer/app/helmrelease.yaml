@@ -39,6 +39,9 @@ spec:
               RUST_LOG: info
               RUNNER_COUNT: 1
               ALLOW_REGISTRATION: 2
+            command:
+              - sleep
+              - 80000
             resources:
               requests:
                 cpu: 15m
