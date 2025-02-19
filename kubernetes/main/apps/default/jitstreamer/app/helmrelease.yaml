@@ -77,6 +77,6 @@ spec:
         enabled: true
         existingClaim: *app
         globalMounts:
-          - path: /app/jitstreamer.db
-            subPath: jitstreamer.db
+          - path: /app
+            # subPath: jitstreamer.db
             readOnly: false
