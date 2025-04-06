@@ -33,7 +33,7 @@ spec:
           app: &bapp
             image:
               repository: freikin/dawarich
-              tag: 0.25.3
+              tag: 0.25.4
             env:
               TIME_ZONE: "${TIMEZONE}"
               REDIS_URL: redis://dragonfly.database.svc.cluster.local
