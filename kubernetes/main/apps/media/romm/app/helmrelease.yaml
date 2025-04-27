@@ -82,7 +82,7 @@ spec:
             port: *port
     ingress:
       app:
-        className: internal
+        className: external
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Video
@@ -93,7 +93,7 @@ spec:
           gethomepage.dev/widget.url: http://romm.media:8080
           # gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_KOMGA_USERNAME}}` }}"
           # gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_KOMGA_PASSWORD}}` }}"
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
         hosts:
           - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
