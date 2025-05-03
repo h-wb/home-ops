@@ -27,6 +27,8 @@ spec:
               repository: ghcr.io/rickdb/plexanisync
               tag: 1.4.2
             env:
+              PUID: 1000
+              PGID: 1000
               PLEX_SECTION: Anime
               PLEX_URL: http://plex.media.svc.cluster.local:32400
               PLEX_TOKEN:
