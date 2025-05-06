@@ -78,14 +78,13 @@ spec:
             dependsOn: app
             image:
               repository: registry.k8s.io/git-sync/git-sync
-              tag: v4.4.0
+              tag: v4.4.0@sha256:0330739a707a2969d617e859f096659ab6d149212658ac0ad7e550b59482ebf0
             args:
-              - --repo=https://github.com/VueTorrent/VueTorrent
+              - --repo=https://github.com/VueTorrent/VueTorrent.git
               - --ref=latest-release
-              - --period=86400s
+              - --period=6h
               - --root=/add-ons
-              - --sync-timeout=3600s
-              - -v=6
+              - --link=vuetorrent
             resources:
               requests:
                 cpu: 10m
