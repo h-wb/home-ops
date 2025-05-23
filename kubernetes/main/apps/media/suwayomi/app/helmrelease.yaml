@@ -38,7 +38,7 @@ spec:
           app:
             image:
               repository: ghcr.io/suwayomi/tachidesk
-              tag: v2.0.1744
+              tag: v2.0.1754
             env:
               TZ: ${TIMEZONE}
               BIND_PORT: &port 4567
