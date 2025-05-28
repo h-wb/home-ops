@@ -38,7 +38,7 @@ spec:
       app.kubernetes.io/name: *app
   interval: 30m
   timeout: 5m
-  path: ./kubernetes/main/apps/media/qbittorrent-vpn/vuetorrent
+  path: ./kubernetes/main/apps/downloads/qbittorrent-vpn/vuetorrent
   dependsOn:
     - name: qbittorrent
   prune: true
