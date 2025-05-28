@@ -26,7 +26,7 @@ spec:
       retries: 1
   values:
     controllers:
-      main:
+      vuetorrent:
         strategy: RollingUpdate
         pod:
           securityContext:
@@ -71,8 +71,9 @@ spec:
               PORT: *port
               QBIT_BASE: http://qbittorrent-vpn:8080
     service:
-      *app :
-        controller: main
+      app :
+        controller: *app
+        nameOverride: *app
         ports:
           http:
             port: *port
