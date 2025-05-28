@@ -62,22 +62,6 @@ spec:
       databases: ["romm"]
       password:
         type: AlphaNumeric
-    # - name: "atuin"
-    #   databases: ["atuin"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "authentik"
-    #   databases: ["authentik"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "bazarr"
-    #   databases: ["bazarr"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "lubelog"
-    #   databases: ["lubelog"]
-    #   password:
-    #     type: AlphaNumeric
     - name: "gatus"
       databases: ["gatus"]
       password:
@@ -86,34 +70,6 @@ spec:
       databases: ["dawarich"]
       password:
         type: AlphaNumeric
-    # - name: "grafana"
-    #   databases: ["grafana"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "kyoo"
-    #   databases: ["kyoo"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "paperless"
-    #   databases: ["paperless"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "prowlarr"
-    #   databases: ["prowlarr_main"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "radarr"
-    #   databases: ["radarr_main"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "readarr"
-    #   databases: ["readarr_main", "readarr_cache", "readarr_log"]
-    #   password:
-    #     type: AlphaNumeric
-    # - name: "sonarr"
-    #   databases: ["sonarr_main"]
-    #   password:
-    #     type: AlphaNumeric
   backups:
     pgbackrest:
       configuration: &backupConfig
@@ -124,12 +80,12 @@ spec:
         compress-type: "bz2"
         compress-level: "9"
         # Minio
-        # repo1-block: "y"
-        # repo1-bundle: "y"
-        # repo1-path: /crunchy-pgo
-        # repo1-retention-full: "30" # days
-        # repo1-retention-full-type: "time"
-        # repo1-s3-uri-style: path
+        repo1-block: "y"
+        repo1-bundle: "y"
+        repo1-path: /crunchy-pgo
+        repo1-retention-full: "30" # days
+        repo1-retention-full-type: "time"
+        repo1-s3-uri-style: path
         # R2
         repo2-block: "y"
         repo2-bundle: "y"
@@ -137,26 +93,23 @@ spec:
         repo2-retention-full: "7" # days
         repo2-retention-full-type: time
         repo2-s3-uri-style: path
-        # PVC
-        # repo3-retention-full: "30" # days
-        # repo3-retention-full-type: "time"
       manual:
-        repoName: repo2
+        repoName: repo1
         options:
           - --type=full
       metadata:
         labels:
           app.kubernetes.io/name: crunchy-postgres-backup
       repos:
-        # - name: repo1
-        #   s3: &minio
-        #     bucket: postgresql
-        #     endpoint: s3.jory.dev
-        #     region: ca-west-1
-        #   schedules:
-        #     full: "30 1 * * 0" # Sunday at 01:30
-        #     differential: "30 1 * * 1-6" # Mon-Sat at 01:30
-        #     incremental: "30 3-23 * * *" # Every hour except 01:30-2:30
+        - name: repo1
+          s3: &minio
+            bucket: crunchy-pgo
+            endpoint: s3.${SECRET_DOMAIN}"
+            region: us-east-1
+          schedules:
+            full: "30 1 * * 0" # Sunday at 01:30
+            differential: "30 1 * * 1-6" # Mon-Sat at 01:30
+            incremental: "30 3-23 * * *" # Every hour except 01:30-2:30
         - name: repo2
           s3: &r2
             bucket: crunchy-pgo
@@ -165,27 +118,14 @@ spec:
           schedules:
             full: "30 2 * * 0" # Sunday at 02:30
             incremental: "30 2 * * 1-6/2" # Mon-Sat at 02:30, every 2nd day
-        # - name: repo3
-        #   volume: &nfs
-        #     volumeClaimSpec:
-        #       storageClassName: ""
-        #       volumeName: "postgres-nfs"
-        #       accessModes: ["ReadWriteMany"]
-        #       resources:
-        #         requests:
-        #           storage: 1Mi
-        #   schedules:
-        #     full: "15 1 * * 0" # Sunday at 01:15
-        #     differential: "15 1 * * 1-6" # Mon-Sat at 01:15
-        #     incremental: "15 3-23 * * *" # Every hour except 01:30-2:30
-  # dataSource:
-  #   pgbackrest:
-  #     stanza: db
-  #     configuration: *backupConfig
-  #     global: *backupFlag
-  #     repo:
-  #       name: repo3
-  #       # s3: *minio
+  dataSource:
+    pgbackrest:
+      stanza: db
+      configuration: *backupConfig
+      global: *backupFlag
+      repo:
+        name: repo1
+        s3: *minio
   proxy:
     pgBouncer:
       service:
