@@ -45,12 +45,12 @@ spec:
               TZ: ${TIMEZONE}
               # QBITTORRENT__PORT: &port 80
               # QBITTORRENT__BT_PORT: &bittorrentPort 28163
-              QBT_Preferences__WebUI__AlternativeUIEnabled: true
+             # QBT_Preferences__WebUI__AlternativeUIEnabled: true
               QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
               QBT_Preferences__WebUI__AuthSubnetWhitelist: |-
                 ${CLUSTER_CIDR}, ${NODE_CIDR}, 192.168.0.0/24
               QBT_Preferences__WebUI__LocalHostAuth: false
-              QBT_Preferences__WebUI__RootFolder: /add-ons/VueTorrent
+             #QBT_Preferences__WebUI__RootFolder: /add-ons/VueTorrent
             probes:
               liveness:
                 enabled: true
@@ -74,35 +74,14 @@ spec:
                 memory: 1G
               limits:
                 memory: 12G
-          vuetorrent:
-            image:
-              repository: registry.k8s.io/git-sync/git-sync
-              tag: v4.4.1@sha256:699b654e373f000c356756c24290a6dbb86500934b65ce6093fd92c434c61c6b
-            env:
-              GITSYNC_REPO: https://github.com/VueTorrent/VueTorrent
-              GITSYNC_REF: latest-release
-              GITSYNC_PERIOD: 24h
-              GITSYNC_ROOT: /add-ons
-            resources:
-              requests:
-                cpu: 10m
-                memory: 128Mi
-              limits:
-                memory: 8Gi
-            securityContext:
-              runAsUser: 1000
-              runAsGroup: 1000
-              fsGroup: 1000
-              fsGroupChangePolicy: OnRootMismatch
-              supplementalGroups: [65542]
 
           gluetun:
             image:
               repository: ghcr.io/qdm12/gluetun
               tag: v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
             env:
-              # DOT: "off"
-              # DNS_ADDRESS: "127.0.0.2"
+              DOT: "off"
+              LOG_LEVEL: debug
               VPN_SERVICE_PROVIDER: custom
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
@@ -111,6 +90,12 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: ${CLUSTER_CIDR},${NODE_CIDR} # Allow access to k8s subnets
+              DNS_KEEP_NAMESERVER: on
+              VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c '/usr/bin/wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{`{{PORTS}}`}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
+            resources:
+              limits:
+                squat.ai/tun: 1
+            restartPolicy: Always
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
@@ -118,25 +103,25 @@ spec:
               capabilities: { add: ["NET_ADMIN"] }
               allowPrivilegeEscalation: false
 
-          port-forward:
-            image:
-              repository: ghcr.io/bjw-s-labs/gluetun-qb-port-sync
-              tag: 0.0.4@sha256:82f97a1ea76a04f96b7521396d3b9766a6a9c95f12d83124ed710d3c204f2fe2
-            env:
-              GLUETUN_CONTROL_SERVER_HOST: localhost
-              GLUETUN_CONTROL_SERVER_PORT: 8000
-              QBITTORRENT_HOST: localhost
-              QBITTORRENT_WEBUI_PORT: *port
-              CRON_ENABLED: true
-              CRON_SCHEDULE: "*/5 * * * *"
-              LOG_TIMESTAMP: false
-            securityContext:
-              runAsUser: 1000
-              runAsGroup: 1000
-              runAsNonRoot: true
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+          # port-forward:
+          #   image:
+          #     repository: ghcr.io/bjw-s-labs/gluetun-qb-port-sync
+          #     tag: 0.0.4@sha256:82f97a1ea76a04f96b7521396d3b9766a6a9c95f12d83124ed710d3c204f2fe2
+          #   env:
+          #     GLUETUN_CONTROL_SERVER_HOST: localhost
+          #     GLUETUN_CONTROL_SERVER_PORT: 8000
+          #     QBITTORRENT_HOST: localhost
+          #     QBITTORRENT_WEBUI_PORT: *port
+          #     CRON_ENABLED: true
+          #     CRON_SCHEDULE: "*/5 * * * *"
+          #     LOG_TIMESTAMP: false
+          #   securityContext:
+          #     runAsUser: 1000
+          #     runAsGroup: 1000
+          #     runAsNonRoot: true
+          #     allowPrivilegeEscalation: false
+          #     readOnlyRootFilesystem: true
+          #     capabilities: { drop: ["ALL"] }
     service:
       app:
         controller: *app
@@ -189,3 +174,10 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /data
+      qbtun:
+        type: hostPath
+        hostPath: /dev/net
+        advancedMounts:
+          qbit:
+            gluetun:
+              - path: /dev/net
