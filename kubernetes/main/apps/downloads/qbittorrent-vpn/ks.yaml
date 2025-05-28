@@ -32,7 +32,7 @@ metadata:
   name: &app vuetorrent
   namespace: flux-system
 spec:
-  targetNamespace: *downloads
+  targetNamespace: downloads
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
