@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app vuetorrent
+  name: &app vuetorrent-vpn
 spec:
   interval: 30m
   chart:
@@ -26,7 +26,7 @@ spec:
       retries: 1
   values:
     controllers:
-      vuetorrent:
+      vuetorrent-vpn:
         strategy: RollingUpdate
         pod:
           securityContext:
