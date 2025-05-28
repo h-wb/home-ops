@@ -9,4 +9,5 @@ resources:
   - ./cilium/ks.yaml
   - ./coredns/ks.yaml
   - ./kubelet-csr-approver/ks.yaml
+  - ./intel-device-plugin-operator/ks.yaml
   - ./metrics-server/ks.yaml

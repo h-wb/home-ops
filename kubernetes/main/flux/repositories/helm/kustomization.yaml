@@ -16,6 +16,7 @@ resources:
   - ./external-secrets.yaml
   - ./grafana.yaml
   - ./ingress-nginx.yaml
+  - ./intel.yaml
   - ./jetstack.yaml
   - ./k8s-gateway.yaml
   - ./kubernetes-sigs-nfd.yaml
