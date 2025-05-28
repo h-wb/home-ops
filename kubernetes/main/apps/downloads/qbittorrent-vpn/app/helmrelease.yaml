@@ -178,6 +178,6 @@ spec:
         type: hostPath
         hostPath: /dev/net
         advancedMounts:
-          qbit:
+          qbittorrent-vpn:
             gluetun:
               - path: /dev/net
