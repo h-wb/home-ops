@@ -36,7 +36,7 @@ spec:
             fsGroupChangePolicy: Always
             seccompProfile: { type: RuntimeDefault }
         containers:
-          app :
+          app:
             image:
               repository: ghcr.io/vuetorrent/vuetorrent-backend
               tag: 2.4.0
