@@ -29,6 +29,8 @@ spec:
         synchronous_commit: "on"
         parameters:
           max_connections: 500
+      log:
+        level: DEBUG
   instances:
     - name: postgres
       metadata:
