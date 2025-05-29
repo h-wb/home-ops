@@ -10,8 +10,6 @@ spec:
       crunchy-userinit.ramblurr.github.com/enabled: "true"
       crunchy-userinit.ramblurr.github.com/superuser: &superuser "postgres"
   postgresVersion: 16
-  standby:
-    enabled: false
   monitoring:
     pgmonitor:
       exporter:
