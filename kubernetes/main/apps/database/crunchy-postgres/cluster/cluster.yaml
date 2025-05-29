@@ -105,7 +105,7 @@ spec:
       repos:
         - name: repo1
           s3: &minio
-            bucket: crunchy-pgo
+            bucket: postgresql
             endpoint: s3.${SECRET_DOMAIN}
             region: us-east-1
           schedules:
