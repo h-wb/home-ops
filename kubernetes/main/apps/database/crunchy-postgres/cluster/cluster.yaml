@@ -135,7 +135,7 @@ spec:
             lbipam.cilium.io/ips: ${SVC_CPGO_ADDR:=temp}
         type: LoadBalancer
       port: 5432
-      replicas: 1
+      replicas: 3
       config:
         global:
           # Grafana requires session
