@@ -97,6 +97,7 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          cert-manager.k8s.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Minio
           gethomepage.dev/description: S3 Object Storage
@@ -117,7 +118,8 @@ spec:
                   identifier: app
                   port: s3
         tls:
-          - hosts:
+          - secretName: "{{ .Release.Name }}-tls"
+            hosts:
               - *host-console
               - *host-api
     persistence:
