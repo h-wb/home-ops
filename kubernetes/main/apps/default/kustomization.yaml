@@ -9,7 +9,7 @@ resources:
   # - ./actual/ks.yaml
   - ./homepage/ks.yaml
   - ./monica/ks.yaml
-  - ./dawarich/ks.yaml
+  # - ./dawarich/ks.yaml
   # - ./paperless/ks.yaml
   - ./syncthing/ks.yaml
   # - ./strava-statistics/ks.yaml
