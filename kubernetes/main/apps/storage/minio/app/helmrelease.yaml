@@ -97,20 +97,29 @@ spec:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Minio
+          gethomepage.dev/description: S3 Object Storage
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/icon: minio.png
         className: internal
         hosts:
-          - host: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - host: &host-console "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: http
-          - host: "s3.${SECRET_DOMAIN}"
+          - host: &host-api "s3.${SECRET_DOMAIN}"
             paths:
               - path: /
                 service:
                   identifier: app
                   port: s3
+        tls:
+          - hosts:
+              - *host-console
+              - *host-api
     persistence:
       config:
         type: nfs
