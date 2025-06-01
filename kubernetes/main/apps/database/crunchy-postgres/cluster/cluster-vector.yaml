@@ -107,7 +107,7 @@ spec:
         - name: repo1
           s3: &minio
             bucket: crunchy-postgres-vector
-            endpoint: https://minio.storage.svc.cluster.local:9000
+            endpoint: 192.168.1.57:9000
             region: home
           schedules:
             full: "30 1 * * 0" # Sunday at 01:30
