@@ -107,7 +107,7 @@ spec:
         - name: repo1
           s3: &minio
             bucket: crunchy-postgres-vector
-            endpoint: s3.${SECRET_DOMAIN}
+            endpoint: s3.${SECRET_DOMAIN}:9000
             region: home
           schedules:
             full: "30 1 * * 0" # Sunday at 01:30
