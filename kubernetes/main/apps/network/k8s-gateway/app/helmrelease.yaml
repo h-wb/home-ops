@@ -30,4 +30,3 @@ spec:
       annotations:
         io.cilium/lb-ipam-ips: "${K8S_GATEWAY_ADDR}"
       externalTrafficPolicy: Cluster
-    watchedResources: ["Ingress", "Service"]
