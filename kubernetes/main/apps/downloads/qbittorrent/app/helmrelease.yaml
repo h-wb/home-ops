@@ -24,7 +24,7 @@ spec:
       retries: 3
   dependsOn:
     - name: longhorn
-      namespace: storage
+      namespace: longhorn-system
     - name: volsync
       namespace: storage
   values:
@@ -114,7 +114,6 @@ spec:
     service:
       app:
         controller: *app
-        nameOverride: *app
         ports:
           http:
             port: *port

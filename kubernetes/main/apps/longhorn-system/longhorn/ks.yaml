@@ -6,13 +6,13 @@ metadata:
   name: &app longhorn
   namespace: flux-system
 spec:
-  targetNamespace: storage
+  targetNamespace: longhorn-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   # dependsOn:
   #   - name: external-secrets-stores
-  path: ./kubernetes/main/apps/storage/longhorn/app
+  path: ./kubernetes/main/apps/longhorn-system/longhorn/app
   prune: true
   sourceRef:
     kind: GitRepository
@@ -29,13 +29,13 @@ metadata:
   name: &app storageclass
   namespace: flux-system
 spec:
-  targetNamespace: storage
+  targetNamespace: longhorn-system
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: longhorn
-  path: ./kubernetes/main/apps/storage/longhorn/storageclass
+  path: ./kubernetes/main/apps/longhorn-system/longhorn/storageclass
   prune: true
   sourceRef:
     kind: GitRepository

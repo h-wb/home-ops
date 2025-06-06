@@ -135,7 +135,7 @@ data:
         icon: mdi-download-circle
     providers:
       longhorn:
-        url: http://longhorn-frontend.storage
+        url: http://longhorn-frontend.longhorn-system
   widgets.yaml: |
     - search:
         provider: [duckduckgo, google]

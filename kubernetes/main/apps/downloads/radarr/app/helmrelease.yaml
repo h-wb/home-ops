@@ -23,7 +23,7 @@ spec:
       retries: 3
   dependsOn:
   - name: longhorn
-    namespace: storage
+    namespace: longhorn-system
   - name: volsync
     namespace: storage
   values:
