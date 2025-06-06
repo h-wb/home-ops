@@ -29,3 +29,6 @@ spec:
       runAsUser: ${puid}
       runAsGroup: ${pgid}
       fsGroup: ${pgid}
+    enableFileDeletion: true
+    cleanupCachePVC: true
+    cleanupTempPVC: true
