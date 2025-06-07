@@ -40,7 +40,7 @@ spec:
   timeout: 5m
   path: ./kubernetes/main/apps/downloads/qbittorrent-vpn/vuetorrent
   dependsOn:
-    - name: qbittorrent
+    - name: qbittorrent-vpn
   prune: true
   sourceRef:
     kind: GitRepository
