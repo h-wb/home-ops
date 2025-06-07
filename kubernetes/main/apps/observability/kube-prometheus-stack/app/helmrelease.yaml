@@ -152,7 +152,7 @@ spec:
         scrapeConfigSelectorNilUsesHelmValues: false
         retention: 7d
         retentionSize: 35GB
-        replicas: 2
+        replicas: 1
         storageSpec:
           volumeClaimTemplate:
             spec:
