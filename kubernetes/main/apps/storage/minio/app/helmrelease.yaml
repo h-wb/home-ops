@@ -99,14 +99,14 @@ spec:
     ingress:
       app:
         annotations:
-          external-dns.alpha.kubernetes.io/target: "internal.${SECRET_DOMAIN}"
+          external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
           cert-manager.k8s.io/cluster-issuer: letsencrypt-production
           gethomepage.dev/enabled: "true"
           gethomepage.dev/name: Minio
           gethomepage.dev/description: S3 Object Storage
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/icon: minio.png
-        className: internal
+        className: external
         hosts:
           - host: &host-console "{{ .Release.Name }}.${SECRET_DOMAIN}"
             paths:
