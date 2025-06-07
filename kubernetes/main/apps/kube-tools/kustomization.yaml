@@ -8,7 +8,7 @@ resources:
   # Flux-Kustomizations
   - ./node-feature-discovery/ks.yaml
   - ./reloader/ks.yaml
-  - ./system-upgrade-controller/ks.yaml
+  # - ./system-upgrade-controller/ks.yaml
 configMapGenerator:
   - name: versions
     env: ./versions.env
