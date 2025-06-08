@@ -1,8 +1,9 @@
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
-KUBECONFIG = "{{config_root}}/kubernetes/main/kubeconfig:{{config_root}}/kubernetes/dev/kubeconfig"
+KUBECONFIG = "{{config_root}}/kubernetes/clusters/main/kubeconfig:{{config_root}}/kubernetes/clusters/test/kubeconfig:{{config_root}}/kubernetes/clusters/utility/kubeconfig"
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
-TALOSCONFIG = "{{config_root}}/kubernetes/main/bootstrap/talos/clusterconfig/talosconfig"
+TALOSCONFIG = "{{config_root}}/talos/main/clusterconfig/talosconfig"
+TALOS_DIR = "{{config_root}}/talos"
 
 [tools]
 "python" = "3.13"

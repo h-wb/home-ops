@@ -2,20 +2,26 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
+set: [pipefail]
+shopt: [globstar]
+
 vars:
-  # Directories
-  ANSIBLE_DIR: "{{.ROOT_DIR}}/ansible"
-  KUBERNETES_DIR: "{{.ROOT_DIR}}/kubernetes"
-  # Files
-  PIP_REQUIREMENTS_FILE: "{{.ANSIBLE_DIR}}/requirements.txt"
+  BOOSTRAP_DIR: '{{.ROOT_DIR}}/bootstrap'
+  CLUSTER: '{{.CLUSTER | default "main"}}'
+  CLUSTER_APPS: '{{.ROOT_DIR}}/kubernetes/apps/{{.CLUSTER}}'
+  CLUSTER_DIR: '{{.ROOT_DIR}}/kubernetes/clusters/{{.CLUSTER}}'
+  SCRIPTS_DIR: '{{.ROOT_DIR}}/scripts'
+  SHARED_APPS: '{{.ROOT_DIR}}/kubernetes/apps/{{.CLUSTER}}'
+  TALOS_DIR: '{{.ROOT_DIR}}/talos/{{.CLUSTER}}'
 
 env:
-  KUBECONFIG: "{{.KUBERNETES_DIR}}/kubernetes/main/kubeconfig:{{.KUBERNETES_DIR}}/kubernetes/dev/kubeconfig"
+  KUBECONFIG: '{{.CLUSTER_DIR}}/kubeconfig'
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
+  TALOSCONFIG: '{{.TALOS_DIR}}/clusterconfig/talosconfig'
 
 
 includes:
-  ansible: .taskfiles/Ansible/Taskfile.yaml
+  bootstrap: .taskfiles/bootstrap
   brew: .taskfiles/Brew/Taskfile.yaml
   external-secrets: .taskfiles/ExternalSecrets/Taskfile.yaml
   flux: .taskfiles/Flux/Taskfile.yaml
@@ -27,6 +33,4 @@ includes:
   volsync: .taskfiles/VolSync/Taskfile.yaml
 
 tasks:
-  default:
-    silent: true
-    cmd: task -l
+  default: task --list

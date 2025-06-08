@@ -1,0 +1,42 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app dawarich
+  namespace: &namespace default
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
+  components:
+    - ../../../../../components/gatus/guarded
+    - ../../../../../components/keda/nfs-scaler
+    - ../../../../../components/postgres
+    # - ../../../../../components/volsync
+  dependsOn:
+    - name: crunchy-postgres-operator
+      namespace: database
+  interval: 30m
+  path: ./kubernetes/apps/main/default/dawarich/app
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+    substitute:
+      APP: *app
+      VOLSYNC_CAPACITY: 2Gi
+      GATUS_SUBDOMAIN: dawarich
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false # no flux ks dependents
