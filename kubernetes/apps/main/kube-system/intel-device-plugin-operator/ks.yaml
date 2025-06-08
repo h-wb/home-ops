@@ -4,9 +4,9 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app intel-device-plugin-operator
-  namespace: flux-system
+  namespace: &namespace kube-system
 spec:
-  targetNamespace: kube-system
+  targetNamespace: *namespace
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
@@ -41,9 +41,9 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app intel-device-plugin-gpu
-  namespace: flux-system
+  namespace: &namespace kube-system
 spec:
-  targetNamespace: kube-system
+  targetNamespace: *namespace
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
@@ -53,7 +53,7 @@ spec:
       name: sops-age
   dependsOn:
     - name: intel-device-plugin-operator
-      namespace: flux-system
+      namespace: *namespace
   interval: 1h
   path: ./kubernetes/main/apps/kube-system/intel-device-plugin-operator/gpu
   prune: true
@@ -86,9 +86,9 @@ apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app intel-device-plugin-exporter
-  namespace: flux-system
+  namespace: &namespace kube-system
 spec:
-  targetNamespace: kube-system
+  targetNamespace: *namespace
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
@@ -98,7 +98,7 @@ spec:
       name: sops-age
   dependsOn:
     - name: intel-device-plugin-gpu
-      namespace: flux-system
+      namespace: *namespace
   path: ./kubernetes/main/apps/kube-system/intel-device-plugin-operator/exporter
   prune: true
   sourceRef:
