@@ -31,11 +31,11 @@ spec:
     substitute:
       CLUSTER: main
       NFS_ADDR: "192.168.1.161"
-    substituteFrom:
+    # substituteFrom:
       # - kind: ConfigMap
       #   name: cluster-settings
-      - kind: Secret
-        name: cluster-secrets
+      # - kind: Secret
+      #   name: cluster-secrets
   prune: true
   sourceRef:
     kind: GitRepository
