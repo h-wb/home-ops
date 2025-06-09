@@ -25,4 +25,6 @@ spec:
       fsGroup: ${VOLSYNC_PGID:=1000}
     enableFileDeletion: true
     cleanupCachePVC: true
-    cleanupTempPVC: true
+    # https://github.com/backube/volsync/issues/1504
+    # https://discord.com/channels/673534664354430999/1173726095921655898/1328753654571728967
+    # cleanupTempPVC: true
