@@ -42,7 +42,7 @@ spec:
               TUNNEL_POST_QUANTUM: true
             envFrom:
               - secretRef:
-                  name: cloudflare-tunnel-secret
+                  name: cloudflared-secret
             args: ["tunnel", "run"]
             probes:
               liveness: &probes
