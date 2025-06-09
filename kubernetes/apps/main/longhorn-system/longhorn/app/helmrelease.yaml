@@ -43,12 +43,7 @@ spec:
     longhornUI:
       replicas: *replicas
     ingress:
-      enabled: true
-      ingressClassName: internal
-      annotations:
-        external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-      host: longhorn.${SECRET_DOMAIN}
-      tls: true
+      enabled: false
     metrics:
       serviceMonitor:
         enabled: true
