@@ -34,7 +34,7 @@ nodes:
           maxSize: 600Gi
           grow: true
           diskSelector:
-            match: disk.transport == "nvme"
+            match: disk.dev_path == "/dev/nvme0n1"
     networkInterfaces:
       - deviceSelector:
           hardwareAddr: "48:21:0b:55:7a:92"

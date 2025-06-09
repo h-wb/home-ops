@@ -13,7 +13,7 @@ spec:
 
   components:
     - ../../../../../components/gatus/guarded
-    - ../../../../../components/keda/nfs-scaler
+  #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/postgres
     # - ../../../../../components/volsync
   dependsOn:

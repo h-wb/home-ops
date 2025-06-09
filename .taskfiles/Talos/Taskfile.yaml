@@ -25,7 +25,7 @@ tasks:
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
-      - test -f {{.TALOSCONFIG}}
+      - test -f {{.TALOS_DIR}}/clusterconfig/talosconfig
       - which talhelper talosctl yq
 
   upgrade-node:

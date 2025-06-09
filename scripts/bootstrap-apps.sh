@@ -162,7 +162,7 @@ function main() {
     wait_for_nodes
     # apply_namespaces
     # apply_sops_secrets
-    # apply_crds
+    apply_crds
     apply_resources
     sync_helm_releases
 
