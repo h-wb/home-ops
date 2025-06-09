@@ -6,9 +6,6 @@ metadata:
   name: &name bitwarden-tls-certs
   namespace: external-secrets
 spec:
-  secretTemplate:
-    annotations:
-      cert-manager.io/allow-direct-injection: "true"
   secretName: *name
   dnsNames:
     - bitwarden-sdk-server.external-secrets.svc.cluster.local
