@@ -133,8 +133,8 @@ spec:
               - identifier: app
                 port: *port
     serviceAccount:
-      create: true
-      name: *app
+      gatus:
+        enabled: true
     persistence:
       config:
         type: emptyDir
