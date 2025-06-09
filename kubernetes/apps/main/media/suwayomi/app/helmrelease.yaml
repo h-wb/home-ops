@@ -40,7 +40,7 @@ spec:
               repository: ghcr.io/suwayomi/tachidesk
               tag: v2.0.1761
             env:
-              TZ: ${TIMEZONE}
+              TZ: Europe/Paris
               BIND_PORT: &port 4567
               WEB_UI_CHANNEL: "preview"
               AUTO_DOWNLOAD_CHAPTERS: true

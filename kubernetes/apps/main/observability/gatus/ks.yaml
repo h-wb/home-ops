@@ -14,7 +14,7 @@ spec:
     - ../../../../components/postgres
   dependsOn:
     - name: crunchy-postgres-operator
-      namespace: *namespace
+      namespace: database
   decryption:
     provider: sops
     secretRef:

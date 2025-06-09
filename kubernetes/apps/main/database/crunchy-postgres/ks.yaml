@@ -44,7 +44,7 @@ spec:
     secretRef:
       name: sops-age
   dependsOn:
-    - name: crunchy-postgres-operator-cluster
+    - name: crunchy-postgres-operator
   interval: 30m
   path: ./kubernetes/apps/main/database/crunchy-postgres/userinit-controller
   postBuild:

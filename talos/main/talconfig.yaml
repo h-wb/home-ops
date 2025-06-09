@@ -27,6 +27,14 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/0a87e2502b112e807c2dd3f91591fe372f3771188424e234a4283398297c2a33
     controlPlane: true
+    userVolumes:
+      - name: longhorn
+        provisioning:
+          minSize: 300Gi
+          maxSize: 600Gi
+          grow: true
+          diskSelector:
+            match: disk.transport == "nvme"
     networkInterfaces:
       - deviceSelector:
           hardwareAddr: "48:21:0b:55:7a:92"
@@ -47,6 +55,14 @@ nodes:
   #     secureboot: false
   #   talosImageURL: factory.talos.dev/installer/0a87e2502b112e807c2dd3f91591fe372f3771188424e234a4283398297c2a33
   #   controlPlane: true
+  #   userVolumes:
+  #     - name: longhorn
+  #       provisioning:
+  #         minSize: 300Gi
+  #         maxSize: 600Gi
+  #         grow: true
+  #         diskSelector:
+  #           match: disk.transport == "nvme"
   #   networkInterfaces:
   #     - deviceSelector:
   #         hardwareAddr: "48:21:0b:3c:20:ce"
@@ -67,6 +83,14 @@ nodes:
   #     secureboot: false
   #   talosImageURL: factory.talos.dev/installer/0a87e2502b112e807c2dd3f91591fe372f3771188424e234a4283398297c2a33
   #   controlPlane: true
+  #   userVolumes:
+  #     - name: longhorn
+  #       provisioning:
+  #         minSize: 300Gi
+  #         maxSize: 600Gi
+  #         grow: true
+  #         diskSelector:
+  #           match: disk.transport == "nvme"
   #   networkInterfaces:
   #     - deviceSelector:
   #         hardwareAddr: "48:21:0b:3c:20:dc"
@@ -82,7 +106,6 @@ nodes:
 
 # Global patches
 patches:
-  - "@./patches/global/machine-disks.yaml"
   - "@./patches/global/machine-features.yaml"
   - "@./patches/global/machine-files.yaml"
   - "@./patches/global/machine-install.yaml"

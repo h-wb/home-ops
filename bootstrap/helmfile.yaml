@@ -58,8 +58,7 @@ releases:
           - --namespace=cert-manager
           - --server-side
           - --field-manager=kustomize-controller
-          # - --filename={{ requiredEnv "SHARED_APPS" }}/cert-manager/cert-manager/app/
-          - --filename={{ requiredEnv "SHARED_APPS" }}/cert-manager/cert-manager/app/self-signed.yaml
+          - --filename={{ requiredEnv "SHARED_APPS" }}/cert-manager/cert-manager/app/clusterissuers.yaml
         showlogs: true
       - # Apply bitwarden certificate
         events: ['postsync']
@@ -70,7 +69,7 @@ releases:
           - --namespace=external-secrets
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "SHARED_APPS" }}/cert-manager/cert-manager/app/eso-cert.yaml
+          - --filename={{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/certificate.yaml
     needs: ['kube-system/coredns']
 
   - name: external-secrets
@@ -79,39 +78,39 @@ releases:
     chart: oci://ghcr.io/external-secrets/charts/external-secrets
     version: 0.17.0
     values: ['{{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/helm/values.yaml']
-    hooks:
-      - # Wait for external-secrets CRDs to be available
-        events: ['postsync']
-        command: bash
-        args:
-          - -c
-          - until kubectl --context {{ requiredEnv "CLUSTER" }} get crd clustersecretstores.external-secrets.io &>/dev/null; do sleep 10; done
-        showlogs: true
-      - # Apply cluster secret store configuration
-        events: ['postsync']
-        command: kubectl
-        args:
-          - --context={{ requiredEnv "CLUSTER" }}
-          - apply
-          - --namespace=external-secrets
-          - --server-side
-          - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/clustersecretstore.yaml
-        showlogs: true
+    # hooks:
+    #   - # Wait for external-secrets CRDs to be available
+    #     events: ['postsync']
+    #     command: bash
+    #     args:
+    #       - -c
+    #       - until kubectl --context {{ requiredEnv "CLUSTER" }} get crd clustersecretstores.external-secrets.io &>/dev/null; do sleep 10; done
+    #     showlogs: true
+    #   - # Apply cluster secret store configuration
+    #     events: ['postsync']
+    #     command: kubectl
+    #     args:
+    #       - --context={{ requiredEnv "CLUSTER" }}
+    #       - apply
+    #       - --namespace=external-secrets
+    #       - --server-side
+    #       - --field-manager=kustomize-controller
+    #       - --filename={{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/clustersecretstore.yaml
+    #     showlogs: true
     needs: ['cert-manager/cert-manager']
 
-  - name: flux-operator
-    namespace: flux-system
-    atomic: true
-    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
-    version: 0.22.0
-    values: ['{{ requiredEnv "SHARED_APPS" }}/flux-system/flux-operator/app/helm/values.yaml']
-    needs: ['external-secrets/external-secrets']
+  # - name: flux-operator
+  #   namespace: flux-system
+  #   atomic: true
+  #   chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-operator
+  #   version: 0.22.0
+  #   values: ['{{ requiredEnv "SHARED_APPS" }}/flux-system/flux-operator/app/helm/values.yaml']
+  #   needs: ['external-secrets/external-secrets']
 
-  - name: flux-instance
-    namespace: flux-system
-    atomic: true
-    chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
-    version: 0.22.0
-    values: ['{{ requiredEnv "SHARED_APPS" }}/flux-system/flux-instance/app/helm/values.yaml']
-    needs: ['flux-system/flux-operator']
+  # - name: flux-instance
+  #   namespace: flux-system
+  #   atomic: true
+  #   chart: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
+  #   version: 0.22.0
+  #   values: ['{{ requiredEnv "SHARED_APPS" }}/flux-system/flux-instance/app/helm/values.yaml']
+  #   needs: ['flux-system/flux-operator']

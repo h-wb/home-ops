@@ -138,7 +138,7 @@ spec:
           - memory-snapshot-on-shutdown
           - new-service-discovery-manager
         externalLabels:
-          cluster: ${CLUSTER}
+          cluster: main
         resources:
           requests:
             cpu: 100m

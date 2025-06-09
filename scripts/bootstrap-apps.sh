@@ -111,6 +111,28 @@ function apply_crds() {
     done
 }
 
+# Resources to be applied before the helmfile charts are installed
+function apply_resources() {
+	log debug "Applying resources"
+
+	local -r resources_file="${ROOT_DIR}/bootstrap/resources.yaml.j2"
+
+	if ! output=$(render_template "${resources_file}") || [[ -z "${output}" ]]; then
+		exit 1
+	fi
+
+	if echo "${output}" | kubectl diff --filename - &>/dev/null; then
+		log info "Resources are up-to-date"
+		return
+	fi
+
+	if response=$(echo "${output}" | kubectl apply --server-side --filename - 2>&1); then
+		log info "Resources applied"
+	else
+		log error "Failed to apply resources" "response=${response}"
+	fi
+}
+
 # Sync Helm releases
 function sync_helm_releases() {
     log debug "Syncing Helm releases"
@@ -131,11 +153,17 @@ function main() {
     check_env KUBECONFIG TALOSCONFIG CLUSTER
     check_cli helmfile kubectl kustomize sops talhelper yq
 
+
+    if ! bws project list &>/dev/null; then
+		log error "Failed to authenticate with Bitwarden Secrets Manager CLI, please export BWS_ACCESS_TOKEN environment variable"
+	fi
+
     # Apply resources and Helm releases
-    # wait_for_nodes
+    wait_for_nodes
     # apply_namespaces
     # apply_sops_secrets
-    # apply_crds
+    apply_crds
+    apply_resources
     sync_helm_releases
 
     log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"

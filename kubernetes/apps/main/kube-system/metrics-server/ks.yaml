@@ -14,7 +14,7 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  path: ./kubernetes/main/apps/kube-system/metrics-server/app
+  path: ./kubernetes/apps/main/kube-system/metrics-server/app
   prune: true
   sourceRef:
     kind: GitRepository

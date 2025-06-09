@@ -1,0 +1,27 @@
+{% for namespace in ["external-secrets", "flux-system", "network"] %}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/namespace-v1.json
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ namespace }}
+{% endfor %}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/secret-v1.json
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bitwarden-secrets-manager
+  namespace: external-secrets
+stringData:
+  token: {{ ENV['BITWARDEN_KUBERNETES_TOKEN'] }}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/secret-v1.json
+# external-secrets namespace needs cluster-secrets so it can bootstrap the ClusterSecretStore, which can then be used to get the cluster-secrets for the other namespaces
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cluster-secrets
+  namespace: external-secrets
+stringData:
+  {{ ENV['CLUSTER_SECRETS'] | indent(2) | safe }}

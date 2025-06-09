@@ -3,9 +3,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./secret.sops.yaml
-  - ./bitwarden.yaml
+  - ./certificate.yaml
   - ./clustersecretstore.yaml
+  - ./externalsecret.yaml
   - ./helmrelease.yaml
 configMapGenerator:
   - name: external-secrets-values

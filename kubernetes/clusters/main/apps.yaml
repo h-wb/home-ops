@@ -28,9 +28,12 @@ spec:
         kind: Kustomization
         labelSelector: substitution.flux/enabled!=false
   postBuild:
+    substitute:
+      CLUSTER: main
+      NFS_ADDR: "192.168.1.161"
     substituteFrom:
-      - kind: ConfigMap
-        name: cluster-settings
+      # - kind: ConfigMap
+      #   name: cluster-settings
       - kind: Secret
         name: cluster-secrets
   prune: true

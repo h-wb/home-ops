@@ -35,7 +35,7 @@ spec:
               repository: ghcr.io/gethomepage/homepage
               tag: v1.2.0
             env:
-              TZ: ${TIMEZONE}
+              TZ: Europe/Paris
               HOMEPAGE_ALLOWED_HOSTS: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             envFrom:
               - secretRef:

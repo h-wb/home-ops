@@ -35,7 +35,7 @@ spec:
               repository: freikin/dawarich
               tag: 0.26.7
             env:
-              TIME_ZONE: "${TIMEZONE}"
+              TIME_ZONE: "Europe/Paris"
               REDIS_URL: redis://dragonfly.database.svc.cluster.local
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
             envFrom:

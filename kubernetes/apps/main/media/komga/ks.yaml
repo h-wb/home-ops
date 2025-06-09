@@ -18,8 +18,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  dependsOn:
-    - name: external-secrets-stores
   path: ./kubernetes/apps/main/media/komga/app
   prune: true
   sourceRef:

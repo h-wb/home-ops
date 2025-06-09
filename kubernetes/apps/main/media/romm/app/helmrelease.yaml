@@ -35,7 +35,7 @@ spec:
               repository: docker.io/rommapp/romm
               tag: 3.9.0@sha256:478544fe537a7b4976f2196f4fe465cbdec931b269d8f5167f5c354f718559a7
             env:
-              TZ: ${TIMEZONE}
+              TZ: Europe/Paris
               ENABLE_SCHEDULED_RESCAN: "true"
               SCHEDULED_RESCAN_CRON: "0 3 * * *"
               # ENABLE_SCHEDULED_UPDATE_SWITCH_TITLEDB: "false"

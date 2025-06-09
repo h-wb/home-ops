@@ -17,10 +17,6 @@ spec:
     provider: sops
     secretRef:
       name: sops-age
-  dependsOn:
-    - name: longhorn
-      namespace: longhorn-system
-    - name: external-secrets-stores
   path: ./kubernetes/apps/main/media/komf/app
   prune: true
   sourceRef:

@@ -42,7 +42,7 @@ spec:
               SONARR__LOG__LEVEL: info
               SONARR__SERVER__PORT: &port 80
               SONARR__UPDATE__BRANCH: develop
-              TZ: ${TIMEZONE}
+              TZ: Europe/Paris
             envFrom:
             - secretRef:
                 name: sonarr-tv-secret

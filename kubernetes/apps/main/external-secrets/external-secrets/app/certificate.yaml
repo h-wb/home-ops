@@ -4,6 +4,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: &name bitwarden-tls-certs
+  namespace: external-secrets
 spec:
   secretTemplate:
     annotations:
@@ -21,27 +22,6 @@ spec:
     encoding: PKCS8
     size: 2048
     rotationPolicy: Always
-  issuerRef:
-    name: home-ca-issuer
-    kind: ClusterIssuer
-    group: cert-manager.io
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: bitwarden-css-certs
-  namespace: external-secrets
-spec:
-  secretName: bitwarden-css-certs
-  dnsNames:
-    - bitwarden-secrets-manager.external-secrets.svc.cluster.local
-  privateKey:
-    algorithm: RSA
-    encoding: PKCS8
-    size: 2048
-    rotationPolicy: Always
-  usages:
-    - client auth
   issuerRef:
     name: home-ca-issuer
     kind: ClusterIssuer

@@ -15,7 +15,7 @@ spec:
     secretRef:
       name: sops-age
   interval: 1h
-  path: ./kubernetes/main/apps/kube-system/intel-device-plugin-operator/app
+  path: ./kubernetes/apps/main/kube-system/intel-device-plugin-operator/app
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -55,7 +55,7 @@ spec:
     - name: intel-device-plugin-operator
       namespace: *namespace
   interval: 1h
-  path: ./kubernetes/main/apps/kube-system/intel-device-plugin-operator/gpu
+  path: ./kubernetes/apps/main/kube-system/intel-device-plugin-operator/gpu
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -99,7 +99,7 @@ spec:
   dependsOn:
     - name: intel-device-plugin-gpu
       namespace: *namespace
-  path: ./kubernetes/main/apps/kube-system/intel-device-plugin-operator/exporter
+  path: ./kubernetes/apps/main/kube-system/intel-device-plugin-operator/exporter
   prune: true
   sourceRef:
     kind: GitRepository
