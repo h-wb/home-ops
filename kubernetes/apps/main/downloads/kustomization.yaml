@@ -6,13 +6,13 @@ namespace: downloads
 components:
   - ../../../components/common
 resources:
-  - ./bazarr/ks.yaml
-  - ./flaresolverr/ks.yaml
-  - ./prowlarr/ks.yaml
+  # - ./bazarr/ks.yaml
+  # - ./flaresolverr/ks.yaml
+  # - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
-  - ./qbittorrent-vpn/ks.yaml
-  - ./radarr/ks.yaml
-  - ./radarr-uhd/ks.yaml
+  # - ./qbittorrent-vpn/ks.yaml
+  # - ./radarr/ks.yaml
+  # - ./radarr-uhd/ks.yaml
   # - ./recyclarr/ks.yaml
-  - ./sonarr-tv/ks.yaml
-  - ./sonarr-anm/ks.yaml
+  # - ./sonarr-tv/ks.yaml
+  # - ./sonarr-anm/ks.yaml
