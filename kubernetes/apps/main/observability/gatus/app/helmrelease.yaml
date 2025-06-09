@@ -9,7 +9,7 @@ spec:
   chart:
     spec:
       chart: app-template
-      version: 3.7.3
+      version: 4.0.1
       sourceRef:
         kind: HelmRepository
         name: bjw-s
@@ -112,9 +112,8 @@ spec:
               - action: replace
                 sourceLabels: ["service"]
                 targetLabel: instance
-    ingress:
+    route:
       app:
-        className: external
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Observability
@@ -124,13 +123,15 @@ spec:
           gethomepage.dev/widget.type: gatus
           gethomepage.dev/widget.url: http://gatus.observability
           external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        hosts:
-          - host: status.${SECRET_DOMAIN}
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     serviceAccount:
       create: true
       name: *app

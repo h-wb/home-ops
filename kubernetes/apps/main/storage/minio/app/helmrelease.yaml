@@ -84,9 +84,9 @@ spec:
           io.cilium/lb-ipam-ips: 192.168.1.57
         ports:
           http:
-            port: 9001
+            port: &httpPort 9001
           s3:
-            port: 9000
+            port: &s3Port 9000
     serviceMonitor:
       app:
         serviceName: minio
@@ -96,7 +96,7 @@ spec:
             path: /minio/v2/metrics/cluster
             interval: 1m
             scrapeTimeout: 10s
-    ingress:
+    route:
       app:
         annotations:
           external-dns.alpha.kubernetes.io/target: "external.${SECRET_DOMAIN}"
@@ -106,25 +106,31 @@ spec:
           gethomepage.dev/description: S3 Object Storage
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/icon: minio.png
-        className: external
-        hosts:
-          - host: &host-console "{{ .Release.Name }}.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: http
-          - host: &host-api "s3.${SECRET_DOMAIN}"
-            paths:
-              - path: /
-                service:
-                  identifier: app
-                  port: s3
-        tls:
-          - secretName: "{{ .Release.Name }}-tls"
-            hosts:
-              - *host-console
-              - *host-api
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}", "s3.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        # rules:
+        #   - backendRefs:
+        #       - identifier: app
+        #         port: *port
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - name: app
+                port: *httpPort
+
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - name: app
+                port: *s3Port
     persistence:
       config:
         type: nfs
