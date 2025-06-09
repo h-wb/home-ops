@@ -35,3 +35,25 @@ metadata:
   namespace: flux-system
 stringData:
   age.agekey: {{ ENV['AGE_KEY'] }}
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/secret-v1.json
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ ENV['SECRET_DOMAIN'] | replace('.', '-') }}-production-tls
+  namespace: kube-system
+  annotations:
+    cert-manager.io/alt-names: '*.{{ ENV['SECRET_DOMAIN'] }},{{ ENV['SECRET_DOMAIN'] }}'
+    cert-manager.io/certificate-name: {{ ENV['SECRET_DOMAIN'] }}
+    cert-manager.io/common-name: {{ ENV['SECRET_DOMAIN'] }}
+    cert-manager.io/ip-sans: ""
+    cert-manager.io/issuer-group: ""
+    cert-manager.io/issuer-kind: ClusterIssuer
+    cert-manager.io/issuer-name: letsencrypt-production
+    cert-manager.io/uri-sans: ""
+  labels:
+    controller.cert-manager.io/fao: "true"
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ ENV['INGRESS_NGINX_TLS_CRT'] }}
+  tls.key: {{ ENV['INGRESS_NGINX_TLS_KEY'] }}
