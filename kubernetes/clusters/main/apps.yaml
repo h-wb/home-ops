@@ -6,7 +6,6 @@ metadata:
   name: cluster-apps
   namespace: flux-system
 spec:
-
   interval: 10m0s
   path: ./kubernetes/apps/main
   patches:
@@ -23,7 +22,6 @@ spec:
       target:
         group: kustomize.toolkit.fluxcd.io
         kind: Kustomization
-        labelSelector: substitution.flux/enabled!=false
   postBuild:
     substitute:
       CLUSTER: main
