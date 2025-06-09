@@ -14,10 +14,7 @@ spec:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   path: ./kubernetes/apps/main/media/plex/app
   prune: true
   sourceRef:
@@ -29,9 +26,7 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 20Gi
@@ -48,10 +43,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   dependsOn:
     - name: plex
       namespace: *namespace
@@ -66,9 +58,7 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
 ---
@@ -83,10 +73,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   dependsOn:
     - name: plex
       namespace: *namespace
@@ -101,8 +88,6 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app

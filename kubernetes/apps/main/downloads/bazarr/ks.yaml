@@ -14,10 +14,7 @@ spec:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   path: ./kubernetes/apps/main/downloads/bazarr/app
   prune: true
   sourceRef:
@@ -29,9 +26,7 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 2Gi

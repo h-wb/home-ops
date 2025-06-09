@@ -13,10 +13,7 @@ spec:
   components:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/keda/nfs-scaler
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   dependsOn:
     - name: external-secrets-stores
   path: ./kubernetes/apps/main/default/syncthing/app
@@ -30,8 +27,6 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app

@@ -10,10 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   components:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/keda/nfs-scaler
@@ -25,9 +22,7 @@ spec:
   interval: 30m
   path: ./kubernetes/apps/main/default/dawarich/app
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 2Gi

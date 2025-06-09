@@ -10,10 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   interval: 30m
   path: ./kubernetes/apps/main/default/homepage/app
   prune: true
@@ -25,8 +22,6 @@ spec:
   timeout: 5m
   wait: false # no flux ks dependents
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app

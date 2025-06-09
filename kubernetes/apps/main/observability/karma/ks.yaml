@@ -10,10 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   path: ./kubernetes/apps/main/observability/karma/app
   prune: true
   sourceRef:
@@ -25,8 +22,6 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app

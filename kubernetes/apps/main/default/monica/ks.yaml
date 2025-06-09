@@ -14,10 +14,7 @@ spec:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/postgres
     - ../../../../../components/volsync
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   dependsOn:
     - name: crunchy-postgres-operator
       namespace: database
@@ -32,9 +29,7 @@ spec:
   timeout: 5m
   wait: false # no flux ks dependents
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 2Gi

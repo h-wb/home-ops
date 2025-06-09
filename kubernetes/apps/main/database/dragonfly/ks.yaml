@@ -9,16 +9,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
   interval: 30m
   path: ./kubernetes/apps/main/database/dragonfly/app
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
   prune: true
   retryInterval: 1m
   sourceRef:
@@ -39,18 +31,10 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
   dependsOn:
     - name: dragonfly-operator
   interval: 30m
   path: ./kubernetes/apps/main/database/dragonfly/cluster
-  postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
   prune: true
   retryInterval: 1m
   sourceRef:

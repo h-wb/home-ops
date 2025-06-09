@@ -13,10 +13,7 @@ spec:
   components:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/volsync
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   dependsOn:
     - name: external-secrets-stores
   path: ./kubernetes/apps/main/media/tautulli/app
@@ -30,9 +27,7 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 5Gi

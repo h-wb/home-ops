@@ -14,10 +14,7 @@ spec:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   dependsOn:
     - name: external-secrets-stores
   interval: 30m
@@ -31,9 +28,7 @@ spec:
   timeout: 5m
   wait: false # no flux ks dependents
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 15Gi

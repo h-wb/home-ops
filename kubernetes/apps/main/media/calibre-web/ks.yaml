@@ -14,10 +14,7 @@ spec:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
-  decryption:
-    provider: sops
-    secretRef:
-      name: sops-age
+
   dependsOn:
     - name: external-secrets-stores
   path: ./kubernetes/apps/main/media/calibre-web/app
@@ -31,9 +28,7 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-    substituteFrom:
-      - name: cluster-secrets
-        kind: Secret
+
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 10Gi
