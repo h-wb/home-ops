@@ -10,7 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-
   interval: 1h
   path: ./kubernetes/apps/main/kube-system/intel-device-plugin-operator/app
   prune: true
@@ -27,7 +26,6 @@ spec:
       name: *app
       namespace: kube-system
   postBuild:
-
     substitute:
       APP: *app
 ---
@@ -42,7 +40,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-
   dependsOn:
     - name: intel-device-plugin-operator
       namespace: *namespace
@@ -67,36 +64,35 @@ spec:
       failed: status.desiredNumberScheduled != status.numberReady
       current: status.desiredNumberScheduled == status.numberReady
   postBuild:
-
     substitute:
       APP: *app
----
-# yaml-language-server: $schema=https://github.com/fluxcd-community/flux2-schemas/raw/main/kustomization-kustomize-v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &app intel-device-plugin-exporter
-  namespace: &namespace kube-system
-spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
+# ---
+# # yaml-language-server: $schema=https://github.com/fluxcd-community/flux2-schemas/raw/main/kustomization-kustomize-v1.json
+# apiVersion: kustomize.toolkit.fluxcd.io/v1
+# kind: Kustomization
+# metadata:
+#   name: &app intel-device-plugin-exporter
+#   namespace: &namespace kube-system
+# spec:
+#   targetNamespace: *namespace
+#   commonMetadata:
+#     labels:
+#       app.kubernetes.io/name: *app
 
-  dependsOn:
-    - name: intel-device-plugin-gpu
-      namespace: *namespace
-  path: ./kubernetes/apps/main/kube-system/intel-device-plugin-operator/exporter
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  wait: false
-  interval: 30m
-  retryInterval: 1m
-  timeout: 5m
-  postBuild:
+#   dependsOn:
+#     - name: intel-device-plugin-gpu
+#       namespace: *namespace
+#   path: ./kubernetes/apps/main/kube-system/intel-device-plugin-operator/exporter
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
+#     namespace: flux-system
+#   wait: false
+#   interval: 30m
+#   retryInterval: 1m
+#   timeout: 5m
+#   postBuild:
 
-    substitute:
-      APP: *app
+#     substitute:
+#       APP: *app
