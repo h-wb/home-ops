@@ -108,12 +108,11 @@ spec:
       #         topologyKey: kubernetes.io/hostname
     service:
       app:
-        controller: *app
+        forceRename: *app
         ports:
           http:
             port: *port
       bittorrent:
-        controller: *app
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: ${SVC_QBITTTORENT_ADDR:=temp}
