@@ -10,7 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
       kind: HelmRelease
@@ -19,7 +18,7 @@ spec:
     - apiVersion: apiextensions.k8s.io/v1
       kind: CustomResourceDefinition
       name: dnsendpoints.externaldns.k8s.io
-  path: ./kubernetes/apps/main/network/external-dns/cloudflare
+  path: ./kubernetes/apps/main/network/cloudflare-dns/app
   prune: false
   sourceRef:
     kind: GitRepository
@@ -30,6 +29,5 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-
     substitute:
       APP: *app
