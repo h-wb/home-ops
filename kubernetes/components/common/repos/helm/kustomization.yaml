@@ -5,9 +5,3 @@ kind: Kustomization
 resources:
   - ./bjw-s.yaml
   - ./userinit-controller.yaml
-  - ./jetstack.yaml
-  - ./metrics-server.yaml
-  - ./piraeus.yaml
-  - ./prometheus-community.yaml
-  - ./spegel.yaml
-  - ./weave-gitops.yaml
