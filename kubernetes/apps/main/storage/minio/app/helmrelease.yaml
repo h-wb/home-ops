@@ -96,40 +96,33 @@ spec:
             path: /minio/v2/metrics/cluster
             interval: 1m
             scrapeTimeout: 10s
-    # route:
-    #   app:
-    #     annotations:
-    #       cert-manager.k8s.io/cluster-issuer: letsencrypt-production
-    #       gethomepage.dev/enabled: "true"
-    #       gethomepage.dev/name: Minio
-    #       gethomepage.dev/description: S3 Object Storage
-    #       gethomepage.dev/group: Infrastructure
-    #       gethomepage.dev/icon: minio.png
-    #     hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}", "s3.${SECRET_DOMAIN}"]
-    #     parentRefs:
-    #       - name: external
-    #         namespace: kube-system
-    #         sectionName: https
-    #     # rules:
-    #     #   - backendRefs:
-    #     #       - identifier: app
-    #     #         port: *port
-    #     rules:
-    #       - matches:
-    #           - path:
-    #               type: PathPrefix
-    #               value: /
-    #         backendRefs:
-    #           - name: app
-    #             port: *httpPort
-
-    #       - matches:
-    #           - path:
-    #               type: PathPrefix
-    #               value: /
-    #         backendRefs:
-    #           - name: app
-    #             port: *s3Port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/name: Minio
+          gethomepage.dev/description: S3 Object Storage
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/icon: minio.png
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: app
+                port: *httpPort
+      s3:
+        hostnames: ["s3.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - name: app
+                port: *s3Port
     persistence:
       config:
         type: nfs
