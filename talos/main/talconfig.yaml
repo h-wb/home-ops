@@ -27,6 +27,8 @@ nodes:
       secureboot: false
     talosImageURL: factory.talos.dev/installer/0a87e2502b112e807c2dd3f91591fe372f3771188424e234a4283398297c2a33
     controlPlane: true
+    nodeLabels: &intel
+      intel.feature.node.kubernetes.io/gpu: "true"
     userVolumes:
       - name: longhorn
         provisioning:
