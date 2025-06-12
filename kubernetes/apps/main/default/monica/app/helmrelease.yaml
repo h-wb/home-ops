@@ -44,6 +44,16 @@ spec:
               MAIL_MAILER: log
               QUEUE_CONNECTION: redis
               REDIS_HOST: dragonfly.database.svc.cluster.local
+              DB_CONNECTION: pgsql
+              DB_DATABASE: *app
+              DB_HOST: monica-pgbouncer.default.svc
+              DB_PORT: 5432
+              DB_USERNAME: *app
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: monica-pguser-monica
+                    key: password
             envFrom:
               - secretRef:
                   name: monica-secret
