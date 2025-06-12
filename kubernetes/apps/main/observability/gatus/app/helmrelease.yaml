@@ -1,11 +1,11 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: &app gatus
 spec:
-  interval: 30m
+  interval: 1h
   chart:
     spec:
       chart: app-template
@@ -16,11 +16,10 @@ spec:
         namespace: flux-system
   install:
     remediation:
-      retries: 3
+      retries: -1
   upgrade:
     cleanupOnFail: true
     remediation:
-      strategy: rollback
       retries: 3
   values:
     controllers:
@@ -34,8 +33,8 @@ spec:
         initContainers:
           init-config:
             image:
-              repository: ghcr.io/kiwigrid/k8s-sidecar
-              tag: 1.30.3@sha256:49dcce269568b1645b0050f296da787c99119647965229919a136614123f0627
+              repository: ghcr.io/home-operations/k8s-sidecar
+              tag: 1.30.3@sha256:39cca7abcad8f1621b9462d95f7d0e60301b92fcb0ff4de0ad4561859011cddf
             env:
               FOLDER: /config
               LABEL: gatus.io/enabled
@@ -48,12 +47,12 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                memory: 256Mi
+                memory: 128Mi
         containers:
           app:
             image:
               repository: ghcr.io/twin/gatus
-              tag: v5.18.1@sha256:97525568fdef34539b1b4d015aef2d1cf6f58f1bc087443387b349940544394d
+              tag: v5.17.0@sha256:a8c53f9e9f1a3876cd00e44a42c80fc984e118d5ba0bdbaf08980cb627d61512
             env:
               TZ: Europe/Paris
               GATUS_CONFIG_PATH: /config
@@ -80,17 +79,15 @@ spec:
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources: *resources
+        serviceAccount:
+          identifier: *app
     defaultPodOptions:
-      dnsConfig:
-        options:
-          - { name: ndots, value: "1" }
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsGroup: 100
+        fsGroup: 100
         fsGroupChangePolicy: OnRootMismatch
-        seccompProfile: { type: RuntimeDefault }
     service:
       app:
         controller: *app
@@ -102,16 +99,6 @@ spec:
         serviceName: *app
         endpoints:
           - port: http
-            scheme: http
-            path: /metrics
-            interval: 1m
-            scrapeTimeout: 10s
-            metricRelabelings:
-              - action: labeldrop
-                regex: (pod)
-              - action: replace
-                sourceLabels: ["service"]
-                targetLabel: instance
     route:
       app:
         annotations:
@@ -122,8 +109,9 @@ spec:
           gethomepage.dev/description: Status Page
           gethomepage.dev/widget.type: gatus
           gethomepage.dev/widget.url: http://gatus.observability
-          external-dns.alpha.kubernetes.io/target: external.${SECRET_DOMAIN}
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "status.${SECRET_DOMAIN}"
         parentRefs:
           - name: external
             namespace: kube-system
@@ -132,9 +120,23 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    rbac:
+      roles:
+        gatus:
+          type: ClusterRole
+          rules:
+            - apiGroups: [""]
+              resources: ["configmaps", "secrets"]
+              verbs: ["get", "watch", "list"]
+      bindings:
+        gatus:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: *app
+          subjects:
+            - identifier: *app
     serviceAccount:
-      gatus:
-        enabled: true
+      gatus: {}
     persistence:
       config:
         type: emptyDir
