@@ -45,9 +45,16 @@ spec:
               REDIS_HOST: dragonfly.database.svc.cluster.local
               REDIS_PORT: 6379
               ROMM_DB_DRIVER: postgresql
+              DB_NAME: *app
+              DB_HOST: romm-pgbouncer.media.svc
+              DB_PORT: 5432
+              DB_USER: *app
+              DB_PASSWD:
+                valueFrom:
+                  secretKeyRef:
+                    name: romm-pguser-romm
+                    key: password
             envFrom:
-              - secretRef:
-                  name: romm-db-secret
               - secretRef:
                   name: romm-secret
             ports:
