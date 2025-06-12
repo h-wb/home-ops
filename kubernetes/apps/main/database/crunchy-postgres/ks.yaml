@@ -21,6 +21,35 @@ spec:
   timeout: 5m
   wait: true
 ---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app crunchy-pgo-cluster
+  namespace: &namespace database
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: crunchy-postgres-operator
+      namespace: *namespace
+  healthCheckExprs:
+    - apiVersion: postgres-operator.crunchydata.com/v1beta1
+      kind: PostgresCluster
+      failed: status.conditions.filter(e, e.type == 'ProxyAvailable').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'ProxyAvailable').all(e, e.status == 'True')
+  path: ./kubernetes/apps/main/database/crunchy-postgres/cluster
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  interval: 1h
+  retryInterval: 2m
+  timeout: 5m
+---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -34,7 +63,7 @@ spec:
   dependsOn:
     - name: crunchy-postgres-operator
   interval: 30m
-  path: ./kubernetes/apps/main/database/crunchy-postgres/userinit-controller
+  path: ./kubernetes/apps/main/database/crunchy-postgres/users
   prune: true
   retryInterval: 1m
   sourceRef:
@@ -55,6 +84,9 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: crunchy-postgres-operator
+      namespace: *namespace
   interval: 30m
   path: ./kubernetes/apps/main/database/crunchy-postgres/clustersecretstore
   prune: true

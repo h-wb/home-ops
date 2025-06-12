@@ -13,7 +13,6 @@ spec:
   components:
     - ../../../../../components/gatus/guarded
   #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/postgres
     - ../../../../../components/volsync
 
   path: ./kubernetes/apps/main/media/romm/app

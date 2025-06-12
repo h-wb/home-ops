@@ -12,7 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/gatus/guarded
-    - ../../../../../components/postgres
     - ../../../../../components/volsync
 
   dependsOn:
