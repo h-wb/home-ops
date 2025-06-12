@@ -57,8 +57,6 @@ spec:
             envFrom:
               - secretRef:
                   name: monica-secret
-              - secretRef:
-                  name: monica-db-secret
           cron:
             <<: *bapp
             command:
