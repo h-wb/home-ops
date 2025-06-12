@@ -3,13 +3,9 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: &name postgres
+  name: &name ${APP}
 spec:
-  metadata:
-    labels:
-      crunchy-userinit.ramblurr.github.com/enabled: "true"
-      crunchy-userinit.ramblurr.github.com/superuser: &superuser "postgres"
-  postgresVersion: 16
+  postgresVersion: 17
   monitoring:
     pgmonitor:
       exporter:
@@ -27,56 +23,42 @@ spec:
         synchronous_commit: "on"
         parameters:
           max_connections: 500
-      log:
-        level: DEBUG
   instances:
     - name: postgres
       metadata:
         labels:
-          app.kubernetes.io/name: crunchy-postgres
-      replicas: &replicas 1
+          app.kubernetes.io/name: ${APP}-crunchy-postgres
+      replicas: &replicas 1 # TODO: Increase to 3 One per node
       dataVolumeClaimSpec:
         storageClassName: local-hostpath
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 20Gi
+            storage: 5Gi
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: "kubernetes.io/hostname"
           whenUnsatisfiable: "DoNotSchedule"
           labelSelector:
             matchLabels:
-              postgres-operator.crunchydata.com/data: postgres
+              postgres-operator.crunchydata.com/cluster: *name
   users:
     # Superuser
-    - name: *superuser
+    - name: "postgres"
       databases: ["postgres"]
       options: "SUPERUSER"
       password:
         type: AlphaNumeric
     # Applications
-    - name: monica
-      databases: ["monica"]
-      password:
-        type: AlphaNumeric
-    - name: romm
-      databases: ["romm"]
-      password:
-        type: AlphaNumeric
-    - name: "gatus"
-      databases: ["gatus"]
-      password:
-        type: AlphaNumeric
-    - name: "dawarich"
-      databases: ["dawarich"]
+    - name: "${USERNAME:=${APP}}"
+      databases: ${DATABASES:=["${APP}"]}
       password:
         type: AlphaNumeric
   backups:
     pgbackrest:
       configuration: &backupConfig
         - secret:
-            name: crunchy-pgo-secret
+            name: "${APP}-crunchy-postgres"
       global: &backupFlag
         # Global
         compress-type: "bz2"
@@ -84,39 +66,40 @@ spec:
         # Minio
         repo1-block: "y"
         repo1-bundle: "y"
-        repo1-path: /crunchy-pgo
+        repo1-path: /${APP}
         repo1-retention-full: "30" # days
         repo1-retention-full-type: "time"
-        repo1-storage-verify-tls: "n"
         repo1-s3-uri-style: path
         # R2
         # repo2-block: "y"
         # repo2-bundle: "y"
-        # repo2-path: /crunchy-pgo
+        # repo2-path: /${APP}
         # repo2-retention-full: "7" # days
         # repo2-retention-full-type: time
         # repo2-s3-uri-style: path
+      jobs:
+        ttlSecondsAfterFinished: 60
       manual:
         repoName: repo1
         options:
           - --type=full
       metadata:
         labels:
-          app.kubernetes.io/name: crunchy-postgres-backup
+          app.kubernetes.io/name: ${APP}-crunchy-postgres-backup
       repos:
         - name: repo1
           s3: &minio
-            bucket: crunchy-pgo
+            bucket: postgresql
             endpoint: s3.${SECRET_DOMAIN}
-            region: us-east-1
+            region: ca-west-1
           schedules:
             full: "30 1 * * 0" # Sunday at 01:30
             differential: "30 1 * * 1-6" # Mon-Sat at 01:30
             incremental: "30 3-23 * * *" # Every hour except 01:30-2:30
         # - name: repo2
-        #   s3: &r2
+        #   s3:
         #     bucket: crunchy-pgo
-        #     endpoint: ${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com
+        #     endpoint: ${R2_ENDPOINT}
         #     region: us-east-1 #https://developers.cloudflare.com/r2/api/s3/api/#bucket-region
         #   schedules:
         #     full: "30 2 * * 0" # Sunday at 02:30
@@ -131,19 +114,11 @@ spec:
   #       s3: *minio
   proxy:
     pgBouncer:
-      service:
-        metadata:
-          annotations:
-            external-dns.alpha.kubernetes.io/hostname: cpgo.${SECRET_DOMAIN}
-            lbipam.cilium.io/ips: ${SVC_CPGO_ADDR:=temp}
-        type: LoadBalancer
       port: 5432
-      replicas: 3
+      # replicas: 1
       config:
         global:
-          # Grafana requires session
-          # Ref: https://github.com/grafana/grafana/issues/74260
-          pool_mode: session
+          pool_mode: ${POOL_MODE:=session}
           client_tls_sslmode: prefer
           default_pool_size: "100"
           max_client_conn: "500"
@@ -154,4 +129,4 @@ spec:
           labelSelector:
             matchLabels:
               postgres-operator.crunchydata.com/cluster: *name
-              postgres-operator.crunchydata.com/role: pgbouncer
+              postgres-operator.crunchydata.com/role: ${APP}-pgbouncer
