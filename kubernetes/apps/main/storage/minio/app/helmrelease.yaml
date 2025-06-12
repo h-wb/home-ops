@@ -78,7 +78,7 @@ spec:
         seccompProfile: { type: RuntimeDefault }
     service:
       app:
-        forceRename: *app
+        controller: *app
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: 192.168.1.57
@@ -111,7 +111,7 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - name: app
+              - identifier: app
                 port: *httpPort
       s3:
         hostnames: ["s3.${SECRET_DOMAIN}"]
@@ -121,7 +121,7 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - name: app
+              - identifier: app
                 port: *s3Port
     persistence:
       config:
