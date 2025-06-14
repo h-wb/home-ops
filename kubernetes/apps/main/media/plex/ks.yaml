@@ -14,7 +14,6 @@ spec:
     - ../../../../../components/gatus/guarded
   #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
-
   path: ./kubernetes/apps/main/media/plex/app
   prune: true
   sourceRef:
@@ -26,10 +25,9 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 20Gi
+      VOLSYNC_CAPACITY: 30Gi
       VOLSYNC_CACHE_CAPACITY: 20Gi
 ---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
