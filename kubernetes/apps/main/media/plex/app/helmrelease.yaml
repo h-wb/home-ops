@@ -115,7 +115,9 @@ spec:
                 port: *port
     persistence:
       config:
-        existingClaim: plex
+        existingClaim: *app
+        globalMounts:
+          - path: /config/Library/Application Support/Plex Media Server
       # Separate PVC for cache to avoid backing up cache files
       config-cache:
         existingClaim: plex-cache
