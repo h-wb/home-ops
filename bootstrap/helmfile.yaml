@@ -42,6 +42,13 @@ releases:
     values: ['{{ requiredEnv "SHARED_APPS" }}/kube-system/coredns/app/helm/values.yaml']
     needs: ['kube-system/cilium']
 
+  - name: spegel
+    namespace: kube-system
+    chart: oci://ghcr.io/spegel-org/helm-charts/spegel
+    version: 0.2.0
+    values: ['{{ requiredEnv "SHARED_APPS" }}/kube-system/spegel/app/helm/values.yaml']
+    needs: ['kube-system/coredns']
+
   - name: cert-manager
     namespace: cert-manager
     atomic: true
