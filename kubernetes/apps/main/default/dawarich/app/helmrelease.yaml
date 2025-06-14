@@ -7,14 +7,9 @@ metadata:
 spec:
   releaseName: dawarich
   interval: 30m
-  chart:
-    spec:
-      chart: app-template
-      version: 4.1.1
-      sourceRef:
-        kind: HelmRepository
-        name: bjw-s
-        namespace: flux-system
+  chartRef:
+    kind: OCIRepository
+    name: app-template
   maxHistory: 2
   install:
     createNamespace: true
