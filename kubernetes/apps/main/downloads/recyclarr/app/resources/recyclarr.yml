@@ -30,6 +30,7 @@ radarr:
           # - 9f6cbff8cfe4ebbc1bde14c7b7bec0de # IMAX Enhanced
         assign_scores_to:
           - name: SQP-1 (1080p)
+            score: 0
       - trash_ids:
           - b6832f586342ef70d9c128d40c07b872 # Bad Dual Groups
           - cc444569854e9de0b084ab2b8b1532b2 # Black and White Editions
@@ -54,6 +55,13 @@ radarr:
           - 9172b2f683f6223e3a1846427b417a3d # VOSTFR
         assign_scores_to:
           - name: SQP-1 (1080p)
+
+      - trash_ids:
+          - 0542a48746585dc4444bbbb8a6bdf6ea # Language: Original + French
+          - 4b900e171accbfb172729b63323ea8ca # MULTi
+        assign_scores_to:
+          - name: SQP-1 (1080p)
+            score: 500
 
       - trash_ids:
         # FR HQ Source Groups
