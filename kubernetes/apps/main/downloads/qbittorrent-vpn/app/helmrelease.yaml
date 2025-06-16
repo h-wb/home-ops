@@ -33,7 +33,7 @@ spec:
               tag: v3.40.0@sha256:2b42bfa046757145a5155acece417b65b4443c8033fb88661a8e9dcf7fda5a00
             env:
               DOT: "off"
-              LOG_LEVEL: debug
+              DNS_ADDRESS: "127.0.0.2"
               VPN_SERVICE_PROVIDER: custom
               VPN_TYPE: wireguard
               VPN_INTERFACE: wg0
@@ -42,11 +42,10 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: 10.42.0.0/16,192.168.1.0/24 # Allow access to k8s subnets
-              DNS_KEEP_NAMESERVER: on
               VPN_PORT_FORWARDING_UP_COMMAND: /bin/sh -c '/usr/bin/wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{`{{PORTS}}`}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
-            # resources:
-            #   limits:
-            #     squat.ai/tun: 1
+            resources:
+              limits:
+                squat.ai/tun: 1
             restartPolicy: Always
             envFrom:
               - secretRef:
