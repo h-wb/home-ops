@@ -11,7 +11,7 @@ spec:
     name: app-template
   values:
     controllers:
-      qbittorrent:
+      qbittorrent-vpn:
         pod:
           securityContext:
             fsGroup: 1000
@@ -63,7 +63,7 @@ spec:
                     - (ip rule del table 51820; ip -6 rule del table 51820) || true
         containers:
           app:
-            nameOverride: qbittorrent
+            nameOverride: qbittorrent-vpn
             image:
               repository: ghcr.io/home-operations/qbittorrent
               tag: 5.1.0
@@ -125,7 +125,7 @@ spec:
 
     service:
       app:
-        forceRename: qbittorrent
+        forceRename: qbittorrent-vpn
         primary: true
         annotations:
           lbipam.cilium.io/ips: 192.168.1.53
@@ -166,13 +166,13 @@ spec:
       config:
         existingClaim: *app
         advancedMounts:
-          qbittorrent:
+          qbittorrent-vpn:
             app:
               - path: /config
       empty-config:
         type: emptyDir
         advancedMounts:
-          qbittorrent:
+          qbittorrent-vpn:
             port-forward:
               - path: /config
       downloads:
@@ -187,7 +187,7 @@ spec:
         type: secret
         name: qbittorrent-gluetun-secret
         advancedMounts:
-          qbittorrent:
+          qbittorrent-vpn:
             gluetun:
               - path: *gluetunAuthPath
                 subPath: auth.toml
@@ -195,7 +195,7 @@ spec:
         type: configMap
         name: qbittorrent-coredns
         advancedMounts:
-          qbittorrent:
+          qbittorrent-vpn:
             coredns:
               - path: /etc/coredns/Corefile
                 subPath: Corefile
