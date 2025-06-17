@@ -13,7 +13,6 @@ spec:
   components:
     - ../../../../../components/gatus/guarded
     - ../../../../../components/volsync
-
   path: ./kubernetes/apps/main/media/komf/app
   prune: true
   sourceRef:
@@ -25,7 +24,6 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 2Gi
+      VOLSYNC_CAPACITY: 1Gi
