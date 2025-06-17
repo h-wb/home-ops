@@ -63,7 +63,7 @@ spec:
         controller: *app
         ports:
           http:
-            port: &port 8080
+            port: &port 3000
     route:
       app:
         annotations:
@@ -85,15 +85,6 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-    # route:
-    #   *app :
-    #     hostnames:
-    #       - qbit.${SECRET_DOMAIN}
-    #     parentRefs:
-    #       - name: internal
-    #         namespace: network
-    #         sectionName: https
-    #     rules:
-    #       - backendRefs:
-    #           - identifier: *app
-    #             port: *port
+    persistence:
+      data:
+        type: emptyDir
