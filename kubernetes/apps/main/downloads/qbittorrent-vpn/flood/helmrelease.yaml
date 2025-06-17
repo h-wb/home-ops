@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app vuetorrent-vpn
+  name: &app flood-vpn
 spec:
   interval: 30m
   chartRef:
@@ -21,7 +21,7 @@ spec:
       retries: 1
   values:
     controllers:
-      vuetorrent-vpn:
+      flood-vpn:
         strategy: RollingUpdate
         pod:
           securityContext:
@@ -33,8 +33,8 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/vuetorrent/vuetorrent-backend
-              tag: 2.5.1
+              repository: docker.io/jesec/flood
+              tag: 4.9.5@sha256:1a603b5e867aa0018bb1a86882d537469f1ca0cee2860fb3f442cae4445888f6
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: false
@@ -50,21 +50,14 @@ spec:
             probes:
               liveness: &probes
                 enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /backend/ping
-                    port: &port 8081
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
               readiness: *probes
             env:
-              # renovate: datasource=github-releases depName=VueTorrent/VueTorrent
-              RELEASE_TYPE: v2.25.0
-              PORT: *port
-              QBIT_BASE: http://qbittorrent-vpn:8080
+              FLOOD_OPTION_AUTH: none
+              FLOOD_OPTION_HOST: 0.0.0.0
+              # FLOOD_OPTION_QBPASS: ${FLOOD_OPTION_QBPASS}
+              FLOOD_OPTION_QBURL: http://qbittorrent-vpn:8080
+              # FLOOD_OPTION_QBUSER: vsz
+              FLOOD_OPTION_RUNDIR: /data
     service:
       app:
         controller: *app
@@ -76,14 +69,14 @@ spec:
         annotations:
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Downloads
-          gethomepage.dev/name: VueTorrent VPN
-          gethomepage.dev/icon: vuetorrent.png
+          gethomepage.dev/name: Flood VPN
+          gethomepage.dev/icon: flood.png
           gethomepage.dev/description: Torrent Client
           gethomepage.dev/widget.type: qbittorrent
-          gethomepage.dev/widget.url: http://qbittorrent-vpn.downloads:8080
+          gethomepage.dev/widget.url: http://flood-vpn.downloads:8080
           gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}` }}"
           gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}` }}"
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}",  "flvpn.${SECRET_DOMAIN}"]
         parentRefs:
           - name: internal
             namespace: kube-system
@@ -92,3 +85,15 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    # route:
+    #   *app :
+    #     hostnames:
+    #       - qbit.${SECRET_DOMAIN}
+    #     parentRefs:
+    #       - name: internal
+    #         namespace: network
+    #         sectionName: https
+    #     rules:
+    #       - backendRefs:
+    #           - identifier: *app
+    #             port: *port
