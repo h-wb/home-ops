@@ -16,3 +16,4 @@ resources:
   - ./recyclarr/ks.yaml
   - ./sonarr-tv/ks.yaml
   - ./sonarr-anm/ks.yaml
+  - ./overseerr/ks.yaml
