@@ -43,9 +43,19 @@ spec:
       #           operator: In
       #           values:
       #           - "true"
+      # securityContext:
+      #   fsGroup: 1000
+      #   fsGroupChangePolicy: OnRootMismatch
       securityContext:
+        runAsUser: 0
+        runAsGroup: 0
         fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
+        fsGroupChangePolicy: "OnRootMismatch"
+        supplementalGroups:
+          - 44 # video
+          - 125 # render
+          - 105 # render
+          - 568
     controllers:
       tdarr-node:
         containers:
