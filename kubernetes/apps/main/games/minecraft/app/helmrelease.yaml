@@ -84,7 +84,7 @@ spec:
       spigetResources:
         - 36618
       type: PAPER
-      version: "1.21"
+      version: "1.21.6"
       viewDistance: 12
       whitelist: "Sahru"
       rcon:

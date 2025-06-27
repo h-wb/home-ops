@@ -39,5 +39,5 @@ spec:
       minecraft:
         type: LoadBalancer
         annotations:
-          lbipam.cilium.io/ips: 192.168.1.75
+          lbipam.cilium.io/ips: 192.168.1.75, ::ffff:192.168.1.75
           external-dns.alpha.kubernetes.io/hostname: "mc.${SECRET_DOMAIN}"
