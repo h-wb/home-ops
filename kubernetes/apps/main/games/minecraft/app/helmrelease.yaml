@@ -1,0 +1,95 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: minecraft
+spec:
+  interval: 5m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 4.26.3
+  url: oci://ghcr.io/itzg/minecraft-server-charts/minecraft
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app minecraft
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: minecraft
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    cleanupOnFail: true
+    remediation:
+      retries: 3
+  values:
+    fullnameOverride: *app
+    image:
+      repository: ghcr.io/itzg/minecraft-server
+      tag: 2025.6.1@sha256:554788c8d3599727c717e62d0a10532354132f99ad8c6af7e98451ceba3ff2f9
+    resources:
+      requests:
+        cpu: 200m
+      limits:
+        cpu: 2000m
+        memory: 8192Mi
+    securityContext:
+      runAsUser: 1000
+      fsGroup: 100
+    livenessProbe:
+      initialDelaySeconds: 30
+    readinessProbe:
+      initialDelaySeconds: 30
+    startupProbe:
+        enabled: true
+    extraEnv:
+      TZ: Europe/Paris
+    persistence:
+      dataDir:
+        enabled: true
+        existingClaim: *app
+    serviceAnnotations:
+      external-dns.alpha.kubernetes.io/hostname: "minecraft.${SECRET_DOMAIN}"
+      external-dns.alpha.kubernetes.io/target: "mc.${SECRET_DOMAIN}"
+      mc-router.itzg.me/externalServerName: minecraft.${SECRET_DOMAIN}
+    minecraftServer:
+      autopauseTimeoutEst: 600
+      autopauseTimeoutInit: 300
+      difficulty: normal
+      enableAutopause: true
+      enableWhitelist: true
+      eula: true
+      forceGamemode: true
+      jvmXxOpts: "-XX:MaxRAMPercentage=75"
+      maxBuildHeight: 320
+      maxTickTime: -1
+      maxWorldSize: 29999984
+      memory: 8192M
+      mode: survival
+      motd: "Chocoboco - Minecraft Server"
+      ops: "Sahru"
+      overrideIcon: true
+      paperChannel: experimental
+      serverName: Chocoboco
+      skipSudo: true
+      spawnProtection: 0
+      spigetResources: 36618
+      type: PAPER
+      version: "1.21"
+      viewDistance: 12
+      whitelist: "Sahru"
+      rcon:
+        enabled: true
+  valuesFrom:
+  - kind: Secret
+    name: *app
+    valuesKey: RCON_PASSWORD
+    targetPath: minecraftServer.rcon.password
