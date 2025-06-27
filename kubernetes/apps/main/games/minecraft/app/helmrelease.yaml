@@ -81,7 +81,8 @@ spec:
       serverName: Chocoboco
       skipSudo: true
       spawnProtection: 0
-      spigetResources: 36618
+      spigetResources:
+        - 36618
       type: PAPER
       version: "1.21"
       viewDistance: 12
