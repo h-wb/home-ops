@@ -85,8 +85,35 @@ spec:
       version: "1.21.6"
       viewDistance: 12
       whitelist: "Sahru"
+      modrinth:
+        projects:
+          # - Cz6msz34 # AxGraves
+          # - pZ2wrerK # Emotecraft
+          # - fALzjamp # Chunky
+          # - OhduvhIc # Veinminer
+          # - J6U9o3JG # HuskHomes
+          # - z4mHgUYG # InteractionVisualizer
+          # - MwLGimob # TabListPing
+          # - IahtO7tM # Clumps
+          # - iOwOrlzi # xpDisplay
+          - swbUV1cr # BlueMap
+          # - Zjb20YAx # Xaero Map Spigot
+        # Specifies whether to download Modrinth dependencies. The allowed values are: none, required, optional
+        downloadDependencies: required
+        # The version type is used to determine the newest version to use from each project. The allowed values are: release, beta, alpha
+        allowedVersionType: alpha
       rcon:
         enabled: true
+      serviceType: LoadBalancer
+      extraPorts:
+      - name: map
+        containerPort: 8100
+        protocol: TCP
+        service:
+          enabled: true
+          embedded: false
+          type: ClusterIP
+          port: 8100
   valuesFrom:
   - kind: Secret
     name: minecraft-secret
