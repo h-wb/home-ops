@@ -57,10 +57,9 @@ spec:
                 containerPort: &port 8080
             resources:
               requests:
-                memory: 350Mi
-                cpu: 100m
+                cpu: 10m
               limits:
-                memory: 1024Mi
+                memory: 3500Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
