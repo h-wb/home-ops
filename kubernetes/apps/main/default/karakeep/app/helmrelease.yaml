@@ -144,6 +144,15 @@ spec:
             port: 7700
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home
+          gethomepage.dev/name: Karakeep
+          gethomepage.dev/icon: karakeep.png
+          gethomepage.dev/description: Bookmarks
+          # gethomepage.dev/widget.type: karakeep
+          # gethomepage.dev/widget.url: http://karakeep.default:3000
+          # gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_KARAKEEP_TOKEN}}` }}"
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
