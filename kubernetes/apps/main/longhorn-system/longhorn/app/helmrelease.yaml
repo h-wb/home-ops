@@ -37,7 +37,6 @@ spec:
     persistence:
       defaultDataLocality: best-effort
     defaultSettings:
-      createDefaultDiskLabeledNodes: false
       defaultDataLocality: best-effort
       defaultDataPath: "/var/mnt/longhorn"
       defaultReplicaCount: 3
