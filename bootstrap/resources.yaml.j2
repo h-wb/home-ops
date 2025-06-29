@@ -40,7 +40,7 @@ stringData:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ ENV['SECRET_DOMAIN'] | replace('.', '-') }}-production-tls
+  name: {{ ENV['SECRET_DOMAIN'] | replace('.', '-') | safe }}-production-tls
   namespace: kube-system
   annotations:
     cert-manager.io/alt-names: '*.{{ ENV['SECRET_DOMAIN'] }},{{ ENV['SECRET_DOMAIN'] }}'

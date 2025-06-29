@@ -23,68 +23,6 @@ function wait_for_nodes() {
     done
 }
 
-
-# Namespaces to be applied before the SOPS secrets are installed
-function apply_namespaces() {
-    log debug "Applying namespaces"
-
-    local -r apps_dir="${ROOT_DIR}/kubernetes/apps/${CLUSTER}"
-
-    if [[ ! -d "${apps_dir}" ]]; then
-        log error "Directory does not exist" "directory=${apps_dir}"
-    fi
-
-    for app in "${apps_dir}"/*/; do
-        namespace=$(basename "${app}")
-        log debug ${namespace}
-        # Check if the namespace resources are up-to-date
-        if kubectl get namespace "${namespace}" &>/dev/null; then
-            log info "Namespace resource is up-to-date" "resource=${namespace}"
-            continue
-        fi
-
-        # Apply the namespace resources
-        if kubectl create namespace "${namespace}" --dry-run=client --output=yaml \
-            | kubectl apply --server-side --filename - &>/dev/null;
-        then
-            log info "Namespace resource applied" "resource=${namespace}"
-        else
-            log error "Failed to apply namespace resource" "resource=${namespace}"
-        fi
-    done
-}
-
-# SOPS secrets to be applied before the helmfile charts are installed
-function apply_sops_secrets() {
-    log debug "Applying secrets"
-
-    local -r secrets=(
-        "${ROOT_DIR}/bootstrap/github-deploy-key.sops.yaml"
-        "${ROOT_DIR}/kubernetes/components/common/sops/cluster-secrets.sops.yaml"
-        "${ROOT_DIR}/kubernetes/components/common/sops/sops-age.sops.yaml"
-    )
-
-    for secret in "${secrets[@]}"; do
-        if [ ! -f "${secret}" ]; then
-            log warn "File does not exist" "file=${secret}"
-            continue
-        fi
-
-        # Check if the secret resources are up-to-date
-        if sops exec-file "${secret}" "kubectl --namespace flux-system diff --filename {}" &>/dev/null; then
-            log info "Secret resource is up-to-date" "resource=$(basename "${secret}" ".sops.yaml")"
-            continue
-        fi
-
-        # Apply secret resources
-        if sops exec-file "${secret}" "kubectl --namespace flux-system apply --server-side --filename {}" &>/dev/null; then
-            log info "Secret resource applied successfully" "resource=$(basename "${secret}" ".sops.yaml")"
-        else
-            log error "Failed to apply secret resource" "resource=$(basename "${secret}" ".sops.yaml")"
-        fi
-    done
-}
-
 # CRDs to be applied before the helmfile charts are installed
 function apply_crds() {
     log debug "Applying CRDs"
@@ -95,7 +33,7 @@ function apply_crds() {
         # renovate: datasource=github-releases depName=prometheus-operator/prometheus-operator
         https://github.com/prometheus-operator/prometheus-operator/releases/download/v0.83.0/stripped-down-crds.yaml
         # renovate: datasource=github-releases depName=kubernetes-sigs/external-dns
-        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.18.0/config/crd/standard/dnsendpoint.yaml
+        https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/tags/v0.18.0/config/crd/standard/dnsendpoints.externaldns.k8s.io.yaml
     )
 
     for crd in "${crds[@]}"; do
@@ -160,11 +98,9 @@ function main() {
 
     # Apply resources and Helm releases
     wait_for_nodes
-    # apply_namespaces
-    # apply_sops_secrets
     apply_crds
-    # apply_resources
-    # sync_helm_releases
+    apply_resources
+    sync_helm_releases
 
     log info "Congrats! The cluster is bootstrapped and Flux is syncing the Git repository"
 }

@@ -13,7 +13,10 @@ tasks:
       - talhelper gencommand apply --extra-flags="--insecure" | bash
       - until talhelper gencommand bootstrap | bash; do sleep 10; done
       - until talhelper gencommand kubeconfig --config-file="{{.TALOS_DIR}}/talconfig.yaml" --extra-flags="{{.ROOT_DIR}} --force"| bash; do sleep 10; done
+      - mv {{.ROOT_DIR}}/kubeconfig {{.CLUSTER_DIR}}
       - kubectl config rename-context admin@{{.CLUSTER}} {{.CLUSTER}}
+    env:
+      CLUSTER_DIR: '{{.CLUSTER_DIR}}'
     preconditions:
       - test -f {{.ROOT_DIR}}/.sops.yaml
       - test -f {{.SOPS_AGE_KEY_FILE}}

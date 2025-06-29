@@ -15,3 +15,8 @@ machine:
       enabled: true
       resolveMemberNames: true
       forwardKubeDNSToHost: false
+  nodeLabels:
+    node.longhorn.io/create-default-disk: config
+    intel.feature.node.kubernetes.io/gpu: 'true'
+  nodeAnnotations:
+    node.longhorn.io/default-disks-config: '[{"path":"/var/mnt/longhorn","allowScheduling":true}]'

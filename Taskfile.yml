@@ -23,13 +23,11 @@ env:
 
 includes:
   bootstrap: .taskfiles/bootstrap
-  brew: .taskfiles/Brew/Taskfile.yaml
   external-secrets: .taskfiles/ExternalSecrets/Taskfile.yaml
   flux: .taskfiles/Flux/Taskfile.yaml
   kubernetes: .taskfiles/Kubernetes/Taskfile.yaml
   sops: .taskfiles/sops/Taskfile.yaml
   talos: .taskfiles/Talos/Taskfile.yaml
-  workstation: .taskfiles/Workstation/Taskfile.yaml
   storage: .taskfiles/Storage/Taskfile.yaml
   volsync: .taskfiles/volsync/Taskfile.yaml
 
