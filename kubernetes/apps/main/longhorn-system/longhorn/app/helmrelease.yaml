@@ -9,8 +9,9 @@ spec:
   interval: 30m
   url: https://charts.longhorn.io
   timeout: 3m
+
 ---
-# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# yaml-language-server: $schema=https://lds-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -27,26 +28,26 @@ spec:
         namespace: longhorn-system
   install:
     remediation:
-      retries: 3
+      retries: -1
   upgrade:
     cleanupOnFail: true
     remediation:
-      strategy: rollback
       retries: 3
   values:
     persistence:
       defaultDataLocality: best-effort
     defaultSettings:
-      defaultDataLocality: best-effort
       defaultDataPath: "/var/mnt/longhorn"
+      defaultDataLocality: best-effort
+      defaultLonghornStaticStorageClass: longhorn
       defaultReplicaCount: 3
+      guaranteedEngineManagerCPU: 20
+      guaranteedReplicaManagerCPU: 20
+      nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
+      orphanAutoDeletion: true
       replicaAutoBalance: true
       storageMinimalAvailablePercentage: 1
       storageReservedPercentageForDefaultDisk: 10
-      defaultLonghornStaticStorageClass: longhorn
-      nodeDownPodDeletionPolicy: delete-both-statefulset-and-deployment-pod
-      concurrentAutomaticEngineUpgradePerNodeLimit: 3
-      orphanAutoDeletion: true
     ingress:
       enabled: false
     metrics:
