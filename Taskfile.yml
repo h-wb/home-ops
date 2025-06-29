@@ -16,6 +16,7 @@ vars:
 
 env:
   KUBECONFIG: '{{.CLUSTER_DIR}}/kubeconfig'
+  MINIJINJA_CONFIG_FILE: '{{.ROOT_DIR}}/.minijinja.toml'
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
   TALOSCONFIG: '{{.TALOS_DIR}}/clusterconfig/talosconfig'
 
@@ -26,11 +27,11 @@ includes:
   external-secrets: .taskfiles/ExternalSecrets/Taskfile.yaml
   flux: .taskfiles/Flux/Taskfile.yaml
   kubernetes: .taskfiles/Kubernetes/Taskfile.yaml
-  sops: .taskfiles/Sops/Taskfile.yaml
+  sops: .taskfiles/sops/Taskfile.yaml
   talos: .taskfiles/Talos/Taskfile.yaml
   workstation: .taskfiles/Workstation/Taskfile.yaml
   storage: .taskfiles/Storage/Taskfile.yaml
-  volsync: .taskfiles/VolSync/Taskfile.yaml
+  volsync: .taskfiles/volsync/Taskfile.yaml
 
 tasks:
   default: task --list
