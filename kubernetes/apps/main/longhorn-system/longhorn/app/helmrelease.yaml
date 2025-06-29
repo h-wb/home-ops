@@ -34,17 +34,13 @@ spec:
       strategy: rollback
       retries: 3
   values:
-    csi:
-      attacherReplicaCount: &replicas 1
-      provisionerReplicaCount: *replicas
-      resizerReplicaCount: *replicas
-      snapshotterReplicaCount: *replicas
     persistence:
-      defaultClassReplicaCount: 1
+      defaultDataLocality: best-effort
     defaultSettings:
       createDefaultDiskLabeledNodes: false
+      defaultDataLocality: best-effort
       defaultDataPath: "/var/mnt/longhorn"
-      defaultDataLocality: true
+      defaultReplicaCount: 3
       replicaAutoBalance: true
       storageMinimalAvailablePercentage: 1
       storageReservedPercentageForDefaultDisk: 10
