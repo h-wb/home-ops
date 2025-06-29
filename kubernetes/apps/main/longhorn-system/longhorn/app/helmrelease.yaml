@@ -37,6 +37,7 @@ spec:
     persistence:
       defaultDataLocality: best-effort
     defaultSettings:
+      # createDefaultDiskLabeledNodes: false
       defaultDataPath: "/var/mnt/longhorn"
       defaultDataLocality: best-effort
       defaultLonghornStaticStorageClass: longhorn
