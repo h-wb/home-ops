@@ -10,7 +10,7 @@ spec:
   trigger:
     manual: restore-once
   restic:
-    repository: "${APP}-volsync"
+    repository: "${APP}-${VOLSYNC_REPOSITORY:=volsync}" # volsync for local, volsync-minio for minio
     copyMethod: Snapshot
     volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=longhorn-snapclass}"
     cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=longhorn-cache}"
