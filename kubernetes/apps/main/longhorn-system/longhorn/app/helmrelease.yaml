@@ -42,7 +42,8 @@ spec:
     persistence:
       defaultClassReplicaCount: 1
     defaultSettings:
-      createDefaultDiskLabeledNodes: true
+      createDefaultDiskLabeledNodes: false
+      defaultDataPath: "/var/mnt/longhorn"
       defaultDataLocality: true
       replicaAutoBalance: true
       storageMinimalAvailablePercentage: 1
