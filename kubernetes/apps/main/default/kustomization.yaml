@@ -8,7 +8,8 @@ components:
 resources:
   # - ./actual/ks.yaml
   - ./homepage/ks.yaml
-  - ./monica/ks.yaml
+  # - ./monica/ks.yaml
+  - ./karakeep/ks.yaml
   # - ./dawarich/ks.yaml
   # - ./paperless/ks.yaml
   # - ./syncthing/ks.yaml
