@@ -40,7 +40,7 @@ spec:
               # OAuth setup
               # OAUTH_PROVIDER_NAME: Authentik
               DISABLE_PASSWORD_AUTH: false
-              DISABLE_SIGNUPS: false
+              DISABLE_SIGNUPS: true
               DISABLE_NEW_RELEASE_CHECK: true
               # FIXME: Remove this when the following PR is merged and released https://github.com/karakeep-app/karakeep/pull/969/files
               COREPACK_INTEGRITY_KEYS: 0
