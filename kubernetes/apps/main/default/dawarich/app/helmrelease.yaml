@@ -35,7 +35,7 @@ spec:
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
-              REDIS_URL: redis://dragonfly.database.svc.cluster.local
+              REDIS_URL: redis://dragonfly.database.svc.cluster.local::6379
               DATABASE_NAME: *app
               DATABASE_PORT: 5432
               DATABASE_HOST: dawarich-pgbouncer.default.svc
