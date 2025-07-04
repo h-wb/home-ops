@@ -7,7 +7,7 @@ metadata:
 spec:
   postgresVersion: 17
   postGISVersion: "3.4"
-  image: ${POSTGRES_IMAGE:=registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-17.4-0}
+  image: ${POSTGRES_IMAGE:=registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi9-17.5-2520}
   monitoring:
     pgmonitor:
       exporter:
