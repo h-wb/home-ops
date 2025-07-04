@@ -6,6 +6,8 @@ metadata:
   name: &name ${APP}
 spec:
   postgresVersion: 17
+  postGISVersion: "3.4"
+  image: ${POSTGRES_IMAGE:=registry.developers.crunchydata.com/crunchydata/crunchy-postgres:ubi8-17.4-0}
   monitoring:
     pgmonitor:
       exporter:

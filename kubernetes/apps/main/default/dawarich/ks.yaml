@@ -10,22 +10,22 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-
   components:
     - ../../../../../components/gatus/guarded
   #  - ../../../../../components/keda/nfs-scaler
     # - ../../../../../components/volsync
+    - ../../../../../components/postgres
   dependsOn:
     - name: crunchy-postgres-operator
       namespace: database
   interval: 30m
   path: ./kubernetes/apps/main/default/dawarich/app
   postBuild:
-
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 2Gi
       GATUS_SUBDOMAIN: dawarich
+      POSTGRES_IMAGE: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi9-17.5-3.5-2520
   prune: true
   retryInterval: 1m
   sourceRef:
