@@ -42,9 +42,6 @@ spec:
                   secretKeyRef:
                     name: dawarich-pguser-dawarich
                     key: password
-            envFrom:
-              - secretRef:
-                  name: dawarich-db-secret
             resources:
               requests:
                 memory: "1Gi"
