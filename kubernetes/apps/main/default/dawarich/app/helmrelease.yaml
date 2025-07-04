@@ -25,14 +25,17 @@ spec:
     controllers:
       dawarich:
         containers:
-          app: &bapp
+          app: &dawarich
             image:
               repository: freikin/dawarich
-              tag: 0.29.1
+              tag: 0.29.1@sha256:d1e50f6bcd7807a223a530304d725e5d999221381e4d2f9dd813535261ddeff6
             env:
               TIME_ZONE: "Europe/Paris"
-              REDIS_URL: redis://dragonfly.database.svc.cluster.local
+              REVERSE_GEOCODING_ENABLED: true
+              SELF_HOSTED: "true"
+              STORE_GEODATA: "true"
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
+              REDIS_URL: redis://dragonfly.database.svc.cluster.local
               DATABASE_NAME: *app
               DATABASE_PORT: 5432
               DATABASE_HOST: dawarich-pgbouncer.default.svc
@@ -53,12 +56,9 @@ spec:
               - "web-entrypoint.sh"
             args:
               - "bin/rails server -p 3000 -b 0.0.0.0"
-          sidekick:
-            <<: *bapp
-            command:
-              - "sidekiq-entrypoint.sh"
-            args:
-              - "bundle exec sidekiq"
+          sidekiq:
+            <<: *dawarich
+            command: ['bundle', 'exec', 'sidekiq'] # fixes https://github.com/Freika/dawarich/pull/941
             resources:
               requests:
                 memory: "1Gi"
@@ -88,9 +88,17 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-    # persistence:
-    #   config:
-    #     enabled: true
-    #     existingClaim: *app
-    #     globalMounts:
-    #       - path: /config
+    persistence:
+      data:
+        existingClaim: dawarich
+        globalMounts:
+          - path: /var/app/public
+            subPath: public
+          - path: /var/app/storage
+            subPath: storage
+          - path: /dawarich_db_data
+            subPath: dawarich_db_data
+      watched:
+        type: emptyDir
+        globalMounts:
+          - path: /var/app/tmp/imports/watched

@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/gatus/guarded
   #  - ../../../../../components/keda/nfs-scaler
-    # - ../../../../../components/volsync
+    - ../../../../../components/volsync
     - ../../../../../components/postgres
   dependsOn:
     - name: crunchy-postgres-operator
@@ -23,7 +23,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 2Gi
+      VOLSYNC_CAPACITY: 1Gi
       GATUS_SUBDOMAIN: dawarich
       POSTGRES_IMAGE: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi9-17.5-3.5-2520
   prune: true
