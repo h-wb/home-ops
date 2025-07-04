@@ -14,7 +14,7 @@ spec:
     - ../../../../../components/gatus/guarded
   #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
-    - ../../../../../components/postgres
+    # - ../../../../../components/postgres
   path: ./kubernetes/apps/main/default/karakeep/app
   prune: true
   sourceRef:
