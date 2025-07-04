@@ -33,6 +33,15 @@ spec:
               TIME_ZONE: "Europe/Paris"
               REDIS_URL: redis://dragonfly.database.svc.cluster.local
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
+              DATABASE_NAME: *app
+              DATABASE_PORT: 5432
+              DATABASE_HOST: dawarich-pgbouncer.default.svc
+              DATABASE_USERNAME: *app
+              DATABASE_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: dawarich-pguser-dawarich
+                    key: password
             envFrom:
               - secretRef:
                   name: dawarich-db-secret
