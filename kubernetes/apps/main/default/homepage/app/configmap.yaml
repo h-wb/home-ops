@@ -61,22 +61,22 @@ data:
               uuid: {{HOMEPAGE_VAR_HEALTHCHECK_UUID}}
 
 
-    - Calendar:
-        - Agenda:
-            widget:
-              type: calendar
-              view: agenda # optional - possible values monthly, agenda
-              maxEvents: 20 # optional - defaults to 10
-              integrations: # optional
-                - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-                  service_group: Downloads # group name where widget exists
-                  service_name: Sonarr TV # service name for that widget
-                - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-                  service_group: Downloads # group name where widget exists
-                  service_name: Sonarr ANM # service name for that widget
-                - type: radarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
-                  service_group: Downloads # group name where widget exists
-                  service_name: Radarr # service name for that widget
+    # - Calendar:
+    #     - Agenda:
+    #         widget:
+    #           type: calendar
+    #           view: agenda # optional - possible values monthly, agenda
+    #           maxEvents: 20 # optional - defaults to 10
+    #           integrations: # optional
+    #             - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
+    #               service_group: Downloads # group name where widget exists
+    #               service_name: Sonarr TV # service name for that widget
+    #             - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
+    #               service_group: Downloads # group name where widget exists
+    #               service_name: Sonarr ANM # service name for that widget
+    #             - type: radarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
+    #               service_group: Downloads # group name where widget exists
+    #               service_name: Radarr # service name for that widget
     - Infrastructure:
         - Router:
             href: http://192.168.1.1
