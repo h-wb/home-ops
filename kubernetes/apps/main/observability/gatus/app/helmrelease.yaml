@@ -125,7 +125,9 @@ spec:
           subjects:
             - identifier: gatus
     serviceAccount:
-      gatus: {}
+      gatus:
+        forceRename: gatus
+        enabled: true
     persistence:
       config:
         type: emptyDir
