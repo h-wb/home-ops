@@ -22,7 +22,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - voyager.internal:9633
+        - 192.168.1.161:9633
   metricsPath: /metrics
   relabelings:
     - action: replace
