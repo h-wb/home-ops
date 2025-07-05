@@ -49,8 +49,8 @@ endpoints:
       - "[CERTIFICATE_EXPIRATION] > 240h"
   - name: PiKVM
     group: ICMP
-    url: http://192.168.1.48
-    conditions: ["[STATUS] == 404"]
+    url: icmp://192.168.1.48
+    conditions: ["[CONNECTED] == true"]
     alerts: [{ type: pushover }]
 # remote:
 #   instances:
