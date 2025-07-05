@@ -54,6 +54,7 @@ spec:
                     secretKeyRef:
                       name: gatus-pguser-gatus
                       key: pgbouncer-uri
+              SECRET_DOMAIN: ${SECRET_DOMAIN}
             probes:
               liveness: &probes
                 enabled: true
