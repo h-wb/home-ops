@@ -137,6 +137,12 @@ spec:
           gnetId: 15038
           revision: 3
           datasource: Prometheus
+        speedtest-exporter-hub:
+          # renovate: depName="Speedtest Exporter"
+          gnetId: 13665
+          revision: 4
+          datasource:
+            - { name: DS_PROMETHEUS, value: Prometheus }
         kubernetes-api-server:
           # renovate: depName="Kubernetes / System / API Server"
           gnetId: 15761
