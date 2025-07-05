@@ -8,8 +8,8 @@ storage:
 metrics: true
 debug: false
 ui:
-  title: Health Status
-  header: Health Status
+  title: Status | Gatus
+  header: Status
 alerting:
   pushover:
     title: Gatus
@@ -34,7 +34,7 @@ endpoints:
       dns-resolver: tcp://1.1.1.1:53
     conditions: ["[STATUS] == 200"]
   - name: flux-webhook
-    group: main-external
+    group: infrastructure
     url: https://flux-webhook.${SECRET_DOMAIN}
     interval: 1m
     client:

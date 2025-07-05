@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app gatus
+  name: gatus
 spec:
   interval: 1h
   chartRef:
@@ -19,10 +19,6 @@ spec:
   values:
     controllers:
       gatus:
-        replicas: 2
-        strategy: RollingUpdate
-        labels:
-          postgres: "true"
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
@@ -38,7 +34,7 @@ spec:
               UNIQUE_FILENAMES: true
               METHOD: WATCH
             restartPolicy: Always
-            resources: &resources
+            resources:
               requests:
                 cpu: 10m
               limits:
@@ -75,25 +71,25 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
-            resources: *resources
-        serviceAccount:
-          identifier: *app
+            resources:
+              requests:
+                cpu: 100m
+              limits:
+                memory: 256Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
-        runAsGroup: 100
-        fsGroup: 100
+        runAsGroup: 1000
+        fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        controller: *app
         ports:
           http:
             port: *port
     serviceMonitor:
       app:
-        serviceName: *app
         endpoints:
           - port: http
     route:
@@ -113,10 +109,6 @@ spec:
           - name: external
             namespace: kube-system
             sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
     rbac:
       roles:
         gatus:
@@ -129,13 +121,11 @@ spec:
         gatus:
           type: ClusterRoleBinding
           roleRef:
-            identifier: *app
+            identifier: gatus
           subjects:
-            - identifier: *app
+            - identifier: gatus
     serviceAccount:
-      gatus:
-        forceRename: gatus
-        enabled: true
+      gatus: {}
     persistence:
       config:
         type: emptyDir
