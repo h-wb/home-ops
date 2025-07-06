@@ -44,13 +44,13 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               FIREWALL_INPUT_PORTS: &port 8080
               FIREWALL_OUTBOUND_SUBNETS: 10.43.0.0/16,192.168.1.0/24 # Allow access to k8s subnets
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-secret
             # resources:
             #   limits:
             #     squat.ai/tun: 1
             restartPolicy: Always
-            envFrom:
-              - secretRef:
-                  name: qbittorrent-secret
             securityContext:
               capabilities: { add: ["NET_ADMIN"] }
               allowPrivilegeEscalation: false
