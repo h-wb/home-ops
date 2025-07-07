@@ -42,6 +42,13 @@ spec:
   tlsConfig:
     insecureSkipVerify: true
   metricsPath: /api/export/prometheus/metrics
+  basicAuth:
+    username:
+      name: alertmanager-secret
+      key: PIKVM_USERNAME
+    password:
+      name: alertmanager-secret
+      key: PIKVM_PASSWORD
   relabelings:
     - action: replace
       targetLabel: job
