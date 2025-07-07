@@ -141,10 +141,3 @@ spec:
         globalMounts:
           - path: /data
             readOnly: true
-      manual:
-        type: nfs
-        server: ${NFS_ADDR:=temp}
-        path: /mnt/tank/fwe
-        globalMounts:
-          - path: /manual
-            readOnly: true
