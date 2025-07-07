@@ -7,4 +7,5 @@ resources:
   # - ./nut-exporter/ks.yaml
   - ./smartctl-exporter/ks.yaml
   - ./speedtest-exporter/ks.yaml
+  - ./snmp-exporter/ks.yaml
   # - ./unpoller/ks.yaml
