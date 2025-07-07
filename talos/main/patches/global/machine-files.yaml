@@ -1,6 +1,7 @@
 machine:
   files:
-    - op: create
+    - # Spegel
+      op: create
       path: /etc/cri/conf.d/20-customization.part
       permissions: 0o644
       content: |-
