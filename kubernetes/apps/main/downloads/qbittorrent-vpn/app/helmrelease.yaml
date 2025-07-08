@@ -132,20 +132,9 @@ spec:
       app:
         forceRename: qbittorrent-vpn
         primary: true
-        annotations:
-          lbipam.cilium.io/ips: 192.168.1.53
         ports:
           http:
             port: *port
-      bittorrent:
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: 192.168.1.53
-        ports:
-          bittorrent:
-            enabled: true
-            port: *torrentPort
-            protocol: TCP
     route:
       app:
         annotations:
