@@ -168,8 +168,6 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /data
-      tmp:
-        type: emptyDir
       gluetun-auth:
         type: secret
         name: qbittorrent-gluetun-secret
