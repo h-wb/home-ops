@@ -27,7 +27,7 @@ includes:
   flux: .taskfiles/Flux/Taskfile.yaml
   kubernetes: .taskfiles/Kubernetes/Taskfile.yaml
   sops: .taskfiles/sops/Taskfile.yaml
-  talos: .taskfiles/Talos/Taskfile.yaml
+  talos: .taskfiles/talos/Taskfile.yaml
   storage: .taskfiles/Storage/Taskfile.yaml
   volsync: .taskfiles/volsync/Taskfile.yaml
 
