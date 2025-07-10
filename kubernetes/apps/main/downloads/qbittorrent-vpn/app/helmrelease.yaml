@@ -43,7 +43,7 @@ spec:
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               FIREWALL_INPUT_PORTS: 8080
               FIREWALL_OUTBOUND_SUBNETS: 10.43.0.0/16,10.42.0.0/16
-              SERVER_COUNTRIES: Luxembourg
+              SERVER_COUNTRIES: Luxembourg,Netherlands,Germany,Switzerland
             envFrom:
               - secretRef:
                   name: qbittorrent-secret
