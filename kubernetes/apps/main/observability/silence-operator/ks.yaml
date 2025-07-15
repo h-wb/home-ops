@@ -43,7 +43,7 @@ spec:
     - name: silence-operator
       namespace: *namespace
   interval: 1h
-  path: ./kubernetes/apps/observability/silence-operator/silences
+  path: ./kubernetes/apps/main/observability/silence-operator/silences
   prune: true
   retryInterval: 2m
   sourceRef:
