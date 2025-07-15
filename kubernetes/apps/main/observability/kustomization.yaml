@@ -11,5 +11,6 @@ resources:
   - ./loki/ks.yaml
   - ./karma/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
+  - ./silence-operator/ks.yaml
   # Exporters
   - ./exporters
