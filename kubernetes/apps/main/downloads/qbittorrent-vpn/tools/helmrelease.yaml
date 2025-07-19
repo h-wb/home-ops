@@ -91,22 +91,22 @@ spec:
               - --include-tag
               - unregistered
 
-      orphaned:
-        type: cronjob
-        cronjob:
-          <<: *cronJobSpec
-          schedule: "@daily"
-        pod:
-          restartPolicy: Never
-        containers:
-          app:
-            <<: *container
-            args:
-              - orphaned
-              - --exclude-pattern
-              - "*/manual/*"
-              - --exclude-pattern
-              - "*/cross-seed/*"
+      # orphaned:
+      #   type: cronjob
+      #   cronjob:
+      #     <<: *cronJobSpec
+      #     schedule: "@daily"
+      #   pod:
+      #     restartPolicy: Never
+      #   containers:
+      #     app:
+      #       <<: *container
+      #       args:
+      #         - orphaned
+      #         - --exclude-pattern
+      #         - "*/manual/*"
+      #         - --exclude-pattern
+      #         - "*/cross-seed/*"
 
       reannounce:
         containers:
