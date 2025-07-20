@@ -56,6 +56,7 @@ spec:
           - 125 # render
           - 105 # render
           - 568
+          - 1000
     controllers:
       tdarr-node:
         containers:
@@ -73,9 +74,9 @@ spec:
             resources:
               requests:
                 cpu: 100m
-                gpu.intel.com/i915: 1
+                memory: 2Gi
               limits:
-                cpu: 2
+                memory: 4Gi
                 gpu.intel.com/i915: 1
     service:
       app:
