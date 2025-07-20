@@ -5,7 +5,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
 configMapGenerator:
-  - name: qbtools-configmap
+  - name: qbtools-vpn-configmap
     files:
       - ./resources/config.yaml
 generatorOptions:

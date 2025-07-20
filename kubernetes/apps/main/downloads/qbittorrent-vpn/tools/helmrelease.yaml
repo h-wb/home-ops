@@ -119,7 +119,7 @@ spec:
     persistence:
       config-file:
         type: configMap
-        name: qbtools-configmap
+        name: qbtools-vpn-configmap
         globalMounts:
           - path: /config/config.yaml
             subPath: config.yaml

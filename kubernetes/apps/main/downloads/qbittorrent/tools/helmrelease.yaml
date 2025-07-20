@@ -1,57 +1,133 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app qbtools
+  name: qbtools
 spec:
   interval: 30m
   chartRef:
     kind: OCIRepository
     name: app-template
-  install:
-    remediation:
-      retries: 3
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      strategy: rollback
-      retries: 3
   dependsOn:
     - name: qbittorrent
       namespace: downloads
   values:
+    defaultPodOptions:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+
     controllers:
-      reannounce:
-        containers:
-          app: &container
+      prune:
+        type: cronjob
+
+        cronjob: &cronJobSpec
+          schedule: "@hourly"
+          backoffLimit: 0
+          concurrencyPolicy: Forbid
+          failedJobsHistory: 1
+          successfulJobsHistory: 0
+
+        pod:
+          restartPolicy: Never
+
+        initContainers:
+          tagging: &container
             image:
               repository: ghcr.io/buroa/qbtools
               tag: v0.21.1@sha256:fd13085f7534719b7b30828684661b7f5611bbc4156831123775cfcd9b8f2eb5
             env:
-              TZ: Europe/Paris
-              POD_NAMESPACE:
-                valueFrom:
-                  fieldRef:
-                    fieldPath: metadata.namespace
-            args: [
-              "reannounce",
-              "--process-seeding",
-              "--server", "qbittorrent.$(POD_NAMESPACE).svc.cluster.local",
-              "--port", "80"
-            ]
+              QBITTORRENT_HOST: qbittorrent.downloads.svc.cluster.local
+              QBITTORRENT_PORT: 8080
+            args:
+              - tagging
+              - --added-on
+              - --expired
+              - --last-activity
+              - --sites
+              - --unregistered
+              - --not-linked
+            resources:
+              requests:
+                memory: 128Mi
+                cpu: 25m
+              limits:
+                memory: 256Mi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
-            resources:
-              requests:
-                cpu: 25m
-              limits:
-                memory: 256M
-    defaultPodOptions:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        seccompProfile: { type: RuntimeDefault }
+              capabilities:
+                drop:
+                  - ALL
+
+        containers:
+          expired:
+            <<: *container
+            args:
+              - prune
+              - --exclude-category
+              - manual
+              - --exclude-category
+              - cross-seed
+              - --exclude-tag
+              - added:24h
+              - --include-tag
+              - expired
+
+          unregistered:
+            <<: *container
+            args:
+              - prune
+              - --exclude-category
+              - manual
+              - --exclude-category
+              - cross-seed
+              - --exclude-tag
+              - added:24h
+              - --include-tag
+              - unregistered
+
+      # orphaned:
+      #   type: cronjob
+      #   cronjob:
+      #     <<: *cronJobSpec
+      #     schedule: "@daily"
+      #   pod:
+      #     restartPolicy: Never
+      #   containers:
+      #     app:
+      #       <<: *container
+      #       args:
+      #         - orphaned
+      #         - --exclude-pattern
+      #         - "*/manual/*"
+      #         - --exclude-pattern
+      #         - "*/cross-seed/*"
+
+      reannounce:
+        containers:
+          app:
+            <<: *container
+            args:
+              - reannounce
+              - --process-seeding
+
+    persistence:
+      config-file:
+        type: configMap
+        name: qbtools-configmap
+        globalMounts:
+          - path: /config/config.yaml
+            subPath: config.yaml
+            readOnly: true
+      downloads:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /data/Downloads/qbittorrent/
+            subPath: Downloads/qbittorrent
