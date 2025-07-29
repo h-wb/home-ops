@@ -40,19 +40,19 @@ spec:
               - secretRef:
                   name: minio-secret
             args: ["server", "/data", "--console-address", ":9001"]
-            probes:
-              liveness: &probes
-                enabled: true
-                custom: true
-                spec:
-                  httpGet:
-                    path: /minio/health/live
-                    port: 9000
-                  initialDelaySeconds: 30
-                  periodSeconds: 30
-                  timeoutSeconds: 10
-                  failureThreshold: 6
-              readiness: *probes
+            # probes:
+            #   liveness: &probes
+            #     enabled: true
+            #     custom: true
+            #     spec:
+            #       httpGet:
+            #         path: /minio/health/live
+            #         port: 9000
+            #       initialDelaySeconds: 30
+            #       periodSeconds: 30
+            #       timeoutSeconds: 10
+            #       failureThreshold: 6
+            #   readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
