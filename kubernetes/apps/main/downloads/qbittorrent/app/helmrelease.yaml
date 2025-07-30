@@ -159,4 +159,3 @@ spec:
             app:
               - path: /config/qbit-hardlinker.sh
                 subPath: qbit-hardlinker.sh
-                readOnly: true
