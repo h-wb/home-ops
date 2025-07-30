@@ -156,7 +156,7 @@ spec:
         name: qbittorrent-script
         advancedMounts:
           qbittorrent:
-            script:
+            app:
               - path: /config/qbit-hardlinker.sh
                 subPath: qbit-hardlinker.sh
                 readOnly: true
