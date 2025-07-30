@@ -151,3 +151,12 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /data
+      script:
+        type: configMap
+        name: qbittorrent-script
+        advancedMounts:
+          app:
+            script:
+              - path: /config/qbit-hardlinker.sh
+                subPath: qbit-hardlinker.sh
+                readOnly: true
