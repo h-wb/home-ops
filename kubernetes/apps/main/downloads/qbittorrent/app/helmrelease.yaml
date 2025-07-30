@@ -155,7 +155,7 @@ spec:
         type: configMap
         name: qbittorrent-script
         advancedMounts:
-          app:
+          qbittorrent:
             script:
               - path: /config/qbit-hardlinker.sh
                 subPath: qbit-hardlinker.sh
