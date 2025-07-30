@@ -154,6 +154,7 @@ spec:
       script:
         type: configMap
         name: qbittorrent-script
+        defaultMode: 0755
         advancedMounts:
           qbittorrent:
             app:
