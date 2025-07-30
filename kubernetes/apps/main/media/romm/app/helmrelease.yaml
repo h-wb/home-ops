@@ -49,6 +49,7 @@ spec:
                   secretKeyRef:
                     name: romm-pguser-romm
                     key: password
+              HASHEOUS_API_ENABLED: "true"
             envFrom:
               - secretRef:
                   name: romm-secret
