@@ -16,11 +16,11 @@ if [[ "$torrentCategory" != "games" ]]; then
 fi
 
 srcPath="${torrentPath}/${torrentName}"
-destDir="/data/Games/Library/import"
+destDir="/data/Games/Library/import/"
 
 echo "[+] Importing \"$torrentName\" to \"$destDir\"" >> "$logFile"
 
 # Hardlink recursively, preserving structure
-cp -vrl --no-dereference "$srcPath" "$destDir" >> "$logFile" 2>&1
+cp -vrl "$srcPath" "$destDir" >> "$logFile" 2>&1
 
 echo "[✔] Successfully hardlinked \"$torrentName\"" >> "$logFile"
