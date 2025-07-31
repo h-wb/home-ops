@@ -14,3 +14,4 @@ resources:
   # - ./calibre-web/ks.yaml
   - ./romm/ks.yaml
   - ./tdarr/ks.yaml
+  - ./multiscrobbler/ks.yaml
