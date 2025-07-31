@@ -35,7 +35,7 @@ spec:
               BASE_URL: https://multiscrobbler.${SECRET_DOMAIN}
               LASTFM_REDIRECT_URI: https://multiscrobbler.${SECRET_DOMAIN}/lastfm/callback
               SPOTIFY_REDIRECT_URI: https://multiscrobbler.${SECRET_DOMAIN}/callback
-              PLEX_URL: https://plex.${SECRET_DOMAIN}
+              PLEX_URL: http://plex.media:32400
             envFrom:
               - secretRef:
                   name: multiscrobbler-secret
