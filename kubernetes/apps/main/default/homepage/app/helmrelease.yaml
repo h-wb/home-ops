@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/gethomepage/homepage
-              tag: v1.4.0
+              tag: v1.4.2
             env:
               TZ: Europe/Paris
               HOMEPAGE_ALLOWED_HOSTS: "{{ .Release.Name }}.${SECRET_DOMAIN}"
