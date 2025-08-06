@@ -83,7 +83,7 @@ spec:
         - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         - "cwa.${SECRET_DOMAIN}"
         parentRefs:
-          - name: internal
+          - name: external
             namespace: kube-system
             sectionName: https
         rules:
