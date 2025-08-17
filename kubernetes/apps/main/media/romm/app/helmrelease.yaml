@@ -109,13 +109,17 @@ spec:
         globalMounts:
           - path: /romm/resources
             readOnly: false
-      config:
+      romm-config:
+        type: emptyDir
+        globalMounts:
+          - path: /romm/config
+      romm-config-file:
         type: configMap
         name: romm-config
         globalMounts:
           - path: /romm/config/config.yml
             subPath: config.yml
-            readOnly: false
+        defaultMode: 0664
       tmp:
         type: emptyDir
         medium: Memory
