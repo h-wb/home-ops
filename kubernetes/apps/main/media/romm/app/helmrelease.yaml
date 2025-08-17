@@ -113,8 +113,7 @@ spec:
         type: configMap
         name: romm-config
         globalMounts:
-          - path: /romm/config/config.yml
-            subPath: config.yml
+          - path: /romm/config/
       tmp:
         type: emptyDir
         medium: Memory
