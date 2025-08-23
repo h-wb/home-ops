@@ -28,7 +28,7 @@ spec:
           app: &dawarich
             image:
               repository: freikin/dawarich
-              tag: 0.30.8@sha256:033fdd6ec4e64807ee7639bd79b0fdc2a6c071633b30fc1ec85595608ef2a539
+              tag: 0.30.11@sha256:fd57bd1de11d99805a77cf5e43ec78c2ad7fa12e5d5304d67438a295c543094c
             env:
               TIME_ZONE: "Europe/Paris"
               REVERSE_GEOCODING_ENABLED: true
