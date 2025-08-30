@@ -15,8 +15,6 @@ spec:
   #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
     - ../../../../../components/postgres
-  dependsOn:
-    - name: external-secrets-stores
   interval: 30m
   path: ./kubernetes/apps/main/default/paperless/app
   prune: true
