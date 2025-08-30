@@ -11,7 +11,7 @@ resources:
   # - ./monica/ks.yaml
   - ./karakeep/ks.yaml
   - ./dawarich/ks.yaml
-  # - ./paperless/ks.yaml
+  - ./paperless/ks.yaml
   # - ./syncthing/ks.yaml
   # - ./strava-statistics/ks.yaml
   - ./fusion/ks.yaml
