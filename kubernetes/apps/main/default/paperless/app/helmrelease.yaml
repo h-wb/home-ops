@@ -98,10 +98,10 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /data/local
-      data:
+      media:
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe
         globalMounts:
-          - path: /data/paperless/data
-            subPath: Docunents/Paperless/data
+          - path: /data/paperless/media
+            subPath: Docunents/Paperless/media
