@@ -98,7 +98,7 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /data/local
-      nas:
+      paperless:
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe
