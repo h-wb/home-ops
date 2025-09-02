@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./externalsecret.yaml
-  - ./pvc.yaml
 configMapGenerator:
 - name: romm-config
   files:

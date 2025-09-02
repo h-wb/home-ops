@@ -99,16 +99,6 @@ spec:
               - identifier: app
                 port: *port
     persistence:
-      # assets:
-      #   existingClaim: romm-assets
-      #   globalMounts:
-      #     - path: /romm/assets
-      #       readOnly: false
-      # resources:
-      #   existingClaim: *app
-      #   globalMounts:
-      #     - path: /romm/resources
-      #       readOnly: false
       data:
         existingClaim: *app
         advancedMounts:
