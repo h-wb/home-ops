@@ -99,27 +99,31 @@ spec:
               - identifier: app
                 port: *port
     persistence:
-      assets:
-        existingClaim: romm-assets
-        globalMounts:
-          - path: /romm/assets
-            readOnly: false
-      resources:
+      # assets:
+      #   existingClaim: romm-assets
+      #   globalMounts:
+      #     - path: /romm/assets
+      #       readOnly: false
+      # resources:
+      #   existingClaim: *app
+      #   globalMounts:
+      #     - path: /romm/resources
+      #       readOnly: false
+      data:
         existingClaim: *app
-        globalMounts:
-          - path: /romm/resources
-            readOnly: false
-      romm-config:
-        type: emptyDir
-        globalMounts:
-          - path: /romm/config
+        advancedMounts:
+          romm:
+            app:
+              - path: /romm/resources
+                subPath: resources
+              - path: /romm/assets
+                subPath: assets
       romm-config-file:
         type: configMap
         name: romm-config
         globalMounts:
           - path: /romm/config/config.yml
             subPath: config.yml
-        defaultMode: 0664
       tmp:
         type: emptyDir
         medium: Memory
