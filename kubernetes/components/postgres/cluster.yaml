@@ -37,13 +37,6 @@ spec:
         resources:
           requests:
             storage: 5Gi
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: "kubernetes.io/hostname"
-          whenUnsatisfiable: "ScheduleAnyway"
-          labelSelector:
-            matchLabels:
-              postgres-operator.crunchydata.com/cluster: *name
   users:
     # Superuser
     - name: "postgres"
