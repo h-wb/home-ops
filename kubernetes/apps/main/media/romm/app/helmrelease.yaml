@@ -99,6 +99,13 @@ spec:
               - identifier: app
                 port: *port
     persistence:
+      config:
+        type: configMap
+        name: romm-configmap
+        globalMounts:
+          - path: /romm/config/config.yml
+            subPath: config.yml
+            readOnly: true
       data:
         existingClaim: *app
         advancedMounts:
@@ -108,17 +115,6 @@ spec:
                 subPath: resources
               - path: /romm/assets
                 subPath: assets
-      romm-config-file:
-        type: configMap
-        name: romm-config
-        globalMounts:
-          - path: /romm/config/config.yml
-            subPath: config.yml
-      tmp:
-        type: emptyDir
-        medium: Memory
-        globalMounts:
-          - path: /tmp
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
@@ -126,3 +122,14 @@ spec:
         globalMounts:
           - path: /romm/library
             subPath: Games/Library
+      tmpfs:
+        type: emptyDir
+        advancedMounts:
+          romm:
+            app:
+              - path: /redis-data
+                subPath: redis-data
+              - path: /romm/config
+                subPath: config
+              - path: /tmp
+                subPath: tmp
