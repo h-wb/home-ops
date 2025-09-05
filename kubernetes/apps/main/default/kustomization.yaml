@@ -7,6 +7,7 @@ components:
   - ../../../components/common
 resources:
   # - ./actual/ks.yaml
+  - ./immich/ks.yaml
   - ./homepage/ks.yaml
   # - ./monica/ks.yaml
   - ./karakeep/ks.yaml
