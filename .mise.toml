@@ -25,6 +25,7 @@ TALOS_DIR = "{{config_root}}/talos"
 "aqua:mikefarah/yq" = "4.47.1"
 "aqua:siderolabs/talos" = "1.11.0"
 "aqua:yannh/kubeconform" = "0.7.0"
+"aqua:google/yamlfmt" = ["latest"]
 bitwarden-secrets-manager = "bws-v1.0.0"
 rust = "1.89.0"
 "cargo:minijinja-cli" = "2.10.2"
