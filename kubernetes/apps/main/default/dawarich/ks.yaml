@@ -29,7 +29,7 @@ spec:
   patches:
     - patch: |
         - op: add
-          path: /spec/args/postGISVersion
+          path: /spec/postGISVersion
           value: "3.4"
       target:
         kind: PostgresCluster
