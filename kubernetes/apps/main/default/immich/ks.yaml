@@ -62,16 +62,16 @@ spec:
             key: init.sql
       target:
         kind: PostgresCluster
-    - patch: |
-        - op: replace
-          path: /spec/users/0
-          value:
-            name: immich
-            databases: ["immich"]
-            password:
-              type: AlphaNumeric
-      target:
-        kind: PostgresCluster
+    # - patch: |
+    #     - op: replace
+    #       path: /spec/users/0
+    #       value:
+    #         name: immich
+    #         databases: ["immich"]
+    #         password:
+    #           type: AlphaNumeric
+    #   target:
+    #     kind: PostgresCluster
     - patch: |
         - op: add
           path: "/metadata/annotations/postgres-operator.crunchydata.com~1authorizeBackupRemoval"
