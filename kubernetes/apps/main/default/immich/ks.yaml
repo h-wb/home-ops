@@ -30,8 +30,8 @@ spec:
         - op: add
           path: /spec/patroni/dynamicConfiguration/postgresql/parameters
           value:
-            shared_preload_libraries: "vectors.so"
-            search_path: '"$user", public, vectors"'
+            shared_preload_libraries: "vchord.so"
+    # search_path: '"$user", public, vectors"'
       target:
         kind: PostgresCluster
     # - patch: |
@@ -44,16 +44,17 @@ spec:
     - patch: |
         - op: replace
           path: /spec/image
-          value: ghcr.io/budimanjojo/cdpgvecto.rs:ubi8-15.10-2-v0.3.0
+          value: ghcr.io/budimanjojo/crunchy-postgres-vectorchord:ubi9-17.6-2534
       target:
         kind: PostgresCluster
-    # - patch: |
-    #     - op: add
-    #       path: /spec/patroni/dynamicConfiguration/postgresql/pg_hba
-    #       value:
-    #         - hostnossl immich immich 10.244.0.0/16 md5
-    #   target:
-    #     kind: PostgresCluster
+    - patch: |
+        - op: add
+          path: /spec/patroni/dynamicConfiguration/postgresql/pg_hba
+          value:
+            - hostnossl all all 10.42.0.0/16 md5
+            - hostssl all all all md5
+      target:
+        kind: PostgresCluster
     - patch: |
         - op: add
           path: /spec/databaseInitSQL
@@ -72,17 +73,17 @@ spec:
     #           type: AlphaNumeric
     #   target:
     #     kind: PostgresCluster
-    - patch: |
-        - op: add
-          path: "/metadata/annotations/postgres-operator.crunchydata.com~1authorizeBackupRemoval"
-          value: "true"
-      target:
-        kind: PostgresCluster
-    - patch: |
-        - op: remove
-          path: /spec/backups
-      target:
-        kind: PostgresCluster
+    # - patch: |
+    #     - op: add
+    #       path: "/metadata/annotations/postgres-operator.crunchydata.com~1authorizeBackupRemoval"
+    #       value: "true"
+    #   target:
+    #     kind: PostgresCluster
+    # - patch: |
+    #     - op: remove
+    #       path: /spec/backups
+    #   target:
+    #     kind: PostgresCluster
     # - patch: |
     #     - op: remove
     #       path: /spec/dataSource
