@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/gatus/guarded
-  #  - ../../../../../components/keda/nfs-scaler
+    #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
     - ../../../../../components/postgres
   dependsOn:
@@ -26,6 +26,19 @@ spec:
       VOLSYNC_CAPACITY: 1Gi
       GATUS_SUBDOMAIN: dawarich
       POSTGRES_IMAGE: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi9-17.5-3.5-2520
+  patches:
+    - patch: |
+        - op: add
+          path: /spec/args/postGISVersion
+          value: "3.4"
+      target:
+        kind: PostgresCluster
+    - patch: |
+        - op: replace
+          path: /spec/image
+          value: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi9-17.5-3.5-2520
+      target:
+        kind: PostgresCluster
   prune: true
   retryInterval: 1m
   sourceRef:
@@ -34,3 +47,4 @@ spec:
     namespace: flux-system
   timeout: 5m
   wait: false # no flux ks dependents
+
