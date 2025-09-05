@@ -3,9 +3,9 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app dawarich
+  name: &app immich
 spec:
-  releaseName: dawarich
+  releaseName: immich
   interval: 30m
   chartRef:
     kind: OCIRepository
@@ -44,7 +44,7 @@ spec:
               DB_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: dawarich-pguser-dawarich
+                    name: immich-pguser-immich
                     key: password
               LOG_LEVEL: verbose
               MPLCONFIGDIR: /tmp/matplotlib
