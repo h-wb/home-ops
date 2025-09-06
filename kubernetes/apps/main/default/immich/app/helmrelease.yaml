@@ -141,19 +141,13 @@ spec:
       #     microservices:
       #       app:
       #         - path: /usr/src/app/photography
-      # model-cache:
-      #   enabled: true
-      #   storageClass: ceph-block
-      #   accessMode: ReadWriteOnce
-      #   size: 8Gi
-      #   retain: true
-      #   advancedMounts:
-      #     machine-learning:
-      #       app:
-      #         - path: /cache
-      cache:
-        enabled: true
-        type: emptyDir
+      model-cache:
+        type: persistentVolumeClaim
+        existingClaim: immich-machine-learning-cache
+        advancedMounts:
+          machine-learning:
+            app:
+              - path: /cache
       tmp:
         enabled: true
         type: emptyDir
