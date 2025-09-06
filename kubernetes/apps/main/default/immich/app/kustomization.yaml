@@ -6,6 +6,7 @@ resources:
   - ./helmrelease.yaml
   # - ./pvc.yaml
   # - ./externalsecret.yaml
+  - ./resources/configmap.yaml
 configMapGenerator:
   - name: immich-database-init-sql
     options:

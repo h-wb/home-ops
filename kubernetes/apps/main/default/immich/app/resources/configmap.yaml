@@ -1,0 +1,23 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-configmap
+data:
+  # URLS
+  IMMICH_WEB_URL: http://immich-web.selfhosted:3000
+  IMMICH_SERVER_URL: http://immich-server.default:3001
+  IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning.default:3003
+  # DB
+  DB_DATABASE_NAME: immich
+  DB_HOSTNAME: immich-pgbouncer.default.svc
+  DB_PORT: "5432"
+  DB_USERNAME: immich
+  # REDIS
+  REDIS_HOSTNAME: "dragonfly.database.svc.cluster.local"
+  REDIS_PORT: "6379"
+  # General
+  NODE_ENV: "production"
+  LOG_LEVEL: verbose
+  TZ: Europe/Paris
+  MPLCONFIGDIR: /tmp/matplotlib

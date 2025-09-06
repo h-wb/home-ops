@@ -18,6 +18,7 @@ spec:
       retries: 3
   values:
     defaultPodOptions:
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -32,28 +33,16 @@ spec:
             image:
               repository: ghcr.io/immich-app/immich-server
               tag: v1.138.1
-            env: &env
-              TZ: Europe/Paris
+            env:
               IMMICH_WORKERS_INCLUDE: api
-              REDIS_HOSTNAME: "dragonfly.database.svc.cluster.local"
-              REDIS_PORT: "6379"
-              DB_DATABASE_NAME: *app
-              DB_HOSTNAME: immich-pgbouncer.default.svc
-              DB_PORT: "5432"
-              DB_USERNAME: *app
               DB_PASSWORD:
                 valueFrom:
                   secretKeyRef:
                     name: immich-pguser-immich
                     key: password
-              LOG_LEVEL: verbose
-              MPLCONFIGDIR: /tmp/matplotlib
-            securityContext: &securityContext
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: {drop: [ALL]}
-        pod:
-          terminationGracePeriodSeconds: 1
+            envFrom:
+              - configMapRef:
+                  name: immich-configmap
       microservices:
         containers:
           app:
@@ -61,23 +50,30 @@ spec:
               repository: ghcr.io/immich-app/immich-server
               tag: v1.138.1
             env:
-              <<: *env
               IMMICH_WORKERS_INCLUDE: null
               IMMICH_WORKERS_EXCLUDE: api
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-pguser-immich
+                    key: password
+            envFrom:
+              - configMapRef:
+                  name: immich-configmap
             resources:
               requests:
                 gpu.intel.com/i915: 1
               limits:
                 gpu.intel.com/i915: 1
-            securityContext: *securityContext
-        pod:
-          terminationGracePeriodSeconds: 1
       machine-learning:
         containers:
           app:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
               tag: v1.138.1
+            envFrom:
+              - configMapRef:
+                  name: immich-configmap
             resources:
               requests:
                 cpu: 15m
@@ -85,9 +81,9 @@ spec:
               limits:
                 memory: 4000Mi
     service:
-      immich:
-        controller: immich
-        enabled: false
+      # immich:
+      #   controller: immich
+      #   enabled: false
       machine-learning:
         controller: machine-learning
         ports:
