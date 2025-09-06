@@ -146,13 +146,15 @@ spec:
       #     machine-learning:
       #       app:
       #         - path: /cache
-      cache:
-        enabled: true
-        type: emptyDir
+      machine-learning-cache:
+        existingClaim: immich-machine-learning-cache
         advancedMounts:
           machine-learning:
             app:
               - path: /cache
+                subPath: cache
+              - path: /.cache
+                subPath: dotCache
       tmp:
         enabled: true
         type: emptyDir
