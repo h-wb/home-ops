@@ -23,7 +23,7 @@ spec:
           app: &photon
             image:
               repository: ghcr.io/rtuszik/photon-docker
-              tag: 0.7.2@sha256:6cf6d57e1d85766cc2ef79bac16b039e3bde6e0888af9d0e32ff023db7588391
+              tag: 1.0.0@sha256:c6c8bdda89baddb2f39a01fcac9df4ddfb6758b7bc181d0d30a4b0531860d029
             env:
               COUNTRY_CODE: ca
               UPDATE_STRATEGY: PARALLEL
