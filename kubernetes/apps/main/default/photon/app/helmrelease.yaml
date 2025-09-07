@@ -27,6 +27,8 @@ spec:
             env:
               COUNTRY_CODE: ca
               UPDATE_STRATEGY: PARALLEL
+              PUID: 1000
+              PGID: 1000
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
