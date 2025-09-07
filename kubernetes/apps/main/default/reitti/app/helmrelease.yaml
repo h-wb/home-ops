@@ -1,0 +1,87 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app reitti
+spec:
+  releaseName: reitti
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  install:
+    remediation:
+      retries: -1
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    controllers:
+      reitti:
+        containers:
+          app: &reitti
+            image:
+              repository: dedicatedcode/reitti
+              tag: 1.4.0
+            env:
+              POSTGIS_DB: *app
+              POSTGIS_PORT: 5432
+              POSTGIS_HOST  : reitti-pgbouncer.default.svc
+              POSTGIS_USER: *app
+              POSTGIS_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: reitti-pguser-reitti
+                    key: password
+              RABBITMQ_HOST: ''
+              RABBITMQ_PORT: 5672
+              RABBITMQ_USER: 'reitti'
+              RABBITMQ_PASSWORD: 'reitti'
+              REDIS_HOST: 'dragonfly.database.svc.cluster.local'
+              REDIS_PORT: 6379
+              PHOTON_BASE_URL: http://photon.default:2322
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "250m"
+              limits:
+                memory: "3Gi"
+                cpu: "2000m"
+          # Move to standalone deployment someday I guess
+          rabbitmq:
+            image:
+              repository: rabbitmq
+              tag: 3-management-alpine
+            env:
+              RABBITMQ_DEFAULT_USER: reitti
+              RABBITMQ_DEFAULT_PASS: reitti
+            resources:
+              requests:
+                memory: "1Gi"
+                cpu: "250m"
+              limits:
+                memory: "3Gi"
+                cpu: "1500m"
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: &port 8080
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home
+          gethomepage.dev/name: reitti
+          gethomepage.dev/icon: google-maps.png
+        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
