@@ -58,4 +58,4 @@ spec:
         enabled: true
         existingClaim: *app
         globalMounts:
-          - path: /photon/data
+          - path: /photon/photon_data
