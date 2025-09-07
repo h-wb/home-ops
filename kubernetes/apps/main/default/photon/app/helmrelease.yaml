@@ -29,10 +29,10 @@ spec:
               UPDATE_STRATEGY: PARALLEL
               PUID: 1000
               PGID: 1000
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+            # securityContext:
+            #   allowPrivilegeEscalation: false
+            #   readOnlyRootFilesystem: true
+            #   capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 memory: "256Mi"
