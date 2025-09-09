@@ -9,22 +9,26 @@ metadata:
 spec:
   trigger:
     manual: restore-once
-  restic:
-    repository: "${APP}-${VOLSYNC_REPOSITORY:=volsync}" # volsync for local, volsync-minio for minio
-    copyMethod: Snapshot
-    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=longhorn-snapclass}"
-    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=longhorn-cache}"
-    cacheAccessModes: ["${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}"]
+  kopia:
+    accessModes:
+      - ${VOLSYNC_ACCESSMODES:=ReadWriteOnce}
+    cacheAccessModes:
+      - ${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}
     cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:=1Gi}"
-    storageClassName: "${VOLSYNC_STORAGECLASS:=longhorn-snapshot}"
-    accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteOnce}"]
-    capacity: "${VOLSYNC_CAPACITY:=5Gi}"
-    moverSecurityContext:
-      runAsUser: ${VOLSYNC_PUID:=1000}
-      runAsGroup: ${VOLSYNC_PGID:=1000}
-      fsGroup: ${VOLSYNC_PGID:=1000}
-    enableFileDeletion: true
+    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=longhorn-cache}"
+    capacity: ${VOLSYNC_CAPACITY:=5Gi}
     cleanupCachePVC: true
     # https://github.com/backube/volsync/issues/1504
     # https://discord.com/channels/673534664354430999/1173726095921655898/1328753654571728967
     # cleanupTempPVC: true
+    copyMethod: Snapshot
+    enableFileDeletion: true
+    moverSecurityContext:
+      runAsUser: ${VOLSYNC_PUID:=1000}
+      runAsGroup: ${VOLSYNC_PGID:=1000}
+      fsGroup: ${VOLSYNC_PGID:=1000}
+    repository: "${APP}-${VOLSYNC_REPOSITORY:=volsync}" # volsync for local, volsync-minio for minio
+    sourceIdentity:
+      sourceName: ${APP}
+    storageClassName: "${VOLSYNC_STORAGECLASS:=longhorn-snapshot}"
+    volumeSnapshotClassName: "${VOLSYNC_SNAPSHOTCLASS:=longhorn-snapclass}"
