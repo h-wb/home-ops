@@ -27,7 +27,7 @@ spec:
             env:
               POSTGIS_DB: *app
               POSTGIS_PORT: 5432
-              POSTGIS_HOST  : reitti-pgbouncer.default.svc
+              POSTGIS_HOST: reitti-pgbouncer.default.svc
               POSTGIS_USER: *app
               POSTGIS_PASSWORD:
                 valueFrom:
@@ -76,7 +76,8 @@ spec:
           gethomepage.dev/group: Home
           gethomepage.dev/name: reitti
           gethomepage.dev/icon: google-maps.png
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

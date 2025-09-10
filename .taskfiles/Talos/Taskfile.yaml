@@ -20,7 +20,8 @@ tasks:
     vars:
       MODE: '{{.MODE | default "auto"}}'
     requires:
-      vars: [IP]
+      vars:
+        - IP
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
@@ -39,7 +40,8 @@ tasks:
       TALOS_VERSION:
         sh: yq '.talosVersion' {{.TALOS_DIR}}/talenv.yaml
     requires:
-      vars: [IP]
+      vars:
+        - IP
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - talosctl config info
@@ -62,7 +64,8 @@ tasks:
     vars:
       MODE: '{{.MODE | default "powercycle"}}'
     requires:
-      vars: [IP]
+      vars:
+        - IP
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - which talosctl
@@ -83,7 +86,8 @@ tasks:
     prompt: Reset Talos node '{{.IP}}' ... continue?
     cmd: talosctl reset --nodes {{.IP}} --graceful=false
     requires:
-      vars: [IP]
+      vars:
+        - IP
     preconditions:
       - talosctl --nodes {{.IP}} get machineconfig
       - which talosctl

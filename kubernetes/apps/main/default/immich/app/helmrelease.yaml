@@ -102,7 +102,8 @@ spec:
           gethomepage.dev/name: immich
           gethomepage.dev/icon: immich.png
           gethomepage.dev/app: immich
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system
@@ -119,13 +120,13 @@ spec:
         path: /mnt/tank/hwe/Images/Immich
         globalMounts:
           - path: /usr/src/app/upload
-        # advancedMounts:
-        #   server:
-        #     app:
-        #       - path: /usr/src/app/upload
-        #   microservices:
-        #     app:
-        #       - path: /usr/src/app/upload
+            # advancedMounts:
+            #   server:
+            #     app:
+            #       - path: /usr/src/app/upload
+            #   microservices:
+            #     app:
+            #       - path: /usr/src/app/upload
       # data2:
       #   enabled: true
       #   type: nfs

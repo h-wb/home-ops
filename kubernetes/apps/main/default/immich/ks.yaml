@@ -12,12 +12,13 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/gatus/guarded
-  #  - ../../../../../components/keda/nfs-scaler
+    #  - ../../../../../components/keda/nfs-scaler
     # - ../../../../../components/volsync
     - ../../../../../components/postgres
   dependsOn:
     - name: crunchy-postgres-operator
       namespace: database
+
   interval: 30m
   path: ./kubernetes/apps/main/default/immich/app
   postBuild:
@@ -31,7 +32,7 @@ spec:
           path: /spec/patroni/dynamicConfiguration/postgresql/parameters
           value:
             shared_preload_libraries: "vchord.so"
-    # search_path: '"$user", public, vectors"'
+      # search_path: '"$user", public, vectors"'
       target:
         kind: PostgresCluster
     # - patch: |
@@ -63,32 +64,32 @@ spec:
             key: init.sql
       target:
         kind: PostgresCluster
-    # - patch: |
-    #     - op: replace
-    #       path: /spec/users/0
-    #       value:
-    #         name: immich
-    #         databases: ["immich"]
-    #         password:
-    #           type: AlphaNumeric
-    #   target:
-    #     kind: PostgresCluster
-    # - patch: |
-    #     - op: add
-    #       path: "/metadata/annotations/postgres-operator.crunchydata.com~1authorizeBackupRemoval"
-    #       value: "true"
-    #   target:
-    #     kind: PostgresCluster
-    # - patch: |
-    #     - op: remove
-    #       path: /spec/backups
-    #   target:
-    #     kind: PostgresCluster
-    # - patch: |
-    #     - op: remove
-    #       path: /spec/dataSource
-    #   target:
-    #     kind: PostgresCluster
+        # - patch: |
+        #     - op: replace
+        #       path: /spec/users/0
+        #       value:
+        #         name: immich
+        #         databases: ["immich"]
+        #         password:
+        #           type: AlphaNumeric
+        #   target:
+        #     kind: PostgresCluster
+        # - patch: |
+        #     - op: add
+        #       path: "/metadata/annotations/postgres-operator.crunchydata.com~1authorizeBackupRemoval"
+        #       value: "true"
+        #   target:
+        #     kind: PostgresCluster
+        # - patch: |
+        #     - op: remove
+        #       path: /spec/backups
+        #   target:
+        #     kind: PostgresCluster
+        # - patch: |
+        #     - op: remove
+        #       path: /spec/dataSource
+        #   target:
+        #     kind: PostgresCluster
   prune: true
   retryInterval: 1m
   sourceRef:

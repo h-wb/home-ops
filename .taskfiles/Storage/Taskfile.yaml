@@ -20,14 +20,17 @@ tasks:
       disk: "{{.cephdisk}}" #In the format /dev/nvme0n1
       node: "{{.ITEM}}"
     cmds:
-      - for: { var: cephnodes }
+      - for: {var: cephnodes}
         task: reset-data
         vars: *vars
-      - for: { var: cephnodes }
+      - for: {var: cephnodes}
         task: reset-disk
         vars: *vars
     requires:
-      vars: ["cluster", "cephnodes", "cephdisk"]
+      vars:
+        - "cluster"
+        - "cephnodes"
+        - "cephdisk"
 
   reset-disk:
     desc: Reset a rook disk on a node
@@ -45,7 +48,10 @@ tasks:
       - kubectl --context {{.cluster}} -n default delete job {{.job}}
     env: *env
     requires:
-      vars: ["cluster", "disk", "node"]
+      vars:
+        - "cluster"
+        - "disk"
+        - "node"
     vars:
       job: wipe-disk-{{.node}}-{{.disk | replace "/" "-"}}
     preconditions:
@@ -67,7 +73,9 @@ tasks:
       - kubectl --context {{.cluster}} -n default delete job {{.job}}
     env: *env
     requires:
-      vars: ["cluster", "node"]
+      vars:
+        - "cluster"
+        - "node"
     vars:
       job: wipe-data-{{.node}}
     preconditions:

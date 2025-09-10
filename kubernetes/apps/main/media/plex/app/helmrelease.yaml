@@ -54,7 +54,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities: {drop: ["ALL"]}
             resources:
               requests:
                 cpu: 100m
@@ -68,21 +68,22 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [10000]
-      # affinity:
-      #   podAntiAffinity:
-      #     requiredDuringSchedulingIgnoredDuringExecution:
-      #       - labelSelector:
-      #           matchExpressions:
-      #             - key: app.kubernetes.io/name
-      #               operator: In
-      #               values: ["kyoo"]
-      #             - key: app.kubernetes.io/component
-      #               operator: In
-      #               values: ["transcoder"]
-      #         topologyKey: kubernetes.io/hostname
-      # nodeSelector:
-      #   intel.feature.node.kubernetes.io/gpu: "true"
+        supplementalGroups:
+          - 10000
+        # affinity:
+        #   podAntiAffinity:
+        #     requiredDuringSchedulingIgnoredDuringExecution:
+        #       - labelSelector:
+        #           matchExpressions:
+        #             - key: app.kubernetes.io/name
+        #               operator: In
+        #               values: ["kyoo"]
+        #             - key: app.kubernetes.io/component
+        #               operator: In
+        #               values: ["transcoder"]
+        #         topologyKey: kubernetes.io/hostname
+        # nodeSelector:
+        #   intel.feature.node.kubernetes.io/gpu: "true"
     service:
       app:
         controller: *app
@@ -103,7 +104,8 @@ spec:
           gethomepage.dev/widget.type: plex
           gethomepage.dev/widget.url: http://plex.media:32400
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_PLEX_TOKEN}}` }}"
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

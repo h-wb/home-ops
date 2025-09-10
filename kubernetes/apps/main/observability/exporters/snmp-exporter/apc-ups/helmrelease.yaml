@@ -34,7 +34,8 @@ spec:
     fullnameOverride: *app
     image:
       repository: quay.io/prometheus/snmp-exporter
-    extraArgs: ["--config.file=/config/snmp.yaml"]
+    extraArgs:
+      - "--config.file=/config/snmp.yaml"
     extraConfigmapMounts:
       - name: &name apc-ups-snmp-configmap
         mountPath: /config/snmp.yaml
@@ -52,11 +53,13 @@ spec:
       enabled: true
       params:
         - name: apc-ups
-          module: [apcups]
+          module:
+            - apcups
           target: 192.168.1.6
           interval: 60s
-          auth: ["public_v1"]
+          auth:
+            - "public_v1"
       path: /snmp
       scrapeTimeout: 10s
       relabelings:
-        - { sourceLabels: ["__param_target"], targetLabel: instance }
+        - {sourceLabels: ["__param_target"], targetLabel: instance}

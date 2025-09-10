@@ -28,7 +28,7 @@ jobs:
         shell: bash
         env:
           GITHUB_TOKEN: "${{ steps.app-token.outputs.token }}"
-        run: |
+        run: |-
           # Retrieve previous release tag
           previous_tag="$(gh release list --limit 1 | awk '{ print $1 }')"
           previous_major="${previous_tag%%\.*}"

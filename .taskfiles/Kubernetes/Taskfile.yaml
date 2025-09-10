@@ -49,7 +49,9 @@ tasks:
     interactive: true
     cmd: kubectl browse-pvc --context {{.cluster}} --namespace {{.ns}} {{.claim}}
     requires:
-      vars: ["cluster", "claim"]
+      vars:
+        - "cluster"
+        - "claim"
 
   delete-failed-pods:
     desc: Deletes pods with a fucked status
@@ -57,7 +59,11 @@ tasks:
       Args:
         cluster: Cluster to run command against (required)
     cmds:
-      - for: ["Evicted", "Failed", "Succeeded"]
+      - for:
+          - "Evicted"
+          - "Failed"
+          - "Succeeded"
         cmd: kubectl --context {{.cluster}} delete pods --field-selector status.phase={{.ITEM}} -A --ignore-not-found=true
     requires:
-      vars: ["cluster"]
+      vars:
+        - "cluster"

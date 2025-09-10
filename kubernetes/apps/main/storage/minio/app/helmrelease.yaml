@@ -38,7 +38,11 @@ spec:
             envFrom:
               - secretRef:
                   name: minio-secret
-            args: ["server", "/data", "--console-address", ":9001"]
+            args:
+              - "server"
+              - "/data"
+              - "--console-address"
+              - ":9001"
             probes:
               startup:
                 enabled: true
@@ -52,7 +56,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities: {drop: ["ALL"]}
             resources:
               requests:
                 cpu: 100m
@@ -65,7 +69,8 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [10000]
+        supplementalGroups:
+          - 10000
     service:
       app:
         controller: minio
@@ -95,7 +100,8 @@ spec:
           gethomepage.dev/description: S3 Object Storage
           gethomepage.dev/group: Infrastructure
           gethomepage.dev/icon: minio.png
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: external
             namespace: kube-system
@@ -105,7 +111,8 @@ spec:
               - identifier: app
                 port: *httpPort
       s3:
-        hostnames: ["s3.${SECRET_DOMAIN}"]
+        hostnames:
+          - "s3.${SECRET_DOMAIN}"
         parentRefs:
           - name: external
             namespace: kube-system

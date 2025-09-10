@@ -60,7 +60,8 @@ spec:
           gethomepage.dev/name: Tdarr
           gethomepage.dev/icon: tdarr.png
           gethomepage.dev/description: Distributed transcode automation
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

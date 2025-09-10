@@ -4,7 +4,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-machine-learning-cache
 spec:
-  accessModes: ["ReadWriteOnce"]
+  accessModes:
+    - "ReadWriteOnce"
   resources:
     requests:
       storage: 8Gi

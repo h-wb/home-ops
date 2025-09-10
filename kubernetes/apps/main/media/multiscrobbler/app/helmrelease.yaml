@@ -69,7 +69,8 @@ spec:
           gethomepage.dev/name: multiscrobbler
           gethomepage.dev/icon: multi-scrobbler.png
           gethomepage.dev/description: Music Scrobbler
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

@@ -32,15 +32,18 @@ endpoints:
     interval: 1m
     client:
       dns-resolver: tcp://1.1.1.1:53
-    conditions: ["[STATUS] == 200"]
+    conditions:
+      - "[STATUS] == 200"
   - name: flux-webhook
     group: infrastructure
     url: https://flux-webhook.${SECRET_DOMAIN}
     interval: 1m
     client:
       dns-resolver: tcp://1.1.1.1:53
-    conditions: ["[STATUS] == 404"]
-    alerts: [{ type: pushover }]
+    conditions:
+      - "[STATUS] == 404"
+    alerts:
+      - {type: pushover}
   - name: cert-expiration
     group: domain
     url: "https://status.${SECRET_DOMAIN}"
@@ -50,9 +53,11 @@ endpoints:
   - name: PiKVM
     group: ICMP
     url: icmp://192.168.1.48
-    conditions: ["[CONNECTED] == true"]
-    alerts: [{ type: pushover }]
-# remote:
-#   instances:
-#     - endpoint-prefix: ""
-#       url: "https://status-utility.${SECRET_DOMAIN}/api/v1/endpoints/statuses"
+    conditions:
+      - "[CONNECTED] == true"
+    alerts:
+      - {type: pushover}
+    # remote:
+    #   instances:
+    #     - endpoint-prefix: ""
+    #       url: "https://status-utility.${SECRET_DOMAIN}/api/v1/endpoints/statuses"

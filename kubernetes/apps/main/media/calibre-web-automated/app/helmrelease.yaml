@@ -79,8 +79,8 @@ spec:
           gethomepage.dev/icon: calibre-web.png
           gethomepage.dev/description: E-Book Library Management
         hostnames:
-        - "{{ .Release.Name }}.${SECRET_DOMAIN}"
-        - "cwa.${SECRET_DOMAIN}"
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "cwa.${SECRET_DOMAIN}"
         parentRefs:
           - name: external
             namespace: kube-system

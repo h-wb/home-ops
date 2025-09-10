@@ -27,7 +27,8 @@ tasks:
     desc: Bootstrap apps into the Talos cluster
     cmd: bash {{.SCRIPTS_DIR}}/bootstrap-apps.sh
     requires:
-      vars: [CLUSTER]
+      vars:
+        - CLUSTER
     env:
       CLUSTER: '{{.CLUSTER}}'
       CLUSTER_APPS: '{{.CLUSTER_APPS}}'

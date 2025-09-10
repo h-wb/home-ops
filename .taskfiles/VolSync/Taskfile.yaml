@@ -34,7 +34,9 @@ tasks:
       APP: '{{.APP}}'
       REPOSITORY: '{{.REPOSITORY}}'
     requires:
-      vars: [CLUSTER, APP]
+      vars:
+        - CLUSTER
+        - APP
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/list.yaml.j2
 
@@ -47,7 +49,8 @@ tasks:
     vars:
       STATE: '{{index .MATCH 0}}'
     requires:
-      vars: [CLUSTER]
+      vars:
+        - CLUSTER
     preconditions:
       - '[[ "{{.STATE}}" == "suspend" || "{{.STATE}}" == "resume" ]]'
       - which flux kubectl
@@ -55,13 +58,14 @@ tasks:
   unlock:
     desc: Unlock all restic source repos [CLUSTER=main]
     cmds:
-      - for: { var: SOURCES, split: "\n" }
+      - for: {var: SOURCES, split: "\n"}
         cmd: kubectl --context {{.CLUSTER}} --namespace {{splitList "," .ITEM | first}} patch --field-manager=flux-client-side-apply replicationsources {{splitList "," .ITEM | last}} --type merge --patch "{\"spec\":{\"restic\":{\"unlock\":\"{{now | unixEpoch}}\"}}}"
     vars:
       SOURCES:
         sh: kubectl --context {{.CLUSTER}} get replicationsources --all-namespaces --no-headers --output=jsonpath='{range .items[*]}{.metadata.namespace},{.metadata.name}{"\n"}{end}'
     requires:
-      vars: [CLUSTER]
+      vars:
+        - CLUSTER
     preconditions:
       - which kubectl
 
@@ -75,7 +79,9 @@ tasks:
       NS: '{{.NS | default "default"}}'
       JOB: volsync-src-{{.APP}}
     requires:
-      vars: [CLUSTER, APP]
+      vars:
+        - CLUSTER
+        - APP
     preconditions:
       - kubectl --namespace {{.NS}} get replicationsources {{.APP}}
       - which kubectl
@@ -119,7 +125,10 @@ tasks:
       PGID:
         sh: kubectl --context {{.CLUSTER}} --namespace {{.NS}} get replicationsources/{{.APP}} --output=jsonpath="{.spec.restic.moverSecurityContext.runAsGroup}"
     requires:
-      vars: [CLUSTER, APP, PREVIOUS]
+      vars:
+        - CLUSTER
+        - APP
+        - PREVIOUS
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/replicationdestination.yaml.j2
       - which flux kubectl minijinja-cli
@@ -138,7 +147,9 @@ tasks:
       NS: '{{.NS}}'
       APP: '{{.APP}}'
     requires:
-      vars: [CLUSTER, APP]
+      vars:
+        - CLUSTER
+        - APP
     preconditions:
       - test -f {{.VOLSYNC_RESOURCES_DIR}}/unlock.yaml.j2
       - which kubectl minijinja-cli stern

@@ -1,3 +1,4 @@
+---
 # This is a generic example of a configuration file
 # Rename this file to `config.yml`, copy it to a `config` folder, and mount that folder as per the docker-compose.example.yml
 # Only uncomment the lines you want to use/modify, or add new ones where needed

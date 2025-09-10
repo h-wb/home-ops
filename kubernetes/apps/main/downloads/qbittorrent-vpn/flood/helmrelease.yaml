@@ -76,7 +76,9 @@ spec:
           gethomepage.dev/widget.url: http://flood-vpn.downloads:8080
           gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}` }}"
           gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}` }}"
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}",  "flvpn.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "flvpn.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

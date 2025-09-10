@@ -14,11 +14,11 @@ radarr:
       - template: radarr-quality-profile-sqp-1-1080p
       - template: radarr-custom-formats-sqp-1-1080p
 
-# Custom Formats: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
+    # Custom Formats: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
     custom_formats:
       # Movie Versions
       - trash_ids:
-         - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
+          - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
         assign_scores_to:
           - name: SQP-1 (1080p) MULTI
             score: 0
@@ -34,9 +34,8 @@ radarr:
           - name: SQP-1 (1080p) MULTI
 
       - trash_ids:
-        # Language CFs
+          # Language CFs
           - d6e9318c875905d6cfb5bee961afcea9 # Language: Not Original
-
 
           - 404c08fd0bd67f39b4d8e5709319094e # VFF
           - 4cafa20d5584f6ba1871d1b8941aa3cb # VOF
@@ -53,7 +52,7 @@ radarr:
             score: 500
 
       - trash_ids:
-        # FR HQ Source Groups
+          # FR HQ Source Groups
           - 48f031e76111f17ea94898f4cdc34fdc # FR LQ
           - 9790a618cec1aeac8ce75601a17ea40d # FR WEB Tier 01
           - 3c83a765f84239716bd5fd2d7af188f9 # FR WEB Tier 02
@@ -71,7 +70,7 @@ radarr:
           - name: SQP-1 (1080p) MULTI
             score: 1050
       - trash_ids: # below score is custom for SQP1
-           - 0d94489c0d5828cd3bf9409d309fb32b # FR Scene Groups
+          - 0d94489c0d5828cd3bf9409d309fb32b # FR Scene Groups
         assign_scores_to:
           - name: SQP-1 (1080p) MULTI
             score: 1000
@@ -85,14 +84,14 @@ radarr:
             score: -10000
 
       - trash_ids: # below score is 0
-        - 5153ec7413d9dae44e24275589b5e944 # BHDStudio
-        - 7a0d1ad358fee9f5b074af3ef3f9d9ef # hallowed
-        - c20f169ef63c5f40c2def54abaf4438e # WEB Tier 01
-        - 403816d65392c79236dcb6dd591aeda4 # WEB Tier 02
-        - af94e0fe497124d1f9ce732069ec8c3b # WEB Tier 03
-        - ed27ebfef2f323e964fb1f61391bcb35 # HD Bluray Tier 01
-        - c20c8647f2746a1f4c4262b0fbbeeeae # HD Bluray Tier 02
-        - 5608c71bcebba0a5e666223bae8c9227 # HD Bluray Tier 03
+          - 5153ec7413d9dae44e24275589b5e944 # BHDStudio
+          - 7a0d1ad358fee9f5b074af3ef3f9d9ef # hallowed
+          - c20f169ef63c5f40c2def54abaf4438e # WEB Tier 01
+          - 403816d65392c79236dcb6dd591aeda4 # WEB Tier 02
+          - af94e0fe497124d1f9ce732069ec8c3b # WEB Tier 03
+          - ed27ebfef2f323e964fb1f61391bcb35 # HD Bluray Tier 01
+          - c20c8647f2746a1f4c4262b0fbbeeeae # HD Bluray Tier 02
+          - 5608c71bcebba0a5e666223bae8c9227 # HD Bluray Tier 03
         assign_scores_to:
           - name: SQP-1 (1080p) MULTI
             score: 0

@@ -40,7 +40,8 @@ spec:
       route:
         main:
           enabled: true
-          hostnames: ["alertmanager.${SECRET_DOMAIN}"]
+          hostnames:
+            - "alertmanager.${SECRET_DOMAIN}"
           parentRefs:
             - name: internal
               namespace: kube-system
@@ -87,7 +88,8 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              sourceLabels:
+                - "__meta_kubernetes_pod_node_name"
               targetLabel: kubernetes_node
     prometheus-node-exporter:
       fullnameOverride: node-exporter
@@ -98,7 +100,8 @@ spec:
             - action: replace
               regex: (.*)
               replacement: $1
-              sourceLabels: ["__meta_kubernetes_pod_node_name"]
+              sourceLabels:
+                - "__meta_kubernetes_pod_node_name"
               targetLabel: kubernetes_node
     additionalPrometheusRulesMap:
       dockerhub-rules:
@@ -144,7 +147,8 @@ spec:
             gethomepage.dev/widget.type: prometheus
             gethomepage.dev/widget.url: http://kube-prometheus-stack-prometheus.observability:9090
           enabled: true
-          hostnames: ["prometheus.${SECRET_DOMAIN}"]
+          hostnames:
+            - "prometheus.${SECRET_DOMAIN}"
           parentRefs:
             - name: internal
               namespace: kube-system

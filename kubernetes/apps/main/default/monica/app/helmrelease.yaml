@@ -74,7 +74,8 @@ spec:
           gethomepage.dev/group: Home
           gethomepage.dev/name: Monica
           gethomepage.dev/icon: monica.png
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

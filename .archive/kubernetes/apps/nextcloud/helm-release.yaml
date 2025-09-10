@@ -98,13 +98,11 @@ spec:
       user: nextcloud
       # password: set by valuesFrom
 
-
     cronjob:
       enabled: true
       failedJobsHistoryLimit: 1
       successfulJobsHistoryLimit: 1
       curlInsecure:
-
 
     postgresql:
       enabled: true

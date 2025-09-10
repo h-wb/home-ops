@@ -7,7 +7,8 @@
         paths: "{{ k3s_server_manifests_dir }}"
         file_type: file
         use_regex: true
-        patterns: ["^custom-.*"]
+        patterns:
+          - "^custom-.*"
       register: custom_manifest
 
     - name: Cruft | Delete custom mantifests

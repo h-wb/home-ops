@@ -16,7 +16,8 @@ spec:
               name: cert-manager-secret
               key: api-token
         selector:
-          dnsZones: ["${SECRET_DOMAIN}"]
+          dnsZones:
+            - "${SECRET_DOMAIN}"
 ---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/cert-manager.io/clusterissuer_v1.json
 apiVersion: cert-manager.io/v1

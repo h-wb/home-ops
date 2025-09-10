@@ -60,7 +60,6 @@ data:
               key: {{HOMEPAGE_VAR_HEALTHCHECK_TOKEN}}
               uuid: {{HOMEPAGE_VAR_HEALTHCHECK_UUID}}
 
-
     - Calendar:
         - Agenda:
             widget:
@@ -139,7 +138,7 @@ data:
     providers:
       longhorn:
         url: http://longhorn-frontend.longhorn-system
-  widgets.yaml: |
+  widgets.yaml: |-
     - search:
         provider: [duckduckgo, google]
         focus: false

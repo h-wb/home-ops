@@ -2,8 +2,10 @@
 # yaml-language-server: $schema=https://taskfile.dev/schema.json
 version: "3"
 
-set: [pipefail]
-shopt: [globstar]
+set:
+  - pipefail
+shopt:
+  - globstar
 
 vars:
   BOOSTRAP_DIR: '{{.ROOT_DIR}}/bootstrap'
@@ -19,7 +21,6 @@ env:
   MINIJINJA_CONFIG_FILE: '{{.ROOT_DIR}}/.minijinja.toml'
   SOPS_AGE_KEY_FILE: "{{.ROOT_DIR}}/age.key"
   TALOSCONFIG: '{{.TALOS_DIR}}/clusterconfig/talosconfig'
-
 
 includes:
   bootstrap: .taskfiles/bootstrap

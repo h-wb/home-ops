@@ -65,7 +65,8 @@ spec:
           gethomepage.dev/group: Home
           gethomepage.dev/name: Strava Stats
           gethomepage.dev/icon: mdi-run
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system
@@ -74,9 +75,9 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-    # persistence:
-    #   resources:
-    #     existingClaim: *app
-    #     globalMounts:
-    #       - path: /var/www
-    #         readOnly: false
+                # persistence:
+                #   resources:
+                #     existingClaim: *app
+                #     globalMounts:
+                #       - path: /var/www
+                #         readOnly: false

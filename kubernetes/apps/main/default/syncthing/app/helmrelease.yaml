@@ -77,7 +77,8 @@ spec:
           gethomepage.dev/icon: syncthing.png
           # gethomepage.dev/widget.type: strelaysrv
           # gethomepage.dev/widget.url: http://syncthing-app.default:8384
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

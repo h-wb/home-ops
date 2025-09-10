@@ -9,8 +9,7 @@ spec:
       rules:
         - alert: UPSOnBattery
           annotations:
-            summary: ZPM {{$labels.instance}} is running on batteries
-              and has less than 20 minutes of battery left
+            summary: ZPM {{$labels.instance}} is running on batteries and has less than 20 minutes of battery left
           expr: |
             (
               upsAdvBatteryRunTimeRemaining/60/100 <= 20

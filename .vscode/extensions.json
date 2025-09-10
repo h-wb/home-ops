@@ -1,17 +1,9 @@
 {
   "recommendations": [
-      "albert.TabOut",
-      "britesnow.vscode-toggle-quotes",
-      "fcrespo82.markdown-table-formatter",
-      "mikestead.dotenv",
-      "mitchdenny.ecdc",
-      "redhat.ansible",
-      "redhat.vscode-yaml",
-      "signageos.signageos-vscode-sops",
-      "will-stone.in-any-case",
-      "BriteSnow.vscode-toggle-quotes",
-      // "HashiCorp.terraform",
-      "PKief.material-icon-theme",
-      "ms-vscode-remote.remote-containers",
+    "bluebrown.yamlfmt",
+    "blueglassblock.better-json5",
+    "irongeek.vscode-env",
+    "PKief.material-icon-theme",
+    "redhat.vscode-yaml",
   ]
 }

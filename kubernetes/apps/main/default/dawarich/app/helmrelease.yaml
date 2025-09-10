@@ -58,8 +58,11 @@ spec:
               - "bin/rails server -p 3000 -b 0.0.0.0"
           sidekiq:
             <<: *dawarich
-            command: ['bundle', 'exec', 'sidekiq'] # fixes https://github.com/Freika/dawarich/pull/941
-            resources:
+            command:
+              - 'bundle'
+              - 'exec'
+              - 'sidekiq'
+            resources: # fixes https://github.com/Freika/dawarich/pull/941
               requests:
                 memory: "1Gi"
                 cpu: "250m"
@@ -79,7 +82,8 @@ spec:
           gethomepage.dev/group: Home
           gethomepage.dev/name: Dawarich
           gethomepage.dev/icon: google-maps.png
-        hostnames: ["{{ .Release.Name }}.${SECRET_DOMAIN}"]
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
           - name: internal
             namespace: kube-system

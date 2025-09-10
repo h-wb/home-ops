@@ -49,7 +49,7 @@ spec:
     readinessProbe:
       initialDelaySeconds: 30
     startupProbe:
-        enabled: true
+      enabled: true
     extraEnv:
       TZ: Europe/Paris
     persistence:
@@ -106,16 +106,16 @@ spec:
         enabled: true
       serviceType: LoadBalancer
       extraPorts:
-      - name: map
-        containerPort: 8100
-        protocol: TCP
-        service:
-          enabled: true
-          embedded: false
-          type: ClusterIP
-          port: 8100
+        - name: map
+          containerPort: 8100
+          protocol: TCP
+          service:
+            enabled: true
+            embedded: false
+            type: ClusterIP
+            port: 8100
   valuesFrom:
-  - kind: Secret
-    name: minecraft-secret
-    valuesKey: RCON_PASSWORD
-    targetPath: minecraftServer.rcon.password
+    - kind: Secret
+      name: minecraft-secret
+      valuesKey: RCON_PASSWORD
+      targetPath: minecraftServer.rcon.password

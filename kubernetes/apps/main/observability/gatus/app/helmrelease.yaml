@@ -50,10 +50,10 @@ spec:
               GATUS_DELAY_START_SECONDS: 5
               WEB_PORT: &port 80
               POSTGRES_URI:
-                  valueFrom:
-                    secretKeyRef:
-                      name: gatus-pguser-gatus
-                      key: pgbouncer-uri
+                valueFrom:
+                  secretKeyRef:
+                    name: gatus-pguser-gatus
+                    key: pgbouncer-uri
               SECRET_DOMAIN: ${SECRET_DOMAIN}
             probes:
               liveness: &probes
@@ -71,7 +71,7 @@ spec:
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
+              capabilities: {drop: ["ALL"]}
             resources:
               requests:
                 cpu: 100m
@@ -115,9 +115,15 @@ spec:
         gatus:
           type: ClusterRole
           rules:
-            - apiGroups: [""]
-              resources: ["configmaps", "secrets"]
-              verbs: ["get", "watch", "list"]
+            - apiGroups:
+                - ""
+              resources:
+                - "configmaps"
+                - "secrets"
+              verbs:
+                - "get"
+                - "watch"
+                - "list"
       bindings:
         gatus:
           type: ClusterRoleBinding
