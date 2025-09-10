@@ -11,7 +11,7 @@ resources:
   - ./homepage/ks.yaml
   # - ./monica/ks.yaml
   - ./karakeep/ks.yaml
-  - ./photon/ks.yaml
+  # - ./photon/ks.yaml
   - ./dawarich/ks.yaml
   - ./reitti/ks.yaml
   - ./paperless/ks.yaml
