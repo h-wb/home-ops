@@ -24,7 +24,6 @@ spec:
             runAsUser: 0
             runAsGroup: 0
             runAsNonRoot: false
-            seccompProfile: { type: RuntimeDefault }
         containers:
           app:
             image:
