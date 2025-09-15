@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: ghcr.io/h-wb/instaloader
-              tag: sha256-ca14872e7bb9789a94fd6a9d691d35aa793c16c5bb9620d1a1cbb765fb03535b
+              tag: 4.14.2@sha256:ca14872e7bb9789a94fd6a9d691d35aa793c16c5bb9620d1a1cbb765fb03535b
             resources:
               requests:
                 cpu: 1m
