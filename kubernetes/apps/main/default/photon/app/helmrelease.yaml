@@ -23,7 +23,7 @@ spec:
           app: &photon
             image:
               repository: ghcr.io/rtuszik/photon-docker
-              tag: 1.0.0
+              tag: 1.0.1
             env:
               REGION: ca
               UPDATE_STRATEGY: PARALLEL
