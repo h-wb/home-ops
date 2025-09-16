@@ -6,5 +6,5 @@ namespace: automation
 components:
   - ../../../components/common
 resources:
-  # - ./instaloader/ks.yaml
+  - ./instaloader/ks.yaml
   - ./n8n/ks.yaml
