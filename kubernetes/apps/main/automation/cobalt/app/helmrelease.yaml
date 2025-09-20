@@ -28,7 +28,7 @@ spec:
               tag: 11.4.3-d577d5e
             env:
               # API_URL: "{{ .Release.Name }}.${SECRET_DOMAIN}"
-              API_URL: https://cobalt.automation:9000
+              API_URL: http://cobalt.automation:9000
               DEBUG: "*"
             resources:
               requests:
