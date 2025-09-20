@@ -28,6 +28,7 @@ spec:
               tag: 11.4.3-d577d5e
             env:
               API_URL: "{{ .Release.Name }}.${SECRET_DOMAIN}"
+              DEBUG: "*"
             resources:
               requests:
                 cpu: 1m
