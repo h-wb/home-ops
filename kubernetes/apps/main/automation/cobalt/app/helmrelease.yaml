@@ -26,6 +26,8 @@ spec:
             image:
               repository: ghcr.io/imputnet/cobalt
               tag: 11.4.3-d577d5e
+            env:
+              API_URL: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             resources:
               requests:
                 cpu: 1m
@@ -45,6 +47,18 @@ spec:
         ports:
           http:
             port: 9000
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: internal
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     # persistence:
     #   data:
     #     existingClaim: n8n
