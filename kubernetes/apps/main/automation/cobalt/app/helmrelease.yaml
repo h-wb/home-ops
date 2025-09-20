@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app instaloader
+  name: &app cobalt
 spec:
   interval: 1h
   chartRef:
@@ -18,14 +18,14 @@ spec:
       retries: 3
   values:
     controllers:
-      instaloader:
+      cobalt:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           app:
             image:
-              repository: ghcr.io/h-wb/instaloader
-              tag: 4.14.2@sha256:ca14872e7bb9789a94fd6a9d691d35aa793c16c5bb9620d1a1cbb765fb03535b
+              repository: ghcr.io/imputnet/cobalt
+              tag: 11.4.3-d577d5e
             resources:
               requests:
                 cpu: 1m
@@ -41,10 +41,10 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
-        controller: instaloader
+        controller: cobalt
         ports:
           http:
-            port: 5663
+            port: 9000
     # persistence:
     #   data:
     #     existingClaim: n8n
