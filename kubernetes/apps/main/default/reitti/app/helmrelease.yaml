@@ -23,7 +23,7 @@ spec:
           app: &reitti
             image:
               repository: dedicatedcode/reitti
-              tag: 1.5.1
+              tag: 1.6.3
             env:
               POSTGIS_DB: *app
               POSTGIS_PORT: 5432
