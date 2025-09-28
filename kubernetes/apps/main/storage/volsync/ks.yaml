@@ -35,7 +35,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/main/storage/maintenance/app
+  path: ./kubernetes/apps/main/storage/volsync/maintenance
   prune: true
   sourceRef:
     kind: GitRepository
