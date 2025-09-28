@@ -31,7 +31,7 @@ reportsController:
 bitwarden-sdk-server:
   enabled: true
   podAnnotations:
-    secret.reloader.stakater.com/reload: "bitwarden,bitwarden-tls-certs"
+    secret.reloader.stakater.com/reload: "bitwarden-secrets-manager,bitwarden-tls-certs"
 resources:
   requests:
     cpu: 10m
