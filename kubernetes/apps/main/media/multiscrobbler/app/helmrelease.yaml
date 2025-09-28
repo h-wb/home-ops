@@ -36,6 +36,7 @@ spec:
               LASTFM_REDIRECT_URI: https://multiscrobbler.${SECRET_DOMAIN}/lastfm/callback
               SPOTIFY_REDIRECT_URI: https://multiscrobbler.${SECRET_DOMAIN}/callback
               PLEX_URL: http://plex.media:32400
+              WS_ENABLE: true
             envFrom:
               - secretRef:
                   name: multiscrobbler-secret
