@@ -106,6 +106,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
+    - ../../../../../components/volsync
   dependsOn:
     - name: plex
       namespace: *namespace
@@ -122,4 +123,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      VOLSYNC_CAPACITY: 500Mi
 
