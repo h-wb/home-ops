@@ -1,27 +1,26 @@
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app plex-trakt-sync
+  name: plex-trakt-sync
 spec:
+  interval: 15m
   chartRef:
     kind: OCIRepository
     name: app-template
-  interval: 30m
   values:
     controllers:
       plex-trakt-sync:
+        # type: cronjob
         annotations:
           reloader.stakater.com/auto: "true"
-
-        pod:
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 5658
-            fsGroup: 1000
-            fsGroupChangePolicy: "OnRootMismatch"
-
+        # cronjob:
+        #   schedule: "@daily"
+        #   timeZone: &timeZone America/Edmonton
+        #   concurrencyPolicy: Forbid
+        #   successfulJobsHistory: 1
+        #   failedJobsHistory: 1
         containers:
           app:
             image:
@@ -57,21 +56,26 @@ spec:
             resources:
               requests:
                 cpu: 5m
-                memory: 101M
+                memory: 128M
               limits:
-                memory: 101M
-
+                memory: 512M
+    defaultPodOptions:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 100
+        fsGroup: 100
+        fsGroupChangePolicy: OnRootMismatch
     persistence:
       config:
         enabled: true
-        existingClaim: *app
+        existingClaim: "{{ .Release.Name }}"
         advancedMounts:
           plex-trakt-sync:
             app:
               - path: /app/config
       config-yaml:
         type: configMap
-        name: plex-tract-sync-configmap
+        name: "{{ .Release.Name }}"
         globalMounts:
           - path: /app/config/config.yml
             subPath: config.yml
