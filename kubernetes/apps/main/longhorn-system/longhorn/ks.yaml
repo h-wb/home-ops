@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
+    - ../../../../../components/defaults
     - ../../../../../components/gatus/guarded
 
   path: ./kubernetes/apps/main/longhorn-system/longhorn/app
@@ -39,6 +40,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
 
   dependsOn:
     - name: longhorn

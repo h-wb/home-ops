@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   path: ./kubernetes/apps/main/storage/volsync/app
   prune: true
   sourceRef:
@@ -35,6 +37,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   path: ./kubernetes/apps/main/storage/volsync/maintenance
   prune: true
   sourceRef:

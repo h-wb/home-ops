@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
+    - ../../../../../components/defaults
     - ../../../../../components/gatus/guarded
     - ../../../../../components/volsync
   path: ./kubernetes/apps/main/media/tdarr/app
@@ -40,6 +41,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   path: ./kubernetes/apps/main/media/tdarr/node
   prune: true
   sourceRef:
@@ -66,6 +69,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
+    - ../../../../../components/defaults
     - ../../../../../components/volsync
   path: ./kubernetes/apps/main/media/tdarr/inform
   prune: true

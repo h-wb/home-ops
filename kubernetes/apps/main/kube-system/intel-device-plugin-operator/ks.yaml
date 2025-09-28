@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   interval: 1h
   path: ./kubernetes/apps/main/kube-system/intel-device-plugin-operator/app
   prune: true
@@ -40,6 +42,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   dependsOn:
     - name: intel-device-plugin-operator
       namespace: *namespace

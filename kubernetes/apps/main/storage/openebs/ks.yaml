@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   path: ./kubernetes/apps/main/storage/openebs/app
   prune: true
   sourceRef:

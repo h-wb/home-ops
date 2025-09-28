@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   path: ./kubernetes/apps/main/observability/exporters/snmp-exporter/apc-ups
   prune: true
   sourceRef:

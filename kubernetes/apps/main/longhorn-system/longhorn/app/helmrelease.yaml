@@ -26,13 +26,6 @@ spec:
         kind: HelmRepository
         name: longhorn
         namespace: longhorn-system
-  install:
-    remediation:
-      retries: -1
-  upgrade:
-    cleanupOnFail: true
-    remediation:
-      retries: 3
   values:
     persistence:
       defaultDataLocality: best-effort

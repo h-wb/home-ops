@@ -9,6 +9,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   interval: 30m
   path: ./kubernetes/apps/main/database/dragonfly/app
   prune: true
@@ -31,6 +33,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
   dependsOn:
     - name: dragonfly-operator
   interval: 30m

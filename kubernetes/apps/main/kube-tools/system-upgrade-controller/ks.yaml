@@ -10,6 +10,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
 
   path: ./kubernetes/apps/main/kube-tools/system-upgrade-controller/app
   prune: true
@@ -37,6 +39,8 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/defaults
 
   dependsOn:
     - name: system-upgrade-controller
