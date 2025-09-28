@@ -13,5 +13,5 @@ resources:
   - ./komf/ks.yaml
   - ./calibre-web-automated/ks.yaml
   - ./romm/ks.yaml
-  - ./tdarr/ks.yaml
+  # - ./tdarr/ks.yaml
   - ./multiscrobbler/ks.yaml
