@@ -9,9 +9,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: app-template
-  maxHistory: 2
-  uninstall:
-    keepHistory: false
   dependsOn:
     - name: komga
   values:

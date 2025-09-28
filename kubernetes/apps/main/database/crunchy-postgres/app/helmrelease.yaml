@@ -23,9 +23,6 @@ spec:
   chartRef:
     kind: OCIRepository
     name: pgo
-  maxHistory: 2
-  uninstall:
-    keepHistory: false
   values:
     monitoring: true
     install:
