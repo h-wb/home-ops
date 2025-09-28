@@ -5,7 +5,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
 configMapGenerator:
-  - name: plex-tract-sync-configmap
+  - name: plex-trakt-sync
     files:
       - ./config/config.yml
 generatorOptions:
