@@ -19,6 +19,10 @@ spec:
             image:
               repository: prefecthq/prefect
               tag: 3-latest
+            command:
+              - prefect
+              - server
+              - start
             env:
               TZ: Europe/Paris
               PREFECT_UI_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
