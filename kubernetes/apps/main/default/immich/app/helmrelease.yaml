@@ -25,7 +25,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: v2.0.0
+              tag: v2.0.1
             env:
               IMMICH_WORKERS_INCLUDE: api
               DB_PASSWORD:
@@ -41,7 +41,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: v2.0.0
+              tag: v2.0.1
             env:
               IMMICH_WORKERS_INCLUDE: null
               IMMICH_WORKERS_EXCLUDE: api
