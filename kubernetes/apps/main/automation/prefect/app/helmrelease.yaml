@@ -67,3 +67,12 @@ spec:
           prefect:
             app:
               - path: /root/.prefect
+      config:
+        type: configMap
+        name: prefect-config
+        advancedMounts:
+          prefect:
+            app:
+              - path: /root/.prefect/prefect.yaml
+                subPath: prefect.yaml
+                readOnly: true

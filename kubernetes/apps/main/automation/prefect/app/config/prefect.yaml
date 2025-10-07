@@ -1,0 +1,7 @@
+# Prefect Server Configuration
+pull:
+- prefect.deployments.steps.git_clone:
+    repository: https://github.com/h-wb/pipelines
+    branch: main
+
+
