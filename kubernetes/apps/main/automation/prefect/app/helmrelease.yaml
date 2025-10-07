@@ -20,9 +20,18 @@ spec:
               repository: prefecthq/prefect
               tag: 3-latest
             command:
-              - prefect
-              - server
-              - start
+              - /bin/sh
+              - -c
+              - |
+                prefect server start &
+                SERVER_PID=$!
+                echo "Waiting for Prefect server to be ready..."
+                sleep 15
+                echo "Creating Prefect deployment..."
+                cd /root/.prefect
+                prefect deploy --all || true
+                echo "Deployment created, server running..."
+                wait $SERVER_PID
             env:
               TZ: Europe/Paris
               PREFECT_UI_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
