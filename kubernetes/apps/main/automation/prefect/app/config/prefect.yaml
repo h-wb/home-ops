@@ -1,7 +1,18 @@
-# Prefect Server Configuration
+# Prefect Deployment Configuration
 pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/h-wb/pipelines
     branch: main
 
-
+deployments:
+- name: listenbrainz-pipeline
+  version: 1.0.0
+  tags: ["listenbrainz", "dlt"]
+  description: ListenBrainz listening history pipeline
+  entrypoint: src/pipelines/listenbrainz.py:load_listenbrainz
+  work_pool:
+    name: local-pool
+    work_queue_name: default
+  schedule:
+    cron: "0 0 * * *"
+    timezone: Europe/Paris

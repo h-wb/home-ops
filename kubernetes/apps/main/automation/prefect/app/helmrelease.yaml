@@ -29,7 +29,7 @@ spec:
                 sleep 15
                 echo "Creating Prefect deployment..."
                 cd /root/.prefect
-                prefect deploy --all || true
+                prefect deploy --prefect-file prefect.yaml || true
                 echo "Deployment created, server running..."
                 wait $SERVER_PID
             env:
