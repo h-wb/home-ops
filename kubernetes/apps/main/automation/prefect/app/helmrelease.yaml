@@ -79,8 +79,8 @@ spec:
         ports:
           http:
             port: *port
-      worker:
-        controller: worker
+      # worker:
+      #   controller: worker
 
     route:
       app:
