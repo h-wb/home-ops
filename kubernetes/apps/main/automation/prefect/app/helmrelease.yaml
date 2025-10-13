@@ -92,7 +92,7 @@ spec:
             sectionName: https
         rules:
           - backendRefs:
-              - identifier: app
+              - identifier: server
                 port: *port
     persistence:
       data:
