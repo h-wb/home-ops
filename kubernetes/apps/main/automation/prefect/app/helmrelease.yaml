@@ -98,7 +98,7 @@ spec:
       data:
         existingClaim: prefect
         advancedMounts:
-          prefect:
+          server:
             app:
               - path: /root/.prefect
           # prefect-worker:
@@ -108,7 +108,7 @@ spec:
         type: configMap
         name: prefect-config
         advancedMounts:
-          prefect:
+          server:
             app:
               - path: /root/.prefect/prefect.yaml
                 subPath: prefect.yaml
