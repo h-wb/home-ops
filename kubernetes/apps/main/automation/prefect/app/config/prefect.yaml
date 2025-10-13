@@ -3,11 +3,11 @@ name: pipelines
 
 pull:
 - prefect.deployments.steps.git_clone:
-    repository: https://github.com/h-wb/pipelines
+    repository: https://github.com/h-wb/pipelines.git
     branch: main
-- prefect.deployments.steps.run_shell_script:
-    id: install-dependencies
-    script: sh -c "cd pipelines-main && uv pip install . && uv sync --frozen"
+# - prefect.deployments.steps.run_shell_script:
+#     id: install-dependencies
+#     script: sh -c "cd pipelines-main && uv pip install . && uv sync --frozen"
 
 deployments:
 - name: listenbrainz-pipeline
