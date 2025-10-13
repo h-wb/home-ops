@@ -14,7 +14,7 @@ spec:
     - ../../../../../components/defaults
     - ../../../../../components/gatus/guarded
     - ../../../../../components/volsync
-    - ../../../../../components/postgres
+    # - ../../../../../components/postgres
   path: ./kubernetes/apps/main/automation/prefect/app
   prune: true
   sourceRef:
