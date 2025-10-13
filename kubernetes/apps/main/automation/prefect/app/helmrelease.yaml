@@ -11,7 +11,7 @@ spec:
     name: app-template
   values:
     controllers:
-      prefect:
+      server:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -38,26 +38,25 @@ spec:
               PREFECT_API_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}/api"
               PREFECT_SERVER_API_HOST: 0.0.0.0
               PREFECT_SERVER_API_PORT: &port 4200
+              PREFECT_LOGGING_LEVEL: 'DEBUG'
             resources:
               requests:
                 cpu: 10m
                 memory: 256Mi
               limits:
                 memory: 512Mi
-      prefect-worker:
+      worker:
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
-          worker:
+          app:
             image:
               repository: prefecthq/prefect
               tag: 3-latest
             command:
               - /bin/sh
               - -c
-              - |
-                echo "Starting Prefect worker for local-pool..."
-                prefect worker start --pool local-pool
+              - prefect worker start --pool local-pool
             env:
               TZ: Europe/Paris
               PREFECT_API_URL: "http://prefect.automation:4200/api"
@@ -75,11 +74,14 @@ spec:
     #     fsGroup: 1000
     #     fsGroupChangePolicy: OnRootMismatch
     service:
-      app:
-        controller: prefect
+      server:
+        controller: server
         ports:
           http:
             port: *port
+      worker:
+        controller: worker
+
     route:
       app:
         hostnames:
