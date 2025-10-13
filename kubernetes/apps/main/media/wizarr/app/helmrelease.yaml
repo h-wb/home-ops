@@ -53,7 +53,7 @@ spec:
           gethomepage.dev/icon: wizarr.png
           gethomepage.dev/description: Plex Invite Management
         parentRefs:
-          - name: internal
+          - name: external
             namespace: kube-system
             sectionName: https
         rules:
