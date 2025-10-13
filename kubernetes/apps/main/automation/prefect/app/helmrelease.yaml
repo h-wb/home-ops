@@ -44,6 +44,29 @@ spec:
                 memory: 256Mi
               limits:
                 memory: 512Mi
+      prefect-worker:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          worker:
+            image:
+              repository: prefecthq/prefect
+              tag: 3-latest
+            command:
+              - /bin/sh
+              - -c
+              - |
+                echo "Starting Prefect worker for local-pool..."
+                prefect worker start --pool local-pool
+            env:
+              TZ: Europe/Paris
+              PREFECT_API_URL: "http://prefect.automation:4200/api"
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 1Gi
     # defaultPodOptions:
     #   securityContext:
     #     runAsNonRoot: true
@@ -76,6 +99,9 @@ spec:
           prefect:
             app:
               - path: /root/.prefect
+          # prefect-worker:
+          #   worker:
+          #     - path: /root/.prefect
       config:
         type: configMap
         name: prefect-config
@@ -85,3 +111,8 @@ spec:
               - path: /root/.prefect/prefect.yaml
                 subPath: prefect.yaml
                 readOnly: true
+          # prefect-worker:
+          #   worker:
+          #     - path: /root/.prefect/prefect.yaml
+          #       subPath: prefect.yaml
+          #       readOnly: true

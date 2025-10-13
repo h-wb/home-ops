@@ -5,6 +5,8 @@ pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/h-wb/pipelines.git
     branch: main
+- prefect.deployments.steps.set_working_directory:
+    directory: "{{ steps.git-clone.directory }}"
 # - prefect.deployments.steps.run_shell_script:
 #     id: install-dependencies
 #     script: sh -c "cd pipelines-main && uv pip install . && uv sync --frozen"
@@ -14,7 +16,7 @@ deployments:
   version: 1.0.0
   tags: ["listenbrainz", "dlt"]
   description: ListenBrainz listening history pipeline
-  entrypoint: src/pipelines/listenbrainz.py:load_listenbrainz
+  entrypoint: ./src/pipelines/listenbrainz.py:load_listenbrainz
   work_pool:
     name: local
     work_queue_name: null
