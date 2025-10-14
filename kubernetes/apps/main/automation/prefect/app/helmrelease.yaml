@@ -98,3 +98,12 @@ spec:
           worker:
             app:
               - path: /root/.prefect
+      nfs:
+        enabled: true
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/hwe/Documents/data
+        advancedMounts:
+          worker:
+            app:
+              - path: /root/.prefect/data
