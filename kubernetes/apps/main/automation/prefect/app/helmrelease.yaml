@@ -22,16 +22,7 @@ spec:
             command:
               - /bin/sh
               - -c
-              - |
-                prefect server start &
-                SERVER_PID=$!
-                echo "Waiting for Prefect server to be ready..."
-                sleep 15
-                echo "Creating Prefect deployment..."
-                cd /root/.prefect
-                prefect deploy --prefect-file prefect.yaml || true
-                echo "Deployment created, server running..."
-                wait $SERVER_PID
+              - prefect server start
             env:
               TZ: Europe/Paris
               PREFECT_UI_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
@@ -101,20 +92,6 @@ spec:
           server:
             app:
               - path: /root/.prefect
-          # prefect-worker:
-          #   worker:
-          #     - path: /root/.prefect
-      config:
-        type: configMap
-        name: prefect-config
-        advancedMounts:
-          server:
-            app:
-              - path: /root/.prefect/prefect.yaml
-                subPath: prefect.yaml
-                readOnly: true
-          # prefect-worker:
-          #   worker:
-          #     - path: /root/.prefect/prefect.yaml
-          #       subPath: prefect.yaml
-          #       readOnly: true
+          prefect-worker:
+            worker:
+              - path: /root/.prefect
