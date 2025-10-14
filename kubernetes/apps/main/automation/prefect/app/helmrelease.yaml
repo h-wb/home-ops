@@ -92,6 +92,9 @@ spec:
           server:
             app:
               - path: /root/.prefect
+      test:
+        type: emptyDir
+        advancedMounts:
           worker:
             app:
               - path: /root/.prefect
