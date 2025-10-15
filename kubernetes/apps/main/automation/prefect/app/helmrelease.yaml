@@ -51,9 +51,9 @@ spec:
             env:
               TZ: Europe/Paris
               PREFECT_API_URL: "http://prefect.automation:4200/api"
-            envFrom:
-              - secretRef:
-                  name: prefect-secret
+            # envFrom:
+            #   - secretRef:
+            #       name: prefect-secret
             resources:
               requests:
                 cpu: 100m
