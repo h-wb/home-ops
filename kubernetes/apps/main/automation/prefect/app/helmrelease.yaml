@@ -30,6 +30,9 @@ spec:
               PREFECT_SERVER_API_HOST: 0.0.0.0
               PREFECT_SERVER_API_PORT: &port 4200
               PREFECT_LOGGING_LEVEL: 'DEBUG'
+            envFrom:
+              - secretRef:
+                  name: prefect-secret
             resources:
               requests:
                 cpu: 10m
@@ -51,9 +54,9 @@ spec:
             env:
               TZ: Europe/Paris
               PREFECT_API_URL: "http://prefect.automation:4200/api"
-            # envFrom:
-            #   - secretRef:
-            #       name: prefect-secret
+            envFrom:
+              - secretRef:
+                  name: prefect-secret
             resources:
               requests:
                 cpu: 100m
