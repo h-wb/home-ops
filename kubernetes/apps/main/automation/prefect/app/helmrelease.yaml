@@ -59,10 +59,11 @@ spec:
                   name: prefect-secret
             resources:
               requests:
-                cpu: 100m
-                memory: 512Mi
-              limits:
+                cpu: 200m
                 memory: 2Gi
+              limits:
+                cpu: 2000m
+                memory: 6Gi
     # defaultPodOptions:
     #   securityContext:
     #     runAsNonRoot: true
