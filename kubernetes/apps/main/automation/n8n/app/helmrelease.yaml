@@ -67,18 +67,18 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-      # webhooks:
-      #   hostnames:
-      #     - n8n-webhook.${CLUSTER_DOMAIN}
-      #   parentRefs:
-      #     - name: internal
-      #       namespace: network
-      #       sectionName: https
-      #   rules:
-      #     - matches:
-      #         - path:
-      #             value: /webhook
-      #       backendRefs: [{}]
+      webhooks:
+        hostnames:
+          - &webhookHostName "n8n-webhook.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: external
+            namespace: kube-system
+            sectionName: https
+        rules:
+          - matches:
+              - path:
+                  value: /webhook
+            backendRefs: [ { } ]
     persistence:
       data:
         existingClaim: n8n
@@ -86,3 +86,12 @@ spec:
           n8n:
             app:
               - path: /home/node/.n8n
+      nfs:
+        enabled: true
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/hwe/Documents/data
+        advancedMounts:
+          n8n:
+            app:
+              - path: /data
