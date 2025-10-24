@@ -94,7 +94,7 @@ releases:
     namespace: external-secrets
     atomic: true
     chart: oci://ghcr.io/external-secrets/charts/external-secrets
-    version: 0.20.2
+    version: 0.20.4
     values:
       - '{{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/helm/values.yaml'
     hooks:
