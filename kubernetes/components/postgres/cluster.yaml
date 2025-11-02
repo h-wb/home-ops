@@ -59,7 +59,7 @@ spec:
         # Global
         compress-type: "bz2"
         compress-level: "9"
-        # Minio
+        # Garage
         repo1-block: "y"
         repo1-bundle: "y"
         repo1-path: /${APP}
@@ -84,7 +84,7 @@ spec:
           app.kubernetes.io/name: ${APP}-crunchy-postgres-backup
       repos:
         - name: repo1
-          s3: &minio
+          s3: &garage
             bucket: postgresql
             endpoint: s3.${SECRET_DOMAIN}
             region: ca-west-1
@@ -107,7 +107,7 @@ spec:
   #     global: *backupFlag
   #     repo:
   #       name: repo1
-  #       s3: *minio
+  #       s3: *garage
   proxy:
     pgBouncer:
       port: 5432
