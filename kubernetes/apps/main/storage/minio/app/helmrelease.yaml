@@ -105,7 +105,7 @@ spec:
                 port: *httpPort
       s3:
         hostnames:
-          - "s3.${SECRET_DOMAIN}"
+          - "minios3.${SECRET_DOMAIN}"
         parentRefs:
           - name: external
             namespace: kube-system
