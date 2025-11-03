@@ -29,7 +29,7 @@ spec:
       metadata:
         labels:
           app.kubernetes.io/name: ${APP}-crunchy-postgres
-      replicas: &replicas 3 # One per node
+      replicas: 3
       dataVolumeClaimSpec:
         storageClassName: local-hostpath
         accessModes:
@@ -37,6 +37,13 @@ spec:
         resources:
           requests:
             storage: 5Gi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: "DoNotSchedule"
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: ${APP}-crunchy-postgres
   users:
     # Superuser
     - name: "postgres"
@@ -111,18 +118,9 @@ spec:
   proxy:
     pgBouncer:
       port: 5432
-      # replicas: 1
       config:
         global:
           pool_mode: ${POOL_MODE:=session}
           client_tls_sslmode: prefer
           default_pool_size: "100"
           max_client_conn: "500"
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: DoNotSchedule
-          labelSelector:
-            matchLabels:
-              postgres-operator.crunchydata.com/cluster: *name
-              postgres-operator.crunchydata.com/role: ${APP}-pgbouncer
