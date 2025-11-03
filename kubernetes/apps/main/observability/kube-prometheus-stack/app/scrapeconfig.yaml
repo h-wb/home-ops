@@ -58,13 +58,13 @@ spec:
 apiVersion: monitoring.coreos.com/v1alpha1
 kind: ScrapeConfig
 metadata:
-  name: &name minio-job
+  name: garage
 spec:
   staticConfigs:
     - targets:
         - s3.${SECRET_DOMAIN}
-  metricsPath: /minio/v2/metrics/cluster
+  metricsPath: /metrics
   relabelings:
     - action: replace
       targetLabel: job
-      replacement: *name
+      replacement: garage
