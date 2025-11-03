@@ -27,7 +27,7 @@ spec:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
       fsGroup: ${VOLSYNC_PGID:=1000}
-    repository: "${APP}-${VOLSYNC_REPOSITORY:=volsync}" # volsync for local, volsync-minio for minio
+    repository: "${APP}-${VOLSYNC_REPOSITORY:=volsync}"
     sourceIdentity:
       sourceName: ${APP}
     storageClassName: "${VOLSYNC_STORAGECLASS:=longhorn-snapshot}"
