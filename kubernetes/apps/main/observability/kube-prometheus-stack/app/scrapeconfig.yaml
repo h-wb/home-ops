@@ -62,7 +62,7 @@ metadata:
 spec:
   staticConfigs:
     - targets:
-        - s3.${SECRET_DOMAIN}
+        - garage.storage.svc.cluster.local:3903
   metricsPath: /metrics
   relabelings:
     - action: replace
