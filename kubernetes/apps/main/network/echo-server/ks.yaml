@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
+
 
   path: ./kubernetes/apps/main/network/echo-server/app
   prune: true

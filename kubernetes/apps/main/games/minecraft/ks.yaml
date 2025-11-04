@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
+
   #  - ../../../../../components/keda/nfs-scaler
   path: ./kubernetes/apps/main/games/minecraft/mc-router
   prune: true
@@ -41,7 +41,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
+
     #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
   dependsOn:

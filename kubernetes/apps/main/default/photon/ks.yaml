@@ -12,7 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
     - ../../../../../components/volsync
   interval: 30m
   path: ./kubernetes/apps/main/default/photon/app
@@ -20,7 +19,6 @@ spec:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 30Gi
-      GATUS_SUBDOMAIN: photon
   prune: true
   retryInterval: 1m
   sourceRef:

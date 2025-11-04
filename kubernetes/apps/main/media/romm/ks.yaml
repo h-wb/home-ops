@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
+
     #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
     - ../../../../../components/postgres

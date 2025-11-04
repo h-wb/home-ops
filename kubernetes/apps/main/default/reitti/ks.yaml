@@ -12,7 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
     - ../../../../../components/postgres
   dependsOn:
     - name: crunchy-postgres-operator
@@ -22,7 +21,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      GATUS_SUBDOMAIN: reitti
   patches:
     - patch: |
         - op: add

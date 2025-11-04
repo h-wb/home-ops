@@ -12,7 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
     #  - ../../../../../components/keda/nfs-scaler
     # - ../../../../../components/volsync
     - ../../../../../components/postgres
@@ -26,7 +25,6 @@ spec:
     substitute:
       APP: *app
       # VOLSYNC_CAPACITY: 1Gi
-      GATUS_SUBDOMAIN: immich
   patches:
     - patch: |
         - op: add

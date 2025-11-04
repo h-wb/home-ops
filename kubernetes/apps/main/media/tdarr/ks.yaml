@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/gatus/guarded
+
     - ../../../../../components/volsync
   path: ./kubernetes/apps/main/media/tdarr/app
   prune: true
