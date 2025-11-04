@@ -12,7 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/postgres
   dependsOn:
     - name: crunchy-postgres-operator
       namespace: database
