@@ -66,9 +66,8 @@ spec:
         hostnames:
           - &webhookHostName "n8n-webhook.${SECRET_DOMAIN}"
         parentRefs:
-          - name: external
-            namespace: kube-system
-            sectionName: https
+          - name: envoy-external
+            namespace: network
         rules:
           - matches:
               - path:

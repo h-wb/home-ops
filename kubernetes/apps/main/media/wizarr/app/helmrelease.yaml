@@ -53,13 +53,8 @@ spec:
           gethomepage.dev/icon: wizarr.png
           gethomepage.dev/description: Plex Invite Management
         parentRefs:
-          - name: external
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: 5690
+          - name: envoy-external
+            namespace: network
     persistence:
       config:
         existingClaim: *app

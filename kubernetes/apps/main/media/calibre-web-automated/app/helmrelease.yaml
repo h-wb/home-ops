@@ -75,13 +75,8 @@ spec:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
           - "cwa.${SECRET_DOMAIN}"
         parentRefs:
-          - name: external
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
+          - name: envoy-internal
+            namespace: network
     persistence:
       config:
         existingClaim: *app
