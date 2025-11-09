@@ -60,13 +60,8 @@ spec:
         hostnames:
           - *hostName
         parentRefs:
-          - name: internal
-            namespace: kube-system
-            sectionName: https
-        rules:
-          - backendRefs:
-              - identifier: app
-                port: *port
+          - name: envoy-internal
+            namespace: network
       webhooks:
         hostnames:
           - &webhookHostName "n8n-webhook.${SECRET_DOMAIN}"
