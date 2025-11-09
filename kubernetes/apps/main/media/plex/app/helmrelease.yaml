@@ -82,12 +82,15 @@ spec:
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: ${SVC_PLEX_ADDR:=temp}
+        externalTrafficPolicy: Local
         ports:
           http:
             port: &port 32400
     route:
       app:
         annotations:
+          gatus.home-operations.com/endpoint: |-
+            conditions: ["[STATUS] == 401"]
           gethomepage.dev/enabled: "true"
           gethomepage.dev/group: Video
           gethomepage.dev/name: Plex
