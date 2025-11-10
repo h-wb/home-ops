@@ -37,8 +37,7 @@ spec:
           - "victoria-logs.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
-            namespace: kube-system
-            sectionName: https
+            namespace: network
         extraRules:
           - filters:
               - type: RequestRedirect
