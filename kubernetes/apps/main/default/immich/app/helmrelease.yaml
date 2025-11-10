@@ -99,8 +99,12 @@ spec:
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:
-          - name: envoy-internal
+          - name: envoy-external
             namespace: network
+        rules:
+          - backendRefs:
+              - identifier: server
+                port: *port
     persistence:
       data:
         enabled: true
