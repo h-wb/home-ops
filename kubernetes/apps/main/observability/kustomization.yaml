@@ -8,6 +8,7 @@ components:
 resources:
   - ./gatus/ks.yaml
   - ./grafana/ks.yaml
+  - ./fluent-bit/ks.yaml
   - ./victoria-logs/ks.yaml
   - ./karma/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
