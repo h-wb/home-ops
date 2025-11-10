@@ -51,7 +51,7 @@ spec:
               readiness: *probes
             env:
               # renovate: datasource=github-releases depName=VueTorrent/VueTorrent
-              RELEASE_TYPE: v2.30.2
+              RELEASE_TYPE: v2.31.0
               PORT: *port
               QBIT_BASE: http://qbittorrent-vpn:8080
     service:
