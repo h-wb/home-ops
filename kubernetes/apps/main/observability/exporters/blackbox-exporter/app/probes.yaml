@@ -13,7 +13,10 @@ spec:
       static:
         # PiKVM
         - 192.168.1.48
-
+  metricRelabelings:
+    - targetLabel: service
+      replacement: blackbox-exporter
+      action: replace
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/probe_v1.json
 apiVersion: monitoring.coreos.com/v1
@@ -28,3 +31,7 @@ spec:
     staticConfig:
       static:
         - 192.168.1.161:2049
+  metricRelabelings:
+    - targetLabel: service
+      replacement: blackbox-exporter
+      action: replace

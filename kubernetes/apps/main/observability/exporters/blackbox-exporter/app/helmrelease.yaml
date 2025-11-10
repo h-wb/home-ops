@@ -13,24 +13,22 @@ spec:
     tag: 11.4.2
   url: oci://ghcr.io/prometheus-community/charts/prometheus-blackbox-exporter
 ---
-# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app blackbox-exporter
+  name: blackbox-exporter
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
-    name: blackbox-exporter
+    name: blackbox-exporter-lan
+  interval: 1h
   values:
     fullnameOverride: blackbox-exporter
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
-      capabilities:
-        add:
-          - "NET_RAW"
+      capabilities: {add: ["NET_RAW"]}
     config:
       modules:
         http_2xx:
@@ -38,8 +36,8 @@ spec:
           timeout: 5s
           http:
             valid_http_versions:
-              - "HTTP/1.1"
-              - "HTTP/2.0"
+              - HTTP/1.1
+              - HTTP/2.0
             follow_redirects: true
             preferred_ip_protocol: ip4
         icmp:
@@ -51,20 +49,20 @@ spec:
           prober: tcp
           timeout: 5s
           tcp:
-            preferred_ip_protocol: ipv4
+            preferred_ip_protocol: ip4
     serviceMonitor:
       enabled: true
-      defaults:
-        interval: 1m
-        scrapeTimeout: 10s
+      selfMonitor:
+        enabled: true
     prometheusRule:
       enabled: true
       rules:
-        - alert: BlackboxProbeFailed
-          expr: probe_success == 0
+        - alert: LanProbeFailed
+          expr: |-
+            probe_success{service="blackbox-exporter-lan"} == 0
           for: 15m
           labels:
             severity: critical
           annotations:
             summary: |-
-              The host {{ $labels.target }} is currently unreachable
+              The probe targeting {{ $labels.instance }} is currently having connectivity issues
