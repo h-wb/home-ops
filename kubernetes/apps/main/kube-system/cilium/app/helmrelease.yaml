@@ -35,7 +35,7 @@ spec:
       tproxy: true # breaks accessing cilium gateway ips from inside cluster
     bpfClockProbe: true
     bgpControlPlane:
-      enabled: true
+      enabled: false
     cni:
       exclusive: false
     dashboards:
