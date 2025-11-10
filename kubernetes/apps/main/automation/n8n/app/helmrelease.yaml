@@ -63,6 +63,9 @@ spec:
           - name: envoy-internal
             namespace: network
       webhooks:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            conditions: ["[STATUS] == 404"]
         hostnames:
           - &webhookHostName "n8n-webhook.${SECRET_DOMAIN}"
         parentRefs:
