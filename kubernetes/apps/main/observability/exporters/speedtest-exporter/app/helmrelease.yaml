@@ -5,10 +5,11 @@ kind: HelmRelease
 metadata:
   name: &app speedtest-exporter
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
     name: app-template
+  dependsOn: []
+  interval: 15m
   values:
     controllers:
       speedtest-exporter:
@@ -27,7 +28,7 @@ spec:
                 cpu: 15m
                 memory: 50Mi
               limits:
-                memory: 200Mi
+                memory: 100Mi
     service:
       metrics:
         controller: *app
