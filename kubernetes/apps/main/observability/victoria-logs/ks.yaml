@@ -19,6 +19,3 @@ spec:
     namespace: flux-system
   targetNamespace: observability
   wait: false
-  postBuild:
-    substitute:
-      APP: *app
