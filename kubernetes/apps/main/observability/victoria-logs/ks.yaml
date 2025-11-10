@@ -9,7 +9,7 @@ spec:
     - ../../../../../components/defaults
   dependsOn:
     - name: longhorn
-      namespace: storage
+      namespace: longhorn-system
   interval: 1h
   path: ./kubernetes/apps/main/observability/victoria-logs/app
   prune: true
