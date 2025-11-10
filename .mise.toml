@@ -27,6 +27,6 @@ TALOS_DIR = "{{config_root}}/talos"
 "aqua:yannh/kubeconform" = "0.7.0"
 "aqua:google/yamlfmt" = ["latest"]
 "asdf:bitwarden-secrets-manager" = "latest"
-rust = "1.91.0"
+rust = "1.91.1"
 "cargo:minijinja-cli" = "2.10.2"
 lefthook = "latest"
