@@ -6,4 +6,4 @@ namespace: system-upgrade
 components:
   - ../../../components/common
 resources:
-  - ./tuppr/ks.yaml
+  # - ./tuppr/ks.yaml
