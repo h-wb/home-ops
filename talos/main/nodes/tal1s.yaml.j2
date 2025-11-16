@@ -1,0 +1,19 @@
+---
+machine:
+  network:
+    hostname: "tal1s"
+    interfaces:
+      - deviceSelector:
+          hardwareAddr: "48:21:0b:3c:20:ce"
+        dhcp: true
+        mtu: 1500
+        addresses:
+          - 192.168.1.191/24
+        routes:
+          - network: "0.0.0.0/0"
+            gateway: "192.168.1.1"
+        vip:
+          ip: "192.168.1.253"
+#  nodeLabels:
+#   topology.kubernetes.io/zone: m
+  type: controlplane

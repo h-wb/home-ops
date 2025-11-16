@@ -1,9 +1,14 @@
+experimental_monorepo_root = true
+
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
-KUBECONFIG = "{{config_root}}/kubernetes/clusters/main/kubeconfig"
+CLUSTER = "main"
+KUBECONFIG = "{{config_root}}/kubernetes/clusters/{{env.CLUSTER}}/kubeconfig"
+MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
-TALOSCONFIG = "{{config_root}}/talos/main/clusterconfig/talosconfig"
-TALOS_DIR = "{{config_root}}/talos"
+TALOSCONFIG = "{{config_root}}/talos/{{env.CLUSTER}}/talosconfig"
+TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
+MISE_EXPERIMENTAL=1
 
 [tools]
 "python" = "3.14.0"
@@ -25,8 +30,30 @@ TALOS_DIR = "{{config_root}}/talos"
 "aqua:mikefarah/yq" = "4.48.2"
 "aqua:siderolabs/talos" = "1.11.5"
 "aqua:yannh/kubeconform" = "0.7.0"
-"aqua:google/yamlfmt" = ["latest"]
-"asdf:bitwarden-secrets-manager" = "latest"
-rust = "1.91.1"
-"cargo:minijinja-cli" = "2.10.2"
-lefthook = "latest"
+"aqua:google/yamlfmt" = "0.17.2"
+"aqua:evilmartians/lefthook" = "1.12.4"
+"aqua:mitsuhiko/minijinja" = "2.11.0"
+"aqua:charmbracelet/gum" = "0.17.0"
+
+
+[tasks.log]
+usage = '''
+arg "<lvl>"
+arg "<msg>"
+arg "[args]" var=#true
+'''
+quiet = true
+run = 'gum log -t rfc3339 -s -l "${usage_lvl?}" "${usage_msg?}" ${usage_args}'
+
+
+[tasks.template]
+usage = '''
+arg "<input>"
+arg "[args]" var=#true
+'''
+quiet = true
+run = '''
+bws run --project-id 812ce0d8-ee9a-4f73-9b8d-b3970152b8ac -- \
+minijinja-cli ${usage_input?} ${usage_args}
+'''
+

@@ -1,0 +1,112 @@
+[tasks.apply-node]
+description = "Apply Talos config to a node"
+usage = '''
+arg "<node>" env="NODE" help="Description"
+'''
+run = '''
+mise run //talos:render-config "${usage_node}" | talosctl -n "${usage_node}" apply-config -f /dev/stdin "$@"
+'''
+
+[tasks.download-image]
+description = "Download Talos machine image"
+usage = '''
+arg "<version>"
+'''
+quiet = true
+run = '''
+schematic="$(mise run //talos:gen-schematic-id)"
+gum spin --title "Downloading Talos ${usage_version} ..." -- \
+curl -sfL --remove-on-error --retry 5 --retry-delay 5 --retry-all-errors \
+    -o "${TALOS_DIR}/talos-${usage_version}-${schematic:0:8}.iso" \
+    "https://factory.talos.dev/image/${schematic}/${usage_version}/metal-amd64.iso"
+mise //:log info "Downloaded Talos" version "${usage_version}" schematic "${schematic}"
+'''
+
+[tasks.gen-schematic-id]
+description = "Generate schematic ID from Talos schematic"
+quiet = true
+run = '''
+curl -sX POST --data-binary "$(mise run //:template ${TALOS_DIR}/schematic.yaml.j2)" \
+    "https://factory.talos.dev/schematics" | jq -r '.id'
+'''
+
+[tasks.reboot-node]
+description = "Reboot a node"
+usage = '''
+arg "<node>" env="NODE"
+'''
+run = '''
+gum confirm "Reboot node ${usage_node}?" --default="No" && \
+    talosctl -n "${usage_node}" reboot -m powercycle || exit 0
+'''
+
+[tasks.render-config]
+description = "Render Talos config for a node"
+usage = '''
+arg "<node>" env="NODE"
+'''
+run = '''
+#!/usr/bin/env bash
+export IS_CONTROLLER=$(mise run //talos:_machine-controller "${usage_node}")
+talosctl machineconfig patch <(mise run //:template "${TALOS_DIR}/machineconfig.yaml.j2") \
+    -p @<(mise run //:template "${TALOS_DIR}/nodes/${usage_node}.yaml.j2")
+'''
+
+[tasks.reset-node]
+description = "Reset a node"
+usage = '''
+arg "<node>" env="NODE"
+'''
+run = '''
+gum confirm "Reset node ${usage_node}?" --default="No" && \
+    talosctl -n "${usage_node}" reset --system-labels-to-wipe STATE --system-labels-to-wipe EPHEMERAL --system-labels-to-wipe u-local-hostpath --graceful=false "$@" || exit 0
+'''
+
+[tasks.shutdown-node]
+description = "Shutdown a node"
+usage = '''
+arg "<node>" env="NODE"
+'''
+run = '''
+gum confirm "Shutdown node ${usage_node}?" --default="No" && \
+    talosctl -n "${usage_node}" shutdown --force "$@" || exit 0
+'''
+
+[tasks.upgrade-k8s]
+description = "Upgrade Kubernetes version on the cluster"
+usage = '''
+arg "<version>"
+'''
+run = '''
+controller=$(talosctl config info -o yaml | yq -e '.endpoints[0]')
+talosctl -n "${controller}" upgrade-k8s --to "${usage_version}"
+'''
+
+[tasks.upgrade-node]
+description = "Upgrade Talos version on a node"
+usage = '''
+arg "<node>" env="NODE"
+'''
+run = '''
+image=$(mise run //talos:_machine-image)
+talosctl -n "${usage_node}" upgrade -i "${image}" -m powercycle --timeout=10m "$@"
+'''
+
+[tasks._machine-controller]
+description = "Check if node is a controller (private)"
+hide = true
+usage = '''
+arg "<node>" env="NODE"
+'''
+run = '''
+mise run //:template "${TALOS_DIR}/nodes/${usage_node}.yaml.j2" | \
+    yq -e 'select(.machine) | (.machine.type == "controlplane") // ""'
+'''
+
+[tasks._machine-image]
+description = "Get machine image from config (private)"
+hide = true
+run = '''
+mise run //:template "${TALOS_DIR}/machineconfig.yaml.j2" | \
+    yq -e 'select(.machine) | .machine.install.image'
+'''
