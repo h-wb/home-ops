@@ -31,7 +31,7 @@ MISE_EXPERIMENTAL=1
 "aqua:siderolabs/talos" = "1.11.5"
 "aqua:yannh/kubeconform" = "0.7.0"
 "aqua:google/yamlfmt" = "0.17.2"
-"aqua:evilmartians/lefthook" = "1.12.4"
+"aqua:evilmartians/lefthook" = "1.13.6"
 "aqua:mitsuhiko/minijinja" = "2.11.0"
 "aqua:charmbracelet/gum" = "0.17.0"
 
