@@ -1,0 +1,116 @@
+# [tasks.default]
+# description = "Run complete bootstrap process"
+# run = '''
+# mise run //bootstrap:talos
+# mise run //bootstrap:k8s
+# mise run //bootstrap:kubeconfig
+# mise run //bootstrap:wait
+# mise run //bootstrap:namespaces
+# mise run //bootstrap:resources
+# mise run //bootstrap:crds
+# mise run //bootstrap:apps
+# mise run //bootstrap:kubeconfig node
+# '''
+
+[tasks.talos]
+description = "Install Talos"
+run = '''
+#!/usr/bin/env bash
+nodes=$(talosctl config info -o yaml | yq -e '.nodes | join (" ")')
+mise //:log info "Running stage..." stage "$0"
+for n in ${nodes}; do
+    if ! op=$(mise run //talos:apply-node "$n" --insecure 2>&1); then
+        if [[ "$op" == *"certificate required"* ]]; then
+            mise //:log info "Talos already configured, skipping apply of config" stage "$0" node "$n"
+            continue
+        fi
+        mise //:log fatal "Failed to apply Talos configuration" stage "$0" node "$n" output "$op"
+    fi
+done
+'''
+
+[tasks.k8s]
+description = "Install Kubernetes"
+run = '''
+#!/usr/bin/env bash
+controller=$(talosctl config info -o yaml | yq -e '.endpoints[0]')
+mise //:log info "Running stage..." stage "$0"
+until op=$(talosctl -n "${controller}" bootstrap 2>&1 || true) && [[ "$op" == *"AlreadyExists"* ]]; do
+    mise //:log info "Kubernetes bootstrap in progress. Retrying in 5 seconds..." stage "$0"
+    sleep 5
+done
+'''
+
+[tasks.kubeconfig]
+description = "Fetch kubeconfig"
+usage = '''
+arg "[lb]" default="cilium" env="LB"
+'''
+run = '''
+#!/usr/bin/env bash
+controller=$(talosctl config info -o yaml | yq -e '.endpoints[0]')
+mise //:log info "Running stage..." stage "$0"
+if ! talosctl kubeconfig -n "${controller}" -f --force-context-name main "${PWD}"; then
+    mise //:log fatal "Failed to fetch kubeconfig" stage "$0"
+fi
+if [[ "${usage_lb}" != "cilium" ]]; then
+    if ! kubectl config set-cluster main --server "https://${controller}:6443"; then
+        mise //:log fatal "Failed to set kubectl cluster server address" stage "$0"
+    fi
+fi
+'''
+
+[tasks.wait]
+description = "Wait for nodes to be not-ready"
+run = '''
+#!/usr/bin/env bash
+mise //:log info "Running stage..." stage "$0"
+if ! kubectl wait nodes --for=condition=Ready=True --all --timeout=10s &>/dev/null; then
+    until kubectl wait nodes --for=condition=Ready=False --all --timeout=10s &>/dev/null; do
+        mise //:log info "Nodes not available, waiting for nodes to be available. Retrying in 5 seconds..." stage "$0"
+        sleep 5
+    done
+fi
+'''
+
+[tasks.namespaces]
+description = "Apply Kubernetes namespaces"
+run = '''
+#!/usr/bin/env bash
+mise //:log info "Running stage..." stage "$0"
+find "${KUBERNETES_DIR}/apps" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r dir; do
+    if ! kustomize build "$dir" | yq ea -e 'select(.kind == "Namespace")' | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
+        mise //:log fatal "Failed to apply namespace" stage "$0" namespace "$(basename "$dir")"
+    fi
+done
+'''
+
+[tasks.resources]
+description = "Apply Kubernetes resources"
+run = '''
+#!/usr/bin/env bash
+mise //:log info "Running stage..." stage "$0"
+if ! mise run //:template "${BOOTSTRAP_DIR}/resources.yaml.j2" | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
+    mise //:log fatal "Failed to apply resources" stage "$0"
+fi
+'''
+
+[tasks.crds]
+description = "Apply Helmfile CRDs"
+run = '''
+#!/usr/bin/env bash
+mise //:log info "Running stage..." stage "$0"
+if ! helmfile -f "${BOOTSTRAP_DIR}/helmfile.d/00-crds.yaml" template -q | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
+    mise //:log fatal "Failed to apply crds" stage "$0"
+fi
+'''
+
+[tasks.apps]
+description = "Apply Helmfile Apps"
+run = '''
+#!/usr/bin/env bash
+mise //:log info "Running stage..." stage "$0"
+if ! helmfile -f "${BOOTSTRAP_DIR}/helmfile.d/01-apps.yaml" sync --hide-notes; then
+    mise //:log fatal "Failed to sync helmfile" stage "$0"
+fi
+'''
