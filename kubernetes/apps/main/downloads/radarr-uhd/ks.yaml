@@ -12,7 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-
     #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync-rook
 
@@ -27,7 +26,6 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 10Gi
+      VOLSYNC_CAPACITY: 5Gi
