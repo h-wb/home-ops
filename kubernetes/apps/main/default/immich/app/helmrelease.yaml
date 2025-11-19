@@ -53,11 +53,6 @@ spec:
             envFrom:
               - configMapRef:
                   name: immich-configmap
-            resources:
-              requests:
-                gpu.intel.com/i915: 1
-              limits:
-                gpu.intel.com/i915: 1
       machine-learning:
         containers:
           app:
