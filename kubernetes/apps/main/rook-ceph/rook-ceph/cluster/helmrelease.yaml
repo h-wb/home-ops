@@ -86,7 +86,8 @@ spec:
         useAllNodes: false
         nodes:
           - name: "tal0s"
-            devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J_.*
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J
         useAllDevices: false
         devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J_.*
         config:
