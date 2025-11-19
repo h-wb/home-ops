@@ -40,6 +40,7 @@
     "observability": "event",
     "openebs-system": "base",
     "longhorn-system": "dump",
+    "rook-ceph": "dump",
     "system-upgrade": "update",
     "storage": "aws"
   },
