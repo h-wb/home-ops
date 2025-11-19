@@ -14,7 +14,7 @@ spec:
     - ../../../../../components/defaults
 
     #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
 
   path: ./kubernetes/apps/main/media/suwayomi/app
   prune: true

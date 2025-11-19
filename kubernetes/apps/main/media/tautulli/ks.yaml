@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/defaults
 
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
   path: ./kubernetes/apps/main/media/tautulli/app
   prune: true
   sourceRef:

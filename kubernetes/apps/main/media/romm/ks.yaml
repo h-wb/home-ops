@@ -14,7 +14,7 @@ spec:
     - ../../../../../components/defaults
 
     #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
     - ../../../../../components/postgres
   path: ./kubernetes/apps/main/media/romm/app
   prune: true

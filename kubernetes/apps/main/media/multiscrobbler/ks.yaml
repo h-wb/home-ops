@@ -12,8 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
   path: ./kubernetes/apps/main/media/multiscrobbler/app
   prune: true
   sourceRef:
