@@ -74,10 +74,6 @@ machine:
         type: bind
         source: /var/openebs/local
         options: ["bind", "rshared", "rw"]
-      - destination: /var/mnt/longhorn
-        type: bind
-        source: /var/mnt/longhorn
-        options: ["bind", "rshared", "rw"]
     nodeIP:
       validSubnets:
         - 192.168.1.0/24
@@ -86,14 +82,10 @@ machine:
       - 1.1.1.1
       - 1.0.0.1
     disableSearchDomain: true
-
-  nodeAnnotations:
-    node.longhorn.io/default-disks-config: '[{"path":"/var/mnt/longhorn","allowScheduling":true}]'
   nodeLabels:
     node.kubernetes.io/gpu: true
     intel.feature.node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
-    node.longhorn.io/create-default-disk: config
   sysctls:
     fs.inotify.max_user_instances: "8192"
     fs.inotify.max_user_watches: "1048576"
@@ -207,16 +199,6 @@ cluster:
   serviceAccount:
     key: {{ ENV['CLUSTER_SERVICEACCOUNT_KEY'] }}
   {% endif %}
----
-apiVersion: v1alpha1
-kind: UserVolumeConfig
-name: longhorn
-provisioning:
-  diskSelector:
-    match: disk.dev_path == "/dev/nvme0n1"
-  grow: true
-  minSize: 300Gi
-  maxSize: 600Gi
 ---
 apiVersion: v1alpha1
 kind: WatchdogTimerConfig
