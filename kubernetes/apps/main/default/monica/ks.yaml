@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
     - ../../../../../components/postgres
   dependsOn:
     - name: crunchy-postgres-operator
@@ -28,7 +28,6 @@ spec:
   timeout: 5m
   wait: false # no flux ks dependents
   postBuild:
-
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 2Gi

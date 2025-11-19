@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
 
   path: ./kubernetes/apps/main/default/strava-statistics/app
   prune: true
@@ -25,7 +25,5 @@ spec:
   retryInterval: 1m
   timeout: 5m
   postBuild:
-
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 5Gi

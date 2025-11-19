@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/defaults
     #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
     # - ../../../../../components/postgres
   path: ./kubernetes/apps/main/default/karakeep/app
   prune: true
