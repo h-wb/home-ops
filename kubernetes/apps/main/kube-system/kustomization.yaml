@@ -9,5 +9,5 @@ resources:
   - ./cilium/ks.yaml
   - ./coredns/ks.yaml
   - ./spegel/ks.yaml
-  - ./intel-device-plugin-operator/ks.yaml
+  - ./intel-gpu-resource-driver/ks.yaml
   - ./metrics-server/ks.yaml
