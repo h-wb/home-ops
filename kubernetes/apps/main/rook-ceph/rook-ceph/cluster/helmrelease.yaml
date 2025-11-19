@@ -82,9 +82,22 @@ spec:
           limits:
             memory: 8Gi
       storage:
-        useAllNodes: true
+        # useAllNodes: true
+        useAllNodes: false
+        nodes:
+          - name: "tal0s"
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J
+        nodes:
+          - name: "tal0s"
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06304W
+        nodes:
+          - name: "tal0s"
+            devices:
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J
         useAllDevices: false
-        devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J_.*
+        devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL_.*
         config:
           osdsPerDevice: "1"
     cephBlockPools:
