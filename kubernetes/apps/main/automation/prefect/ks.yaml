@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/volsync
+    - ../../../../../components/volsync-rook
     # - ../../../../../components/postgres
   path: ./kubernetes/apps/main/automation/prefect/app
   prune: true
@@ -27,4 +27,3 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 5Gi
