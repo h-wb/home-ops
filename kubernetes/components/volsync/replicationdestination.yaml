@@ -10,12 +10,7 @@ spec:
   trigger:
     manual: restore-once
   kopia:
-    accessModes:
-      - ${VOLSYNC_ACCESSMODES:=ReadWriteOnce}
-    cacheAccessModes:
-      - ${VOLSYNC_CACHE_ACCESSMODES:=ReadWriteOnce}
-    cacheCapacity: "${VOLSYNC_CACHE_CAPACITY:=3Gi}"
-    cacheStorageClassName: "${VOLSYNC_CACHE_SNAPSHOTCLASS:=longhorn-cache}"
+    accessModes: ["${VOLSYNC_ACCESSMODES:=ReadWriteOnce}"]
     capacity: ${VOLSYNC_CAPACITY:=5Gi}
     cleanupCachePVC: true
     # https://github.com/backube/volsync/issues/1504
@@ -27,7 +22,7 @@ spec:
       runAsUser: ${VOLSYNC_PUID:=1000}
       runAsGroup: ${VOLSYNC_PGID:=1000}
       fsGroup: ${VOLSYNC_PGID:=1000}
-    repository: "${APP}-${VOLSYNC_REPOSITORY:=volsync}"
+    repository: ${APP}-volsync
     sourceIdentity:
       sourceName: ${APP}
     storageClassName: "${VOLSYNC_STORAGECLASS:=longhorn-snapshot}"
