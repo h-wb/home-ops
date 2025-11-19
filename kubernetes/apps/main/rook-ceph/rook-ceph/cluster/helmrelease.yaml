@@ -89,11 +89,11 @@ spec:
             devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J
         nodes:
-          - name: "tal0s"
+          - name: "tal1s"
             devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06304W
         nodes:
-          - name: "tal0s"
+          - name: "tal2s"
             devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J
         useAllDevices: false
