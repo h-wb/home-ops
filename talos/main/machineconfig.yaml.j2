@@ -54,6 +54,7 @@ machine:
   install:
     diskSelector:
       model: TS128GMTS430S
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/installer
     image: factory.talos.dev/installer/97dc72954d99d9baec927ede36517f09da68d78a27be7ea5c9f6984afcc03eae:v1.11.5
     wipe: false
   kernel:
@@ -68,6 +69,7 @@ machine:
       featureGates:
         ImageVolume: true
       serializeImagePulls: false
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
     image: ghcr.io/siderolabs/kubelet:v1.34.2
     extraMounts:
       - destination: /var/openebs/local
