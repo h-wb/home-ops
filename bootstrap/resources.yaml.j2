@@ -26,12 +26,10 @@ metadata:
 stringData:
   {{ ENV['CLUSTER_SECRETS'] | indent(2) | safe }}
 ---
-# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/secret-v1.json
-# not useful right now but we never know
 apiVersion: v1
 kind: Secret
 metadata:
-  name: sops-age
+  name: sops-age-secret
   namespace: flux-system
 stringData:
   age.agekey: {{ ENV['AGE_KEY'] }}
