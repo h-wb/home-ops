@@ -54,6 +54,9 @@ spec:
               limits:
                 memory: 16G
     defaultPodOptions:
+      resourceClaims:
+        - name: gpu
+          resourceClaimTemplateName: plex-gpu
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

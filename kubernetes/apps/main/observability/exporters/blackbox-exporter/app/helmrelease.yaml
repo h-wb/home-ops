@@ -22,6 +22,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: blackbox-exporter-lan
+  dependsOn: []
   interval: 1h
   values:
     fullnameOverride: blackbox-exporter

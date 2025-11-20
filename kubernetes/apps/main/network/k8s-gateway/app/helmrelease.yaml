@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: k8s-gateway
+  dependsOn: []
   values:
     fullnameOverride: k8s-gateway
     domain: "${SECRET_DOMAIN}"

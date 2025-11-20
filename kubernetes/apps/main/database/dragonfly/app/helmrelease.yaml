@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: dragonfly-operator
+  dependsOn: []
   values:
     manager:
       image:

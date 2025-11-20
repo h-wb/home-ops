@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: rook-ceph-cluster
+  dependsOn: []
   interval: 1h
   values:
     monitoring:

@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: kube-prometheus-stack
+  dependsOn: []
   values:
     crds:
       enabled: true

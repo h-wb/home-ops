@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: cloudflare-dns
+  dependsOn: []
   values:
     fullnameOverride: *app
     provider:

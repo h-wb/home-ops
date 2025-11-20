@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: headlamp
+  dependsOn: []
   values:
     podAnnotations:
       reloader.stakater.com/auto: "true"

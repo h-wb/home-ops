@@ -22,6 +22,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: intel-gpu-resource-driver
+  dependsOn: []
   interval: 1h
   values:
     cdi:

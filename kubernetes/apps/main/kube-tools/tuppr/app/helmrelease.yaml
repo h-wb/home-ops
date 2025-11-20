@@ -22,6 +22,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: tuppr
+  dependsOn: []
   interval: 1h
   values:
     replicaCount: 2

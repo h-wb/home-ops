@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: snapshot-controller
+  dependsOn: []
   values:
     controller:
       replicaCount: 2

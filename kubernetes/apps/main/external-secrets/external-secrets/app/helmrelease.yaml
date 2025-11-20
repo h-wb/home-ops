@@ -23,6 +23,7 @@ spec:
   chartRef:
     kind: OCIRepository
     name: external-secrets
+  dependsOn: []
   values:
     installCRDs: true
     replicaCount: 1
