@@ -28,6 +28,7 @@ spec:
             restartPolicy: Always
 
           gluetun:
+            dependsOn:
               - coredns
             image:
               repository: ghcr.io/qdm12/gluetun
