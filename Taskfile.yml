@@ -23,7 +23,6 @@ env:
   TALOSCONFIG: '{{.TALOS_DIR}}/clusterconfig/talosconfig'
 
 includes:
-  bootstrap: .taskfiles/bootstrap
   external-secrets: .taskfiles/ExternalSecrets/Taskfile.yaml
   flux: .taskfiles/Flux/Taskfile.yaml
   kubernetes: .taskfiles/Kubernetes/Taskfile.yaml
