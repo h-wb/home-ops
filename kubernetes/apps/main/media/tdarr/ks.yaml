@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-
+    - ../../../../../components/nfs-scaler
     - ../../../../../components/volsync
   path: ./kubernetes/apps/main/media/tdarr/app
   prune: true
@@ -43,6 +43,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
+    - ../../../../../components/nfs-scaler
   path: ./kubernetes/apps/main/media/tdarr/node
   prune: true
   sourceRef:

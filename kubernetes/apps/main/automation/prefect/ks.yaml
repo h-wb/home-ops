@@ -12,6 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
+    - ../../../../../components/nfs-scaler
     - ../../../../../components/volsync
     # - ../../../../../components/postgres
   path: ./kubernetes/apps/main/automation/prefect/app

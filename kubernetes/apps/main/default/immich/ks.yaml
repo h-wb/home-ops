@@ -12,6 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
+    - ../../../../../components/nfs-scaler
     #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/postgres
   dependsOn:
