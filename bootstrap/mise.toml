@@ -12,6 +12,9 @@
 # mise run //bootstrap:kubeconfig node
 # '''
 
+[env]
+BOOTSTRAP_DIR = "{{config_root}}/"
+
 [tasks.talos]
 description = "Install Talos"
 run = '''
