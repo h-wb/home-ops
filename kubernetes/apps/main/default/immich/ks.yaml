@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/nfs-scaler
     - ../../../../../components/postgres
-    - ../../../../../components/gpu
+    # - ../../../../../components/gpu
   dependsOn:
     - name: crunchy-postgres-operator
       namespace: database
