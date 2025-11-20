@@ -13,7 +13,6 @@ spec:
     - ../../../../../components/nfs-scaler
     - ../../../../../components/volsync
     - ../../../../../components/gpu
-  dependsOn: []
   path: ./kubernetes/apps/main/media/plex/app
   prune: true
   sourceRef:
