@@ -5,8 +5,6 @@ kind: Kustomization
 metadata:
   name: victoria-logs
 spec:
-  components:
-    - ../../../../../components/defaults
   dependsOn:
     - name: rook-ceph
       namespace: rook-ceph

@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../../components/defaults
   dependsOn:
     - name: crunchy-postgres-operator
       namespace: database

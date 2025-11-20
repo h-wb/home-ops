@@ -10,10 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../../components/defaults
-
-
   path: ./kubernetes/apps/main/network/echo-server/app
   prune: true
   sourceRef:

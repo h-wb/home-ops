@@ -11,7 +11,6 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../../components/defaults
     - ../../../../../components/nfs-scaler
     - ../../../../../components/volsync
 
@@ -42,9 +41,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../../components/defaults
-
   dependsOn:
     - name: qbittorrent
   path: ./kubernetes/apps/main/downloads/qbittorrent/tools

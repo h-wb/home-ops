@@ -5,8 +5,6 @@ kind: Kustomization
 metadata:
   name: fluent-bit
 spec:
-  components:
-    - ../../../../../components/defaults
   interval: 1h
   path: ./kubernetes/apps/main/observability/fluent-bit/app
   prune: true

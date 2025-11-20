@@ -10,9 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../../components/defaults
-
   interval: 1h
   path: ./kubernetes/apps/main/flux-system/headlamp/app
   postBuild:
