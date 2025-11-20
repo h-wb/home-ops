@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immich-database-init-sql
+data:
+  init.sql: |
+    \c immich\\
+    BEGIN;
+    ALTER DATABASE ${APP} OWNER TO ${APP};
+    CREATE EXTENSION IF NOT EXISTS vchord CASCADE;
+    CREATE EXTENSION IF NOT EXISTS earthdistance CASCADE;
+    COMMIT;

@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/nfs-scaler
-    - ../../../../../components/postgres
+    - ../../../../../components/vchord
     # - ../../../../../components/gpu
   dependsOn:
     - name: crunchy-postgres-operator
@@ -23,15 +23,15 @@ spec:
     substitute:
       APP: *app
       # VOLSYNC_CAPACITY: 1Gi
-  patches:
-    - patch: |
-        - op: add
-          path: /spec/patroni/dynamicConfiguration/postgresql/parameters/shared_preload_libraries
-          value: "vchord.so"
-      target:
-        group: postgres-operator.crunchydata.com
-        version: v1beta1
-        kind: PostgresCluster
+  # patches:
+    # - patch: |
+    #     - op: add
+    #       path: /spec/patroni/dynamicConfiguration/postgresql/parameters/shared_preload_libraries
+    #       value: "vchord.so"
+    #   target:
+    #     group: postgres-operator.crunchydata.com
+    #     version: v1beta1
+    #     kind: PostgresCluster
     # - patch: |
     #     - op: add
     #       path: /spec/args/-
@@ -39,34 +39,34 @@ spec:
     #         --default_lua_flags=allow-undeclared-keys
     #   target:
     #     kind: Dragonfly
-    - patch: |
-        - op: replace
-          path: /spec/image
-          value: ghcr.io/budimanjojo/crunchy-postgres-vectorchord:ubi9-17.6-2534
-      target:
-        group: postgres-operator.crunchydata.com
-        version: v1beta1
-        kind: PostgresCluster
-    - patch: |
-        - op: add
-          path: /spec/patroni/dynamicConfiguration/postgresql/pg_hba
-          value:
-            - hostnossl all all 10.42.0.0/16 md5
-            - hostssl all all all md5
-      target:
-        group: postgres-operator.crunchydata.com
-        version: v1beta1
-        kind: PostgresCluster
-    - patch: |
-        - op: add
-          path: /spec/databaseInitSQL
-          value:
-            name: immich-database-init-sql
-            key: init.sql
-      target:
-        group: postgres-operator.crunchydata.com
-        version: v1beta1
-        kind: PostgresCluster
+    # - patch: |
+    #     - op: replace
+    #       path: /spec/image
+    #       value: ghcr.io/budimanjojo/crunchy-postgres-vectorchord:ubi9-17.6-2534
+    #   target:
+    #     group: postgres-operator.crunchydata.com
+    #     version: v1beta1
+    #     kind: PostgresCluster
+    # - patch: |
+    #     - op: add
+    #       path: /spec/patroni/dynamicConfiguration/postgresql/pg_hba
+    #       value:
+    #         - hostnossl all all 10.42.0.0/16 md5
+    #         - hostssl all all all md5
+    #   target:
+    #     group: postgres-operator.crunchydata.com
+    #     version: v1beta1
+    #     kind: PostgresCluster
+    # - patch: |
+    #     - op: add
+    #       path: /spec/databaseInitSQL
+    #       value:
+    #         name: immich-database-init-sql
+    #         key: init.sql
+    #   target:
+    #     group: postgres-operator.crunchydata.com
+    #     version: v1beta1
+    #     kind: PostgresCluster
         # - patch: |
         #     - op: replace
         #       path: /spec/users/0

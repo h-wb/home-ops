@@ -7,9 +7,9 @@ resources:
   - ./pvc.yaml
   # - ./externalsecret.yaml
   - ./resources/configmap.yaml
-configMapGenerator:
-  - name: immich-database-init-sql
-    options:
-      disableNameSuffixHash: true
-    files:
-      - init.sql=./resources/database-init-cm.sql
+# configMapGenerator:
+#   - name: immich-database-init-sql
+#     options:
+#       disableNameSuffixHash: true
+#     files:
+#       - init.sql=./resources/database-init-cm.sql
