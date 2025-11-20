@@ -13,9 +13,6 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      resourceClaims:
-        - name: gpu
-          resourceClaimTemplateName: immich-gpu
       enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
