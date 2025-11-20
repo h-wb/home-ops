@@ -12,8 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-
-  #  - ../../../../../components/keda/nfs-scaler
   path: ./kubernetes/apps/main/games/minecraft/mc-router
   prune: true
   sourceRef:
@@ -41,8 +39,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-
-    #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
   dependsOn:
     - name: mc-router

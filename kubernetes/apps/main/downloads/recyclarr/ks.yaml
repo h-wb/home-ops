@@ -12,8 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-
-    #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
   path: ./kubernetes/apps/main/downloads/recyclarr/app
   prune: true

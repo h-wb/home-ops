@@ -13,7 +13,6 @@ spec:
   components:
     - ../../../../../components/defaults
     - ../../../../../components/nfs-scaler
-    #  - ../../../../../components/keda/nfs-scaler
     - ../../../../../components/volsync
 
   path: ./kubernetes/apps/main/media/suwayomi/app
