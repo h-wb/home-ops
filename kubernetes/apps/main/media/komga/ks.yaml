@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/defaults
     #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/volsync-rook
+    - ../../../../../components/volsync
   path: ./kubernetes/apps/main/media/komga/app
   prune: true
   sourceRef:

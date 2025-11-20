@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/defaults
     #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/volsync-rook
+    - ../../../../../components/volsync
   path: ./kubernetes/apps/main/downloads/overseerr/app
   prune: true
   sourceRef:

@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/defaults
 
-    - ../../../../../components/volsync-rook
+    - ../../../../../components/volsync
 
   path: ./kubernetes/apps/main/downloads/prowlarr/app
   prune: true

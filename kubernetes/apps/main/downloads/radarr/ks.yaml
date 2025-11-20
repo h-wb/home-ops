@@ -14,7 +14,7 @@ spec:
     - ../../../../../components/defaults
 
     #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/volsync-rook
+    - ../../../../../components/volsync
 
   path: ./kubernetes/apps/main/downloads/radarr/app
   prune: true

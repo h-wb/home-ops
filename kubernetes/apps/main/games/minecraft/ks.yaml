@@ -43,7 +43,7 @@ spec:
     - ../../../../../components/defaults
 
     #  - ../../../../../components/keda/nfs-scaler
-    - ../../../../../components/volsync-rook
+    - ../../../../../components/volsync
   dependsOn:
     - name: mc-router
       namespace: *namespace

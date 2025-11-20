@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/defaults
-    - ../../../../../components/volsync-rook
+    - ../../../../../components/volsync
   path: ./kubernetes/apps/main/automation/n8n/app
   prune: true
   sourceRef:
