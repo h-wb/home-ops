@@ -7,9 +7,4 @@ components:
   - ../../../components/common
 resources:
   - ./reloader/ks.yaml
-  # - ./system-upgrade-controller/ks.yaml
-configMapGenerator:
-  - name: versions
-    env: ./versions.env
-configurations:
-  - ./kustomizeconfig.yaml
+  - ./tuppr/ks.yaml
