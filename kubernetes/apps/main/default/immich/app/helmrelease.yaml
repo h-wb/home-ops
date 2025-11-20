@@ -38,10 +38,10 @@ spec:
               - configMapRef:
                   name: immich-configmap
       microservices:
-        # pod:
-        #   resourceClaims:
-        #     - name: gpu
-        #       resourceClaimTemplateName: immich-gpu
+        pod:
+          resourceClaims:
+            - name: gpu
+              resourceClaimTemplateName: immich-gpu
         containers:
           app:
             image:
@@ -58,15 +58,15 @@ spec:
             envFrom:
               - configMapRef:
                   name: immich-configmap
-            # resources:
-            #   claims:
-            #     - name: gpu
+            resources:
+              claims:
+                - name: gpu
       machine-learning:
         containers:
           app:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: v2.3.1
+              tag: v2.3.0
             envFrom:
               - configMapRef:
                   name: immich-configmap
