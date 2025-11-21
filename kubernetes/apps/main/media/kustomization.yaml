@@ -15,4 +15,4 @@ resources:
   - ./romm/ks.yaml
   # - ./tdarr/ks.yaml
   - ./multiscrobbler/ks.yaml
-  - ./wizarr/ks.yaml
+  # - ./wizarr/ks.yaml
