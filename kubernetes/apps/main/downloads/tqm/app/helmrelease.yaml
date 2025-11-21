@@ -40,12 +40,13 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: {drop: ["ALL"]}
-        # containers:
-        #   clean:
-        #     <<: *container
-        #     args:
-        #       - clean
-        #       - qb
+        containers:
+          clean:
+            <<: *container
+            args:
+              - clean
+              - qb
+              - --dry-run
         pod:
           restartPolicy: Never
       orphaned:
