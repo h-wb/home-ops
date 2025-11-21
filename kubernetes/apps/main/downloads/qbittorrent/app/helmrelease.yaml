@@ -13,8 +13,6 @@ spec:
   values:
     controllers:
       qbittorrent:
-        labels:
-          nfsMount: "true"
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
@@ -82,17 +80,6 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups:
-          - 10000
-        # affinity:
-        #   podAntiAffinity:
-        #     requiredDuringSchedulingIgnoredDuringExecution:
-        #       - labelSelector:
-        #           matchExpressions:
-        #             - key: app.kubernetes.io/name
-        #               operator: In
-        #               values: ["sabnzbd"]
-        #         topologyKey: kubernetes.io/hostname
     service:
       app:
         forceRename: *app
