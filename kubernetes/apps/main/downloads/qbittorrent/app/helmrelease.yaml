@@ -24,12 +24,10 @@ spec:
               TZ: Europe/Paris
               QBITTORRENT__PORT: &port 80
               QBITTORRENT__BT_PORT: &bittorrentPort 28163
-              QBT_Preferences__WebUI__AlternativeUIEnabled: true
               QBT_Preferences__WebUI__AuthSubnetWhitelistEnabled: true
               QBT_Preferences__WebUI__AuthSubnetWhitelist: |-
                 10.42.0.0/16, 192.168.1.0/24, 192.168.0.0/24
               QBT_Preferences__WebUI__LocalHostAuth: false
-              QBT_Preferences__WebUI__RootFolder: /add-ons/VueTorrent
             probes:
               liveness: &probes
                 enabled: true
@@ -58,21 +56,6 @@ spec:
                 memory: 1G
               limits:
                 memory: 12G
-          vuetorrent:
-            image:
-              repository: registry.k8s.io/git-sync/git-sync
-              tag: v4.5.0
-            args:
-              - --repo=https://github.com/WDaan/VueTorrent
-              - --ref=latest-release
-              - --period=86400s
-              - --root=/add-ons
-            resources:
-              requests:
-                cpu: 10m
-                memory: 25Mi
-              limits:
-                memory: 50Mi
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
