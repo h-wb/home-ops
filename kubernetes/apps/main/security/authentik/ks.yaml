@@ -7,7 +7,7 @@ metadata:
 spec:
   targetNamespace: security
   components:
-    - ../../../../components/dragonfly
+    # - ../../../../components/dragonfly
     - ../../../../components/postgres
   healthCheckExprs:
     - apiVersion: dragonflydb.io/v1alpha1
