@@ -43,6 +43,17 @@ spec:
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /kavita/config
+      tmpfs:
+        type: emptyDir
+        globalMounts:
+          - path: /kavita/config/logs
+            subPath: logs
+          - path: /kavita/config/cache
+            subPath: cache
+          - path: /tmp
+            subPath: tmp
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
