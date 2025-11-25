@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: generic-device-plugin
+spec:
+  interval: 1h
+  timeout: 5m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  interval: 1h
+  values:
+    defaultPodOptions:
+      priorityClassName: system-node-critical
+    controllers:
+      generic-device-plugin:
+        type: daemonset
+        strategy: RollingUpdate
+        containers:
+          main:
+            image:
+              repository: ghcr.io/squat/generic-device-plugin
+              tag: 0f7fddf166f17d58107d9811b53bec74e4d52e7c
+            args:
+              - --log-level=info
+              - --device
+              - |
+                name: tun
+                groups:
+                  - count: 1000
+                    paths:
+                      - path: /dev/net/tun
+            resources:
+              requests:
+                cpu: 10m
+              limits:
+                memory: 64Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+    persistence:
+      dev:
+        type: hostPath
+        hostPath: /dev
+        globalMounts:
+          - readOnly: true
+      var-lib-kubelet-device-plugins:
+        type: hostPath
+        hostPath: /var/lib/kubelet/device-plugins
