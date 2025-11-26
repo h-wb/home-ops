@@ -32,6 +32,13 @@ spec:
                 cpu: 15m
               limits:
                 memory: 4282M
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         controller: *app
