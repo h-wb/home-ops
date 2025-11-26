@@ -73,3 +73,10 @@ spec:
           - path: /config/application.yml
             # readOnly: true
             subPath: application.yml
+      media:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /data
+            subPath: Literature
