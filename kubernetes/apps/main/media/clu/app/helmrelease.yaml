@@ -24,6 +24,9 @@ spec:
               TZ: Europe/Paris
               PUID: "1000"
               PGID: "1000"
+              UMASK: "022"
+              FLASK_ENV: development
+              MONITOR: no
             resources:
               requests:
                 memory: 4282M
