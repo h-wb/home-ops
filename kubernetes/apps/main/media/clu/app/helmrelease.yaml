@@ -61,6 +61,10 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /config
+      logs:
+        type: emptyDir
+        globalMounts:
+          - path: /app/logs
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
