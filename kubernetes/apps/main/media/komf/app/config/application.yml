@@ -86,7 +86,7 @@ metadataProviders:
         - "ja"
     mangaBaka:
       priority: 140
-      enabled: true
+      enabled: false
       # Datasource used for metadata retrieval. DATABASE mode will only work if MangaBaka database is installed
       # API or DATABASE
       mode: API
