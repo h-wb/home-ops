@@ -10,3 +10,5 @@ configMapGenerator:
   - name: bitmagnet-coredns
     files:
       - ./config/Corefile
+generatorOptions:
+  disableNameSuffixHash: true
