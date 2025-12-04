@@ -2,7 +2,7 @@
 komga:
   eventListener:
     enabled: true # if disabled will not connect to komga and won't pick up newly added entries
-    libraries: ['test'] # listen to all events if empty
+    libraries: [''] # listen to all events if empty
   notifications:
     libraries: [] # Will send notifications if any notification source is enabled. If empty will send notifications for all libraries
   metadataUpdate:
@@ -60,7 +60,7 @@ metadataProviders:
       enabled: false
     aniList:
       priority: 40
-      enabled: false
+      enabled: true
       mediaType: "MANGA" # filter used in matching. Can be NOVEL or MANGA. MANGA type includes everything except novels
       tagsScoreThreshold: 60 # tags with this score or higher will be included
       tagsSizeLimit: 15 # amount of tags that will be included
@@ -76,8 +76,17 @@ metadataProviders:
       enabled: false
     bookWalker:
       priority: 80
-      enabled: false
+      enabled: true
       mediaType: "MANGA" # filter used in matching. Can be NOVEL or MANGA.
     mangaDex:
       priority: 90
-      enabled: false
+      enabled: true
+      coverLanguages:
+        - "en"
+        - "ja"
+    mangaBaka:
+      priority: 140
+      enabled: true
+      # Datasource used for metadata retrieval. DATABASE mode will only work if MangaBaka database is installed
+      # API or DATABASE
+      mode: API
