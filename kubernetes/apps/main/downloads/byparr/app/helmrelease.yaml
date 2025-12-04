@@ -84,3 +84,12 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
+    persistence:
+      cache:
+        existingClaim: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /var/cache/uv
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
