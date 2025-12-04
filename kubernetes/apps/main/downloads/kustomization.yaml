@@ -7,6 +7,7 @@ components:
   - ../../../components/common
 resources:
   - ./bazarr/ks.yaml
+  - ./byparr/ks.yaml
   - ./flaresolverr/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml

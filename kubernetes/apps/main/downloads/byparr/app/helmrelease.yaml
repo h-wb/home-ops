@@ -1,0 +1,86 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: byparr
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      byparr:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/thephaseless/byparr
+              tag: 2.0.1
+            env:
+              TZ: Europe/Paris
+            resources:
+              requests:
+                cpu: 15m
+                memory: 256Mi
+              limits:
+                memory: 512Mi
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  initialDelaySeconds: 20
+                  timeoutSeconds: 180
+                  periodSeconds: 200
+                  failureThreshold: 5
+                  httpGet:
+                    port: 8191
+                    path: /health
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  initialDelaySeconds: 0
+                  timeoutSeconds: 15
+                  periodSeconds: 60
+                  httpGet:
+                    port: 8191
+                    path: /health
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  initialDelaySeconds: 0
+                  timeoutSeconds: 15
+                  periodSeconds: 60
+                  httpGet:
+                    port: 8191
+                    path: /health
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+    defaultPodOptions:
+      hostUsers: false
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+    service:
+      app:
+        controller: byparr
+        ports:
+          http:
+            port: 8191
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
