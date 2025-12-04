@@ -6,8 +6,8 @@ metadata:
   name: &app byparr
 spec:
   targetNamespace: downloads
-  components:
-    - ../../../../../components/volsync
+  # components:
+  #   - ../../../../../components/volsync
   path: ./kubernetes/apps/main/downloads/byparr/app
   prune: true
   sourceRef:
@@ -18,7 +18,7 @@ spec:
   interval: 30m
   retryInterval: 1m
   timeout: 5m
-  postBuild:
-    substitute:
-      APP: *app
-      VOLSYNC_CAPACITY: 1Gi
+  # postBuild:
+  #   substitute:
+  #     APP: *app
+  #     VOLSYNC_CAPACITY: 1Gi
