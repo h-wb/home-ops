@@ -92,6 +92,7 @@ radarr:
           - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
         assign_scores_to:
           - name: FR-MULTi-VO-HD
+            score: 0
 
       # Uncomment the associated score if you don't want FanSUB releases
       - trash_ids:
