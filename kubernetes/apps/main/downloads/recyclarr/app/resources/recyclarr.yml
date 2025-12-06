@@ -1,7 +1,7 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
 radarr:
-  french-hd-bluray-web:
+  radarr:
     base_url: http://radarr.downloads.svc.cluster.local
     api_key: !env_var RADARR_API_KEY
 
@@ -153,3 +153,418 @@ radarr:
         assign_scores_to:
           - name: FR-MULTi-VO-HD
             # score: 101
+
+  radarr-uhd:
+    base_url: http://radarr-uhd.downloads.svc.cluster.local
+    api_key: !env_var RADARR_API_KEY
+
+    delete_old_custom_formats: true
+    replace_existing_custom_formats: true
+
+    # Uncomment to override the quality profile name from the template
+    # (default from template is "FR-MULTi-VO-UHD")
+    # quality_profiles:
+    #   - name: UHD-2160p
+
+    include:
+      # ──────────────────────────────────────────────────────────────────────
+      # Quality Definition: Sets the file size ranges for each quality tier
+      # ──────────────────────────────────────────────────────────────────────
+      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/quality-definitions/radarr-quality-definition-movie.yml
+      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/radarr/quality-size/movie.json
+      - template: radarr-quality-definition-movie
+      # ──────────────────────────────────────────────────────────────────────
+      # Language Profile: MULTi.VO (UHD)
+      # ──────────────────────────────────────────────────────────────────────
+      # This profile prioritizes releases with BOTH Original + French audio
+      # tracks, but falls back to Original audio only if dual-audio is unavailable.
+      # ┌────────────────────────────────────────────────────────────────────┐
+      # │ Language Profile Comparison:                                        │
+      # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
+      # │ Profile  │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
+      # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
+      # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
+      # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
+      # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
+      # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
+      # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
+      # ──────────────────────────────────────────────────────────────────────
+
+      # Quality Profile: Defines the quality tiers and upgrade rules for UHD
+      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/quality-profiles/radarr-quality-profile-uhd-bluray-web-french-multi-vo.yml
+      - template: radarr-quality-profile-uhd-bluray-web-french-multi-vo
+
+      # Custom Formats: Defines the scoring rules for language preferences and release quality
+      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/custom-formats/radarr-custom-formats-uhd-bluray-web-french-multi-vo.yml
+      - template: radarr-custom-formats-uhd-bluray-web-french-multi-vo
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # Additional Custom Formats Configuration
+    # ══════════════════════════════════════════════════════════════════════════
+    # The following section adds extra custom formats on top of the base
+    # radarr-custom-formats-uhd-bluray-web-french-multi-vo template.
+    # These allow you to fine-tune scoring for HDR/DV, audio formats,
+    # French audio types, and codec preferences.
+    #
+    # Reference: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
+    # ══════════════════════════════════════════════════════════════════════════
+    custom_formats:
+      # Advanced Audio Formats
+      # Uncomment to prioritize high-quality audio formats
+      - trash_ids:
+          # - 496f355514737f7d83bf7aa4d24f8169 # TrueHD Atmos
+          # - 2f22d89048b01681dde8afe203bf2e95 # DTS X
+          # - 417804f7f2c4308c1f4c5d380d4c4475 # ATMOS (undefined)
+          # - 1af239278386be2919e1bcee0bde047e # DD+ ATMOS
+          # - 3cafb66171b47f226146a0770576870f # TrueHD
+          # - dcf3ec6938fa32445f590a4da84256cd # DTS-HD MA
+          # - a570d4a0e56a2874b64e5bfa55202a1b # FLAC
+          # - e7c2fcae07cbada050a0af3357491d7b # PCM
+          # - 8e109e50e0a0b83a5098b056e13bf6db # DTS-HD HRA
+          # - 185f1dd7264c4562b9022d963ac37424 # DD+
+          # - f9f847ac70a0af62ea4a08280b859636 # DTS-ES
+          # - 1c1a4c5e823891c75bc50380a6866f73 # DTS
+          # - 240770601cc226190c367ef59aba7463 # AAC
+          # - c2998bd0d90ed5621d8df281e839436e # DD
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+
+      # HDR/DV Configuration
+      - trash_ids:
+          # Blocks DV without HDR fallback (compatibility with non-DV setups)
+          - 923b6abef9b17f937fab56cfcf89e1f1 # DV (w/o HDR fallback)
+          # Uncomment to boost DV or HDR10+ preference
+          # - b337d6812e06c200ec9a2d3cfa9d20a7 # DV Boost
+          # - caa37d0df9c348912df1fb1d88f9273a # HDR10Plus Boost
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+
+      # SDR Blocking
+      # Blocks SDR releases for UHD (or use SDR (no WEBDL) to allow SDR WEB only)
+      - trash_ids:
+          - 9c38ebb7384dada637be8899efa68e6f # SDR
+          # - 25c12f78430a3a23413652cbd1d48d77 # SDR (no WEBDL)
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+
+      # Movie Versions
+      - trash_ids:
+      # Uncomment any of the following lines to prefer these movie versions
+          # - 570bc9ebecd92723d2d21500f4be314c # Remaster
+          # - eca37840c13c6ef2dd0262b141a5482f # 4K Remaster
+          # - e0c07d59beb37348e975a930d5e50319 # Criterion Collection
+          # - 9d27d9d2181838f76dee150882bdc58c # Masters of Cinema
+          # - db9b4c4b53d312a3ca5f1378f6440fc9 # Vinegar Syndrome
+          # - 957d0f44b592285f26449575e8b1167e # Special Edition
+          # - eecf3a857724171f968a66cb5719e152 # IMAX
+          # - 9f6cbff8cfe4ebbc1bde14c7b7bec0de # IMAX Enhanced
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+
+      # Optional
+      # These are optional and may not work correctly with French profiles
+      - trash_ids:
+          # - b6832f586342ef70d9c128d40c07b872 # Bad Dual Groups
+          # - ae9b7c9ebde1f3bd336a8cbd1ec4c5e5 # No-RlsGroup
+          # - 7357cf5161efbf8c4d5d0c30b4815ee2 # Obfuscated
+          # - 5c44f52a8714fdd79bb4d98e2673be1f # Retags
+          # - f537cf427b64c38c8e36298f657e4828 # Scene
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+
+      # Codec Settings for UHD
+      # x265 (HD) should remain commented for UHD (native 4K sources preferred)
+      - trash_ids:
+          - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: 500
+      - trash_ids:
+          - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: 300
+
+      # FanSUB releases
+      - trash_ids:
+          - 02e48d30a176c91baf9e15de05e5dc6a # FanSUB
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: -10000
+
+      # ═════════════════════════════════════════════════════════════════════
+      # French Audio Versions
+      # ═════════════════════════════════════════════════════════════════════
+      # Enable or disable the following Custom Formats if you want to score
+      # your releases with them. You can also assign them a score depending on
+      # whether you prefer a certain type of French audio.
+      #
+      # For example, if you prefer VFF: set VFF + VF2 to 101, VFQ to -101, rest to 0.
+      #
+      # Check what the different types of French versions correspond to:
+      # https://trash-guides.info/Radarr/radarr-setup-quality-profiles-french-en/#french-audio-versions
+      # ═════════════════════════════════════════════════════════════════════
+      - trash_ids:
+          - 404c08fd0bd67f39b4d8e5709319094e # VFF
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: 101
+      - trash_ids:
+          - 4cafa20d5584f6ba1871d1b8941aa3cb # VOF
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            # score: 101
+      - trash_ids:
+          - 52772f1cad6b5d26c2551f79bc538a50 # VFI
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            # score: 101
+      - trash_ids:
+          - 29b5f7b1a5f20f64228786c3ab1bdc7d # VF2
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: 101
+      - trash_ids:
+          - b6ace47331a1d3b77942fc18156f6df6 # VFQ
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: -101
+      - trash_ids:
+          - f7caa1942be5cc547c266bd3dbc2cda9 # VOQ
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            # score: 101
+      - trash_ids:
+          - 95aa50f71a01c82354a7a2b385f1c4d8 # VQ
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            # score: 101
+      - trash_ids:
+          - b3fb499641d7b3c2006be1d9eb014cb3 # VFB
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            # score: 101
+
+sonarr:
+  sonarr:
+    base_url: http://sonarr-tv.downloads.svc.cluster.local
+    api_key: !env_var SONARR_API_KEY
+
+    delete_old_custom_formats: true
+    replace_existing_custom_formats: true
+
+    # Uncomment to override the quality profile name from the template
+    # (default from template is "FR-MULTi-VO-WEB-1080p")
+    # quality_profiles:
+    #   - name: HD-1080p
+
+    include:
+      # ──────────────────────────────────────────────────────────────────────
+      # Quality Definition: Sets the file size ranges for each quality tier
+      # ──────────────────────────────────────────────────────────────────────
+      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-definitions/sonarr-quality-definition-series.yml
+      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-size/series.json
+      - template: sonarr-quality-definition-series
+      # ──────────────────────────────────────────────────────────────────────
+      # Language Profile: MULTi.VO
+      # ──────────────────────────────────────────────────────────────────────
+      # This profile prioritizes releases with BOTH Original + French audio
+      # tracks, but falls back to Original audio only if dual-audio is unavailable.
+      # ┌────────────────────────────────────────────────────────────────────┐
+      # │ Language Profile Comparison:                                        │
+      # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
+      # │ Profile  │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
+      # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
+      # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
+      # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
+      # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
+      # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
+      # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
+      # ──────────────────────────────────────────────────────────────────────
+
+      # Quality Profile: Defines the quality tiers and upgrade rules
+      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-profiles/sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo.yml
+      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-profiles/french-multi-vo-bluray-web-1080p.json
+      - template: sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo
+
+      # Custom Formats: Defines the scoring rules for language preferences and release quality
+      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/custom-formats/sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo.yml
+      - template: sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # Additional Custom Formats Configuration
+    # ══════════════════════════════════════════════════════════════════════════
+    # The following section adds extra custom formats on top of the base
+    # sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo template.
+    # These allow you to fine-tune scoring for French audio types and codec preferences.
+    #
+    # Reference: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
+    # ══════════════════════════════════════════════════════════════════════════
+    custom_formats:
+      # Optional
+      # These are optional and may not work correctly with French profiles
+      - trash_ids:
+          # - 32b367365729d530ca1c124a0b180c64 # Bad Dual Groups
+          # - 82d40da2bc6923f41e14394075dd4b03 # No-RlsGroup
+          # - e1a997ddb54e3ecbfe06341ad323c458 # Obfuscated
+          # - 06d66ab109d4d2eddb2794d21526d140 # Retags
+          # - 1b3994c551cbb92a2c781af061f4ab44 # Scene
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+
+      # Uncomment the following lines to accept x265 HD releases with HDR/DV
+      - trash_ids:
+          - 47435ece6b99a0b477caf360e79ba0bb # x265 (HD)
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            score: 500
+      - trash_ids:
+          - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            score: 300
+
+      # FanSUB releases
+      - trash_ids:
+          - 84f0acbda9c0c9de783894fb66df25aa # FanSUB
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            score: -10000
+
+      # ═════════════════════════════════════════════════════════════════════
+      # French Audio Versions
+      # ═════════════════════════════════════════════════════════════════════
+      # Enable or disable the following Custom Formats if you want to score
+      # your releases with them. You can also assign them a score depending on
+      # whether you prefer a certain type of French audio.
+      #
+      # For example, if you prefer VFF: set VFF + VF2 to 101, VFQ to -101, rest to 0.
+      #
+      # Check what the different types of French versions correspond to:
+      # https://trash-guides.info/Sonarr/sonarr-setup-quality-profiles-french-en/#french-audio-versions
+      # ═════════════════════════════════════════════════════════════════════
+      - trash_ids:
+          - 2c29a39a4fdfd6d258799bc4c09731b9 # VFF
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            score: 101
+      - trash_ids:
+          - 7ae924ee9b2f39df3283c6c0beb8a2aa # VOF
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            # score: 101
+      - trash_ids:
+          - b6816a0e1d4b64bf3550ad3b74b009b6 # VFI
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            # score: 101
+      - trash_ids:
+          - 34789ec3caa819f087e23bbf9999daf7 # VF2
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            score: 101
+      - trash_ids:
+          - 7a7f4e4f58bd1058440236d033a90b67 # VFQ
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            score: -101
+      - trash_ids:
+          - 802dd70b856c423a9b0cb7f34ac42be1 # VOQ
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            # score: 101
+      - trash_ids:
+          - 82085412d9a53ba8d8e46fc624eb701d # VQ
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            # score: 101
+      - trash_ids:
+          - 0ce1e39a4676c6692ce47935278dac76 # VFB
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            # score: 101
+
+  sonarr-anime:
+    base_url: http://sonarr-anm.downloads.svc.cluster.local
+    api_key: !env_var SONARR_API_KEY
+
+    delete_old_custom_formats: true
+    replace_existing_custom_formats: true
+
+    # Override quality profile name to match the French Bluray/WEB template
+    # (template default is "FR-MULTi-VO-WEB-1080p", we rename it for anime)
+    quality_profiles:
+      - name: WEB-1080p
+
+    include:
+      # ──────────────────────────────────────────────────────────────────────
+      # Quality Definition: Sets the file size ranges for anime content
+      # ──────────────────────────────────────────────────────────────────────
+      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-definitions/sonarr-quality-definition-anime.yml
+      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-size/anime.json
+      - template: sonarr-quality-definition-anime
+
+      # ──────────────────────────────────────────────────────────────────────
+      # NOTE: Using French Bluray/WEB profile instead of default anime profile
+      # ──────────────────────────────────────────────────────────────────────
+      # The default anime profile (sonarr-v4-quality-profile-anime) focuses on
+      # Remux quality, which results in very large file sizes. Instead, we're
+      # using the French Bluray/WEB profile which prioritizes WEB-DL and
+      # smaller Bluray releases - better for storage and still great quality.
+      #
+      # Default anime profile (commented out - focuses on Remux):
+      # - template: sonarr-v4-quality-profile-anime
+      # - template: sonarr-v4-custom-formats-anime
+      #
+      # Using instead (Bluray/WEB focused):
+      # ──────────────────────────────────────────────────────────────────────
+
+      # Quality Profile: Defines the quality tiers and upgrade rules
+      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-profiles/sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo.yml
+      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-profiles/french-multi-vo-bluray-web-1080p.json
+      - template: sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo
+
+      # Custom Formats: Defines the scoring rules for language preferences and release quality
+      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/custom-formats/sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo.yml
+      - template: sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # Additional Custom Formats Configuration
+    # ══════════════════════════════════════════════════════════════════════════
+    # The following section adds extra custom formats on top of the base
+    # sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo template.
+    # These allow you to fine-tune scoring for anime-specific preferences.
+    #
+    # Reference: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
+    # ══════════════════════════════════════════════════════════════════════════
+    custom_formats:
+      # Anime-specific Custom Formats
+      - trash_ids:
+          - 026d5aadd1a6b4e550b134cb6c72b3ca # Uncensored
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 0 # Neutral - adjust if you prefer uncensored versions
+
+      - trash_ids:
+          - b2550eb333d27b75833e25b8c2557b38 # 10bit
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 0 # Neutral - 10bit color depth
+
+      - trash_ids:
+          - 418f50b10f1907201b6cfdf881f467b7 # Anime Dual Audio
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 0 # Neutral - adjust if you prefer dual audio
+
+      # Codec Settings for Anime
+      - trash_ids:
+          - 47435ece6b99a0b477caf360e79ba0bb # x265 (HD)
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 500
+      - trash_ids:
+          - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
+        assign_scores_to:
+          - name: WEB-1080p
+            score: 300
