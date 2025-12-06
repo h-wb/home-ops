@@ -149,5 +149,6 @@ radarr:
             # score: 101
       - trash_ids:
           - b3fb499641d7b3c2006be1d9eb014cb3 # VFB
+        assign_scores_to:
           - name: FR-MULTi-VO-HD
             # score: 101
