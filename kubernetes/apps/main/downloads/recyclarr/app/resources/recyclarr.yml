@@ -117,7 +117,7 @@ radarr:
           - 404c08fd0bd67f39b4d8e5709319094e # VFF
         assign_scores_to:
           - name: FR-MULTi-VO-HD
-            # score: 101
+            score: 101
       - trash_ids:
           - 4cafa20d5584f6ba1871d1b8941aa3cb # VOF
         assign_scores_to:
@@ -132,12 +132,12 @@ radarr:
           - 29b5f7b1a5f20f64228786c3ab1bdc7d # VF2
         assign_scores_to:
           - name: FR-MULTi-VO-HD
-            # score: 101
+            score: 101
       - trash_ids:
           - b6ace47331a1d3b77942fc18156f6df6 # VFQ
         assign_scores_to:
           - name: FR-MULTi-VO-HD
-            # score: 101
+            score: -101
       - trash_ids:
           - f7caa1942be5cc547c266bd3dbc2cda9 # VOQ
         assign_scores_to:
