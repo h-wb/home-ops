@@ -85,7 +85,7 @@ radarr:
       # Uncomment the following lines to accept x265 HD releases with HDR/DV
       - trash_ids:
           - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
-        # assign_scores_to:
+        assign_scores_to:
           - name: FR-MULTi-VO-HD
             score: 0
       - trash_ids:
