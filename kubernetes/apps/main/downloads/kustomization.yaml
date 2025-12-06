@@ -8,7 +8,7 @@ components:
 resources:
   - ./bazarr/ks.yaml
   # - ./bitmagnet/ks.yaml
-  - ./byparr/ks.yaml
+  # - ./byparr/ks.yaml
   - ./flaresolverr/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
