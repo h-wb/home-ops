@@ -113,6 +113,14 @@ radarr:
       # Check what the different types of French versions correspond to:
       # https://trash-guides.info/Radarr/radarr-setup-quality-profiles-french-en/#french-audio-versions
       # ═════════════════════════════════════════════════════════════════════
+
+      # Test: grab bad multi release over good vo ?
+      - trash_ids:
+          - 533f782474f0819643c2ec0c1eeeb0ac # Language: Not French
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: -1500
+
       - trash_ids:
           - 404c08fd0bd67f39b4d8e5709319094e # VFF
         assign_scores_to:
@@ -304,6 +312,14 @@ radarr:
       # Check what the different types of French versions correspond to:
       # https://trash-guides.info/Radarr/radarr-setup-quality-profiles-french-en/#french-audio-versions
       # ═════════════════════════════════════════════════════════════════════
+
+      # Test: grab bad multi release over good vo ?
+      - trash_ids:
+          - 533f782474f0819643c2ec0c1eeeb0ac # Language: Not French
+        assign_scores_to:
+          - name: FR-MULTi-VO-UHD
+            score: -1500
+
       - trash_ids:
           - 404c08fd0bd67f39b4d8e5709319094e # VFF
         assign_scores_to:
@@ -443,6 +459,14 @@ sonarr:
       # Check what the different types of French versions correspond to:
       # https://trash-guides.info/Sonarr/sonarr-setup-quality-profiles-french-en/#french-audio-versions
       # ═════════════════════════════════════════════════════════════════════
+
+      # Test: grab bad multi release over good vo ?
+      - trash_ids:
+          - 322fca6f8f3694acc1401ddb530fd33d # Language: Not French
+        assign_scores_to:
+          - name: FR-MULTi-VO-WEB-1080p
+            score: -1500
+
       - trash_ids:
           - 2c29a39a4fdfd6d258799bc4c09731b9 # VFF
         assign_scores_to:
