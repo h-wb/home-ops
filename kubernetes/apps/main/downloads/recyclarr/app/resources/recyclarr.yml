@@ -116,7 +116,7 @@ radarr:
 
       # Test: grab bad multi release over good vo ?
       - trash_ids:
-          - 533f782474f0819643c2ec0c1eeeb0ac # Language: Not French
+          - 322fca6f8f3694acc1401ddb530fd33d # Language: Not French
         assign_scores_to:
           - name: FR-MULTi-VO-UHD
             score: -1500
@@ -315,7 +315,7 @@ radarr:
 
       # Test: grab bad multi release over good vo ?
       - trash_ids:
-          - 533f782474f0819643c2ec0c1eeeb0ac # Language: Not French
+          - 322fca6f8f3694acc1401ddb530fd33d # Language: Not French
         assign_scores_to:
           - name: FR-MULTi-VO-UHD
             score: -1500
