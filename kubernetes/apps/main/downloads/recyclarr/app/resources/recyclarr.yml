@@ -366,8 +366,9 @@ sonarr:
     base_url: http://sonarr-tv.downloads.svc.cluster.local
     api_key: !env_var SONARR_API_KEY
 
-    delete_old_custom_formats: true
-    replace_existing_custom_formats: true
+    # Custom change on release groups
+    delete_old_custom_formats: false
+    replace_existing_custom_formats: false
 
     # Uncomment to override the quality profile name from the template
     # (default from template is "FR-MULTi-VO-WEB-1080p")
