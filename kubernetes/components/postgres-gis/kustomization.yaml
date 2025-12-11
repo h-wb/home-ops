@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ../postgres
+patches:
+  - patch: |-
+      - op: add
+        path: /spec/postGISVersion
+        value: "3.4"
+      - op: replace
+        path: /spec/image
+        value: registry.developers.crunchydata.com/crunchydata/crunchy-postgres-gis:ubi9-17.5-3.5-2520
+    target:
+      kind: PostgresCluster
