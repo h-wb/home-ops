@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ../postgres/cluster.yaml
+  - ../postgres/externalsecret.yaml
+  - ../postgres/podmonitor.yaml
+  - ./database-init-sql.yaml
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/image
+        value: ghcr.io/budimanjojo/crunchy-postgres-vectorchord:ubi9-17.6-2534
+      - op: add
+        path: /spec/patroni/dynamicConfiguration/postgresql/parameters/shared_preload_libraries
+        value: "vchord.so"
+      - op: add
+        path: /spec/patroni/dynamicConfiguration/postgresql/pg_hba
+        value:
+          - hostnossl all all 10.42.0.0/16 md5
+          - hostssl all all all md5
+      - op: add
+        path: /spec/databaseInitSQL
+        value:
+          name: immich-database-init-sql
+          key: init.sql
+    target:
+      kind: PostgresCluster
