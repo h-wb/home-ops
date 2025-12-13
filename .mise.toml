@@ -32,7 +32,7 @@ MISE_EXPERIMENTAL=1
 "aqua:yannh/kubeconform" = "0.7.0"
 "aqua:google/yamlfmt" = "0.20.0"
 "aqua:evilmartians/lefthook" = "1.13.6"
-"aqua:mitsuhiko/minijinja" = "2.13.0"
+"aqua:mitsuhiko/minijinja" = "2.14.0"
 "aqua:charmbracelet/gum" = "0.17.0"
 
 
