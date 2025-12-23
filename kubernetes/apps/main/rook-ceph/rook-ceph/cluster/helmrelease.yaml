@@ -88,7 +88,7 @@ spec:
         nodes:
           - name: "tal0s"
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06342J
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7KHNJ0YB01703A
           - name: "tal1s"
             devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06304W
