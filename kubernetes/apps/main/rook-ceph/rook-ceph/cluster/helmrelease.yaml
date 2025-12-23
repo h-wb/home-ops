@@ -94,7 +94,7 @@ spec:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7KHNJ0YB01543W
           - name: "tal2s"
             devices:
-              - name: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL0WA06305X
+              - name: /dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7KHNU0X416048K
         useAllDevices: false
         devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL_.*
         config:
