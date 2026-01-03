@@ -12,7 +12,7 @@ resources:
   # - ./monica/ks.yaml
   - ./karakeep/ks.yaml
   # - ./photon/ks.yaml
-  # - ./dawarich/ks.yaml
+  - ./dawarich/ks.yaml
   - ./reitti/ks.yaml
   - ./paperless/ks.yaml
   # - ./syncthing/ks.yaml
