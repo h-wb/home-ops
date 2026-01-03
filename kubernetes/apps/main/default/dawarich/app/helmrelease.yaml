@@ -21,9 +21,11 @@ spec:
               tag: 0.37.1@sha256:299596d1ddebd47a5baacf271a6d647f7e11d7c13041d5d70430dc61e1be3bd8
             env:
               TIME_ZONE: "Europe/Paris"
-              REVERSE_GEOCODING_ENABLED: true
+              PHOTON_API_HOST: photon.komoot.io
+              PHOTON_API_USE_HTTPS: true
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
+              DISTANCE_UNIT: km
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
               REDIS_URL: redis://dragonfly.database.svc.cluster.local:6379
               RAILS_ENV: development
