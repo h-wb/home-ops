@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app metabase
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      metabase:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/metabase/metabase
+              tag: v0.51.6
+            env:
+              MB_DB_TYPE: h2
+              MB_DB_FILE: /metabase-data/metabase.db
+              MB_SITE_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: metabase
+        ports:
+          http:
+            port: 3000
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      data:
+        existingClaim: metabase
+        advancedMounts:
+          metabase:
+            app:
+              - path: /metabase-data
+      nfs:
+        enabled: true
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/hwe/Documents/data
+        advancedMounts:
+          metabase:
+            app:
+              - path: /data
+                readOnly: true
