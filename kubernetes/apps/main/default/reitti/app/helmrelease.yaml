@@ -37,7 +37,7 @@ spec:
               REDIS_PORT: 6379
               PHOTON_BASE_URL: http://photon.default:2322
               # CUSTOM_TILES_ATTRIBUTION: '© MapTiler © OpenStreetMap contributors'
-              TILES_CACHE: ''
+              # TILES_CACHE: 'http://reitti:'
             # envFrom:
             #   - secretRef:
             #       name: reitti-secret
