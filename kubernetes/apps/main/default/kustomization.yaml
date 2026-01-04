@@ -13,7 +13,7 @@ resources:
   - ./karakeep/ks.yaml
   # - ./photon/ks.yaml
   - ./dawarich/ks.yaml
-  - ./reitti/ks.yaml
+  # - ./reitti/ks.yaml
   - ./paperless/ks.yaml
   # - ./syncthing/ks.yaml
   # - ./strava-statistics/ks.yaml
