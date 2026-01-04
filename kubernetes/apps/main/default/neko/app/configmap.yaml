@@ -1,0 +1,30 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neko-firefox-config
+data:
+  policies.json: |
+    {
+      "policies": {
+        "DisableTelemetry": true,
+        "DisableFirefoxStudies": true,
+        "EnableTrackingProtection": {
+          "Value": true,
+          "Locked": true,
+          "Cryptomining": true,
+          "Fingerprinting": true
+        },
+        "DisablePocket": true,
+        "DisableFirefoxAccounts": true,
+        "DisableAccounts": true,
+        "DisableFirefoxScreenshots": true,
+        "OverrideFirstRunPage": "",
+        "OverridePostUpdatePage": "",
+        "DontCheckDefaultBrowser": true,
+        "DisplayBookmarksToolbar": "never",
+        "DisplayMenuBar": "default-off",
+        "SearchBar": "unified"
+      }
+    }

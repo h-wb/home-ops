@@ -18,3 +18,4 @@ resources:
   # - ./syncthing/ks.yaml
   # - ./strava-statistics/ks.yaml
   - ./fusion/ks.yaml
+  - ./neko/ks.yaml

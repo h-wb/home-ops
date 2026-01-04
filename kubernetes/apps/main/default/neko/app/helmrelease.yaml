@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app neko
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      neko:
+        replicas: 1
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/m1k1o/neko/firefox
+              tag: "3.0.9"
+            env:
+              NEKO_SCREEN: 1920x1080@30
+              NEKO_PROXY: "true"
+              NEKO_TCPMUX: &mux "5101"
+              NEKO_UDPMUX: *mux
+              NEKO_ICELITE: "true"
+              NEKO_NAT1TO1: 192.168.8.133
+              NEKO_SESSION_HEARTBEAT_INTERVAL: 30
+            envFrom:
+              - secretRef:
+                  name: neko-secret
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+    service:
+      app:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.1.133
+        ports:
+          http:
+            port: 80
+            targetPort: 8080
+          mux:
+            port: &port 5101
+          muxudp:
+            port: *port
+            protocol: UDP
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    # persistence:
+    #   config:
+    #     name: neko-firefox-config
+    #     type: configMap
+    #     advancedMounts:
+    #       neko:
+    #         app:
+    #           - path: /usr/lib/firefox/distribution/policies.json
+    #             readOnly: true
+    #             subPath: policies.json
