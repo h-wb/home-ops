@@ -187,14 +187,14 @@ spec:
         path: /mnt/tank/shared
         globalMounts:
           - path: /data
-      gluetun-auth:
-        type: secret
-        name: qbittorrent-gluetun-secret
-        advancedMounts:
-          qbittorrent-vpn:
-            gluetun:
-              - path: *gluetunAuthPath
-                subPath: auth.toml
+      # gluetun-auth:
+      #   type: secret
+      #   name: qbittorrent-gluetun-secret
+      #   advancedMounts:
+      #     qbittorrent-vpn:
+      #       gluetun:
+      #         - path: *gluetunAuthPath
+      #           subPath: auth.toml
       coredns:
         type: configMap
         name: qbittorrent-coredns
