@@ -60,13 +60,13 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
-    # persistence:
-    #   config:
-    #     name: neko-firefox-config
-    #     type: configMap
-    #     advancedMounts:
-    #       neko:
-    #         app:
-    #           - path: /usr/lib/firefox/distribution/policies.json
-    #             readOnly: true
-    #             subPath: policies.json
+    persistence:
+      config:
+        name: neko-firefox-config
+        type: configMap
+        advancedMounts:
+          neko:
+            app:
+              - path: /usr/lib/firefox/distribution/policies.json
+                readOnly: true
+                subPath: policies.json
