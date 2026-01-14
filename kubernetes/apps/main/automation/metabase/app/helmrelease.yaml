@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: docker.io/metabase/metabase
-              tag: v0.58.1
+              tag: v0.58.2
             env:
               MB_DB_TYPE: h2
               MB_DB_FILE: /metabase-data/metabase.db
