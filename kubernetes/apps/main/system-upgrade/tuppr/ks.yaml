@@ -6,13 +6,13 @@ metadata:
   name: tuppr
 spec:
   interval: 1h
-  path: ./kubernetes/apps/main/kube-tools/tuppr/app
+  path: ./kubernetes/apps/main/system-upgrade/tuppr/app
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: kube-tools
+  targetNamespace: system-upgrade
   wait: true
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -24,11 +24,11 @@ spec:
   dependsOn:
     - name: tuppr
   interval: 1h
-  path: ./kubernetes/apps/main/kube-tools/tuppr/upgrades
+  path: ./kubernetes/apps/main/system-upgrade/tuppr/upgrades
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: kube-tools
+  targetNamespace: system-upgrade
   wait: false
