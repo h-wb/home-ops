@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1beta2.json
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: OCIRepository
 metadata:
@@ -13,29 +13,19 @@ spec:
     tag: 5.0.2
   url: oci://ghcr.io/piraeusdatastore/helm-charts/snapshot-controller
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: snapshot-controller
 spec:
-  interval: 1h
   chartRef:
     kind: OCIRepository
     name: snapshot-controller
   dependsOn: []
+  interval: 15m
   values:
     controller:
-      replicaCount: 2
+      replicaCount: ${REPLICAS:=1}
       serviceMonitor:
         create: true
-      volumeSnapshotClasses:
-        - name: longhorn-snapclass
-          annotations:
-            snapshot.storage.kubernetes.io/is-default-class: "true"
-          driver: driver.longhorn.io
-          deletionPolicy: Delete
-          parameters:
-            # needed for successful VolumeSnapshots
-            # see: https://github.com/longhorn/longhorn/issues/2534#issuecomment-1010508714
-            type: snap
