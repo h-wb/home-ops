@@ -18,4 +18,5 @@ resources:
   # - ./syncthing/ks.yaml
   # - ./strava-statistics/ks.yaml
   - ./fusion/ks.yaml
+  - ./ghostfolio/ks.yaml
   - ./neko/ks.yaml
