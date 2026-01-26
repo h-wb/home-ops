@@ -44,7 +44,7 @@ spec:
               requests:
                 cpu: 10m
               limits:
-                memory: 512Mi
+                memory: 3500Mi
     service:
       app:
         controller: ghostfolio
