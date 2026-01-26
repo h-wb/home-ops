@@ -30,7 +30,7 @@ spec:
                   secretKeyRef:
                     name: ghostfolio-pguser-ghostfolio
                     key: password
-              DATABASE_URL: "postgresql://ghostfolio:$(POSTGRES_PASSWORD)@ghostfolio-pgbouncer.default.svc:5432/ghostfolio?sslmode=prefer"
+              DATABASE_URL: "postgresql://ghostfolio:$(POSTGRES_PASSWORD)@ghostfolio-pgbouncer.default.svc:5432"
               REDIS_HOST: dragonfly.database.svc.cluster.local
               REDIS_PORT: "6379"
             envFrom:
