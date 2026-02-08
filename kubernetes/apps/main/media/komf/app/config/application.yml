@@ -2,12 +2,12 @@
 komga:
   eventListener:
     enabled: true # if disabled will not connect to komga and won't pick up newly added entries
-    libraries: [''] # listen to all events if empty
-  notifications:
-    libraries: [] # Will send notifications if any notification source is enabled. If empty will send notifications for all libraries
+    metadataLibraryFilter: [] # listen to all events if empty
+    metadataSeriesExcludeFilter: []
+    notificationsLibraryFilter: [] # Will send notifications if any notification source is enabled. If empty will send notifications for all libraries
   metadataUpdate:
     default:
-      libraryType: "MANGA"
+      libraryType: "MANGA" # Can be "MANGA", "NOVEL", "COMIC" or "WEBTOON". Hint to help better match book numbers
       updateModes:
         - API
         - COMIC_INFO
@@ -16,9 +16,12 @@ komga:
       mergeGenres: true # if true and aggregate is enabled will merge genres from all providers
       bookCovers: true # update book thumbnails
       seriesCovers: true # update series thumbnails
-      postProcessing: # can use multiple options at once. available options are API, COMIC_INFO
+      overrideExistingCovers: false # if false will upload but not select new cover if another cover already exists
+      overrideComicInfo: true # Replace existing ComicInfo file. If false, only append additional data
+      postProcessing:
         seriesTitle: true # update series title
-        seriesTitleLanguage: "en" # series title update language
+        seriesTitleLanguage: "en" # series title update language. If empty chose first matching title
+        fallbackToAltTitle: false # fallback to first alternative tile if series title is not found
         alternativeSeriesTitles: false # use other title types as alternative title option
         alternativeSeriesTitleLanguages: # alternative title languages
           - "en"
@@ -42,26 +45,26 @@ metadataProviders:
     mangaUpdates:
       priority: 10
       enabled: true
-      mediaType: "MANGA" # filter used in matching. Can be NOVEL or MANGA. MANGA type includes everything except novels
+      mediaType: "MANGA" # filter used in matching. Can be NOVEL, MANGA or WEBTOON. MANGA type includes everything except novels
       authorRoles:
         - "WRITER"
-      artistRoles: # roles that will be mapped to author role
+      artistRoles: # roles that will be mapped to artist role
         - "PENCILLER"
         - "INKER"
         - "COLORIST"
         - "LETTERER"
         - "COVER"
     # mal:
-    # priority: 20
-    # enabled: true
-    # mediaType: "MANGA" # filter used in matching. Can be NOVEL or MANGA. MANGA type includes everything except novels
-    nautiljon: # roles that will be mapped to artist role
+    #   priority: 20
+    #   enabled: true
+    #   mediaType: "MANGA" # filter used in matching. Can be NOVEL, MANGA or WEBTOON. MANGA type includes everything except novels
+    nautiljon:
       priority: 30
       enabled: false
     aniList:
       priority: 40
       enabled: true
-      mediaType: "MANGA" # filter used in matching. Can be NOVEL or MANGA. MANGA type includes everything except novels
+      mediaType: "MANGA" # filter used in matching. Can be NOVEL, MANGA or WEBTOON. MANGA type includes everything except novels
       tagsScoreThreshold: 60 # tags with this score or higher will be included
       tagsSizeLimit: 15 # amount of tags that will be included
     yenPress:
@@ -77,16 +80,30 @@ metadataProviders:
     bookWalker:
       priority: 80
       enabled: true
-      mediaType: "MANGA" # filter used in matching. Can be NOVEL or MANGA.
+      mediaType: "MANGA" # filter used in matching. Can be NOVEL, MANGA or WEBTOON.
     mangaDex:
       priority: 90
       enabled: true
       coverLanguages:
         - "en"
         - "ja"
+    bangumi: # Chinese metadata provider. https://bgm.tv/
+      priority: 100
+      enabled: false
+    comicVine: # https://comicvine.gamespot.com/ requires API key. Experimental provider, can mismatch issue numbers
+      priority: 110
+      enabled: false
+    hentag:
+      priority: 120
+      enabled: false
+    webtoons:
+      priority: 130
+      enabled: false
     mangaBaka:
       priority: 140
       enabled: false
       # Datasource used for metadata retrieval. DATABASE mode will only work if MangaBaka database is installed
       # API or DATABASE
       mode: API
+
+logLevel: INFO # or env:KOMF_LOG_LEVEL
