@@ -19,4 +19,24 @@ spec:
   rules:
     - backendRefs:
         - name: nextcloud
+          port: 8080
+    - matches:
+        - path:
+            type: RegularExpression
+            value: /.well-known/(?:card|cal)dav
+      filters:
+        - type: RequestRedirect
+          requestRedirect:
+            path:
+              type: ReplaceFullPath
+              replaceFullPath: /remote.php/dav/
+            statusCode: 301
+    - backendRefs:
+        - name: nextcloud
           port: 80
+      matches:
+        - path:
+            type: PathPrefix
+            value: /settings/ajax/checksetup
+      timeouts:
+        request: 300s
