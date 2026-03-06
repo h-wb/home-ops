@@ -109,7 +109,6 @@ spec:
               LOCALAI_CONFIG_DIR: &workerConfig /configuration
               LOCALAI_FORCE_META_BACKEND_CAPABILITY: default
               LOCALAI_P2P_LISTEN_MADDRS: /ip4/0.0.0.0/tcp/4001
-              LOCALAI_P2P_DHT_ANNOUNCE_MADDRS: /ip4/192.168.1.175/tcp/4001
               DEBUG: "true"
             envFrom:
               - secretRef:
