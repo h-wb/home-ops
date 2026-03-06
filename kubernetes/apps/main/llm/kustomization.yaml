@@ -6,4 +6,4 @@ namespace: llm
 components:
   - ../../../components/common
 resources:
-  - ./local-ai/ks.yaml
+  # - ./local-ai/ks.yaml
