@@ -1,0 +1,105 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: nextcloud
+spec:
+  interval: 30m
+  timeout: 60s
+  url: oci://ghcr.io/nextcloud/helm/nextcloud
+  ref:
+    tag: 8.7.0
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &name nextcloud
+spec:
+  interval: 1h
+  timeout: 5m
+  chartRef:
+    kind: OCIRepository
+    name: nextcloud
+  dependsOn: []
+  values:
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    image:
+      flavor: fpm-alpine
+    nextcloud:
+      host: nextcloud.${SECRET_DOMAIN}
+      existingSecret:
+        enabled: true
+        secretName: nextcloud-secret
+        usernameKey: nextcloud-username
+        passwordKey: nextcloud-password
+      datadir: /var/www/html/data
+      mail:
+        enabled: false
+      configs:
+        local.config.php: |-
+          <?php
+          $CONFIG = array (
+            'trusted_proxies' =>
+            array (
+              0 => '127.0.0.1',
+              1 => '10.42.0.0/16',
+              2 => '10.43.0.0/16',
+            ),
+            'trusted_domains' =>
+            array (
+              0 => 'nextcloud',
+              1 => 'nextcloud.${SECRET_DOMAIN}',
+            ),
+            'forwarded_for_headers' => array('HTTP_X_FORWARDED_FOR'),
+            'overwrite.cli.url' => 'https://nextcloud.${SECRET_DOMAIN}',
+            'overwriteprotocol' => 'https',
+            'default_phone_region' => 'FR',
+            'maintenance_window_start' => 20,
+          );
+      extraEnv:
+        - name: REDIS_HOST
+          value: dragonfly.database.svc.cluster.local
+        - name: REDIS_HOST_PORT
+          value: "6379"
+    nginx:
+      enabled: true
+      config:
+        headers:
+          Strict-Transport-Security: "max-age=15552000; includeSubDomains; preload;"
+    internalDatabase:
+      enabled: false
+    externalDatabase:
+      enabled: true
+      type: postgresql
+      host: nextcloud-pgbouncer.default.svc:5432
+      database: nextcloud
+      existingSecret:
+        enabled: true
+        secretName: nextcloud-pguser-nextcloud
+        usernameKey: user
+        passwordKey: password
+    cronjob:
+      enabled: true
+    startupProbe:
+      enabled: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 363Mi
+      limits:
+        memory: 363Mi
+    securityContext:
+      fsGroupChangePolicy: OnRootMismatch
+    persistence:
+      enabled: true
+      existingClaim: *name
+      nextcloudData:
+        enabled: true
+        existingClaim: nextcloud-data
+        accessMode: ReadWriteMany

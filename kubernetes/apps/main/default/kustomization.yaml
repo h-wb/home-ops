@@ -20,3 +20,4 @@ resources:
   - ./fusion/ks.yaml
   - ./ghostfolio/ks.yaml
   - ./neko/ks.yaml
+  - ./nextcloud/ks.yaml
