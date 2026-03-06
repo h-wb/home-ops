@@ -140,6 +140,8 @@ spec:
             protocol: TCP
     route:
       app:
+        serviceRef:
+          identifier: app
         hostnames:
           - "local-ai-worker.${SECRET_DOMAIN}"
         parentRefs:
