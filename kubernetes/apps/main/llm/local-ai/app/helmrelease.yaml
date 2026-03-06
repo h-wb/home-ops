@@ -108,6 +108,8 @@ spec:
               LOCALAI_MODELS_PATH: /models
               LOCALAI_CONFIG_DIR: &workerConfig /configuration
               LOCALAI_FORCE_META_BACKEND_CAPABILITY: default
+              LOCALAI_P2P_LISTEN_MADDRS: /ip4/0.0.0.0/tcp/4001
+              LOCALAI_P2P_DHT_ANNOUNCE_MADDRS: /ip4/192.168.1.175/tcp/4001
               DEBUG: "true"
             envFrom:
               - secretRef:
@@ -127,6 +129,15 @@ spec:
         ports:
           http:
             port: &port 8080
+      p2p:
+        controller: local-ai
+        type: LoadBalancer
+        annotations:
+          io.cilium/lb-ipam-ips: 192.168.1.175
+        ports:
+          p2p:
+            port: 4001
+            protocol: TCP
     route:
       app:
         hostnames:
