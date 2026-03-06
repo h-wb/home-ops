@@ -140,13 +140,15 @@ spec:
             protocol: TCP
     route:
       app:
-        serviceRef:
-          identifier: app
         hostnames:
           - "local-ai-worker.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
     persistence:
       models:
         existingClaim: local-ai-models
