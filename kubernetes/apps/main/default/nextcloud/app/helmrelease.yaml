@@ -62,6 +62,14 @@ spec:
             'default_phone_region' => 'FR',
             'maintenance_window_start' => 20,
           );
+      extraVolumes:
+        - name: nfs-tank
+          nfs:
+            server: ${NFS_ADDR}
+            path: /mnt/tank/hwe
+      extraVolumeMounts:
+        - name: nfs-tank
+          mountPath: /mnt/tank/hwe
       extraEnv:
         - name: REDIS_HOST
           value: dragonfly.database.svc.cluster.local

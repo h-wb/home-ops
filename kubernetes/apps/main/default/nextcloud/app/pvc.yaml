@@ -12,7 +12,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   nfs:
     server: ${NFS_ADDR}
-    path: /mnt/tank/hwe
+    path: /mnt/tank/backup/nextcloud
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
