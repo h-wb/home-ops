@@ -33,6 +33,7 @@ spec:
               WEBHOOK_URL: "https://n8n-webhook.${SECRET_DOMAIN}"
               N8N_LOG_LEVEL: info
               N8N_LOG_OUTPUT: console
+              N8N_RESTRICT_FILE_ACCESS_TO: '/data'
               N8N_ENCRYPTION_KEY:
                 valueFrom:
                   secretKeyRef:
