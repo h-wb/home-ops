@@ -96,12 +96,6 @@ spec:
       enabled: true
     startupProbe:
       enabled: true
-    resources:
-      requests:
-        cpu: 100m
-        memory: 363Mi
-      limits:
-        memory: 363Mi
     securityContext:
       fsGroupChangePolicy: OnRootMismatch
     persistence:
