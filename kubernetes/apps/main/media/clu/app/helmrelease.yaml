@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: allaboutduncan/comic-utils-web
-              tag: latest@sha256:ac481a30a50e7a3fcd61e187abdee93d415d625d7c4b214f182c2b56d3e2bb3c
+              tag: latest@sha256:a8dda6353337e80834f2b5c13d3b780886a49be7096708d36d5dd8bdadf2f406
             env:
               TZ: Europe/Paris
               PUID: "1000"
