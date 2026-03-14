@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: quay.io/go-skynet/local-ai
-              tag: v3.12.1
+              tag: v4.0.0
             args: ["federated"]
             env:
               LOCALAI_CONFIG_DIR: &lbConfig /configuration
@@ -100,7 +100,7 @@ spec:
           app:
             image:
               repository: quay.io/go-skynet/local-ai
-              tag: v3.12.1-gpu-intel
+              tag: v4.0.0-gpu-intel
             args: ["run", "--p2p", "--federated"]
             securityContext:
               privileged: true
