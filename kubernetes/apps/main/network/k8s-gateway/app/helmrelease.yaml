@@ -26,7 +26,7 @@ spec:
   dependsOn: []
   values:
     fullnameOverride: k8s-gateway
-    domain: "${SECRET_DOMAIN}"
+    domain: "${SECRET_DOMAIN:=example.com}"
     ttl: 1
     service:
       type: LoadBalancer
