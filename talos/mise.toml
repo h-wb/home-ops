@@ -104,6 +104,14 @@ mise run //:template "${TALOS_DIR}/nodes/${usage_node}.yaml.j2" | \
     yq -e 'select(.machine) | (.machine.type == "controlplane") // ""'
 '''
 
+[tasks.etcd-defrag]
+description = "Defragment etcd on all control plane nodes"
+run = '''
+talosctl -n 192.168.1.190 etcd defrag
+talosctl -n 192.168.1.191 etcd defrag
+talosctl -n 192.168.1.192 etcd defrag
+'''
+
 [tasks._machine-image]
 description = "Get machine image from config (private)"
 hide = true
