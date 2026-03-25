@@ -40,6 +40,7 @@ spec:
             name: headlamp-plugins
     config:
       pluginsDir: /build/plugins
+      sessionTTL: 0
     serviceAccount:
       create: false
       name: headlamp-admin
