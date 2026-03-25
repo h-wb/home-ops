@@ -6,4 +6,5 @@ resources:
   - ./certificate.yaml
   - ./clustersecretstore.yaml
   - ./externalsecret.yaml
+  - ./grafanadashboard.yaml
   - ./helmrelease.yaml
