@@ -19,7 +19,8 @@ spec:
               repository: ghcr.io/0x2e/fusion
               tag: 1.1.1@sha256:9d4f9f041f138b4ed84c6673d9c754a9f4dab6173b723872ecbf8ae3e97dfe33
             env:
-              PORT: &port 80
+              FUSION_PORT: &port 80
+              FUSION_ALLOW_EMPTY_PASSWORD: "true"
               TZ: Europe/Paris
             probes:
               liveness: &probes
