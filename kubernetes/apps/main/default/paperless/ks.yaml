@@ -41,7 +41,7 @@ spec:
     labels:
       app.kubernetes.io/name: paperless-gpt
   components:
-    - ../../../../../components/volsync
+    - ../../../../../../../components/volsync
   dependsOn:
     - name: paperless
   interval: 30m
