@@ -1,0 +1,72 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app open-webui
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  interval: 1h
+  values:
+    controllers:
+      open-webui:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/open-webui/open-webui
+              tag: v0.8.12@sha256:8113fa5510020ef05a44afc0c42d33eabeeb2524a996e3e3fb8c437c00f0d792
+            env:
+              TZ: Europe/Paris
+              # Image Generation
+              ENABLE_OPENAI_API: False
+              ENABLE_OLLAMA_API: True
+              ENABLE_IMAGE_GENERATION: True
+              IMAGE_GENERATION_ENGINE: comfyui
+              IMAGE_GENERATION_MODEL: dreamshaper_8
+              IMAGE_SIZE: 400x400
+              IMAGE_STEPS: 8
+              COMFYUI_BASE_URL: http://smurf-pc:8188
+              # Open-webui settings
+              OLLAMA_BASE_URL: http://ollama.llm.svc.cluster.local:11434
+              # ENABLE_RAG_WEB_SEARCH: true
+              # ENABLE_SEARCH_QUERY: true
+              # RAG_WEB_SEARCH_ENGINE: searxng
+              # SEARXNG_QUERY_URL: http://searxng.llm.svc.cluster.local:8080/search?q=<query>
+              ENABLE_WEBSOCKET_SUPPORT: "true"
+              WEBSOCKET_MANAGER: "redis"
+              WEBSOCKET_REDIS_URL: "redis://dragonfly.database.svc.cluster.local:6379"
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ .Release.Name }}-pguser-{{ .Release.Name }}"
+                    key: pgbouncer-uri
+            # envFrom:
+            #   - secretRef:
+            #       name: "{{ .Release.Name }}-secret"
+            resources:
+              requests:
+                cpu: 500m
+              limits:
+                memory: 2Gi
+    service:
+      app:
+        ports:
+          http:
+            port: 8080
+    route:
+      app:
+        hostnames:
+          - "chat.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        existingClaim: "{{ .Release.Name }}"
+        globalMounts:
+          - path: /app/backend/data
