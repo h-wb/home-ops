@@ -98,4 +98,4 @@ spec:
         path: /mnt/tank/hwe
         globalMounts:
           - path: /data/paperless/media
-            subPath: Docunents/Paperless/media
+            subPath: Documents/Paperless/media
