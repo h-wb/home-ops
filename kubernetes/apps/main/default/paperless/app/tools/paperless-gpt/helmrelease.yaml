@@ -23,7 +23,7 @@ spec:
             env:
               TZ: Europe/Paris
               PAPERLESS_BASE_URL: http://paperless.default.svc.cluster.local:8000
-              OLLAMA_HOST: http://open-webui.llm.svc.cluster.local:8080
+              OLLAMA_HOST: http://ollama.llm.svc.cluster.local:11434
               # LLM Configuration
               LLM_LANGUAGE: English
               LLM_PROVIDER: ollama
