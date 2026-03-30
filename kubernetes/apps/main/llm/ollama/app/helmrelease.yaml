@@ -11,6 +11,10 @@ spec:
   dependsOn: []
   interval: 1h
   values:
+    defaultPodOptions:
+      resourceClaims:
+        - name: gpu
+          resourceClaimTemplateName: ollama-gpu
     controllers:
       ollama:
         annotations:
@@ -25,12 +29,10 @@ spec:
             env:
               TZ: Europe/Paris
               OLLAMA_NUM_PARALLEL: 1
-              # OLLAMA_CONTEXT_LENGTH: 32768
-              # OLLAMA_KV_CACHE_TYPE: q8_0
+              OLLAMA_VULKAN: 1
+              OLLAMA_CONTEXT_LENGTH: 32768
+              OLLAMA_KV_CACHE_TYPE: q8_0
               # OLLAMA_FLASH_ATTENTION: 0
-              OLLAMA_KEEP_ALIVE: 30m
-              OLLAMA_INTEL_GPU: true
-              OLLAMA_NUM_GPU: 999
             resources:
               claims:
                 - name: gpu
