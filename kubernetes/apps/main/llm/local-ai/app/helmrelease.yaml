@@ -80,7 +80,7 @@ spec:
           resourceClaimTemplateName: local-ai-gpu
     controllers:
       local-ai:
-        replicas: 1
+        replicas: 0
         strategy: RollingUpdate
         rollingUpdate:
           surge: 0
