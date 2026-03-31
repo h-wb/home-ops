@@ -30,9 +30,11 @@ spec:
               TZ: Europe/Paris
               OLLAMA_NUM_PARALLEL: 1
               OLLAMA_VULKAN: 1
-              # OLLAMA_CONTEXT_LENGTH: 32768
+              OLLAMA_CONTEXT_LENGTH: "64000"
+              OLLAMA_DEBUG: 1
               OLLAMA_KV_CACHE_TYPE: q8_0
-              OLLAMA_FLASH_ATTENTION: 0
+              OLLAMA_FLASH_ATTENTION: 1
+              GGML_VK_DISABLE_INTEGER_DOT_PRODUCT: 1
             resources:
               claims:
                 - name: gpu
