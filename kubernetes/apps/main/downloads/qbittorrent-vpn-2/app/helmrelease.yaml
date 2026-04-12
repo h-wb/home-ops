@@ -1,0 +1,134 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app qbittorrent-vpn-2
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      qbittorrent-vpn-2:
+        pod:
+          securityContext:
+            fsGroup: 1000
+            fsGroupChangePolicy: "OnRootMismatch"
+        initContainers:
+          gluetun:
+            image:
+              repository: ghcr.io/qdm12/gluetun
+              tag: v3.41.1
+            env:
+              # Control server auth required in v3.41.0
+              HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE: '{"auth":"apikey","apikey":"$(GLUETUN_CONTROL_SERVER_API_KEY)"}'
+              VPN_SERVICE_PROVIDER: protonvpn
+              VPN_TYPE: wireguard
+              VPN_PORT_FORWARDING: on
+              PORT_FORWARD_ONLY: on
+              FIREWALL_INPUT_PORTS: 8080
+              # Pod and service CIDRs from talos/talconfig.yaml - allows cluster traffic
+              FIREWALL_OUTBOUND_SUBNETS: 10.42.0.0/16,10.43.0.0/16
+              FIREWALL_VPN_INPUT_PORTS: ""
+              BLOCK_IPV6: "on"
+              SERVER_COUNTRIES: Switzerland
+              VPN_PORT_FORWARDING_UP_COMMAND: |
+                /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{`{{PORTS}}`}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
+            envFrom:
+              - secretRef:
+                  name: qbittorrent-vpn-2-secret
+            resources:
+              limits:
+                squat.ai/tun: 1
+            restartPolicy: Always
+            securityContext:
+              capabilities: {add: ["NET_ADMIN"]}
+              allowPrivilegeEscalation: false
+            lifecycle:
+              postStart:
+                exec:
+                  command:
+                    - /bin/sh
+                    - -c
+                    - (ip rule del table 51820; ip -6 rule del table 51820) || true
+        containers:
+          app:
+            nameOverride: qbittorrent-vpn-2
+            image:
+              repository: ghcr.io/home-operations/qbittorrent
+              tag: 5.1.4
+            env:
+              UMASK: "022"
+              QBT_WEBUI_PORT: &port 8080
+            probes:
+              liveness:
+                enabled: true
+              readiness:
+                enabled: true
+              startup:
+                enabled: true
+                spec:
+                  failureThreshold: 30
+                  periodSeconds: 5
+            resources:
+              requests:
+                cpu: 200m
+                memory: 2Gi
+              limits:
+                memory: 10Gi
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              runAsNonRoot: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+
+    service:
+      app:
+        forceRename: qbittorrent-vpn-2
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "false"
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: qBittorrent VPN 2
+          gethomepage.dev/icon: qbittorrent.png
+          gethomepage.dev/description: Torrent Client
+          gethomepage.dev/widget.type: qbittorrent
+          gethomepage.dev/widget.url: http://qbittorrent-vpn-2.downloads:8080
+          gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_USERNAME}}` }}"
+          gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}` }}"
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "qbpvn2.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        existingClaim: *app
+        advancedMounts:
+          qbittorrent-vpn-2:
+            app:
+              - path: /config
+      empty-config:
+        type: emptyDir
+        advancedMounts:
+          qbittorrent-vpn-2:
+            port-forward:
+              - path: /config
+      downloads:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /data
