@@ -109,7 +109,7 @@ spec:
           gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_QBITTORRENT_PASSWORD}}` }}"
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
-          - "qbpvn2.${SECRET_DOMAIN}"
+          - "qbvpn2.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
