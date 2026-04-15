@@ -12,6 +12,7 @@ resources:
   - ./victoria-logs/ks.yaml
   - ./karma/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
+  - ./keda/ks.yaml
   - ./silence-operator/ks.yaml
   # Exporters
   - ./exporters
