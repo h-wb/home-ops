@@ -3,19 +3,43 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: certificates
-  namespace: network
+  name: certificates-import
 spec:
   dependsOn:
-    - name: cert-manager
-      namespace: cert-manager
+    - name: external-secrets-stores
   interval: 1h
-  path: ./kubernetes/apps/steamdeck/network/certificates/app
+  path: ./kubernetes/apps/steamdeck/network/certificates/import
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
   prune: true
-  retryInterval: 2m
   sourceRef:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
   targetNamespace: network
-  timeout: 5m
+  wait: true
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: certificates-export
+spec:
+  dependsOn:
+    - name: certificates-import
+    - name: cert-manager
+  interval: 1h
+  path: ./kubernetes/apps/steamdeck/network/certificates/export
+  postBuild:
+    substituteFrom:
+      - name: cluster-secrets
+        kind: Secret
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: network
+  wait: false
