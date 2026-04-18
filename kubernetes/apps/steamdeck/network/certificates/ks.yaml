@@ -6,7 +6,8 @@ metadata:
   name: certificates-import
 spec:
   dependsOn:
-    - name: external-secrets-stores
+    - name: external-secrets
+      namespace: external-secrets
   interval: 1h
   path: ./kubernetes/apps/steamdeck/network/certificates/import
   postBuild:
@@ -30,6 +31,7 @@ spec:
   dependsOn:
     - name: certificates-import
     - name: cert-manager
+      namespace: cert-manager
   interval: 1h
   path: ./kubernetes/apps/steamdeck/network/certificates/export
   postBuild:
