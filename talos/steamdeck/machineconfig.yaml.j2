@@ -1,0 +1,138 @@
+---
+version: v1alpha1
+machine:
+  type: controlplane
+  ca:
+    crt: {{ ENV['MACHINE_CA_CRT'] }}
+    key: {{ ENV['MACHINE_CA_KEY'] }}
+  certSANs:
+    - 127.0.0.1
+    - 192.168.18.33
+  features:
+    apidCheckExtKeyUsage: true
+    diskQuotaSupport: true
+    hostDNS:
+      enabled: true
+      forwardKubeDNSToHost: true
+      resolveMemberNames: true
+    kubePrism:
+      enabled: true
+      port: 7445
+    kubernetesTalosAPIAccess:
+      allowedKubernetesNamespaces:
+        - system-upgrade
+      allowedRoles:
+        - os:admin
+      enabled: true
+    rbac: true
+    stableHostname: true
+  files:
+    - op: create
+      path: /etc/cri/conf.d/20-customization.part
+      content: |
+        [plugins."io.containerd.cri.v1.images"]
+          discard_unpacked_layers = false
+  network:
+    nameservers:
+      - 1.1.1.1
+      - 1.0.0.1
+    disableSearchDomain: true
+  nodeLabels:
+    topology.kubernetes.io/region: steamdeck
+  sysctls:
+    fs.inotify.max_user_instances: "8192"
+    fs.inotify.max_user_watches: "1048576"
+    net.core.default_qdisc: fq
+    net.core.rmem_max: "67108864"
+    net.core.wmem_max: "67108864"
+    net.ipv4.tcp_congestion_control: bbr
+    net.ipv4.tcp_fastopen: "3"
+    net.ipv4.tcp_mtu_probing: "1"
+    net.ipv4.tcp_rmem: 4096 87380 33554432
+    net.ipv4.tcp_window_scaling: "1"
+    net.ipv4.tcp_wmem: 4096 65536 33554432
+    user.max_user_namespaces: "11255"
+  token: {{ ENV['MACHINE_TOKEN'] }}
+cluster:
+  ca:
+    crt: {{ ENV['CLUSTER_CA_CRT'] }}
+    key: {{ ENV['CLUSTER_CA_KEY'] }}
+  clusterName: steamdeck
+  controlPlane:
+    endpoint: https://192.168.18.33:6443
+  discovery:
+    enabled: true
+    registries:
+      kubernetes:
+        disabled: true
+      service:
+        disabled: false
+  id: {{ ENV['CLUSTER_ID'] }}
+  network:
+    cni:
+      name: none
+    dnsDomain: cluster.local
+    podSubnets:
+      - 10.42.0.0/16
+    serviceSubnets:
+      - 10.43.0.0/16
+  secret: {{ ENV['CLUSTER_SECRET'] }}
+  token: {{ ENV['CLUSTER_TOKEN'] }}
+  aggregatorCA:
+    crt: {{ ENV['CLUSTER_AGGREGATORCA_CRT'] }}
+    key: {{ ENV['CLUSTER_AGGREGATORCA_KEY'] }}
+  allowSchedulingOnControlPlanes: true
+  apiServer:
+    auditPolicy:
+      apiVersion: audit.k8s.io/v1
+      kind: Policy
+      rules:
+        - level: Metadata
+    certSANs:
+      - 192.168.18.33
+      - 127.0.0.1
+    disablePodSecurityPolicy: true
+    extraArgs:
+      enable-aggregator-routing: "true"
+      feature-gates: ImageVolume=true,MutatingAdmissionPolicy=true
+      runtime-config: admissionregistration.k8s.io/v1beta1=true
+    image: registry.k8s.io/kube-apiserver:v1.35.3
+  controllerManager:
+    extraArgs:
+      bind-address: 0.0.0.0
+    image: registry.k8s.io/kube-controller-manager:v1.35.3
+  coreDNS:
+    disabled: true
+  etcd:
+    ca:
+      crt: {{ ENV['CLUSTER_ETCD_CA_CRT'] }}
+      key: {{ ENV['CLUSTER_ETCD_CA_KEY'] }}
+    extraArgs:
+      listen-metrics-urls: http://0.0.0.0:2381
+  proxy:
+    disabled: true
+    image: registry.k8s.io/kube-proxy:v1.35.3
+  scheduler:
+    config:
+      apiVersion: kubescheduler.config.k8s.io/v1
+      kind: KubeSchedulerConfiguration
+      profiles:
+        - schedulerName: default-scheduler
+          plugins:
+            score:
+              disabled:
+                - name: ImageLocality
+          pluginConfig:
+            - name: PodTopologySpread
+              args:
+                defaultingType: List
+                defaultConstraints:
+                  - maxSkew: 1
+                    topologyKey: kubernetes.io/hostname
+                    whenUnsatisfiable: ScheduleAnyway
+    extraArgs:
+      bind-address: 0.0.0.0
+    image: registry.k8s.io/kube-scheduler:v1.35.3
+  secretboxEncryptionSecret: {{ ENV['CLUSTER_SECRETBOXENCRYPTIONSECRET'] }}
+  serviceAccount:
+    key: {{ ENV['CLUSTER_SERVICEACCOUNT_KEY'] }}

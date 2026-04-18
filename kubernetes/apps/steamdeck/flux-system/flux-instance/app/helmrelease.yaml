@@ -1,0 +1,86 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: flux-instance
+spec:
+  interval: 5m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.45.1
+  url: oci://ghcr.io/controlplaneio-fluxcd/charts/flux-instance
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: flux-instance
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: flux-instance
+  dependsOn: []
+  interval: 1h
+  values:
+    instance:
+      distribution:
+        # renovate: datasource=github-releases depName=controlplaneio-fluxcd/distribution
+        version: 2.8.3
+      cluster:
+        networkPolicy: false
+      components:
+        - source-controller
+        - kustomize-controller
+        - helm-controller
+        - notification-controller
+      sync:
+        kind: GitRepository
+        url: https://github.com/h-wb/home-ops
+        ref: refs/heads/main
+        path: kubernetes/clusters/steamdeck
+        interval: 1h
+      kustomize:
+        patches:
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --concurrent=10
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --requeue-dependency=5s
+            target:
+              kind: Deployment
+              name: (kustomize-controller|helm-controller|source-controller)
+          - patch: |-
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: all
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: manager
+                        resources:
+                          limits:
+                            memory: 512Mi
+            target:
+              kind: Deployment
+              name: (kustomize-controller|helm-controller|source-controller)
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --sops-age-secret=sops-age-secret
+            target:
+              kind: Deployment
+              name: kustomize-controller
+          - patch: |-
+              - op: add
+                path: /spec/template/spec/containers/0/args/-
+                value: --feature-gates=DefaultToRetryOnFailure=true,DisableChartDigestTracking=true
+            target:
+              kind: Deployment
+              name: helm-controller

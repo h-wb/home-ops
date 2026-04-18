@@ -8,5 +8,7 @@ kubeconfig
 *.agekey
 *.pub
 *.key
+# mise
+.mise.local.toml
 # Ansible
 .venv*

@@ -3,6 +3,8 @@ experimental_monorepo_root = true
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
 CLUSTER = "main"
+CLUSTER_APPS = "{{config_root}}/kubernetes/apps/main"
+BWS_PROJECT_ID = "812ce0d8-ee9a-4f73-9b8d-b3970152b8ac"
 KUBECONFIG = "{{config_root}}/kubernetes/clusters/{{env.CLUSTER}}/kubeconfig"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
@@ -11,11 +13,11 @@ TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
 MISE_EXPERIMENTAL=1
 
 [tools]
-"python" = "3.14.4"
+"python" = "3.14.2"
 "pipx:makejinja" = "2.8.2"
 "aqua:budimanjojo/talhelper" = "3.1.7"
 "aqua:cilium/cilium-cli" = "0.19.2"
-"aqua:cli/cli" = "2.90.0"
+"github:cli/cli" = "2.89.0"
 "aqua:cloudflare/cloudflared" = "2026.3.0"
 "aqua:cue-lang/cue" = "0.16.1"
 "aqua:FiloSottile/age" = "1.3.1"
@@ -53,7 +55,7 @@ arg "[args]" var=#true
 '''
 quiet = true
 run = '''
-bws run --project-id 812ce0d8-ee9a-4f73-9b8d-b3970152b8ac -- \
+bws run --project-id ${BWS_PROJECT_ID} -- \
 minijinja-cli ${usage_input?} ${usage_args}
 '''
 
