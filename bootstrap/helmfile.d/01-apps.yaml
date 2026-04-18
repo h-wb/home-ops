@@ -103,7 +103,7 @@ releases:
           - --namespace=external-secrets
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/clustersecretstore.yaml
+          - --filename={{ requiredEnv "CLUSTER_APPS" }}/external-secrets/external-secrets/app/clustersecretstore.yaml
         showlogs: true
     needs:
       - 'cert-manager/cert-manager'
