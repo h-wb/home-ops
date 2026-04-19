@@ -107,7 +107,7 @@ run = '''
 mise //:log info "Running stage..." stage "$0"
 CRDS_FILE="${BOOTSTRAP_DIR}/helmfile.d/${CLUSTER}/00-crds.yaml"
 [[ -f "${CRDS_FILE}" ]] || CRDS_FILE="${BOOTSTRAP_DIR}/helmfile.d/00-crds.yaml"
-if ! helmfile -f "${CRDS_FILE}" template -q | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
+if ! helmfile -f "${CRDS_FILE}" template -q | yq ea -e 'select(.kind == "CustomResourceDefinition")' | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
     mise //:log fatal "Failed to apply crds" stage "$0"
 fi
 '''
@@ -119,7 +119,7 @@ run = '''
 mise //:log info "Running stage..." stage "$0"
 APPS_FILE="${BOOTSTRAP_DIR}/helmfile.d/${CLUSTER}/01-apps.yaml"
 [[ -f "${APPS_FILE}" ]] || APPS_FILE="${BOOTSTRAP_DIR}/helmfile.d/01-apps.yaml"
-if ! helmfile -f "${APPS_FILE}" sync --hide-notes; then
+if ! helmfile -e "${CLUSTER}" -f "${APPS_FILE}" sync --hide-notes; then
     mise //:log fatal "Failed to sync helmfile" stage "$0"
 fi
 '''

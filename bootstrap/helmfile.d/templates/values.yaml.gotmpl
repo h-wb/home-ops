@@ -1,1 +1,1 @@
-{{ (fromYaml (readFile (printf "%s/%s/%s/app/helmrelease.yaml" (requiredEnv "CLUSTER_APPS") .Release.Namespace .Release.Name))).spec.values | toYaml }}
+{{ exec "yq" (list "select(.kind == \"HelmRelease\").spec.values" (printf "%s/%s/%s/app/helmrelease.yaml" (requiredEnv "CLUSTER_APPS") .Release.Namespace .Release.Name)) }}
