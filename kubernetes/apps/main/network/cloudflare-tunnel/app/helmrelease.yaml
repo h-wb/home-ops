@@ -73,12 +73,16 @@ spec:
       config:
         data:
           config.yaml: |-
+            originRequest:
+              http2Origin: true
+              originServerName: "${EXTERNAL_DOMAIN}.${SECRET_DOMAIN}"
             ingress:
-              - hostname: "*.${SECRET_DOMAIN}"
+              - hostname: "${SECRET_DOMAIN}"
+                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local
                 originRequest:
-                  http2Origin: true
-                  originServerName: external.${SECRET_DOMAIN}
-                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local:443
+                  originServerName: "${SECRET_DOMAIN}"
+              - hostname: "*.${SECRET_DOMAIN}"
+                service: https://envoy-external.{{ .Release.Namespace }}.svc.cluster.local
               - service: http_status:404
     persistence:
       config-file:

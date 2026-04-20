@@ -51,8 +51,8 @@ spec:
     sources:
       - "crd"
       - "gateway-httproute"
-    txtOwnerId: default
-    txtPrefix: k8s.
+    txtOwnerId: ${CLUSTER}
+    txtPrefix: k8s.${CLUSTER}.
     domainFilters:
       - "${SECRET_DOMAIN}"
     serviceMonitor:

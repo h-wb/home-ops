@@ -31,3 +31,4 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      CLUSTER: ${CLUSTER}

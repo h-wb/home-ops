@@ -17,6 +17,9 @@ spec:
     name: flux-system
     namespace: flux-system
   wait: false
+  postBuild:
+    substitute:
+      CLUSTER: main
   patches:
     - # Add Kustomization defaults for all child Kustomizations
       patch: |-

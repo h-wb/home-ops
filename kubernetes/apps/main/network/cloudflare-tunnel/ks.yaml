@@ -12,9 +12,13 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/main/network/cloudflare-tunnel/app
   postBuild:
+    substitute:
+      CLUSTER: ${CLUSTER}
+      EXTERNAL_DOMAIN: external
+      CLOUDFLARED_TUNNEL_ID: ${MAIN_CLOUDFLARE_TUNNEL_ID}
     substituteFrom:
       - kind: Secret
-        name: cloudflare-tunnel-id-secret
+        name: cluster-secrets
   prune: true
   retryInterval: 2m
   sourceRef:
