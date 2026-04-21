@@ -12,7 +12,17 @@ spec:
     - name: certificates
       namespace: network
   interval: 1h
-  path: ./kubernetes/apps/steamdeck/network/envoy-gateway/app
+  path: ./kubernetes/apps/main/network/envoy-gateway/app
+  postBuild:
+    substitute:
+      CLUSTER: ${CLUSTER}
+      EXTERNAL_DOMAIN: ${CLUSTER}-external
+      INTERNAL_DOMAIN: ${CLUSTER}-internal
+      SVC_GATEWAY_EXTERNAL: 192.168.18.200
+      SVC_GATEWAY_INTERNAL: 192.168.18.202
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
   prune: true
   retryInterval: 2m
   sourceRef:

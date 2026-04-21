@@ -26,7 +26,7 @@ spec:
       failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
       current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 1h
-  path: ./kubernetes/apps/steamdeck/cert-manager/cert-manager/app
+  path: ./kubernetes/apps/main/cert-manager/cert-manager/app
   prune: true
   retryInterval: 2m
   sourceRef:

@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/steamdeck/kube-tools/reloader/app
+  path: ./kubernetes/apps/main/kube-tools/reloader/app
   prune: true
   sourceRef:
     kind: GitRepository

@@ -10,7 +10,7 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  path: ./kubernetes/apps/steamdeck/storage/openebs/app
+  path: ./kubernetes/apps/main/storage/openebs/app
   prune: true
   sourceRef:
     kind: GitRepository

@@ -3,14 +3,16 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app coredns
-  namespace: &namespace kube-system
+  name: &app cloudflare-tunnel
+  namespace: &namespace network
 spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  dependsOn:
+    - name: cloudflare-dns
   interval: 1h
-  path: ./kubernetes/apps/main/kube-system/coredns/app
+  path: ./kubernetes/apps/main/network/cloudflare-tunnel/app
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -22,4 +24,9 @@ spec:
   wait: false
   postBuild:
     substitute:
-      REPLICAS: "1"
+      CLUSTER: ${CLUSTER}
+      EXTERNAL_DOMAIN: ${CLUSTER}-external
+      CLOUDFLARED_TUNNEL_ID: ${STEAMDECK_CLOUDFLARE_TUNNEL_ID}
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
