@@ -13,7 +13,7 @@ spec:
   values:
     controllers:
       cloudflare-tunnel:
-        replicas: ${REPLICAS:=2}
+        replicas: ${REPLICAS:=1}
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"

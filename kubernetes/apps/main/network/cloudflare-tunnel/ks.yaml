@@ -15,6 +15,7 @@ spec:
     substitute:
       CLUSTER: ${CLUSTER}
       EXTERNAL_DOMAIN: external
+      REPLICAS: "2"
       CLOUDFLARED_TUNNEL_ID: ${MAIN_CLOUDFLARE_TUNNEL_ID}
     substituteFrom:
       - kind: Secret
