@@ -23,3 +23,9 @@ spec:
   targetNamespace: flux-system
   timeout: 5m
   wait: false
+  postBuild:
+    substitute:
+      SUBDOMAIN: flux-webhook
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
