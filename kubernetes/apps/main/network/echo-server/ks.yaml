@@ -24,4 +24,5 @@ spec:
 
     substitute:
       APP: *app
+      SUBDOMAIN: echo-server
       GATUS_SUBDOMAIN: echo-server
