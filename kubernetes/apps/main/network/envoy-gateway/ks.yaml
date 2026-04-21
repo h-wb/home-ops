@@ -10,6 +10,12 @@ spec:
   interval: 1h
   path: ./kubernetes/apps/main/network/envoy-gateway/app
   postBuild:
+    substitute:
+      CLUSTER: ${CLUSTER}
+      EXTERNAL_DOMAIN: external
+      INTERNAL_DOMAIN: internal
+      SVC_GATEWAY_EXTERNAL: 192.168.1.201
+      SVC_GATEWAY_INTERNAL: 192.168.1.202
     substituteFrom:
       - name: cluster-secrets
         kind: Secret

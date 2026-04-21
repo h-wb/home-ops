@@ -30,7 +30,7 @@ spec:
         externalTrafficPolicy: Cluster
       envoyHpa:
         minReplicas: 1
-        maxReplicas: 2
+        maxReplicas: ${REPLICAS:=2}
         metrics:
           - resource:
               name: cpu
@@ -63,17 +63,17 @@ kind: Gateway
 metadata:
   name: envoy-external
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname external.${SECRET_DOMAIN}
+    external-dns.alpha.kubernetes.io/target: &hostname ${EXTERNAL_DOMAIN}.${SECRET_DOMAIN}
     gatus.home-operations.com/endpoint: |-
       client:
         dns-resolver: tcp://1.1.1.1:53
-      group: external
+      group: ${CLUSTER}-external
 spec:
   gatewayClassName: envoy
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: *hostname
-      lbipam.cilium.io/ips: 192.168.1.201
+      lbipam.cilium.io/ips: ${SVC_GATEWAY_EXTERNAL}
   listeners:
     - name: http
       protocol: HTTP
@@ -99,9 +99,9 @@ kind: Gateway
 metadata:
   name: envoy-internal
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname internal.${SECRET_DOMAIN}
+    external-dns.alpha.kubernetes.io/target: &hostname ${INTERNAL_DOMAIN}.${SECRET_DOMAIN}
     gatus.home-operations.com/endpoint: |-
-      group: internal
+      group: ${CLUSTER}-internal
       guarded: true
       ui:
         hide-hostname: true
@@ -111,7 +111,7 @@ spec:
   infrastructure:
     annotations:
       external-dns.alpha.kubernetes.io/hostname: *hostname
-      lbipam.cilium.io/ips: 192.168.1.202
+      lbipam.cilium.io/ips: ${SVC_GATEWAY_INTERNAL}
   listeners:
     - name: http
       protocol: HTTP
