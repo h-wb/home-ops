@@ -17,11 +17,24 @@ spec:
     name: flux-system
     namespace: flux-system
   wait: false
+  # Level 1 substitution: runs when cluster-apps processes child ks.yaml FILES.
+  # Use this to resolve variables that appear as VALUES inside child ks.yaml
+  # postBuild.substitute blocks (e.g. CLOUDFLARED_TUNNEL_ID: ${MAIN_CLOUDFLARE_TUNNEL_ID}).
+  # Variables here are available when Flux writes the child Kustomization objects
+  # to the cluster, before those child KS's reconcile their own resources.
   postBuild:
     substitute:
       CLUSTER: main
+    substituteFrom:
+      - kind: Secret
+        name: cluster-secrets
   patches:
     - # Add Kustomization defaults for all child Kustomizations
+      # Level 2 substitution: injected into every child KS's own postBuild.
+      # Runs when each child KS processes its app resources (HelmReleases, etc.).
+      # Variables here are available inside helmrelease values, httproutes, etc.
+      # Does NOT affect how cluster-apps resolves values in the child ks.yaml files
+      # themselves — that is handled by the Level 1 postBuild above.
       patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
         kind: Kustomization
