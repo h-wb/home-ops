@@ -41,7 +41,7 @@ TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
 "aqua:mitsuhiko/minijinja" = "2.19.0"
 "aqua:siderolabs/talos" = "1.12.6"
 "aqua:yannh/kubeconform" = "0.7.0"
-"github:cli/cli" = "2.90.0"
+"github:cli/cli" = "2.91.0"
 "pipx:makejinja" = "2.8.2"
 "python" = "3.14.4"
 
