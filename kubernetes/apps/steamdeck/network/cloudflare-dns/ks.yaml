@@ -32,6 +32,4 @@ spec:
     substitute:
       APP: *app
       CLUSTER: ${CLUSTER}
-    substituteFrom:
-      - kind: Secret
-        name: cluster-secrets
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
