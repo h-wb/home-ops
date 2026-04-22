@@ -26,7 +26,8 @@ spec:
     substitute:
       CLUSTER: ${CLUSTER}
       EXTERNAL_DOMAIN: ${CLUSTER}-external
-      CLOUDFLARED_TUNNEL_ID: ${STEAMDECK_CLOUDFLARE_TUNNEL_ID}
+      # CLOUDFLARED_TUNNEL_ID: ${STEAMDECK_CLOUDFLARE_TUNNEL_ID}
+      CLOUDFLARED_TUNNEL_ID: test
     substituteFrom:
       - kind: Secret
         name: cluster-secrets
