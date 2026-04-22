@@ -5,11 +5,8 @@ kind: Kustomization
 metadata:
   name: certificates-import
 spec:
-  dependsOn:
-    - name: external-secrets
-      namespace: external-secrets
   interval: 1h
-  path: ./kubernetes/apps/steamdeck/network/certificates/import
+  path: ./kubernetes/apps/main/network/certificates/import
   postBuild:
     substituteFrom:
       - name: cluster-secrets
@@ -21,6 +18,9 @@ spec:
     namespace: flux-system
   targetNamespace: network
   wait: true
+  postBuild:
+    substitute:
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -30,10 +30,8 @@ metadata:
 spec:
   dependsOn:
     - name: certificates-import
-    - name: cert-manager
-      namespace: cert-manager
   interval: 1h
-  path: ./kubernetes/apps/steamdeck/network/certificates/export
+  path: ./kubernetes/apps/main/network/certificates/export
   postBuild:
     substituteFrom:
       - name: cluster-secrets
@@ -45,3 +43,6 @@ spec:
     namespace: flux-system
   targetNamespace: network
   wait: false
+  postBuild:
+    substitute:
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
