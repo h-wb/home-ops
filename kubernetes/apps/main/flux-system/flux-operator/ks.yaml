@@ -24,3 +24,7 @@ spec:
     namespace: flux-system
   targetNamespace: flux-system
   timeout: 5m
+  postBuild:
+    substitute:
+      SUBDOMAIN: flux-operator
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
