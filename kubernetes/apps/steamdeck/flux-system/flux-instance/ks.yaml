@@ -13,7 +13,7 @@ spec:
     - name: flux-operator
       namespace: *namespace
   interval: 1h
-  path: ./kubernetes/apps/main/flux-system/flux-instance/app
+  path: ./kubernetes/apps/steamdeck/flux-system/flux-instance/app
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -27,6 +27,7 @@ spec:
     substitute:
       SUBDOMAIN: flux-webhook-sd
       CLUSTER: ${CLUSTER}
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
     substituteFrom:
       - kind: Secret
         name: cluster-secrets

@@ -9,9 +9,9 @@ config_roots = [
 
 [env]
 _.python.venv = {path = "{{config_root}}/.venv", create = true}
-CLUSTER = "main"
+# CLUSTER = "main"
 BWS_ACCESS_TOKEN = {required = true}
-# CLUSTER = "steamdeck"
+CLUSTER = "steamdeck"
 CLUSTER_APPS = "{{config_root}}/kubernetes/apps/{{env.CLUSTER}}"
 KUBECONFIG = "{{config_root}}/kubernetes/clusters/{{env.CLUSTER}}/kubeconfig"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
