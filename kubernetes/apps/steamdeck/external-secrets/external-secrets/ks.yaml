@@ -29,3 +29,7 @@ spec:
     namespace: flux-system
   targetNamespace: *namespace
   timeout: 15m
+  postBuild:
+    substitute:
+      SECRET_BW_ORG_ID: ${SECRET_BW_ORG_ID}
+      SECRET_BW_PROJECT_ID: ${SECRET_BW_PROJECT_ID}
