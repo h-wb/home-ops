@@ -123,3 +123,38 @@ if ! helmfile -e "${CLUSTER}" -f "${APPS_FILE}" sync --hide-notes; then
     mise //:log fatal "Failed to sync helmfile" stage "$0"
 fi
 '''
+
+[tasks.cloudflare-tunnel]
+description = "Login to Cloudflare and create a tunnel for the current cluster"
+usage = '''
+arg "[name]" help="Tunnel name (default: kubernetes-<cluster>)"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+TUNNEL_NAME="${usage_name:-kubernetes-${CLUSTER}}"
+CRED_FILE="${BOOTSTRAP_DIR}/cloudflare-tunnel-${CLUSTER}.json"
+
+mise //:log info "Running stage..." stage "$0" tunnel "${TUNNEL_NAME}"
+
+if [[ ! -f "${HOME}/.cloudflared/cert.pem" ]]; then
+    mise //:log info "Logging in to Cloudflare (browser will open)..." stage "$0"
+    cloudflared tunnel login
+fi
+
+if [[ -f "${CRED_FILE}" ]]; then
+    mise //:log info "Credentials file already exists, reusing" stage "$0" file "${CRED_FILE}"
+else
+    mise //:log info "Creating tunnel..." stage "$0" tunnel "${TUNNEL_NAME}"
+    cloudflared tunnel create --credentials-file "${CRED_FILE}" "${TUNNEL_NAME}"
+fi
+
+TUNNEL_ID=$(jq -r '.TunnelID' "${CRED_FILE}")
+TUNNEL_SECRET=$(jq -rc '{a: .AccountTag, t: .TunnelID, s: .TunnelSecret}' "${CRED_FILE}" | base64)
+PREFIX=$(echo "${CLUSTER}" | tr '[:lower:]' '[:upper:]')
+
+mise //:log info "Tunnel ready. Add these to the BWS cloudflare item:" stage "$0"
+echo "  ${PREFIX}_CLOUDFLARE_TUNNEL_ID=${TUNNEL_ID}"
+echo "  ${PREFIX}_CLOUDFLARE_TUNNEL_SECRET=${TUNNEL_SECRET}"
+'''

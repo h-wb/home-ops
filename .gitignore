@@ -10,5 +10,7 @@ kubeconfig
 *.key
 # mise
 .mise.local.toml
+# cloudflare
+cloudflare-tunnel*.json
 # Ansible
 .venv*
