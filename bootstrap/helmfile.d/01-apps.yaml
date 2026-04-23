@@ -40,7 +40,7 @@ releases:
           - --namespace=kube-system
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "CLUSTER_APPS" }}/kube-system/cilium/networking.yaml
+          - --filename={{ requiredEnv "CLUSTER_APPS" }}/kube-system/cilium/app/networking.yaml
         events:
           - postsync
         showlogs: true
