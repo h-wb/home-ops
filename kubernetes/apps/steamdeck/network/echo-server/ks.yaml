@@ -26,3 +26,4 @@ spec:
   postBuild:
     substitute:
       SUBDOMAIN: echo-sd
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
