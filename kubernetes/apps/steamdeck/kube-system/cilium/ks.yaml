@@ -10,7 +10,37 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   interval: 1h
-  path: ./kubernetes/apps/steamdeck/kube-system/cilium/app
+  path: ./kubernetes/apps/main/kube-system/cilium/app
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  targetNamespace: *namespace
+  timeout: 5m
+  wait: false
+  postBuild:
+    substitute:
+      CLUSTER: ${CLUSTER}
+      CILIUM_CLUSTER_ID: "2"
+      CILIUM_OPERATOR_REPLICAS: "1"
+      CILIUM_DEVICES: wlan+
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app cilium-config
+  namespace: &namespace kube-system
+spec:
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: cilium
+  interval: 1h
+  path: ./kubernetes/apps/steamdeck/kube-system/cilium/config
   prune: true
   retryInterval: 2m
   sourceRef:
