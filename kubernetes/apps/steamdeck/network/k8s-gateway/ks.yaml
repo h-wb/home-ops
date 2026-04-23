@@ -23,7 +23,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      SVC_K8S_GATEWAY: "192.168.18.201"
+      SVC_K8S_GATEWAY: "192.168.18.200"
     substituteFrom:
       - kind: Secret
         name: cluster-secrets
