@@ -24,7 +24,7 @@ spec:
               tag: 1.43.1.10611@sha256:a9c3723cb31cc9621df27cf5801184c290293adf1df2bfaea4b8b6fc01dbfd96
             env:
               TZ: Europe/Paris
-              PLEX_ADVERTISE_URL: https://plex.${SECRET_DOMAIN}:443,http://${SVC_PLEX_ADDR}:32400
+              PLEX_ADVERTISE_URL: https://plex.${SECRET_DOMAIN}:443,http://192.168.1.211:32400
               PLEX_NO_AUTH_NETWORKS: 192.168.1.0/24
             probes:
               liveness: &probes
@@ -70,7 +70,7 @@ spec:
         controller: *app
         type: LoadBalancer
         annotations:
-          io.cilium/lb-ipam-ips: ${SVC_PLEX_ADDR:=temp}
+          io.cilium/lb-ipam-ips: 192.168.1.211
         externalTrafficPolicy: Cluster
         ports:
           http:
