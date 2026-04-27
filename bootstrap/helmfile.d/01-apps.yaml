@@ -40,7 +40,7 @@ releases:
           - --namespace=kube-system
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "CLUSTER_APPS" }}/kube-system/cilium/app/networking.yaml
+          - --filename={{ requiredEnv "CLUSTER_APPS" }}/kube-system/cilium/config/networking.yaml
         events:
           - postsync
         showlogs: true
@@ -95,7 +95,7 @@ releases:
           - --namespace=cert-manager
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "CLUSTER_APPS" }}/cert-manager/cert-manager/app/clusterissuers.yaml
+          - --filename={{ requiredEnv "SHARED_APPS" }}/cert-manager/cert-manager/app/clusterissuers.yaml
         events:
           - postsync
         showlogs: true
@@ -106,7 +106,7 @@ releases:
           - --namespace=external-secrets
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "CLUSTER_APPS" }}/external-secrets/external-secrets/app/certificate.yaml
+          - --filename={{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/certificate.yaml
         events:
           - postsync
         showlogs: true
@@ -117,7 +117,7 @@ releases:
           - --namespace=external-secrets
           - --server-side
           - --field-manager=kustomize-controller
-          - --filename={{ requiredEnv "CLUSTER_APPS" }}/external-secrets/external-secrets/app/clustersecretstore.yaml
+          - --filename={{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/clustersecretstore.yaml
         events:
           - postsync
         showlogs: true
