@@ -23,7 +23,7 @@ spec:
           defrag:
             image:
               repository: ghcr.io/siderolabs/talosctl
-              tag: v1.12.6
+              tag: v1.13.0
             args:
               - -n
               - "192.168.1.190,192.168.1.191,192.168.1.192"
