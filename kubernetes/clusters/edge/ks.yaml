@@ -10,7 +10,7 @@ spec:
     provider: sops
   deletionPolicy: WaitForTermination
   interval: 1h
-  path: ./kubernetes/apps/steamdeck
+  path: ./kubernetes/apps/edge
   prune: true
   sourceRef:
     kind: GitRepository
@@ -19,7 +19,7 @@ spec:
   wait: false
   postBuild:
     substitute:
-      CLUSTER: steamdeck
+      CLUSTER: edge
     substituteFrom:
       - kind: Secret
         name: cluster-secrets

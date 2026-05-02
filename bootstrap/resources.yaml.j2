@@ -1,11 +1,3 @@
-{% for namespace in ["cert-manager", "external-secrets", "flux-system", "kube-tools", "network", "storage"] %}
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/namespace-v1.json
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: {{ namespace }}
-{% endfor %}
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/refs/heads/master/master/secret-v1.json
 apiVersion: v1

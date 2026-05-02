@@ -1,5 +1,0 @@
-[tasks.etcd-defrag]
-description = "Defragment etcd"
-run = '''
-talosctl -n 192.168.18.33 etcd defrag
-'''

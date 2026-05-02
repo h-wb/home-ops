@@ -8,9 +8,9 @@ environments:
   main:
     values:
       - values/default.yaml
-  steamdeck:
+  edge:
     values:
-      - values/steamdeck.yaml
+      - values/edge.yaml
 ---
 helmDefaults:
   cleanupOnFail: true
@@ -97,9 +97,9 @@ releases:
           - --field-manager=kustomize-controller
           - --filename={{ requiredEnv "SHARED_APPS" }}/cert-manager/cert-manager/app/clusterissuers.yaml
         events:
-          - postsync
+          - presync
         showlogs: true
-      - # Apply bitwarden SDK TLS certificate (issued by home-ca, required by ClusterSecretStore)
+      - # Apply bitwarden SDK TLS certificate (issued by home-ca, required by bitwarden-sdk-server pod)
         command: kubectl
         args:
           - apply
@@ -108,7 +108,7 @@ releases:
           - --field-manager=kustomize-controller
           - --filename={{ requiredEnv "SHARED_APPS" }}/external-secrets/external-secrets/app/certificate.yaml
         events:
-          - postsync
+          - presync
         showlogs: true
       - # Apply ClusterSecretStore (bitwarden secrets manager)
         command: kubectl

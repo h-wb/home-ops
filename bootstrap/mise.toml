@@ -1,16 +1,16 @@
-# [tasks.default]
-# description = "Run complete bootstrap process"
-# run = '''
-# mise run //bootstrap:talos
-# mise run //bootstrap:k8s
-# mise run //bootstrap:kubeconfig
-# mise run //bootstrap:wait
-# mise run //bootstrap:namespaces
-# mise run //bootstrap:resources
-# mise run //bootstrap:crds
-# mise run //bootstrap:apps
-# mise run //bootstrap:kubeconfig node
-# '''
+[tasks.default]
+description = "Run complete bootstrap process"
+run = '''
+mise run //bootstrap:talos
+mise run //bootstrap:k8s
+mise run //bootstrap:kubeconfig node
+mise run //bootstrap:wait
+mise run //bootstrap:namespaces
+mise run //bootstrap:resources
+mise run //bootstrap:crds
+mise run //bootstrap:apps
+mise run //bootstrap:kubeconfig
+'''
 
 [env]
 BOOTSTRAP_DIR = "{{config_root}}/"
@@ -22,7 +22,7 @@ run = '''
 nodes=$(talosctl config info -o yaml | yq -e '.nodes | join (" ")')
 mise //:log info "Running stage..." stage "$0"
 for n in ${nodes}; do
-    if ! op=$(mise run //talos:apply-node "$n" --insecure 2>&1); then
+    if ! op=$(mise run "//talos:node:apply" "$n" --insecure 2>&1); then
         if [[ "$op" == *"certificate required"* ]]; then
             mise //:log info "Talos already configured, skipping apply of config" stage "$0" node "$n"
             continue
@@ -53,7 +53,7 @@ run = '''
 #!/usr/bin/env bash
 controller=$(talosctl config info -o yaml | yq -e '.endpoints[0]')
 mise //:log info "Running stage..." stage "$0"
-if ! talosctl kubeconfig -n "${controller}" -f --force-context-name "${CLUSTER}" "${PWD}"; then
+if ! talosctl kubeconfig -n "${controller}" -f --force-context-name "${CLUSTER}" "${KUBECONFIG}"; then
     mise //:log fatal "Failed to fetch kubeconfig" stage "$0"
 fi
 if [[ "${usage_lb}" != "cilium" ]]; then
@@ -81,7 +81,7 @@ description = "Apply Kubernetes namespaces"
 run = '''
 #!/usr/bin/env bash
 mise //:log info "Running stage..." stage "$0"
-find "${KUBERNETES_DIR}/apps" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r dir; do
+find "${CLUSTER_APPS}" -mindepth 1 -maxdepth 1 -type d | while IFS= read -r dir; do
     if ! kustomize build "$dir" | yq ea -e 'select(.kind == "Namespace")' | kubectl apply --server-side --field-manager bootstrap --force-conflicts -f -; then
         mise //:log fatal "Failed to apply namespace" stage "$0" namespace "$(basename "$dir")"
     fi

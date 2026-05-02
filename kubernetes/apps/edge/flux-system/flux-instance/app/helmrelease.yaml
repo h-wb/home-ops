@@ -40,7 +40,7 @@ spec:
         kind: GitRepository
         url: https://github.com/h-wb/home-ops
         ref: refs/heads/main
-        path: kubernetes/clusters/steamdeck
+        path: kubernetes/clusters/edge
         interval: 1h
       kustomize:
         patches:

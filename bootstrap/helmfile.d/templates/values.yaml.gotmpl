@@ -1,1 +1,5 @@
-{{ exec "yq" (list "select(.kind == \"HelmRelease\").spec.values" (printf "%s/%s/%s/app/helmrelease.yaml" (requiredEnv "SHARED_APPS") .Release.Namespace .Release.Name)) }}
+{{- $cluster := printf "%s/%s/%s/app/helmrelease.yaml" (requiredEnv "CLUSTER_APPS") .Release.Namespace .Release.Name -}}
+{{- $shared := printf "%s/%s/%s/app/helmrelease.yaml" (requiredEnv "SHARED_APPS") .Release.Namespace .Release.Name -}}
+{{- $exists := exec "bash" (list "-c" (printf "test -f %q && printf 1 || printf 0" $cluster)) -}}
+{{- $file := ternary $cluster $shared (eq $exists "1") -}}
+{{ exec "yq" (list "select(.kind == \"HelmRelease\").spec.values" $file) }}

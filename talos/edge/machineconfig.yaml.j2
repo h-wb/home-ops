@@ -7,7 +7,7 @@ machine:
     key: {{ ENV['MACHINE_CA_KEY'] }}
   certSANs:
     - 127.0.0.1
-    - 192.168.18.33
+    - 192.168.18.44
   features:
     apidCheckExtKeyUsage: true
     diskQuotaSupport: true
@@ -32,13 +32,18 @@ machine:
       content: |
         [plugins."io.containerd.cri.v1.images"]
           discard_unpacked_layers = false
+  install:
+    diskSelector:
+      model: QEMU HARDDISK
+    image: factory.talos.dev/installer/97dc72954d99d9baec927ede36517f09da68d78a27be7ea5c9f6984afcc03eae:v1.13.0
+    wipe: false
   network:
     nameservers:
       - 1.1.1.1
       - 1.0.0.1
     disableSearchDomain: true
   nodeLabels:
-    topology.kubernetes.io/region: steamdeck
+    topology.kubernetes.io/region: edge
   sysctls:
     fs.inotify.max_user_instances: "8192"
     fs.inotify.max_user_watches: "1048576"
@@ -57,9 +62,9 @@ cluster:
   ca:
     crt: {{ ENV['CLUSTER_CA_CRT'] }}
     key: {{ ENV['CLUSTER_CA_KEY'] }}
-  clusterName: steamdeck
+  clusterName: edge
   controlPlane:
-    endpoint: https://192.168.18.33:6443
+    endpoint: https://192.168.18.44:6443
   discovery:
     enabled: true
     registries:
@@ -89,7 +94,7 @@ cluster:
       rules:
         - level: Metadata
     certSANs:
-      - 192.168.18.33
+      - 192.168.18.44
       - 127.0.0.1
     disablePodSecurityPolicy: true
     extraArgs:

@@ -1,4 +1,4 @@
-[tasks.apply-node]
+[tasks."node:apply"]
 description = "Apply Talos config to a node"
 usage = '''
 arg "<node>" env="NODE" help="Description"
@@ -31,7 +31,7 @@ curl -sX POST --data-binary "$(mise run //:template ${TALOS_DIR}/schematic.yaml.
     "https://factory.talos.dev/schematics" | jq -r '.id'
 '''
 
-[tasks.reboot-node]
+[tasks."node:reboot"]
 description = "Reboot a node"
 usage = '''
 arg "<node>" env="NODE"
@@ -48,12 +48,12 @@ arg "<node>" env="NODE"
 '''
 run = '''
 #!/usr/bin/env bash
-export IS_CONTROLLER=$(mise run //talos:_machine-controller "${usage_node}")
+export IS_CONTROLLER=$(mise run "//talos:_machine:controller" "${usage_node}")
 talosctl machineconfig patch <(mise run //:template "${TALOS_DIR}/machineconfig.yaml.j2") \
     -p @<(mise run //:template "${TALOS_DIR}/nodes/${usage_node}.yaml.j2")
 '''
 
-[tasks.reset-node]
+[tasks."node:reset"]
 description = "Reset a node"
 usage = '''
 arg "<node>" env="NODE"
@@ -63,7 +63,7 @@ gum confirm "Reset node ${usage_node}?" --default="No" && \
     talosctl -n "${usage_node}" reset --graceful=false "$@" || exit 0
 '''
 
-[tasks.shutdown-node]
+[tasks."node:shutdown"]
 description = "Shutdown a node"
 usage = '''
 arg "<node>" env="NODE"
@@ -83,17 +83,17 @@ controller=$(talosctl config info -o yaml | yq -e '.endpoints[0]')
 talosctl -n "${controller}" upgrade-k8s --to "${usage_version}"
 '''
 
-[tasks.upgrade-node]
+[tasks."node:upgrade"]
 description = "Upgrade Talos version on a node"
 usage = '''
 arg "<node>" env="NODE"
 '''
 run = '''
-image=$(mise run //talos:_machine-image)
+image=$(mise run "//talos:_machine:image")
 talosctl -n "${usage_node}" upgrade -i "${image}" -m powercycle --timeout=10m "$@"
 '''
 
-[tasks._machine-controller]
+[tasks."_machine:controller"]
 description = "Check if node is a controller (private)"
 hide = true
 usage = '''
@@ -107,12 +107,15 @@ mise run //:template "${TALOS_DIR}/nodes/${usage_node}.yaml.j2" | \
 [tasks.etcd-defrag]
 description = "Defragment etcd on all control plane nodes"
 run = '''
-talosctl -n 192.168.1.190 etcd defrag
-talosctl -n 192.168.1.191 etcd defrag
-talosctl -n 192.168.1.192 etcd defrag
+#!/usr/bin/env bash
+endpoints=$(talosctl config info -o yaml | yq -e '.endpoints | join(" ")')
+for n in ${endpoints}; do
+    mise //:log info "Defragmenting etcd..." stage "$0" node "$n"
+    talosctl -n "$n" etcd defrag
+done
 '''
 
-[tasks._machine-image]
+[tasks."_machine:image"]
 description = "Get machine image from config (private)"
 hide = true
 run = '''
