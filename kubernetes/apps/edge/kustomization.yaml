@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./cert-manager
   - ./external-secrets
+  - ./home-automation
   - ./flux-system
   - ./kube-system
   - ./kube-tools
