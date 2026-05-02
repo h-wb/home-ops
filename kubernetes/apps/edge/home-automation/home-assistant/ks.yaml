@@ -3,8 +3,8 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app flux-instance
-  namespace: &namespace flux-system
+  name: &app home-assistant
+  namespace: &namespace home-automation
 spec:
   commonMetadata:
     labels:
@@ -13,7 +13,7 @@ spec:
     - name: flux-operator
       namespace: *namespace
   interval: 1h
-  path: ./kubernetes/apps/edge/flux-system/flux-instance/app
+  path: ./kubernetes/apps/edge/home-automation/home-assistant/app
   prune: true
   retryInterval: 2m
   sourceRef:
@@ -25,7 +25,7 @@ spec:
   wait: false
   postBuild:
     substitute:
-      SUBDOMAIN: flux-webhook-${CLUSTER}
+      SUBDOMAIN: hass-${CLUSTER}
       CLUSTER: ${CLUSTER}
       SECRET_DOMAIN: ${SECRET_DOMAIN}
     substituteFrom:
