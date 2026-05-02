@@ -9,9 +9,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  dependsOn:
-    - name: flux-operator
-      namespace: *namespace
   interval: 1h
   path: ./kubernetes/apps/edge/home-automation/home-assistant/app
   prune: true
@@ -20,7 +17,7 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  targetNamespace: flux-system
+  targetNamespace: *namespace
   timeout: 5m
   wait: false
   postBuild:
