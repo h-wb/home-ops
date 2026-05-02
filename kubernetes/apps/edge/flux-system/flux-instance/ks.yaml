@@ -25,7 +25,7 @@ spec:
   wait: false
   postBuild:
     substitute:
-      SUBDOMAIN: flux-webhook-sd
+      SUBDOMAIN: flux-webhook-${CLUSTER}
       CLUSTER: ${CLUSTER}
       SECRET_DOMAIN: ${SECRET_DOMAIN}
     substituteFrom:

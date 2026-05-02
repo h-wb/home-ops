@@ -25,5 +25,5 @@ spec:
   timeout: 5m
   postBuild:
     substitute:
-      SUBDOMAIN: echo-sd
+      SUBDOMAIN: echo-${CLUSTER}
       SECRET_DOMAIN: ${SECRET_DOMAIN}
