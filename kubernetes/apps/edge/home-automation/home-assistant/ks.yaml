@@ -25,6 +25,3 @@ spec:
       SUBDOMAIN: hass-${CLUSTER}
       CLUSTER: ${CLUSTER}
       SECRET_DOMAIN: ${SECRET_DOMAIN}
-    substituteFrom:
-      - kind: Secret
-        name: cluster-secrets
