@@ -18,7 +18,7 @@ spec:
           app: &dawarich
             image:
               repository: freikin/dawarich
-              tag: 1.7.1@sha256:20e2fc135c3724de2a8b447ffc2b062c2ad2b3c631f909efdf132108bb6c14e4
+              tag: 1.7.5@sha256:dceef4bf7bd5e6a842d61cdd2a82440a0db34f70dc766e02b0b3b212e13b4ba6
             env:
               TIME_ZONE: "Europe/Paris"
               PHOTON_API_HOST: photon.komoot.io
