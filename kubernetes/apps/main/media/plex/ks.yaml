@@ -10,7 +10,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../../components/nfs-scaler
+    - ../../../../../components/zeroscaler
     - ../../../../../components/volsync
     - ../../../../../components/gpu
   path: ./kubernetes/apps/main/media/plex/app
