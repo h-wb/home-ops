@@ -82,7 +82,6 @@ machine:
     disableSearchDomain: true
   nodeLabels:
     node.kubernetes.io/gpu: true
-    intel.feature.node.kubernetes.io/gpu: "true"
     topology.kubernetes.io/region: main
   sysctls:
     fs.inotify.max_user_instances: "8192"
@@ -152,8 +151,7 @@ cluster:
     disablePodSecurityPolicy: true
     extraArgs:
       enable-aggregator-routing: "true"
-      feature-gates: ImageVolume=true,MutatingAdmissionPolicy=true
-      runtime-config: admissionregistration.k8s.io/v1beta1=true
+      feature-gates: HPAScaleToZero=true
     image: registry.k8s.io/kube-apiserver:v1.36.0
   controllerManager:
     extraArgs:
