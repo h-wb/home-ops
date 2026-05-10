@@ -8,6 +8,5 @@ resources:
   - ./home-automation
   - ./flux-system
   - ./kube-system
-  - ./kube-tools
   - ./network
   - ./storage

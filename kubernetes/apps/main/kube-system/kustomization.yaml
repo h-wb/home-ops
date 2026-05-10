@@ -13,3 +13,4 @@ resources:
   - ./intel-gpu-resource-driver/ks.yaml
   - ./generic-device-plugin/ks.yaml
   - ./metrics-server/ks.yaml
+  - ./reloader/ks.yaml
