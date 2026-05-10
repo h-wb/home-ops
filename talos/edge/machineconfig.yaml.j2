@@ -64,6 +64,9 @@ machine:
     net.ipv4.tcp_wmem: 4096 65536 33554432
     user.max_user_namespaces: "11255"
   token: {{ ENV['MACHINE_TOKEN'] }}
+  udev:
+    rules:
+      - SUBSYSTEM=="tty", ATTRS{serial}=="E072A1D7AD60", GROUP="20", MODE="0660"
 cluster:
   ca:
     crt: {{ ENV['CLUSTER_CA_CRT'] }}
