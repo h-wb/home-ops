@@ -19,7 +19,6 @@ spec:
         runAsGroup: 100
         fsGroup: 100
         fsGroupChangePolicy: OnRootMismatch
-        supplementalGroups: [20]
     controllers:
       zigbee:
         annotations:
@@ -71,10 +70,14 @@ spec:
             resources:
               requests:
                 cpu: 10m
+                squat.ai/zigbee: 1
               limits:
                 memory: 256Mi
+                squat.ai/zigbee: 1
             securityContext:
-              privileged: true
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"

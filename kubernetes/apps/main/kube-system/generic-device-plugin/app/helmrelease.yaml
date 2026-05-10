@@ -32,6 +32,12 @@ spec:
                   - count: 1000
                     paths:
                       - path: /dev/net/tun
+              - --device
+              - |
+                name: zigbee
+                groups:
+                  - paths:
+                      - path: /dev/serial/by-id/usb-Nabu_Casa_ZBT-2_E072A1D7AD60-if00
             resources:
               requests:
                 cpu: 10m
