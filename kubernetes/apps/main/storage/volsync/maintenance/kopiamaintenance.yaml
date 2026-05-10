@@ -9,5 +9,11 @@ spec:
   enabled: true
   trigger:
     schedule: 0 */8 * * *
+  moverVolumes:
+    - mountPath: repository
+      volumeSource:
+        nfs:
+          server: ${NFS_ADDR}
+          path: /mnt/tank/backup/volsync
   repository:
     repository: volsync-maintenance-secret
