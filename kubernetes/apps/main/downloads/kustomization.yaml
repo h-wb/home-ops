@@ -15,7 +15,6 @@ resources:
   - ./qbittorrent-vpn/ks.yaml
   - ./qbittorrent-vpn-2/ks.yaml
   - ./qui/ks.yaml
-  - ./tqm/ks.yaml
   - ./radarr/ks.yaml
   - ./radarr-uhd/ks.yaml
   - ./recyclarr/ks.yaml
