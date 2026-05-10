@@ -19,6 +19,7 @@ spec:
         runAsGroup: 100
         fsGroup: 100
         fsGroupChangePolicy: OnRootMismatch
+        supplementalGroups: [20]
     controllers:
       zigbee:
         annotations:
@@ -52,7 +53,7 @@ spec:
               ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: false
               ZIGBEE2MQTT_CONFIG_SERIAL_BAUDRATE: 115200
               ZIGBEE2MQTT_CONFIG_SERIAL_DISABLE_LED: false
-              ZIGBEE2MQTT_CONFIG_SERIAL_PORT: tcp://slzb.internal:6638
+              ZIGBEE2MQTT_CONFIG_SERIAL_PORT: /dev/serial/by-id/usb-Nabu_Casa_ZBT-2_E072A1D7AD60-if00
               ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: ember
             envFrom:
               - secretRef:
@@ -73,9 +74,7 @@ spec:
               limits:
                 memory: 256Mi
             securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: {drop: ["ALL"]}
+              privileged: true
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
