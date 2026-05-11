@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/k8s.cni.cncf.io/networkattachmentdefinition_v1.json
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: multus-lan
+spec:
+  config: |-
+    {
+      "cniVersion": "0.3.1",
+      "name": "multus-lan",
+      "plugins": [
+        {
+          "type": "macvlan",
+          "master": "enp0s1",
+          "mode": "bridge",
+          "ipam": {
+            "type": "static",
+            "routes": [
+              {"dst": "0.0.0.0/0", "gw": "192.168.18.1"}
+            ]
+          }
+        },
+        {
+          "type": "sbr"
+        }
+      ]
+    }
