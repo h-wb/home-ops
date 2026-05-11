@@ -51,10 +51,11 @@ spec:
               ZIGBEE2MQTT_CONFIG_MQTT_SERVER: mqtt://mosquitto
               ZIGBEE2MQTT_CONFIG_MQTT_VERSION: 5
               ZIGBEE2MQTT_CONFIG_PERMIT_JOIN: false
-              ZIGBEE2MQTT_CONFIG_SERIAL_BAUDRATE: 115200
+              ZIGBEE2MQTT_CONFIG_SERIAL_BAUDRATE: 460800
               ZIGBEE2MQTT_CONFIG_SERIAL_DISABLE_LED: false
               ZIGBEE2MQTT_CONFIG_SERIAL_PORT: /dev/serial/by-id/usb-Nabu_Casa_ZBT-2_E072A1D7AD60-if00
               ZIGBEE2MQTT_CONFIG_SERIAL_ADAPTER: ember
+              ZIGBEE2MQTT_CONFIG_SERIAL_RTSCTS: true
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}"
