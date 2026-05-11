@@ -12,13 +12,8 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      annotations:
-        k8s.v1.cni.cncf.io/networks: |
-          [{
-            "name": "multus-lan",
-            "namespace": "network",
-            "ips": ["192.168.18.121/24"]
-          }]
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       hostUsers: false
       securityContext:
         runAsNonRoot: true
