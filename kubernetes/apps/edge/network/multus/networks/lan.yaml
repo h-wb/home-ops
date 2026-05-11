@@ -11,9 +11,9 @@ spec:
       "name": "multus-lan",
       "plugins": [
         {
-          "type": "macvlan",
+          "type": "ipvlan",
           "master": "enp0s1",
-          "mode": "bridge",
+          "mode": "l2",
           "ipam": {
             "type": "static",
             "routes": [
