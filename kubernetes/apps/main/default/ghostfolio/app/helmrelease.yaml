@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: docker.io/ghostfolio/ghostfolio
-              tag: 3.0.1@sha256:e1b0fb31b888bddcdb4dd14899ea6b5696555782e8a121ccc795feae489f1447
+              tag: 3.5.0@sha256:200c57ad71eab4b4a5216033cefa5a718d991ca7facbf0427583093ad81283ae
             env:
               NODE_ENV: production
               PORT: &port 3333
