@@ -8,7 +8,7 @@ metadata:
 spec:
   enabled: true
   trigger:
-    schedule: 0 */8 * * *
+    schedule: 0 */12 * * *
   moverVolumes:
     - mountPath: repository
       volumeSource:
@@ -17,3 +17,12 @@ spec:
           path: /mnt/tank/backup/volsync
   repository:
     repository: volsync-maintenance-secret
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      memory: 12Gi
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  suspend: false
