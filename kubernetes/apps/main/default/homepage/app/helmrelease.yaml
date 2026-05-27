@@ -11,6 +11,8 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      automountServiceAccountToken: true
     controllers:
       homepage:
         replicas: 2

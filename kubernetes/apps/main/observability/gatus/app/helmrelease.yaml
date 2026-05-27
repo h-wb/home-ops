@@ -73,6 +73,7 @@ spec:
               size: 5Gi
     defaultPodOptions:
       hostUsers: false
+      automountServiceAccountToken: true
     service:
       app:
         ports:
