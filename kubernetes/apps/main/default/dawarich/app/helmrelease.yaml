@@ -31,12 +31,12 @@ spec:
               RAILS_ENV: development
               DATABASE_NAME: *app
               DATABASE_PORT: 5432
-              DATABASE_HOST: dawarich-pgbouncer.default.svc
+              DATABASE_HOST: postgres-dawarich-rw.default.svc
               DATABASE_USERNAME: *app
               DATABASE_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: dawarich-pguser-dawarich
+                    name: postgres-dawarich-app
                     key: password
             resources:
               requests:

@@ -13,15 +13,25 @@ spec:
   components:
     - ../../../../../components/volsync
     - ../../../../../components/postgres-gis
+    - ../../../../../components/cnpg/import
   dependsOn:
     - name: crunchy-postgres-operator
       namespace: database
+    - name: plugin-barman-cloud
+      namespace: database
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 30m
   path: ./kubernetes/apps/main/default/dawarich/app
   postBuild:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 1Gi
+      CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis
+      CNPG_VERSION: "18-3-system-trixie"
   prune: true
   retryInterval: 1m
   sourceRef:
