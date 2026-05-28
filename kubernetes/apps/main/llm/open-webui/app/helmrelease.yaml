@@ -43,7 +43,7 @@ spec:
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
-                    name: "{{ .Release.Name }}-app"
+                    name: "postgres-{{ .Release.Name }}-app"
                     key: uri
             # envFrom:
             #   - secretRef:
