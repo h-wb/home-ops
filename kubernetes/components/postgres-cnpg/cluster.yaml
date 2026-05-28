@@ -22,12 +22,6 @@ spec:
     storageClass: local-hostpath
     size: 5Gi
   affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: node.kubernetes.io/gpu
-                operator: DoesNotExist
     topologyKey: kubernetes.io/hostname
     podAntiAffinityType: required
   postgresql:
