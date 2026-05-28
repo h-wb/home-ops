@@ -12,6 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/postgres
+    - ../../../../../components/postgres-cnpg
     - ../../../../../components/volsync
   interval: 30m
   path: ./kubernetes/apps/main/llm/open-webui/app
