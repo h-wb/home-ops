@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/postgresql.cnpg.io/scheduledbackup_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: "postgres-${APP}-backup"
+spec:
+  immediate: true
+  backupOwnerReference: self
+  schedule: "@daily"
+  # BACKUP TARGET configuration:
+  # - prefer-standby: Runs backup on replica (recommended for multi-replica setups)
+  # - primary: Runs backup on primary (use for single instance only)
+  # For CNPG_REPLICAS = 1: set CNPG_BACKUP_TARGET=primary
+  target: ${CNPG_BACKUP_TARGET:=prefer-standby}
+  cluster:
+    name: "postgres-${APP}"
+  method: plugin
+  pluginConfiguration:
+    name: barman-cloud.cloudnative-pg.io

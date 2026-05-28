@@ -1,0 +1,64 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: &name postgres-${APP}
+spec:
+  # INSTANCES configuration:
+  # - Multi-node cluster: 3+ (HA with zero-downtime updates)
+  # - Single-node cluster: 2 recommended (zero-downtime updates, read scaling)
+  # - Single-node minimal: 1 (expect 5-15s downtime on updates)
+  instances: ${CNPG_REPLICAS:=3}
+  imageName: ${CNPG_IMAGE:=ghcr.io/cloudnative-pg/postgresql}:${CNPG_VERSION:=18.1-system-trixie}
+  # primaryUpdateMethod:
+  # - switchover: Zero-downtime (requires instances >= 2)
+  # - restart: Fast but 5-15s downtime (works with instances = 1)
+  primaryUpdateMethod: switchover
+  primaryUpdateStrategy: unsupervised
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: *name
+        serverName: *name
+  managed:
+    services:
+      disabledDefaultServices: ${CNPG_DISABLED_SERVICES:=['ro', 'r']}
+  storage:
+    size: ${CNPG_SIZE:=2Gi}
+    storageClass: ${CNPG_STORAGECLASS:=local-hostpath}
+  enableSuperuserAccess: true
+  # Bootstrap method must be provided by a component (initdb, import, or restore)
+  # AFFINITY configuration - controls pod placement across nodes
+  affinity:
+    enablePodAntiAffinity: true
+    topologyKey: kubernetes.io/hostname
+    podAntiAffinityType: ${CNPG_ANTI_AFFINITY:=required}
+    nodeSelector:
+      kubernetes.io/arch: amd64
+  postgresql:
+    # SYNCHRONOUS REPLICATION configuration:
+    # - Multi-node (3+ replicas): Provides HA + near-zero data loss (~1-2ms write latency)
+    # - Single-node (2 instances): Provides data durability + zero-downtime updates
+    # - Single instance (1): Will be rejected by webhook with this synchronous block present
+    synchronous:
+      method: ${CNPG_SYNC_METHOD:=any}
+      number: ${CNPG_SYNC_NUMBER:=1}
+      dataDurability: ${CNPG_SYNC_DURABILITY:=preferred}
+    parameters:
+      random_page_cost: ${CNPG_RANDOM_PAGE_COST:="1.1"}
+      effective_io_concurrency: ${CNPG_EFFECTIVE_IO_CONCURRENCY:="200"}
+      # REPLICA CATCH-UP settings (prevents slow WAL archive restore):
+      # - wal_keep_size: WAL retained on primary for streaming catch-up
+      # - max_slot_wal_keep_size: Auto-invalidate slot when replica too far behind
+      wal_keep_size: ${CNPG_WAL_KEEP_SIZE:="1GB"}
+      max_slot_wal_keep_size: ${CNPG_MAX_SLOT_WAL_KEEP:="2GB"}
+  resources:
+    requests:
+      cpu: ${CNPG_REQUESTS_CPU:=100m}
+      memory: ${CNPG_REQUESTS_MEMORY:=256Mi}
+    limits:
+      memory: ${CNPG_LIMITS_MEMORY:=2Gi}
+  monitoring:
+    enablePodMonitor: true

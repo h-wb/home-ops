@@ -1,0 +1,29 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: &name postgres-${APP}
+  annotations:
+    cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
+spec:
+  bootstrap:
+    recovery:
+      database: ${CNPG_DATABASE:=${APP}}
+      owner: ${CNPG_USER:=${APP}}
+      source: source
+      # CNPG 1.28+: Stage-specific pg_restore options for fine-grained control
+      # Uncomment and customize if needed:
+      # recoveryTarget:
+      #   targetTime: "2025-01-01 00:00:00.00000+00"
+      # pgRestoreOptions:
+      #   preRestore: []
+      #   dataRestore: []
+      #   postRestore: []
+  externalClusters:
+    - name: source
+      plugin:
+        name: barman-cloud.cloudnative-pg.io
+        parameters:
+          barmanObjectName: *name
+          serverName: *name

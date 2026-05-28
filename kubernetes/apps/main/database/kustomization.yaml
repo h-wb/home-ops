@@ -9,3 +9,4 @@ resources:
   - ./cloudnative-pg/ks.yaml
   - ./crunchy-postgres/ks.yaml
   - ./dragonfly/ks.yaml
+  - ./plugin-barman-cloud/ks.yaml

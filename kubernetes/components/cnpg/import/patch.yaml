@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/postgresql.cnpg.io/cluster_v1.json
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: postgres-${APP}
+  annotations:
+    # Skip WAL archive check — the import populates the cluster, no WAL in S3 yet
+    cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
+spec:
+  bootstrap:
+    initdb:
+      database: ${CNPG_DATABASE:=${APP}}
+      owner: ${CNPG_USER:=${APP}}
+      import:
+        type: ${CNPG_IMPORT_TYPE:=microservice}
+        databases:
+          - ${CNPG_DATABASE:=${APP}}
+        source:
+          externalCluster: source
+        pgDumpExtraOptions:
+          - --exclude-extension=pg_stat_statements
+          - --exclude-extension=pgaudit
+          - --exclude-schema=pgbouncer
+  externalClusters:
+    - name: source
+      connectionParameters:
+        host: ${CNPG_IMPORT_HOST:=${APP}-primary}
+        user: ${CNPG_IMPORT_USER:=postgres}
+        dbname: ${CNPG_IMPORT_DBNAME:=postgres}
+        sslmode: prefer
+      password:
+        name: ${CNPG_IMPORT_PASSWORD_SECRET:=${APP}-pguser-postgres}
+        key: password

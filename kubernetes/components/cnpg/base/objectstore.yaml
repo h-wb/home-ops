@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/barmancloud.cnpg.io/objectstore_v1.json
+# technically we only need one of these per namespace...
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: postgres-${APP}
+spec:
+  retentionPolicy: ${CNPG_RETENTION_POLICY:=30d}
+  configuration:
+    wal:
+      # Compression algorithms (plugin-barman-cloud v1.1.0+):
+      # - bzip2: 5.9:1 ratio → 100MB→17MB, VERY SLOW backup/restore → Max compression
+      # - xz:    5.5:1 ratio → 100MB→18MB, VERY SLOW backup/restore → High compression
+      # - zstd:  4.8:1 ratio → 100MB→21MB, FAST backup/restore → RECOMMENDED (best balance)
+      # - gzip:  4.3:1 ratio → 100MB→23MB, SLOW backup, FAST restore → Legacy default
+      # - lz4:   2.6:1 ratio → 100MB→38MB, VERY FAST backup/restore → Speed priority
+      # - none:  1.0:1 ratio → 100MB→100MB, NO overhead → Unlimited storage only
+      # Note: data compression still only supports gzip, bzip2, snappy
+      compression: zstd
+      maxParallel: 8
+      archiveAdditionalCommandArgs:
+        - "--read-timeout=120"
+    data:
+      compression: bzip2
+      jobs: 2
+      additionalCommandArgs:
+        - "--min-chunk-size=5MB"
+        - "--read-timeout=120"
+    destinationPath: s3://postgresql/${APP}
+    endpointURL: https://s3.${SECRET_DOMAIN}
+    s3Credentials:
+      region:
+        name: &secret ${APP}-cnpg-secret
+        key: AWS_DEFAULT_REGION
+      accessKeyId:
+        name: *secret
+        key: AWS_ACCESS_KEY_ID
+      secretAccessKey:
+        name: *secret
+        key: AWS_SECRET_ACCESS_KEY
