@@ -85,8 +85,9 @@ spec:
             resources:
               requests:
                 cpu: 10m
+                memory: 256Mi
               limits:
-                memory: 3Gi
+                memory: 1Gi
       chrome:
         annotations:
           reloader.stakater.com/auto: "true"
