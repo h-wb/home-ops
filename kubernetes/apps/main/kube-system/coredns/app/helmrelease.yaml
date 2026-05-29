@@ -25,6 +25,7 @@ spec:
   dependsOn: []
   interval: 1h
   values:
+    priorityClassName: system-cluster-critical
     fullnameOverride: coredns
     image:
       repository: mirror.gcr.io/coredns/coredns

@@ -19,6 +19,8 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyDeployment:
+        pod:
+          priorityClassName: system-cluster-critical
         container:
           image: mirror.gcr.io/envoyproxy/envoy:v1.38.0
           resources:
