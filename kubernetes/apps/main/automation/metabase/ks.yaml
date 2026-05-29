@@ -13,11 +13,8 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/volsync
-    - ../../../../../components/postgres
-    - ../../../../../components/cnpg/import
+    - ../../../../../components/cnpg/restore
   dependsOn:
-    - name: crunchy-postgres-operator
-      namespace: database
     - name: plugin-barman-cloud
       namespace: database
   healthCheckExprs:
