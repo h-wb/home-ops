@@ -45,6 +45,8 @@ spec:
         local.config.php: |-
           <?php
           $CONFIG = array (
+            'dbhost' => 'postgres-nextcloud-rw.default.svc:5432',
+            'dbpassword' => getenv('POSTGRES_PASSWORD'),
             'trusted_proxies' =>
             array (
               0 => '127.0.0.1',
