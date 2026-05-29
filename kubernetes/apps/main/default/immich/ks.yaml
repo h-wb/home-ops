@@ -46,7 +46,7 @@ spec:
               dynamic_library_path:
                 - /usr/lib/postgresql/18/lib
               extension_control_path:
-                - /usr/share/postgresql/18/
+                - /usr/share/postgresql/18/extension/
   postBuild:
     substitute:
       APP: *app
