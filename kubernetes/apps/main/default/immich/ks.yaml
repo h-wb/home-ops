@@ -12,12 +12,10 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/cnpg/import
+    - ../../../../../components/cnpg/restore
     - ../../../../../components/cnpg/extensions/vchord
     - ../../../../../components/gpu
   dependsOn:
-    - name: crunchy-postgres-operator
-      namespace: database
     - name: plugin-barman-cloud
       namespace: database
   healthCheckExprs:

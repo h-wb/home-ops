@@ -7,8 +7,7 @@ metadata:
 spec:
   targetNamespace: downloads
   components:
-    - ../../../../../components/postgres
-    - ../../../../../components/cnpg/import
+    - ../../../../../components/cnpg/restore
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database

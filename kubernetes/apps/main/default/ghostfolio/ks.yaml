@@ -11,8 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../../components/postgres
-    - ../../../../../components/cnpg/import
+    - ../../../../../components/cnpg/restore
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database

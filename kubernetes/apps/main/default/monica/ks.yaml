@@ -12,11 +12,8 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/volsync
-    - ../../../../../components/postgres
-    - ../../../../../components/cnpg/import
+    - ../../../../../components/cnpg/restore
   dependsOn:
-    - name: crunchy-postgres-operator
-      namespace: database
     - name: plugin-barman-cloud
       namespace: database
   healthCheckExprs:
