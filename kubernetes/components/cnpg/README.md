@@ -147,8 +147,6 @@ env:
 
 ```yaml
 dependsOn:
-  - name: cloudnative-pg
-    namespace: database
   - name: plugin-barman-cloud
     namespace: database
 postBuild:
