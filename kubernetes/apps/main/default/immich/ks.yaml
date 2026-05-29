@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/postgres-vchord
-    - ../../../../../components/cnpg/import
+    # - ../../../../../components/cnpg/import
     - ../../../../../components/gpu
   dependsOn:
     - name: crunchy-postgres-operator
@@ -46,7 +46,7 @@ spec:
               dynamic_library_path:
                 - /usr/lib/postgresql/18/lib
               extension_control_path:
-                - /usr/share/postgresql/18/extension/
+                - /usr/share/postgresql/18/
   postBuild:
     substitute:
       APP: *app
