@@ -9,6 +9,7 @@ spec:
   components:
     # - ../../../../components/dragonfly
     - ../../../../../components/cnpg/restore
+    - ../../../../../components/cnpg/pooler
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database

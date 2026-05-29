@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# Opt-in PgBouncer pooler. Reference this Component alongside cnpg/restore (or
+# initdb/import) only for apps that actually need transaction-mode pooling or
+# benefit from connection multiplexing (e.g., authentik).
+# Apps that connect directly to postgres-${APP}-rw don't need this.
+resources:
+  - ./pooler.yaml
