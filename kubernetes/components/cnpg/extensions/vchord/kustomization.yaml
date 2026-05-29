@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# Patches the Cluster from cnpg/base to load vchord via the PG 18 extensions
+# mount mechanism (separate image volume, no rebuilt postgres image). Standard
+# postgresql:18 image stays from base.
+patches:
+  - target:
+      group: postgresql.cnpg.io
+      version: v1
+      kind: Cluster
+    patch: |-
+      - op: add
+        path: /spec/postgresql/shared_preload_libraries
+        value:
+          - vchord.so
+      - op: add
+        path: /spec/postgresql/extensions
+        value:
+          - name: vchord
+            image:
+              reference: ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1
+            dynamic_library_path:
+              - /usr/lib/postgresql/18/lib
+            extension_control_path:
+              - /usr/share/postgresql/18

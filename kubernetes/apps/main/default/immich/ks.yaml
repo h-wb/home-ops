@@ -13,7 +13,8 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/postgres-vchord
-    # - ../../../../../components/cnpg/import
+    - ../../../../../components/cnpg/import
+    - ../../../../../components/cnpg/extensions/vchord
     - ../../../../../components/gpu
   dependsOn:
     - name: crunchy-postgres-operator
@@ -27,26 +28,6 @@ spec:
       current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 30m
   path: ./kubernetes/apps/main/default/immich/app
-  patches:
-    - target:
-        group: postgresql.cnpg.io
-        version: v1
-        kind: Cluster
-      patch: |-
-        - op: add
-          path: /spec/postgresql/shared_preload_libraries
-          value:
-            - vchord.so
-        - op: add
-          path: /spec/postgresql/extensions
-          value:
-            - name: vchord
-              image:
-                reference: ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1
-              dynamic_library_path:
-                - /usr/lib/postgresql/18/lib
-              extension_control_path:
-                - /usr/share/postgresql/18/
   postBuild:
     substitute:
       APP: *app
