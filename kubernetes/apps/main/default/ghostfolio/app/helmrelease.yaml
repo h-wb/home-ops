@@ -28,13 +28,13 @@ spec:
               POSTGRES_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: ghostfolio-pguser-ghostfolio
+                    name: postgres-ghostfolio-app
                     key: password
               DATABASE_URL:
                 valueFrom:
                   secretKeyRef:
-                    name: ghostfolio-pguser-ghostfolio
-                    key: pgbouncer-uri
+                    name: postgres-ghostfolio-app
+                    key: uri
               REDIS_HOST: dragonfly.database.svc.cluster.local
               REDIS_PORT: "6379"
             envFrom:

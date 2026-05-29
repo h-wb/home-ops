@@ -79,14 +79,14 @@ spec:
               PROCESSOR_CONCURRENCY: "3"
               DHT_CRAWLER_SCALING_FACTOR: "100"
               DHT_CRAWLER_SAVE_FILES_THRESHOLD: "1000"
-              POSTGRES_HOST: bitmagnet-pgbouncer.downloads.svc
+              POSTGRES_HOST: postgres-bitmagnet-rw.downloads.svc
               POSTGRES_PORT: "5432"
               POSTGRES_USER: bitmagnet
               POSTGRES_NAME: bitmagnet
               POSTGRES_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: bitmagnet-pguser-bitmagnet
+                    name: postgres-bitmagnet-app
                     key: password
             resources:
               requests:

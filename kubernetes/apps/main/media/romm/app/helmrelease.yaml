@@ -34,13 +34,13 @@ spec:
               REDIS_PORT: 6379
               ROMM_DB_DRIVER: postgresql
               DB_NAME: *app
-              DB_HOST: romm-pgbouncer.media.svc
+              DB_HOST: postgres-romm-rw.media.svc
               DB_PORT: 5432
               DB_USER: *app
               DB_PASSWD:
                 valueFrom:
                   secretKeyRef:
-                    name: romm-pguser-romm
+                    name: postgres-romm-app
                     key: password
               HASHEOUS_API_ENABLED: "true"
             envFrom:

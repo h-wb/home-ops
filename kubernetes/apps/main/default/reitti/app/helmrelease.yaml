@@ -22,12 +22,12 @@ spec:
             env:
               POSTGIS_DB: *app
               POSTGIS_PORT: 5432
-              POSTGIS_HOST: reitti-pgbouncer.default.svc
+              POSTGIS_HOST: postgres-reitti-rw.default.svc
               POSTGIS_USER: *app
               POSTGIS_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: reitti-pguser-reitti
+                    name: postgres-reitti-app
                     key: password
               RABBITMQ_HOST: ''
               RABBITMQ_PORT: 5672

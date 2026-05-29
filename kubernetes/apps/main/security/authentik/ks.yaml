@@ -9,6 +9,10 @@ spec:
   components:
     # - ../../../../components/dragonfly
     - ../../../../../components/postgres
+    - ../../../../../components/cnpg/import
+  dependsOn:
+    - name: plugin-barman-cloud
+      namespace: database
   healthCheckExprs:
     - apiVersion: dragonflydb.io/v1alpha1
       kind: Dragonfly
@@ -18,6 +22,10 @@ spec:
       kind: PostgresCluster
       failed: status.conditions.filter(e, e.type == 'ProxyAvailable').all(e, e.status == 'False')
       current: status.conditions.filter(e, e.type == 'ProxyAvailable').all(e, e.status == 'True')
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 1h
   path: ./kubernetes/apps/main/security/authentik/app
   postBuild:
@@ -25,6 +33,7 @@ spec:
       APP: *app
       SUBDOMAIN: sso
       POOL_MODE: transaction
+      CNPG_POOLER_MODE: transaction
   prune: true
   sourceRef:
     kind: GitRepository

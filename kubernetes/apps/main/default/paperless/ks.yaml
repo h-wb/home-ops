@@ -14,6 +14,15 @@ spec:
     - ../../../../../components/zeroscaler
     - ../../../../../components/volsync
     - ../../../../../components/postgres
+    - ../../../../../components/cnpg/import
+  dependsOn:
+    - name: plugin-barman-cloud
+      namespace: database
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
   interval: 30m
   path: ./kubernetes/apps/main/default/paperless/app
   prune: true
