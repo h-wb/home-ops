@@ -12,7 +12,6 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/postgres-vchord
     - ../../../../../components/cnpg/import
     - ../../../../../components/cnpg/extensions/vchord
     - ../../../../../components/gpu
