@@ -32,7 +32,7 @@ spec:
               DB_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: immich-pguser-immich
+                    name: postgres-immich-app
                     key: password
             envFrom:
               - configMapRef:
@@ -53,7 +53,7 @@ spec:
               DB_PASSWORD:
                 valueFrom:
                   secretKeyRef:
-                    name: immich-pguser-immich
+                    name: postgres-immich-app
                     key: password
             envFrom:
               - configMapRef:

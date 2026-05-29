@@ -10,7 +10,7 @@ data:
   IMMICH_MACHINE_LEARNING_URL: http://immich-machine-learning.default:3003
   # DB
   DB_DATABASE_NAME: immich
-  DB_HOSTNAME: immich-pgbouncer.default.svc
+  DB_HOSTNAME: postgres-immich-rw.default.svc
   DB_PORT: "5432"
   DB_USERNAME: immich
   # REDIS
