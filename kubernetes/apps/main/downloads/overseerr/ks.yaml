@@ -23,4 +23,4 @@ spec:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 5Gi
-      ANUBIS_TARGET: "http://overseerr-app.downloads.svc.cluster.local:80"
+      ANUBIS_TARGET: "http://overseerr.downloads.svc.cluster.local:80"
