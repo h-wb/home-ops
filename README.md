@@ -1,7 +1,7 @@
+
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/h-wb/home-ops/main/docs/src/assets/icons/logo.png" align="center" width="144px" height="144px"/>
-
+<img src="https://github.com/user-attachments/assets/ff2077be-4375-4ecb-8f17-cb4e47e5e4ae" align="center" width="144px" height="144px"/>
 
 ### My Homelab Repository
 
