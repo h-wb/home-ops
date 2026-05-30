@@ -1,25 +1,32 @@
 experimental_monorepo_root = true
 
+[settings]
+experimental = true
+unix_default_inline_shell_args = "bash -euo pipefail -c"
+
 [monorepo]
 config_roots = [
     "bootstrap",
+    "kubernetes",
     "talos",
     "talos/*",
 ]
 
 [env]
 _.python.venv = {path = "{{config_root}}/.venv", create = true}
-# CLUSTER = "main"
+CLUSTER = "main"
 BWS_ACCESS_TOKEN = {required = true}
-CLUSTER = "edge"
+# CLUSTER = "edge"
 SHARED_APPS = "{{config_root}}/kubernetes/apps/main"
 CLUSTER_APPS = "{{config_root}}/kubernetes/apps/{{env.CLUSTER}}"
 KUBECONFIG = "{{config_root}}/kubernetes/clusters/{{env.CLUSTER}}/kubeconfig"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
-MISE_EXPERIMENTAL = 1
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
 TALOSCONFIG = "{{config_root}}/talos/{{env.CLUSTER}}/talosconfig"
 TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
+
+[plugins]
+krew = "https://github.com/soupglasses/mise-krew"
 
 [tools]
 "aqua:FiloSottile/age" = "1.3.1"
@@ -28,10 +35,10 @@ TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
 "aqua:cilium/cilium-cli" = "0.19.4"
 "aqua:cloudflare/cloudflared" = "2026.5.2"
 "aqua:cue-lang/cue" = "0.16.1"
+"aqua:elsesiy/kubectl-view-secret" = "0.13.0"
 "aqua:evilmartians/lefthook" = "2.1.9"
 "aqua:fluxcd/flux2" = "2.8.8"
 "aqua:getsops/sops" = "3.13.1"
-"aqua:go-task/task" = "3.51.1"
 "aqua:google/yamlfmt" = "0.21.0"
 "aqua:helm/helm" = "4.2.0"
 "aqua:helmfile/helmfile" = "1.5.2"
@@ -43,24 +50,77 @@ TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
 "aqua:siderolabs/talos" = "1.13.3"
 "aqua:yannh/kubeconform" = "0.7.0"
 "github:cli/cli" = "2.93.0"
+"krew:browse-pvc" = "v1.4.4"
+"krew:node-shell" = "v1.11.0"
+"krew:rook-ceph" = "v0.9.6"
+"pipx:flux-local" = "8.1.0"
 "pipx:makejinja" = "2.8.2"
 "python" = "3.14.5"
+uv = "latest"
 
 [tasks.log]
+description = "Log a structured message with gum"
 quiet = true
 run = 'gum log -t rfc3339 -s -l "${usage_lvl?}" "${usage_msg?}" ${usage_args}'
 usage = '''
-arg "<lvl>"
-arg "<msg>"
-arg "[args]" var=#true
+arg "<lvl>" help="Log level" {
+    choices "debug" "info" "warn" "error" "fatal"
+}
+arg "<msg>" help="Message to log"
+arg "[args]" help="Additional key/value pairs" var=#true
 '''
 
 [tasks.template]
+description = "Render a minijinja template with BWS secrets injected"
 quiet = true
 run = '''
 bws run -- minijinja-cli ${usage_input?} ${usage_args}
 '''
 usage = '''
-arg "<input>"
-arg "[args]" var=#true
+arg "<input>" help="Template file to render"
+arg "[args]" help="Extra args passed to minijinja-cli" var=#true
+'''
+
+[tasks.encrypt]
+description = "Encrypt SOPS file(s) in place (skips already-encrypted)"
+quiet = true
+usage = '''
+arg "[file]" help="File to encrypt (default: all tracked *.sops.yaml)"
+complete "file" run="git ls-files '*.sops.yaml'"
+'''
+run = '''
+encrypt() {
+    if grep -q '^sops:' "$1" 2>/dev/null; then
+        echo "skip (already encrypted): $1"
+    else
+        sops --encrypt --in-place "$1" && echo "encrypted: $1"
+    fi
+}
+if [ -n "${usage_file:-}" ]; then
+    encrypt "${usage_file}"
+else
+    git ls-files '*.sops.yaml' | while read -r f; do encrypt "$f"; done
+fi
+'''
+
+[tasks.decrypt]
+description = "Decrypt SOPS file(s) in place (skips already-decrypted)"
+quiet = true
+usage = '''
+arg "[file]" help="File to decrypt (default: all tracked *.sops.yaml)"
+complete "file" run="git ls-files '*.sops.yaml'"
+'''
+run = '''
+decrypt() {
+    if grep -q '^sops:' "$1" 2>/dev/null; then
+        sops --decrypt --in-place "$1" && echo "decrypted: $1"
+    else
+        echo "skip (not encrypted): $1"
+    fi
+}
+if [ -n "${usage_file:-}" ]; then
+    decrypt "${usage_file}"
+else
+    git ls-files '*.sops.yaml' | while read -r f; do decrypt "$f"; done
+fi
 '''

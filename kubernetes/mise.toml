@@ -1,0 +1,155 @@
+[tasks."render-local-ks"]
+description = "Render a Flux Kustomization locally (internal helper)"
+hide = true
+quiet = true
+dir = "{{ config_root }}/.."
+usage = '''
+arg "<ns>" help="Namespace of the Kustomization"
+arg "<ks>" help="Name of the Kustomization"
+'''
+run = '''
+flux-local build ks "${usage_ks?}" \
+    --path "kubernetes/apps/${CLUSTER}" \
+    --namespace "${usage_ns?}" \
+    --sources "flux-system=."
+'''
+
+[tasks."apply-ks"]
+description = "Apply local Flux Kustomization"
+quiet = true
+usage = '''
+arg "<ns>" help="Namespace of the Kustomization"
+arg "<ks>" help="Name of the Kustomization"
+complete "ns" run="kubectl get namespace --no-headers -o custom-columns=:.metadata.name"
+'''
+run = '''
+mise run //kubernetes:render-local-ks "${usage_ns?}" "${usage_ks?}" \
+    | kubectl apply --server-side --force-conflicts --field-manager=kustomize-controller -f -
+'''
+
+[tasks."delete-ks"]
+description = "Delete local Flux Kustomization"
+quiet = true
+usage = '''
+arg "<ns>" help="Namespace of the Kustomization"
+arg "<ks>" help="Name of the Kustomization"
+complete "ns" run="kubectl get namespace --no-headers -o custom-columns=:.metadata.name"
+'''
+run = '''
+mise run //kubernetes:render-local-ks "${usage_ns?}" "${usage_ks?}" | kubectl delete -f -
+'''
+
+[tasks."browse-pvc"]
+description = "Browse a PVC"
+quiet = true
+usage = '''
+arg "<ns>" help="Namespace of the PVC"
+arg "<claim>" help="Name of the PersistentVolumeClaim"
+complete "ns" run="kubectl get namespace --no-headers -o custom-columns=:.metadata.name"
+'''
+run = '''
+kubectl browse-pvc -n "${usage_ns?}" "${usage_claim?}"
+'''
+
+[tasks."debug-node"]
+description = "Open a root shell on a node"
+quiet = true
+usage = '''
+arg "<node>" help="Name of the node to debug"
+complete "node" run="kubectl get node --no-headers -o custom-columns=:.metadata.name"
+'''
+run = '''
+kubectl node-shell "${usage_node?}"
+'''
+
+[tasks."prune-pods"]
+description = "Prune pods in Failed, Pending, or Succeeded state"
+quiet = true
+run = '''
+for phase in Failed Pending Succeeded; do
+    kubectl delete pods -A --field-selector status.phase="$phase" --ignore-not-found=true
+done
+'''
+
+[tasks."view-secret"]
+description = "Decode and view a secret"
+quiet = true
+usage = '''
+arg "<ns>" help="Namespace of the secret"
+arg "<secret>" help="Name of the secret"
+complete "ns" run="kubectl get namespace --no-headers -o custom-columns=:.metadata.name"
+'''
+run = '''
+kubectl view-secret -n "${usage_ns?}" "${usage_secret?}"
+'''
+
+[tasks."restore"]
+description = "Restore a PVC from VolSync, scaling the workload down"
+quiet = true
+usage = '''
+arg "<ns>" help="Namespace of the app"
+arg "<app>" help="App name (PVC/HelmRelease/Kustomization share this name)"
+arg "[previous]" help="How many snapshots back to restore (0 = latest)" default="0"
+complete "ns" run="kubectl get namespace --no-headers -o custom-columns=:.metadata.name"
+'''
+run = '''
+flux -n "${usage_ns?}" suspend kustomization "${usage_app?}"
+flux -n "${usage_ns?}" suspend helmrelease "${usage_app?}"
+kubectl -n "${usage_ns?}" get deploy,sts -l "app.kubernetes.io/name=${usage_app?}" -o name \
+    | xargs -r -I{} kubectl -n "${usage_ns?}" scale {} --replicas=0
+kubectl -n "${usage_ns?}" wait pod --for=delete --selector="app.kubernetes.io/name=${usage_app?}" --timeout=5m
+kubectl -n "${usage_ns?}" get replicationdestination "${usage_app?}-dst" -o json \
+    | jq --arg name "${usage_app?}-manual" --arg pvc "${usage_app?}" --argjson prev "${usage_previous?}" \
+        'del(.status)
+        | .metadata = {name: $name, namespace: .metadata.namespace}
+        | .spec.kopia.copyMethod = "Direct"
+        | .spec.kopia.destinationPVC = $pvc
+        | .spec.kopia.previous = $prev' \
+    | kubectl apply --server-side -f -
+kubectl -n "${usage_ns?}" wait "job/volsync-dst-${usage_app?}-manual" --for=create --timeout=120s
+kubectl -n "${usage_ns?}" wait "job/volsync-dst-${usage_app?}-manual" --for=condition=complete --timeout=120m
+kubectl -n "${usage_ns?}" delete replicationdestination "${usage_app?}-manual"
+flux -n "${usage_ns?}" resume kustomization "${usage_app?}"
+flux -n "${usage_ns?}" resume helmrelease "${usage_app?}"
+flux -n "${usage_ns?}" reconcile helmrelease "${usage_app?}" --force
+kubectl -n "${usage_ns?}" wait pod --for=condition=ready --selector="app.kubernetes.io/name=${usage_app?}" --timeout=5m
+'''
+
+[tasks."sync"]
+description = "Force-reconcile Flux/ESO resources of a kind, all or one"
+quiet = true
+usage = '''
+arg "<resource>" help="Resource kind to reconcile" {
+    choices "hr" "ks" "gitrepo" "ocirepo" "es"
+}
+flag "-n --namespace <ns>" help="Limit to a single namespace (requires --name)"
+flag "-r --name <name>" help="Limit to a single resource (requires --namespace)"
+complete "ns" run="kubectl get namespace --no-headers -o custom-columns=:.metadata.name"
+'''
+run = '''
+annotate() {
+    kubectl -n "$1" annotate --field-manager flux-client-side-apply --overwrite "${usage_resource?}" "$2" \
+        "force-sync=$(date +%s)" \
+        "reconcile.fluxcd.io/requestedAt=$(date +%s)" \
+        "reconcile.fluxcd.io/forceAt=$(date +%s)"
+}
+ns="${usage_namespace:-}"
+name="${usage_name:-}"
+if [ -n "$ns" ] && [ -n "$name" ]; then
+    annotate "$ns" "$name"
+else
+    kubectl get "${usage_resource?}" --no-headers -A | while read -r ns name _; do
+        annotate "$ns" "$name"
+    done
+fi
+'''
+
+[tasks."hr-restart"]
+description = "Suspend then resume all non-Ready HelmReleases"
+quiet = true
+run = '''
+kubectl get hr -A --no-headers | awk '$4 != "True" {print $1, $2}' | while read -r ns name; do
+    flux -n "$ns" suspend helmrelease "$name"
+    flux -n "$ns" resume helmrelease "$name"
+done
+'''

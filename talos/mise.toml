@@ -1,8 +1,9 @@
 [tasks."node:apply"]
 description = "Apply Talos config to a node"
 usage = '''
-arg "<node>" env="NODE" help="Description"
-flag "--insecure"
+arg "<node>" env="NODE" help="Node IP/hostname to apply config to"
+flag "--insecure" help="Apply over a maintenance-mode (insecure) connection"
+complete "node" run="talosctl config info -o yaml | yq '.nodes[]'"
 '''
 run = '''
 mise run //talos:render-config "${usage_node}" | talosctl -n "${usage_node}" apply-config -f /dev/stdin ${usage_insecure:+--insecure}
@@ -11,7 +12,7 @@ mise run //talos:render-config "${usage_node}" | talosctl -n "${usage_node}" app
 [tasks.download-image]
 description = "Download Talos machine image"
 usage = '''
-arg "<version>"
+arg "<version>" help="Talos version to download (e.g. v1.13.3)"
 '''
 quiet = true
 run = '''
@@ -34,7 +35,8 @@ curl -sX POST --data-binary "$(mise run //:template ${TALOS_DIR}/schematic.yaml.
 [tasks."node:reboot"]
 description = "Reboot a node"
 usage = '''
-arg "<node>" env="NODE"
+arg "<node>" env="NODE" help="Node IP/hostname to reboot"
+complete "node" run="talosctl config info -o yaml | yq '.nodes[]'"
 '''
 run = '''
 gum confirm "Reboot node ${usage_node}?" --default="No" && \
@@ -44,7 +46,8 @@ gum confirm "Reboot node ${usage_node}?" --default="No" && \
 [tasks.render-config]
 description = "Render Talos config for a node"
 usage = '''
-arg "<node>" env="NODE"
+arg "<node>" env="NODE" help="Node IP/hostname to render config for"
+complete "node" run="talosctl config info -o yaml | yq '.nodes[]'"
 '''
 run = '''
 #!/usr/bin/env bash
@@ -56,7 +59,8 @@ talosctl machineconfig patch <(mise run //:template "${TALOS_DIR}/machineconfig.
 [tasks."node:reset"]
 description = "Reset a node"
 usage = '''
-arg "<node>" env="NODE"
+arg "<node>" env="NODE" help="Node IP/hostname to reset"
+complete "node" run="talosctl config info -o yaml | yq '.nodes[]'"
 '''
 run = '''
 gum confirm "Reset node ${usage_node}?" --default="No" && \
@@ -66,7 +70,8 @@ gum confirm "Reset node ${usage_node}?" --default="No" && \
 [tasks."node:shutdown"]
 description = "Shutdown a node"
 usage = '''
-arg "<node>" env="NODE"
+arg "<node>" env="NODE" help="Node IP/hostname to shut down"
+complete "node" run="talosctl config info -o yaml | yq '.nodes[]'"
 '''
 run = '''
 gum confirm "Shutdown node ${usage_node}?" --default="No" && \
@@ -76,7 +81,7 @@ gum confirm "Shutdown node ${usage_node}?" --default="No" && \
 [tasks.upgrade-k8s]
 description = "Upgrade Kubernetes version on the cluster"
 usage = '''
-arg "<version>"
+arg "<version>" help="Kubernetes version to upgrade to (e.g. 1.33.1)"
 '''
 run = '''
 controller=$(talosctl config info -o yaml | yq -e '.endpoints[0]')
@@ -86,7 +91,8 @@ talosctl -n "${controller}" upgrade-k8s --to "${usage_version}"
 [tasks."node:upgrade"]
 description = "Upgrade Talos version on a node"
 usage = '''
-arg "<node>" env="NODE"
+arg "<node>" env="NODE" help="Node IP/hostname to upgrade"
+complete "node" run="talosctl config info -o yaml | yq '.nodes[]'"
 '''
 run = '''
 image=$(mise run "//talos:_machine:image")
@@ -97,7 +103,7 @@ talosctl -n "${usage_node}" upgrade -i "${image}" -m powercycle --timeout=10m "$
 description = "Check if node is a controller (private)"
 hide = true
 usage = '''
-arg "<node>" env="NODE"
+arg "<node>" env="NODE" help="Node IP/hostname to check"
 '''
 run = '''
 mise run //:template "${TALOS_DIR}/nodes/${usage_node}.yaml.j2" | \

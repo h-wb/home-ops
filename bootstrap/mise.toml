@@ -56,7 +56,7 @@ mise //:log info "Running stage..." stage "$0"
 if ! talosctl kubeconfig -n "${controller}" -f --force-context-name "${CLUSTER}" "${KUBECONFIG}"; then
     mise //:log fatal "Failed to fetch kubeconfig" stage "$0"
 fi
-if [[ "${usage_lb}" != "cilium" ]]; then
+if [[ "${usage_lb?}" != "cilium" ]]; then
     if ! kubectl config set-cluster "${CLUSTER}" --server "https://${controller}:6443"; then
         mise //:log fatal "Failed to set kubectl cluster server address" stage "$0"
     fi
