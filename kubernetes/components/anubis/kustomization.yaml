@@ -5,3 +5,29 @@ kind: Component
 resources:
   - ./helmrelease.yaml
   - ./externalsecret.yaml
+patches:
+  - target:
+      group: helm.toolkit.fluxcd.io
+      kind: HelmRelease
+      annotationSelector: '!anubis.home/skip-route-patch'
+    patch: |
+      - op: add
+        path: /spec/values/route/app/rules
+        value:
+          - backendRefs:
+              - name: ${APP}-anubis
+                port: 8080
+            timeouts:
+              request: 300s
+  - target:
+      group: gateway.networking.k8s.io
+      kind: HTTPRoute
+    patch: |-
+      - op: replace
+        path: /spec/rules
+        value:
+          - backendRefs:
+              - name: ${APP}-anubis
+                port: 8080
+            timeouts:
+              request: 300s

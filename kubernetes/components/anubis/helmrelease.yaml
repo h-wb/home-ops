@@ -90,6 +90,7 @@ spec:
             readOnly: true
     service:
       anubis:
+        forceRename: "${APP}-anubis"
         controller: anubis
         ports:
           http:

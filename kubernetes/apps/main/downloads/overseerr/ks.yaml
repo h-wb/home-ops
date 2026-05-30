@@ -8,6 +8,7 @@ spec:
   targetNamespace: downloads
   components:
     - ../../../../../components/volsync
+    - ../../../../../components/anubis
   path: ./kubernetes/apps/main/downloads/overseerr/app
   prune: true
   sourceRef:
@@ -22,3 +23,4 @@ spec:
     substitute:
       APP: *app
       VOLSYNC_CAPACITY: 5Gi
+      ANUBIS_TARGET: "http://overseerr-app.downloads.svc.cluster.local:80"
