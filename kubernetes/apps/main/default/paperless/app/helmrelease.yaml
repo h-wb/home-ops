@@ -55,7 +55,7 @@ spec:
               PAPERLESS_OCR_LANGUAGES: fra eng
               PAPERLESS_OCR_LANGUAGE: fra
               # Redis
-              PAPERLESS_REDIS: "redis://dragonfly.database.svc.cluster.local:6379"
+              PAPERLESS_REDIS: "redis://paperless-dragonfly.default.svc.cluster.local:6379"
               # User Permissions
               USERMAP_GID: "65542"
             envFrom:

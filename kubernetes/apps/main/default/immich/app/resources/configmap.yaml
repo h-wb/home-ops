@@ -14,7 +14,7 @@ data:
   DB_PORT: "5432"
   DB_USERNAME: immich
   # REDIS
-  REDIS_HOSTNAME: "dragonfly.database.svc.cluster.local"
+  REDIS_HOSTNAME: "immich-dragonfly.default.svc.cluster.local"
   REDIS_PORT: "6379"
   # General
   NODE_ENV: "production"

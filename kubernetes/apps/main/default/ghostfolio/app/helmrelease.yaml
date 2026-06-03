@@ -35,7 +35,7 @@ spec:
                   secretKeyRef:
                     name: postgres-ghostfolio-app
                     key: uri
-              REDIS_HOST: dragonfly.database.svc.cluster.local
+              REDIS_HOST: ghostfolio-dragonfly.default.svc.cluster.local
               REDIS_PORT: "6379"
             envFrom:
               - secretRef:

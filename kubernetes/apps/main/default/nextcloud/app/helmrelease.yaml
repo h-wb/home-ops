@@ -74,7 +74,7 @@ spec:
           mountPath: /mnt/tank/hwe
       extraEnv:
         - name: REDIS_HOST
-          value: dragonfly.database.svc.cluster.local
+          value: nextcloud-dragonfly.default.svc.cluster.local
         - name: REDIS_HOST_PORT
           value: "6379"
     nginx:

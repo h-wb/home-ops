@@ -28,7 +28,7 @@ spec:
               DEFAULT_MAX_STORAGE_SIZE: 4096
               MAIL_MAILER: log
               QUEUE_CONNECTION: redis
-              REDIS_HOST: dragonfly.database.svc.cluster.local
+              REDIS_HOST: monica-dragonfly.default.svc.cluster.local
               DB_CONNECTION: pgsql
               DB_DATABASE: *app
               DB_HOST: postgres-monica-rw.default.svc

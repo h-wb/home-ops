@@ -30,7 +30,7 @@ spec:
               # ENABLE_SCHEDULED_UPDATE_MAME_XML: "false"
               ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: "true"
               RESCAN_ON_FILESYSTEM_CHANGE_DELAY: 5
-              REDIS_HOST: dragonfly.database.svc.cluster.local
+              REDIS_HOST: romm-dragonfly.media.svc.cluster.local
               REDIS_PORT: 6379
               ROMM_DB_DRIVER: postgresql
               DB_NAME: *app

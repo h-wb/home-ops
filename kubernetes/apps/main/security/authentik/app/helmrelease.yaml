@@ -51,7 +51,7 @@ spec:
             name: authentik-secret
     authentik:
       redis:
-        host: dragonfly.database.svc.cluster.local
+        host: authentik-dragonfly.security.svc.cluster.local
     server:
       autoscaling:
         enabled: true
