@@ -17,7 +17,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 30Gi
+      VOLSYNC_CAPACITY: 150Gi
   prune: true
   retryInterval: 1m
   sourceRef:

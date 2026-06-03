@@ -11,6 +11,10 @@ spec:
     kind: OCIRepository
     name: app-template
   dependsOn: []
+  install:
+    disableWait: true
+  upgrade:
+    disableWait: true
   values:
     controllers:
       photon:
@@ -20,20 +24,39 @@ spec:
               repository: ghcr.io/rtuszik/photon-docker
               tag: 2.2.0
             env:
-              REGION: ca
-              UPDATE_STRATEGY: PARALLEL
+              REGION: planet
+              UPDATE_STRATEGY: DISABLED # avoid 2x disk spike on planet index
+              ENABLE_METRICS: "TRUE"
               PUID: 1000
               PGID: 1000
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: &port 2322
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: *port
+                  failureThreshold: 1080 # ~3h grace for first planet index load
+                  periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: {drop: ["ALL"]}
             resources:
               requests:
-                memory: "256Mi"
+                memory: "1Gi"
                 cpu: "250m"
               limits:
-                memory: "1Gi"
+                memory: "10Gi"
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
@@ -46,10 +69,28 @@ spec:
         controller: *app
         ports:
           http:
-            port: &port 2322
+            port: *port
+    serviceMonitor:
+      app:
+        serviceName: *app
+        endpoints:
+          - port: http
+            path: /metrics
     persistence:
       data:
         enabled: true
         existingClaim: *app
         globalMounts:
           - path: /photon/data
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              group: apps
+              version: v1
+              kind: Deployment
+              name: photon
+            patch: |
+              - op: add
+                path: /spec/progressDeadlineSeconds
+                value: 7200
