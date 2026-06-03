@@ -7,22 +7,19 @@ metadata:
 spec:
   image: ghcr.io/dragonflydb/dragonfly:v1.38.1@sha256:baf70ba7ad182a992b988497cfa31a488978c8fab7712079784c2401f447e402
   replicas: 1
-  env:
-    - name: MAX_MEMORY
-      valueFrom:
-        resourceFieldRef:
-          resource: limits.memory
-          divisor: 1Mi
   args:
-    - --maxmemory=$(MAX_MEMORY)Mi
+    # keep maxmemory ~80% of the limit so process overhead doesn't trip the
+    # cgroup limit and get OOMKilled under load (shared by ~10 apps)
+    - --maxmemory=1638Mi
     - --proactor_threads=2
     - --cluster_mode=emulated
     - --default_lua_flags=allow-undeclared-keys
   resources:
     requests:
       cpu: 100m
+      memory: 2Gi
     limits:
-      memory: 512Mi
+      memory: 2Gi
       # topologySpreadConstraints:
       #   - maxSkew: 1
       #     topologyKey: "kubernetes.io/hostname"
