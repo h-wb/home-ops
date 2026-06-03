@@ -21,8 +21,8 @@ spec:
               tag: 1.7.11@sha256:531a649c7e96d5c182834b1628103d70f0d020d9285d2c9367d73f9e34164e1f
             env:
               TIME_ZONE: "Europe/Paris"
-              PHOTON_API_HOST: photon.komoot.io
-              PHOTON_API_USE_HTTPS: true
+              PHOTON_API_HOST: photon.default.svc.cluster.local:2322
+              PHOTON_API_USE_HTTPS: false
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
               DISTANCE_UNIT: km
