@@ -12,4 +12,6 @@ spec:
   datasources:
     - datasourceName: prometheus
       inputName: DS_PROMETHEUS
-  url: https://grafana.com/api/dashboards/24901/revisions/4/download
+  configMapRef:
+    name: photon-dashboard
+    key: photon.json

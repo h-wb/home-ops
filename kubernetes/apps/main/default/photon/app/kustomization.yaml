@@ -5,3 +5,11 @@ kind: Kustomization
 resources:
   - ./grafanadashboard.yaml
   - ./helmrelease.yaml
+configMapGenerator:
+  - name: photon-dashboard
+    files:
+      - photon.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled
