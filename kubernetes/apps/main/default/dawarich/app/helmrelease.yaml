@@ -17,7 +17,7 @@ spec:
         containers:
           app: &dawarich
             image:
-              repository: freikin/dawarich
+              repository: mirror.gcr.io/freikin/dawarich
               tag: 1.7.11@sha256:531a649c7e96d5c182834b1628103d70f0d020d9285d2c9367d73f9e34164e1f
             env:
               TIME_ZONE: "Europe/Paris"
@@ -28,7 +28,7 @@ spec:
               DISTANCE_UNIT: km
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
               REDIS_URL: redis://dragonfly.database.svc.cluster.local:6379
-              RAILS_ENV: development
+              RAILS_ENV: production
               DATABASE_NAME: *app
               DATABASE_PORT: 5432
               DATABASE_HOST: postgres-dawarich-rw.default.svc
@@ -38,36 +38,68 @@ spec:
                   secretKeyRef:
                     name: postgres-dawarich-app
                     key: password
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v1/health
+                    port: &port 3000
+              readiness: *probe
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 memory: "1Gi"
-                cpu: "250m"
+                cpu: "500m"
               limits:
-                memory: "3Gi"
-                cpu: "2000m"
+                memory: "4Gi"
+                cpu: "3000m"
             command:
               - "web-entrypoint.sh"
             args:
-              - "bin/rails server -p 3000 -b 0.0.0.0"
+              - "bin/rails"
+              - "server"
+              - "-p"
+              - "3000"
+              - "-b"
+              - "0.0.0.0"
           sidekiq:
             <<: *dawarich
             command:
-              - 'bundle'
-              - 'exec'
-              - 'sidekiq'
-            resources: # fixes https://github.com/Freika/dawarich/pull/941
+              - "sidekiq-entrypoint.sh"
+            args:
+              - "sidekiq"
+            probes:
+              liveness:
+                enabled: false
+              readiness:
+                enabled: false
+            securityContext: *securityContext
+            resources:
               requests:
                 memory: "1Gi"
-                cpu: "250m"
+                cpu: "500m"
               limits:
-                memory: "3Gi"
-                cpu: "1500m"
+                memory: "6Gi"
+                cpu: "3000m"
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
     service:
       app:
         controller: *app
         ports:
           http:
-            port: &port 3000
+            port: *port
     route:
       app:
         annotations:
@@ -88,8 +120,6 @@ spec:
             subPath: public
           - path: /var/app/storage
             subPath: storage
-          - path: /dawarich_db_data
-            subPath: dawarich_db_data
       watched:
         type: emptyDir
         globalMounts:
