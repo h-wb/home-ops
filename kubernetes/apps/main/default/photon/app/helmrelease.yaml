@@ -47,10 +47,8 @@ spec:
                     port: *port
                   failureThreshold: 1080 # ~3h grace for first planet index load
                   periodSeconds: 10
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: {drop: ["ALL"]}
+            # rtuszik image starts as root, then drops to PUID/PGID via gosu,
+            # so it cannot be hardened with non-root/readOnlyRootFilesystem
             resources:
               requests:
                 memory: "1Gi"
@@ -59,9 +57,9 @@ spec:
                 memory: "10Gi"
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
+        # entrypoint requires root to chown/usermod then gosu-drops to PUID/PGID
+        runAsUser: 0
+        runAsGroup: 0
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
