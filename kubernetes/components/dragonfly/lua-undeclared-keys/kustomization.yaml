@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# Appends --default_lua_flags=allow-undeclared-keys to the Dragonfly from
+# dragonfly/base. Required by Sidekiq/Resque Lua scripts (e.g. dawarich) which
+# access keys not declared in KEYS[]; rejected by default under emulated cluster.
+# Add this component AFTER ../dragonfly so the base Dragonfly exists to patch.
+patches:
+  - target:
+      group: dragonflydb.io
+      version: v1alpha1
+      kind: Dragonfly
+    patch: |-
+      - op: add
+        path: /spec/args/-
+        value: --default_lua_flags=allow-undeclared-keys

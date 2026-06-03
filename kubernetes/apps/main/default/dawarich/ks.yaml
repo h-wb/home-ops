@@ -12,6 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/dragonfly
+    - ../../../../../components/dragonfly/lua-undeclared-keys
     - ../../../../../components/volsync
     - ../../../../../components/cnpg/restore
   dependsOn:
