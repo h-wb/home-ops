@@ -28,7 +28,7 @@ spec:
               DISTANCE_UNIT: km
               APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
               REDIS_URL: redis://dragonfly.database.svc.cluster.local:6379
-              RAILS_ENV: development
+              RAILS_ENV: production
               DATABASE_NAME: *app
               DATABASE_PORT: 5432
               DATABASE_HOST: postgres-dawarich-rw.default.svc
@@ -38,6 +38,9 @@ spec:
                   secretKeyRef:
                     name: postgres-dawarich-app
                     key: password
+            envFrom:
+              - secretRef:
+                  name: dawarich-secret
             probes:
               liveness: &probe
                 enabled: true
