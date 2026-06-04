@@ -29,8 +29,8 @@ spec:
               REGION: planet
               UPDATE_STRATEGY: DISABLED # avoid 2x disk spike on planet index
               ENABLE_METRICS: "TRUE"
-              PUID: 1000
-              PGID: 1000
+              PUID: 9011
+              PGID: 9011
             probes:
               liveness: &probe
                 enabled: true
@@ -62,9 +62,9 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 9011
+        runAsGroup: 9011
+        fsGroup: 9011
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
