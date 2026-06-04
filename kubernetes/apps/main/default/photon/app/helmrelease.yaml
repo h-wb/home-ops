@@ -23,6 +23,8 @@ spec:
             image:
               repository: ghcr.io/rtuszik/photon-docker
               tag: 2.2.0
+            command: ["uv"]
+            args: ["run", "--no-sync", "-m", "src.process_manager"]
             env:
               REGION: planet
               UPDATE_STRATEGY: DISABLED # avoid 2x disk spike on planet index
@@ -47,8 +49,10 @@ spec:
                     port: *port
                   failureThreshold: 1080 # ~3h grace for first planet index load
                   periodSeconds: 10
-            # rtuszik image starts as root, then drops to PUID/PGID via gosu,
-            # so it cannot be hardened with non-root/readOnlyRootFilesystem
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: {drop: ["ALL"]}
             resources:
               requests:
                 memory: "1Gi"
@@ -57,9 +61,9 @@ spec:
                 memory: "10Gi"
     defaultPodOptions:
       securityContext:
-        # entrypoint requires root to chown/usermod then gosu-drops to PUID/PGID
-        runAsUser: 0
-        runAsGroup: 0
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
@@ -75,6 +79,10 @@ spec:
           - port: http
             path: /metrics
     persistence:
+      cache:
+        type: emptyDir
+        globalMounts:
+          - path: /photon/.cache
       data:
         enabled: true
         existingClaim: *app
