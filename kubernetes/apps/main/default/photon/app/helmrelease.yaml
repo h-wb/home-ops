@@ -27,7 +27,8 @@ spec:
             args: ["run", "--no-sync", "-m", "src.process_manager"]
             env:
               REGION: planet
-              UPDATE_STRATEGY: DISABLED # avoid 2x disk spike on planet index
+              UPDATE_STRATEGY: SEQUENTIAL
+              UPDATE_INTERVAL: 30d
               ENABLE_METRICS: "TRUE"
               PUID: 9011
               PGID: 9011
