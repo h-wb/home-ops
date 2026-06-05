@@ -5,7 +5,7 @@ kind: Cluster
 metadata:
   name: &name postgres-${APP}
   annotations:
-    cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
+    cnpg.io/skipEmptyWalArchiveCheck: "enabled"
 spec:
   bootstrap:
     recovery:

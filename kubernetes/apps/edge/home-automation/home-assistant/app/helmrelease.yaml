@@ -28,8 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/joryirving/home-assistant
-              tag:
-                2026.5.4@sha256:affa384bad3868c07ea507760baec149aae4074a756fd3352dd9f52cc171d65a
+              tag: 2026.5.4@sha256:affa384bad3868c07ea507760baec149aae4074a756fd3352dd9f52cc171d65a
             env:
               TZ: America/Toronto
               HASS_HTTP_TRUSTED_PROXY_1: 10.43.0.0/16
@@ -49,12 +48,21 @@ spec:
           codeserver:
             image:
               repository: ghcr.io/coder/code-server
-              tag:
-                4.121.0@sha256:ea5f42d99998e2ba44297eca9b8a38a101e718ef54caaa41d649f6c6f1c8c71e
+              tag: 4.121.0@sha256:ea5f42d99998e2ba44297eca9b8a38a101e718ef54caaa41d649f6c6f1c8c71e
             env:
               TZ: America/Toronto
-            args: ["--auth", "none", "--user-data-dir", "/config/.vscode", "--extensions-dir",
-              "/config/.vscode", "--port", "12321", "/config"]
+            args:
+              [
+                "--auth",
+                "none",
+                "--user-data-dir",
+                "/config/.vscode",
+                "--extensions-dir",
+                "/config/.vscode",
+                "--port",
+                "12321",
+                "/config",
+              ]
             resources:
               requests:
                 cpu: 10m
@@ -64,11 +72,11 @@ spec:
       config:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
-        - path: /config
+          - path: /config
       config-cache:
         existingClaim: "{{ .Release.Name }}-cache"
         globalMounts:
-        - path: /config/.venv
+          - path: /config/.venv
       tmp:
         type: emptyDir
     route:
@@ -76,22 +84,22 @@ spec:
         hostnames:
           - ${SUBDOMAIN}.${SECRET_DOMAIN}
         parentRefs:
-        - name: envoy-internal
-          namespace: network
+          - name: envoy-internal
+            namespace: network
         rules:
-        - backendRefs:
-          - name: "{{ .Release.Name }}"
-            port: &port 8123
+          - backendRefs:
+              - name: "{{ .Release.Name }}"
+                port: &port 8123
       codeserver:
         hostnames:
           - code.${SECRET_DOMAIN}
         parentRefs:
-        - name: envoy-internal
-          namespace: network
+          - name: envoy-internal
+            namespace: network
         rules:
-        - backendRefs:
-          - name: "{{ .Release.Name }}"
-            port: &codeserverPort 12321
+          - backendRefs:
+              - name: "{{ .Release.Name }}"
+                port: &codeserverPort 12321
     service:
       app:
         type: LoadBalancer

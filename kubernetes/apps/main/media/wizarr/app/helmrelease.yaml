@@ -67,4 +67,3 @@ spec:
           wizarr:
             app:
               - path: /.cache
-

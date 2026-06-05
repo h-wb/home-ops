@@ -26,6 +26,6 @@ spec:
     - <<: *policy
       namespace: system
   to:
-    - group: ''
+    - group: ""
       kind: Service
       name: ak-outpost-authentik-embedded-outpost

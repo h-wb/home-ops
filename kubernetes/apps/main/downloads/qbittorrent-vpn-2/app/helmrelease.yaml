@@ -45,7 +45,7 @@ spec:
                 squat.ai/tun: 1
             restartPolicy: Always
             securityContext:
-              capabilities: {add: ["NET_ADMIN"]}
+              capabilities: { add: ["NET_ADMIN"] }
               allowPrivilegeEscalation: false
             lifecycle:
               postStart:

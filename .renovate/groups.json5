@@ -25,11 +25,7 @@
       description: "CloudNativePG Group",
       groupName: "cloudnative-pg",
       matchDatasources: ["docker"],
-      matchPackageNames: [
-        "/cloudnative-pg/",
-        "/plugin-barman-cloud/",
-        "/barman-cloud/",
-      ],
+      matchPackageNames: ["/cloudnative-pg/", "/plugin-barman-cloud/", "/barman-cloud/"],
       group: {
         commitMessageTopic: "{{{groupName}}} group",
       },

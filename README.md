@@ -1,4 +1,3 @@
-
 <div align="center">
 
 <img src="https://github.com/user-attachments/assets/ff2077be-4375-4ecb-8f17-cb4e47e5e4ae" align="center" width="144px" height="144px"/>
@@ -26,8 +25,9 @@ There is a template over at [onedr0p/cluster-template](https://github.com/onedr0
 I would recommend looking at [onedr0p/home-ops](https://github.com/onedr0p/home-ops) or [joryirving/home-ops](https://github.com/joryirving/home-ops) for more polished repositories.
 
 You could find this one useful if you're looking for informations about:
+
 - Longhorn
-- OVH (*archived*)
+- OVH (_archived_)
 - [Bitwarden Secrets Manager](https://external-secrets.io/latest/provider/bitwarden-secrets-manager/)
 
 ### Installation
@@ -81,15 +81,15 @@ While most of my infrastructure and workloads are self-hosted I do rely upon the
 
 The alternative solution to these two problems would be to host a Kubernetes cluster in the cloud and deploy applications like [HCVault](https://www.vaultproject.io/), [Vaultwarden](https://github.com/dani-garcia/vaultwarden), [ntfy](https://ntfy.sh/), and [Gatus](https://gatus.io/). However, maintaining another cluster and monitoring another group of workloads is a lot more time and effort than I am willing to put in.
 
-| Service                                     | Use                                                               | Cost           |
-|---------------------------------------------|-------------------------------------------------------------------|----------------|
-| [Bitwarden](https://bitwarden.com/)         | Secrets with [External Secrets](https://external-secrets.io/)     | Free        |
-| [OVH](https://www.ovhcloud.com)             | Domain registrar                                                  | 3.58€/yr        |
-| [Cloudflare](https://www.cloudflare.com/)     | Domain and Tunnels                                                | Free       |
-| [GitHub](https://github.com/)               | Hosting this repository and continuous integration/deployments    | Free           |
-| [Hetzner](https://www.hetzner.com/)               | Backup with [Storage box](https://www.hetzner.com/storage/storage-box/)    | 46.08€/yr          |
-| [Healthchecks.io](https://healthchecks.io/) | Monitoring internet connectivity and external facing applications | Free          |
-|                                             |                                                                   | Total: 49.66€/yr |
+| Service                                     | Use                                                                     | Cost             |
+| ------------------------------------------- | ----------------------------------------------------------------------- | ---------------- |
+| [Bitwarden](https://bitwarden.com/)         | Secrets with [External Secrets](https://external-secrets.io/)           | Free             |
+| [OVH](https://www.ovhcloud.com)             | Domain registrar                                                        | 3.58€/yr         |
+| [Cloudflare](https://www.cloudflare.com/)   | Domain and Tunnels                                                      | Free             |
+| [GitHub](https://github.com/)               | Hosting this repository and continuous integration/deployments          | Free             |
+| [Hetzner](https://www.hetzner.com/)         | Backup with [Storage box](https://www.hetzner.com/storage/storage-box/) | 46.08€/yr        |
+| [Healthchecks.io](https://healthchecks.io/) | Monitoring internet connectivity and external facing applications       | Free             |
+|                                             |                                                                         | Total: 49.66€/yr |
 
 ---
 
@@ -109,31 +109,30 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 
 ### Main Kubernetes Cluster
 
-| Name  | Device         | CPU       | OS Disk   | Data Disk | RAM  | OS    | Purpose           |
-|-------|----------------|-----------|-----------|-----------|------|-------|-------------------|
-| k8s-1 | Intel NUC13ANHI7   | i7-1360P | 128GB SSD | 500GB NVME  | 64GB | Talos | Kubernetes Control-plane |
-| k8s-2 | Intel NUC12WSHI7   | i7-1260P | 128GB SSD | 500GB NVME  | 64GB | Talos | Kubernetes Control-plane |
-| k8s-3 | Intel NUC12WSHI7   | i7-1260P | 128GB SSD | 500GB NVME  | 64GB | Talos | Kubernetes Control-plane |
+| Name  | Device           | CPU      | OS Disk   | Data Disk  | RAM  | OS    | Purpose                  |
+| ----- | ---------------- | -------- | --------- | ---------- | ---- | ----- | ------------------------ |
+| k8s-1 | Intel NUC13ANHI7 | i7-1360P | 128GB SSD | 500GB NVME | 64GB | Talos | Kubernetes Control-plane |
+| k8s-2 | Intel NUC12WSHI7 | i7-1260P | 128GB SSD | 500GB NVME | 64GB | Talos | Kubernetes Control-plane |
+| k8s-3 | Intel NUC12WSHI7 | i7-1260P | 128GB SSD | 500GB NVME | 64GB | Talos | Kubernetes Control-plane |
 
 ### Dev Kubernetes Cluster
 
-| Name  | Device         | CPU       | OS Disk   | Data Disk | RAM  | OS    | Purpose           |
-|-------|----------------|-----------|-----------|-----------|------|-------|-------------------|
-| hyperv-1 | Gaming PC   | Ryzen 3600X | 2TB NVME | -  | 64GB | Hyper-V | Kubernetes Control-plane |
+| Name     | Device    | CPU         | OS Disk  | Data Disk | RAM  | OS      | Purpose                  |
+| -------- | --------- | ----------- | -------- | --------- | ---- | ------- | ------------------------ |
+| hyperv-1 | Gaming PC | Ryzen 3600X | 2TB NVME | -         | 64GB | Hyper-V | Kubernetes Control-plane |
 
 ### Supporting Hardware
 
-| Name   | Device         | CPU           | OS Disk    | Data Disk  | RAM   | OS           | Purpose        |
-|--------|----------------|---------------|------------|------------|-------|--------------|----------------|
-| NAS    | Supermicro 4U        | **?**     | **?**   | 60B | 32GB | TrueNAS Scale       | NAS/NFS/Backup |
-| PiKVM  | Raspberry Pi4  | Cortex A72    | 64GB mSD   | -          | 4GB   | PiKVM (Arch) | KVM            |
+| Name  | Device        | CPU        | OS Disk  | Data Disk | RAM  | OS            | Purpose        |
+| ----- | ------------- | ---------- | -------- | --------- | ---- | ------------- | -------------- |
+| NAS   | Supermicro 4U | **?**      | **?**    | 60B       | 32GB | TrueNAS Scale | NAS/NFS/Backup |
+| PiKVM | Raspberry Pi4 | Cortex A72 | 64GB mSD | -         | 4GB  | PiKVM (Arch)  | KVM            |
 
 ---
 
 ## 🤝 Thanks
 
 A big thanks to [onedr0p](https://github.com/onedr0p) and his [cluster-template](https://github.com/onedr0p/cluster-template), [joryirving](https://github.com/joryirving), and the whole [Home Operations](https://discord.gg/home-operations) Discord community to have helped me build this repository.
-
 
 ## 📜 Changelog
 

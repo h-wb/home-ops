@@ -81,7 +81,7 @@ env:
     valueFrom:
       secretKeyRef:
         name: postgres-${APP}-app
-        key: host       # postgres-${APP}-rw (override to pooler-${APP}-rw for PgBouncer)
+        key: host # postgres-${APP}-rw (override to pooler-${APP}-rw for PgBouncer)
   - name: DB_USER
     valueFrom:
       secretKeyRef:
@@ -108,11 +108,11 @@ The base component creates a `Pooler` per app at `pooler-${APP}-rw`. Apps opt in
 
 **Pool modes:**
 
-| Mode | Use Case | Limitations |
-|------|----------|-------------|
-| `session` (default) | Most apps | None |
-| `transaction` | Authentik, Django | No SET, LISTEN/NOTIFY, session features |
-| `statement` | Rare | No transactions, prepared statements |
+| Mode                | Use Case          | Limitations                             |
+| ------------------- | ----------------- | --------------------------------------- |
+| `session` (default) | Most apps         | None                                    |
+| `transaction`       | Authentik, Django | No SET, LISTEN/NOTIFY, session features |
+| `statement`         | Rare              | No transactions, prepared statements    |
 
 **Example: Authentik with transaction-mode pooler**
 
@@ -130,7 +130,7 @@ postBuild:
 # helmrelease.yaml — override host to use pooler
 env:
   - name: DB_HOST
-    value: pooler-authentik-rw   # use PgBouncer
+    value: pooler-authentik-rw # use PgBouncer
   - name: DB_USER
     valueFrom:
       secretKeyRef:
@@ -151,22 +151,22 @@ dependsOn:
     namespace: database
 postBuild:
   substitute:
-    APP: myapp   # Required
+    APP: myapp # Required
 ```
 
 ### Core Settings (with defaults)
 
 ```yaml
-CNPG_REPLICAS: '3'                # Instances (3 = HA quorum)
-CNPG_SIZE: 2Gi                    # PVC size (2Gi small, 10Gi large)
+CNPG_REPLICAS: "3" # Instances (3 = HA quorum)
+CNPG_SIZE: 2Gi # PVC size (2Gi small, 10Gi large)
 CNPG_STORAGECLASS: local-hostpath
 ```
 
 ### Image override (PostGIS, vectorchord, …)
 
 ```yaml
-CNPG_IMAGE: ghcr.io/cloudnative-pg/postgresql   # Override image
-CNPG_VERSION: '18.1-system-trixie'              # Override tag
+CNPG_IMAGE: ghcr.io/cloudnative-pg/postgresql # Override image
+CNPG_VERSION: "18.1-system-trixie" # Override tag
 # For PostGIS:
 # CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis
 # CNPG_VERSION: '17-3.5'
@@ -175,18 +175,18 @@ CNPG_VERSION: '18.1-system-trixie'              # Override tag
 ### Import (only for `cnpg/import`)
 
 ```yaml
-CNPG_IMPORT_HOST: ${APP}-primary                # Source Postgres service
-CNPG_IMPORT_USER: postgres                      # User to connect as
-CNPG_IMPORT_DBNAME: postgres                    # DB to connect to
+CNPG_IMPORT_HOST: ${APP}-primary # Source Postgres service
+CNPG_IMPORT_USER: postgres # User to connect as
+CNPG_IMPORT_DBNAME: postgres # DB to connect to
 CNPG_IMPORT_PASSWORD_SECRET: ${APP}-pguser-postgres
-CNPG_IMPORT_TYPE: microservice                  # or 'monolith' for multi-DB
+CNPG_IMPORT_TYPE: microservice # or 'monolith' for multi-DB
 ```
 
 ### PostgreSQL Tuning
 
 ```yaml
-CNPG_RANDOM_PAGE_COST: '1.1'        # SSD-optimized
-CNPG_EFFECTIVE_IO_CONCURRENCY: '200'
+CNPG_RANDOM_PAGE_COST: "1.1" # SSD-optimized
+CNPG_EFFECTIVE_IO_CONCURRENCY: "200"
 CNPG_WAL_KEEP_SIZE: 1GB
 CNPG_MAX_SLOT_WAL_KEEP: 2GB
 ```
@@ -202,16 +202,16 @@ CNPG_LIMITS_MEMORY: 2Gi
 ### Synchronous Replication
 
 ```yaml
-CNPG_SYNC_METHOD: any             # 'any' = quorum; remove to disable
-CNPG_SYNC_NUMBER: '1'             # Min standby replicas for sync
-CNPG_SYNC_DURABILITY: preferred   # Self-healing — stays writable if standbys down
+CNPG_SYNC_METHOD: any # 'any' = quorum; remove to disable
+CNPG_SYNC_NUMBER: "1" # Min standby replicas for sync
+CNPG_SYNC_DURABILITY: preferred # Self-healing — stays writable if standbys down
 ```
 
 ### PgBouncer Pooler
 
 ```yaml
-CNPG_POOLER_MODE: session              # session, transaction, statement
-CNPG_POOLER_INSTANCES: '2'             # Number of pooler pods
+CNPG_POOLER_MODE: session # session, transaction, statement
+CNPG_POOLER_INSTANCES: "2" # Number of pooler pods
 CNPG_POOLER_REQUESTS_CPU: 10m
 CNPG_POOLER_REQUESTS_MEMORY: 32Mi
 CNPG_POOLER_LIMITS_MEMORY: 64Mi
@@ -220,7 +220,7 @@ CNPG_POOLER_LIMITS_MEMORY: 64Mi
 ### Backup
 
 ```yaml
-CNPG_BACKUP_TARGET: prefer-standby   # 'primary' if instances=1
+CNPG_BACKUP_TARGET: prefer-standby # 'primary' if instances=1
 CNPG_RETENTION_POLICY: 30d
 CNPG_DISABLED_SERVICES: "['ro', 'r']"
 ```

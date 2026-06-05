@@ -6,7 +6,7 @@ metadata:
   name: postgres-${APP}
   annotations:
     # Skip WAL archive check — the import populates the cluster, no WAL in S3 yet
-    cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
+    cnpg.io/skipEmptyWalArchiveCheck: "enabled"
 spec:
   bootstrap:
     initdb:

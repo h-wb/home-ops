@@ -25,33 +25,33 @@ home-ops/
 
 ## Clusters
 
-| Cluster | Nodes | Purpose |
-|---|---|---|
+| Cluster  | Nodes                                                                       | Purpose                                              |
+| -------- | --------------------------------------------------------------------------- | ---------------------------------------------------- |
 | **main** | 3× Talos (tal0s, tal1s, tal2s — all control-plane, NVMe storage, Rook/Ceph) | Production homelab — auth, photos, media, automation |
-| **edge** | 1× node | Edge services / lighter workloads |
+| **edge** | 1× node                                                                     | Edge services / lighter workloads                    |
 
 Switch clusters by setting `CLUSTER=edge` (or `main`) in the shell or `.mise.toml`. That swaps `KUBECONFIG`, `TALOSCONFIG`, and the apps tree mise sees.
 
 ## Key technologies
 
-| Category | Tool | Notes |
-|---|---|---|
-| OS | Talos Linux | configs in `talos/` |
-| GitOps | Flux | recursive scan of `kubernetes/apps/${CLUSTER}/` |
-| Networking | Cilium (eBPF) | CNI |
-| Gateway | Envoy Gateway | `envoy-internal` + `envoy-external` Gateways in `network` ns |
-| DNS | external-dns | syncs HTTPRoutes to Cloudflare / k8s-gateway |
-| Secrets | external-secrets + **Bitwarden Secrets Manager** (`bitwarden-secrets-manager` ClusterSecretStore) | not 1Password |
-| Sensitive Git files | SOPS + age (`age.key` at repo root) | |
-| Postgres | **CloudNativePG** + plugin-barman-cloud | migrated off CrunchyData PGO in 2026-05 |
-| Caches/KV | Dragonfly | redis-compatible |
-| Block storage | Rook-Ceph (`ceph-block`, `ceph-filesystem`, `ceph-bucket`) | hyper-converged on the 3 Talos nodes |
-| Local hostpath | `local-hostpath` storage class (`WaitForFirstConsumer`) | used by CNPG, etc. |
-| Backup | volsync (Kopia repo on NFS), CNPG → Barman → Garage S3 | |
-| Object storage | Garage (`s3.${SECRET_DOMAIN}`) | for CNPG Barman + other |
-| OCI mirror | spegel | per-node local image cache |
-| CI | Renovate + GitHub Actions | |
-| App chart | bjw-s `app-template` (v5.x) | shared OCIRepository at `components/common/repos/app-template/` |
+| Category            | Tool                                                                                              | Notes                                                           |
+| ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| OS                  | Talos Linux                                                                                       | configs in `talos/`                                             |
+| GitOps              | Flux                                                                                              | recursive scan of `kubernetes/apps/${CLUSTER}/`                 |
+| Networking          | Cilium (eBPF)                                                                                     | CNI                                                             |
+| Gateway             | Envoy Gateway                                                                                     | `envoy-internal` + `envoy-external` Gateways in `network` ns    |
+| DNS                 | external-dns                                                                                      | syncs HTTPRoutes to Cloudflare / k8s-gateway                    |
+| Secrets             | external-secrets + **Bitwarden Secrets Manager** (`bitwarden-secrets-manager` ClusterSecretStore) | not 1Password                                                   |
+| Sensitive Git files | SOPS + age (`age.key` at repo root)                                                               |                                                                 |
+| Postgres            | **CloudNativePG** + plugin-barman-cloud                                                           | migrated off CrunchyData PGO in 2026-05                         |
+| Caches/KV           | Dragonfly                                                                                         | redis-compatible                                                |
+| Block storage       | Rook-Ceph (`ceph-block`, `ceph-filesystem`, `ceph-bucket`)                                        | hyper-converged on the 3 Talos nodes                            |
+| Local hostpath      | `local-hostpath` storage class (`WaitForFirstConsumer`)                                           | used by CNPG, etc.                                              |
+| Backup              | volsync (Kopia repo on NFS), CNPG → Barman → Garage S3                                            |                                                                 |
+| Object storage      | Garage (`s3.${SECRET_DOMAIN}`)                                                                    | for CNPG Barman + other                                         |
+| OCI mirror          | spegel                                                                                            | per-node local image cache                                      |
+| CI                  | Renovate + GitHub Actions                                                                         |                                                                 |
+| App chart           | bjw-s `app-template` (v5.x)                                                                       | shared OCIRepository at `components/common/repos/app-template/` |
 
 ## GitOps flow
 
@@ -85,9 +85,9 @@ Apps pick the bootstrap mode by directory reference:
 ```yaml
 # kubernetes/apps/main/<ns>/<app>/ks.yaml
 components:
-  - ../../../../../components/cnpg/restore   # production default
+  - ../../../../../components/cnpg/restore # production default
 dependsOn:
-  - name: plugin-barman-cloud                # gates transitively on cloudnative-pg
+  - name: plugin-barman-cloud # gates transitively on cloudnative-pg
     namespace: database
 healthCheckExprs:
   - apiVersion: postgresql.cnpg.io/v1
@@ -131,9 +131,9 @@ postBuild:
 
 ## Common pitfalls
 
-- **Helm-managed config files persist** beyond chart values. Apps like Nextcloud write to `config.php` on the persistent volume during *initial install only* — later `externalDatabase.host` changes in the HR are ignored. Override via the app's own `local.config.php` (or equivalent) instead of relying on Helm regenerating.
+- **Helm-managed config files persist** beyond chart values. Apps like Nextcloud write to `config.php` on the persistent volume during _initial install only_ — later `externalDatabase.host` changes in the HR are ignored. Override via the app's own `local.config.php` (or equivalent) instead of relying on Helm regenerating.
 - **`spec.patches` on child Kustomizations doesn't stick** (see Gotcha above). Use a Component.
-- **JSON Patch target name** in kustomize patches uses the *literal pre-substitution* name. The Cluster's `metadata.name` is `postgres-${APP}` during kustomize, before Flux postBuild. Target by group+kind (and skip `name:`) to avoid this footgun.
+- **JSON Patch target name** in kustomize patches uses the _literal pre-substitution_ name. The Cluster's `metadata.name` is `postgres-${APP}` during kustomize, before Flux postBuild. Target by group+kind (and skip `name:`) to avoid this footgun.
 - **`local-hostpath` is `WaitForFirstConsumer`**: PVCs stay Pending until a pod is scheduled. If the pod can't schedule (memory pressure, anti-affinity), the PVC also hangs.
 - **Pod anti-affinity `required`** on CNPG instances forces one-per-node. If a node is full and the cluster has 3 instances, instance 3 will be unschedulable. Either soften to `preferred` per-app (`CNPG_ANTI_AFFINITY: preferred` substitute) or free memory.
 

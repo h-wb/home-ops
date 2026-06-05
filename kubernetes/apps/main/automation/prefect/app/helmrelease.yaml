@@ -30,7 +30,7 @@ spec:
               PREFECT_API_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}/api"
               PREFECT_SERVER_API_HOST: 0.0.0.0
               PREFECT_SERVER_API_PORT: &port 4200
-              PREFECT_LOGGING_LEVEL: 'DEBUG'
+              PREFECT_LOGGING_LEVEL: "DEBUG"
             envFrom:
               - secretRef:
                   name: prefect-secret

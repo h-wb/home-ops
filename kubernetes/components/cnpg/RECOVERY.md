@@ -10,6 +10,7 @@ Point-In-Time Recovery allows you to restore a PostgreSQL cluster to any specifi
 ## How PITR Works
 
 CNPG uses base backups + Write-Ahead Logs (WAL) to replay transactions up to a specific point:
+
 1. Restore from nearest base backup (before target time)
 2. Replay WAL archives up to specified recovery target
 3. Stop at exact moment (timestamp, transaction ID, or restore point)
@@ -40,6 +41,7 @@ TARGET_TIME="2025-12-12T14:30:00+00:00"  # Before the incident
 ```
 
 **Or use transaction ID if known:**
+
 ```bash
 # From PostgreSQL logs or monitoring
 TARGET_XID="123456789"
@@ -115,98 +117,102 @@ spec:
 ```
 
 **Option B: Recover to transaction ID**
+
 ```yaml
-  patches:
-    - patch: |-
-        apiVersion: postgresql.cnpg.io/v1
-        kind: Cluster
-        metadata:
-          name: postgres-${APP}
-          annotations:
-            cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
-        spec:
-          bootstrap:
-            recovery:
-              database: forgejo
-              owner: forgejo
-              source: source
-              recoveryTarget:
-                targetXID: "123456789"
-                backupID: postgres-forgejo-backup-20251210000000
-          externalClusters:
-            - name: source
-              plugin:
-                name: barman-cloud.cloudnative-pg.io
-                parameters:
-                  barmanObjectName: postgres-${APP}
-                  serverName: postgres-forgejo
-      target:
-        kind: Cluster
+patches:
+  - patch: |-
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
         name: postgres-${APP}
+        annotations:
+          cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
+      spec:
+        bootstrap:
+          recovery:
+            database: forgejo
+            owner: forgejo
+            source: source
+            recoveryTarget:
+              targetXID: "123456789"
+              backupID: postgres-forgejo-backup-20251210000000
+        externalClusters:
+          - name: source
+            plugin:
+              name: barman-cloud.cloudnative-pg.io
+              parameters:
+                barmanObjectName: postgres-${APP}
+                serverName: postgres-forgejo
+    target:
+      kind: Cluster
+      name: postgres-${APP}
 ```
 
 **Option C: Recover to named restore point**
+
 ```yaml
-  patches:
-    - patch: |-
-        apiVersion: postgresql.cnpg.io/v1
-        kind: Cluster
-        metadata:
-          name: postgres-${APP}
-          annotations:
-            cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
-        spec:
-          bootstrap:
-            recovery:
-              database: forgejo
-              owner: forgejo
-              source: source
-              recoveryTarget:
-                targetName: "before-migration"
-                backupID: postgres-forgejo-backup-20251210000000
-          externalClusters:
-            - name: source
-              plugin:
-                name: barman-cloud.cloudnative-pg.io
-                parameters:
-                  barmanObjectName: postgres-${APP}
-                  serverName: postgres-forgejo
-      target:
-        kind: Cluster
+patches:
+  - patch: |-
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
         name: postgres-${APP}
+        annotations:
+          cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
+      spec:
+        bootstrap:
+          recovery:
+            database: forgejo
+            owner: forgejo
+            source: source
+            recoveryTarget:
+              targetName: "before-migration"
+              backupID: postgres-forgejo-backup-20251210000000
+        externalClusters:
+          - name: source
+            plugin:
+              name: barman-cloud.cloudnative-pg.io
+              parameters:
+                barmanObjectName: postgres-${APP}
+                serverName: postgres-forgejo
+    target:
+      kind: Cluster
+      name: postgres-${APP}
 ```
 
 **Option D: Recover to earliest consistent state**
+
 ```yaml
-  patches:
-    - patch: |-
-        apiVersion: postgresql.cnpg.io/v1
-        kind: Cluster
-        metadata:
-          name: postgres-${APP}
-          annotations:
-            cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
-        spec:
-          bootstrap:
-            recovery:
-              database: forgejo
-              owner: forgejo
-              source: source
-              recoveryTarget:
-                targetImmediate: true
-          externalClusters:
-            - name: source
-              plugin:
-                name: barman-cloud.cloudnative-pg.io
-                parameters:
-                  barmanObjectName: postgres-${APP}
-                  serverName: postgres-forgejo
-      target:
-        kind: Cluster
+patches:
+  - patch: |-
+      apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      metadata:
         name: postgres-${APP}
+        annotations:
+          cnpg.io/skipEmptyWalArchiveCheck: 'enabled'
+      spec:
+        bootstrap:
+          recovery:
+            database: forgejo
+            owner: forgejo
+            source: source
+            recoveryTarget:
+              targetImmediate: true
+        externalClusters:
+          - name: source
+            plugin:
+              name: barman-cloud.cloudnative-pg.io
+              parameters:
+                barmanObjectName: postgres-${APP}
+                serverName: postgres-forgejo
+    target:
+      kind: Cluster
+      name: postgres-${APP}
 ```
 
 **Why this approach?**
+
 - ✅ Only affects THIS app's cluster
 - ✅ Other apps using `cnpg/restore` are unaffected
 - ✅ Easy to add/remove - just edit ks.yaml
@@ -228,6 +234,7 @@ kubectl logs -n development postgres-forgejo-1 -f | grep recovery
 ```
 
 Expected output:
+
 ```
 LOG:  starting point-in-time recovery to 2025-12-12 14:30:00+00
 LOG:  restored log file "000000010000000000000042" from archive
@@ -282,14 +289,14 @@ git push
 
 ## Recovery Target Options
 
-| Target Type | When to Use | Requires backupID? |
-|-------------|-------------|-------------------|
-| `targetTime` | Most common - rollback to timestamp | ❌ No (auto-finds backup) |
-| `targetXID` | Rollback to specific transaction | ✅ Yes |
-| `targetName` | Pre-created restore point | ✅ Yes |
-| `targetLSN` | Rollback to WAL position | ❌ No (auto-finds backup) |
-| `targetImmediate` | Earliest consistent state | ❌ No |
-| `targetTLI` | Recover to specific timeline (see below) | ❌ No |
+| Target Type       | When to Use                              | Requires backupID?        |
+| ----------------- | ---------------------------------------- | ------------------------- |
+| `targetTime`      | Most common - rollback to timestamp      | ❌ No (auto-finds backup) |
+| `targetXID`       | Rollback to specific transaction         | ✅ Yes                    |
+| `targetName`      | Pre-created restore point                | ✅ Yes                    |
+| `targetLSN`       | Rollback to WAL position                 | ❌ No (auto-finds backup) |
+| `targetImmediate` | Earliest consistent state                | ❌ No                     |
+| `targetTLI`       | Recover to specific timeline (see below) | ❌ No                     |
 
 ---
 
@@ -329,6 +336,7 @@ patches:
 **IMPORTANT:** Use `postgres-${APP}` in patch target (before variable substitution), not the final name like `postgres-myapp`.
 
 **Finding the correct timeline:**
+
 1. Check error message for "timeline N" in backup_label
 2. Or list timeline history files in S3: `00000007.history`, `00000008.history`, etc.
 3. Use the timeline number where your backup was created
@@ -355,15 +363,19 @@ postgres-forgejo-backup-20251212000000  16h   postgres-forgejo  plugin   complet
 ## Troubleshooting PITR
 
 **Issue: "no backup found for target time"**
+
 - Solution: Check backups exist before target time with `kubectl get backup -n <namespace>`
 
 **Issue: "requested timeline is not a child of this server's history"**
+
 - Solution: Timeline mismatch - verify `serverName` in externalClusters matches original cluster
 
 **Issue: Recovery stuck at "waiting for WAL"**
+
 - Solution: Target time may be beyond available WAL archives. Check S3 bucket for WAL files.
 
 **Issue: Cluster recreates but ignores recoveryTarget**
+
 - Solution: Ensure patch.yaml is in `restore` component, not `initdb`
 
 ---
