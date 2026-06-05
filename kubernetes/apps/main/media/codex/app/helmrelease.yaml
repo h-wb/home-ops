@@ -69,6 +69,8 @@ spec:
         globalMounts:
           - path: /tmp
             subPath: tmp
+          - path: /app/.npm
+            subPath: npm
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
