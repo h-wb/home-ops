@@ -32,13 +32,13 @@ spec:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
-    defaultPodOptions:
-      securityContext:
-        fsGroup: 1000
-        runAsGroup: 1000
-        runAsNonRoot: true
-        runAsUser: 1000
-        fsGroupChangePolicy: OnRootMismatch
+    # defaultPodOptions:
+    #   securityContext:
+    #     fsGroup: 1000
+    #     runAsGroup: 1000
+    #     runAsNonRoot: true
+    #     runAsUser: 1000
+    #     fsGroupChangePolicy: OnRootMismatch
     service:
       app:
         ports:
@@ -56,6 +56,15 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /kavita/config
+      tmpfs:
+        type: emptyDir
+        globalMounts:
+          - path: /kavita/config/logs
+            subPath: logs
+          - path: /kavita/config/cache
+            subPath: cache
+          - path: /tmp
+            subPath: tmp
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
