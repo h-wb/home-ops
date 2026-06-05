@@ -61,6 +61,9 @@ spec:
         existingClaim: "{{ .Release.Name }}"
         globalMounts:
           - path: /app/data
+            subPath: data
+          - path: /app/config
+            subPath: config
       tmpfs:
         type: emptyDir
         globalMounts:
