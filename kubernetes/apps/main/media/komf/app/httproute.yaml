@@ -1,0 +1,68 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.networking.k8s.io/httproute_v1.json
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: komf
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/group: Books
+    gethomepage.dev/name: Komf
+    gethomepage.dev/icon: komga.png
+    gethomepage.dev/description: Komga Metadata Analyser
+    external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
+spec:
+  hostnames:
+    - "komf.${SECRET_DOMAIN}"
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    # Komelia webui ships its JS/wasm gzip-only (komelia-app.js.gz, *.wasm.gz),
+    # and Ktor 3.3.x won't serve them under their bare names. Rewrite to the .gz
+    # asset and tag the response so the browser decompresses and uses it.
+    - matches:
+        - path:
+            type: RegularExpression
+            value: .*\.js$
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: komf-gz-rewrite
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Content-Encoding
+                value: gzip
+              - name: Content-Type
+                value: text/javascript
+      backendRefs:
+        - name: komf
+          port: 8085
+    - matches:
+        - path:
+            type: RegularExpression
+            value: .*\.wasm$
+      filters:
+        - type: ExtensionRef
+          extensionRef:
+            group: gateway.envoyproxy.io
+            kind: HTTPRouteFilter
+            name: komf-gz-rewrite
+        - type: ResponseHeaderModifier
+          responseHeaderModifier:
+            set:
+              - name: Content-Encoding
+                value: gzip
+              - name: Content-Type
+                value: application/wasm
+      backendRefs:
+        - name: komf
+          port: 8085
+    # Everything else (index.html, /api, the .gz assets by their real name) is
+    # served unchanged.
+    - backendRefs:
+        - name: komf
+          port: 8085
