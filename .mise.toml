@@ -5,17 +5,12 @@ experimental = true
 unix_default_inline_shell_args = "bash -euo pipefail -c"
 
 [monorepo]
-config_roots = [
-    "bootstrap",
-    "kubernetes",
-    "talos",
-    "talos/*",
-]
+config_roots = ["bootstrap", "kubernetes", "talos", "talos/*"]
 
 [env]
-_.python.venv = {path = "{{config_root}}/.venv", create = true}
+_.python.venv = { path = "{{config_root}}/.venv", create = true }
 CLUSTER = "main"
-BWS_ACCESS_TOKEN = {required = true}
+BWS_ACCESS_TOKEN = { required = true }
 # CLUSTER = "edge"
 SHARED_APPS = "{{config_root}}/kubernetes/apps/main"
 CLUSTER_APPS = "{{config_root}}/kubernetes/apps/{{env.CLUSTER}}"
@@ -50,6 +45,9 @@ krew = "https://github.com/soupglasses/mise-krew"
 "aqua:siderolabs/talos" = "1.13.3"
 "aqua:yannh/kubeconform" = "0.8.0"
 "github:cli/cli" = "2.93.0"
+hk = "latest"
+pkl = "latest"
+oxfmt = "latest"
 "krew:browse-pvc" = "v1.4.4"
 "krew:node-shell" = "v1.11.0"
 "krew:rook-ceph" = "v0.9.6"
