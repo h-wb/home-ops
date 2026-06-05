@@ -78,6 +78,8 @@ spec:
           - matches:
               - path:
                   value: /webhook
+              - path:
+                  value: /mcp-server
             backendRefs: [ { } ]
     persistence:
       data:
