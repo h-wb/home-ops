@@ -45,20 +45,8 @@ spec:
         ports:
           http:
             port: &port 8085
-    route:
-      app:
-        annotations:
-          gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Books
-          gethomepage.dev/name: Komf
-          gethomepage.dev/icon: komga.png
-          gethomepage.dev/description: Komga Metadata Analyser
-          external-dns.alpha.kubernetes.io/target: internal.${SECRET_DOMAIN}
-        hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
-        parentRefs:
-          - name: envoy-internal
-            namespace: network
+    # HTTPRoute is defined in ./httproute.yaml because the Komelia webui assets
+    # need a gzip-rewrite workaround that app-template's route block can't express.
     persistence:
       config:
         enabled: true

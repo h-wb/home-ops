@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
+# Rewrites requests for the gzip-only Komelia webui assets to their stored
+# ".gz" name, e.g. /komelia-app.js -> /komelia-app.js.gz, /<hash>.wasm ->
+# /<hash>.wasm.gz. komf bundles these assets pre-compressed only, and Ktor
+# 3.3.x's preCompressed handler fails to serve them under their bare names from
+# the jar, so the browser otherwise receives index.html and renders blank.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: HTTPRouteFilter
+metadata:
+  name: komf-gz-rewrite
+spec:
+  urlRewrite:
+    path:
+      type: ReplaceRegexMatch
+      replaceRegexMatch:
+        pattern: '^/(.*)\.(js|wasm)$'
+        substitution: '/\1.\2.gz'
