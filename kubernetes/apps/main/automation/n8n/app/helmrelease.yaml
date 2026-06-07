@@ -33,7 +33,7 @@ spec:
               WEBHOOK_URL: "https://n8n-webhook.${SECRET_DOMAIN}"
               N8N_LOG_LEVEL: info
               N8N_LOG_OUTPUT: console
-              N8N_RESTRICT_FILE_ACCESS_TO: "/data:/mnt/tank/shared"
+              N8N_RESTRICT_FILE_ACCESS_TO: "/data:/documents"
               NODE_FUNCTION_ALLOW_BUILTIN: "fs,path"
               N8N_ENCRYPTION_KEY:
                 valueFrom:
@@ -97,7 +97,7 @@ spec:
         advancedMounts:
           n8n:
             app:
-              - path: /data
+              - path: /documents
       media:
         enabled: true
         type: nfs
@@ -106,4 +106,4 @@ spec:
         advancedMounts:
           n8n:
             app:
-              - path: /mnt/tank/shared
+              - path: /data
