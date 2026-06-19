@@ -11,6 +11,7 @@ spec:
     operation: copy
   ref:
     tag: v1.20.1
+    digest: sha256:e57bbce7d259a3cc4dc4300b919688fb903daad9da645f838e05fcdfaeeea775
   url: oci://ghcr.io/rook/rook-ceph
 ---
 # yaml-language-server: $schema=https://schemas.vzkn.eu/helm.toolkit.fluxcd.io/helmrelease_v2.json
