@@ -18,7 +18,7 @@ spec:
           app: &bapp
             image:
               repository: ghcr.io/monicahq/monica-next
-              tag: main
+              tag: main@sha256:8be69156acbb1edce2ba82685729f2d4ce79f1b7f749fe967d0a36f78e7ad454
             env:
               TZ: "Europe/Paris"
               APP_ENV: production
