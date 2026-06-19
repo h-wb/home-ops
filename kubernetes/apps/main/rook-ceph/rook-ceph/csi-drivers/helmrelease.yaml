@@ -61,6 +61,11 @@ spec:
       rbd:
         enabled: true
         name: "rook-ceph.rbd.csi.ceph.com"
+        # Deploy the csi-snapshotter sidecar for RBD. The chart defaults rbd to
+        # "none" (cephfs defaults to "volumeSnapshot"), which silently dropped the
+        # sidecar during the ceph-csi-operator migration and broke VolumeSnapshot
+        # create/delete for every ceph-block volsync backup (e.g. media/tautulli).
+        snapshotPolicy: volumeSnapshot
         log: null
         clusterName: "rook-ceph"
         enableMetadata: false
