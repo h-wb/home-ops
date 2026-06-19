@@ -55,5 +55,30 @@
       matchUpdateTypes: ["minor", "patch"],
       ignoreTests: false,
     },
+    // --- Gates: override the global automerge:true. Kept last so they win. ---
+    {
+      description: "Majors always wait for a human — Claude still reviews, but you click merge",
+      matchUpdateTypes: ["major"],
+      automerge: false,
+    },
+    {
+      description: "Never auto-merge high-blast-radius components (Talos, Kubernetes, Rook-Ceph, CloudNativePG) for any update type",
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "/kube-apiserver/",
+        "/kube-controller-manager/",
+        "/kube-proxy/",
+        "/kube-scheduler/",
+        "/kubelet/",
+        "/installer/",
+        "/talosctl/",
+        "/rook-ceph/",
+        "/rook-ceph-cluster/",
+        "/cloudnative-pg/",
+        "/plugin-barman-cloud/",
+        "/barman-cloud/",
+      ],
+      automerge: false,
+    },
   ],
 }
