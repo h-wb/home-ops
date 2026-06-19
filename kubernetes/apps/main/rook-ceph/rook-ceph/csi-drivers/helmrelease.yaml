@@ -120,6 +120,13 @@ spec:
       cephfs:
         enabled: true
         name: "rook-ceph.cephfs.csi.ceph.com"
+        # Talos kernel cephfs client needs ms_mode set to complete the msgr-v2
+        # (port 3300) handshake; without it mounts fail with the misleading
+        # "no mds is up … or you may not be authorized". rook 1.20 stopped wiring
+        # the operator's cephFSKernelMountOptions into the Driver CR, so set it
+        # here (the chart default is an empty {}). Tracking: home-ops#12266.
+        cephFsClientType: kernel
+        kernelMountOptions: "ms_mode=prefer-crc"
         log: null
         clusterName: "rook-ceph"
         enableMetadata: false
