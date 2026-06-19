@@ -126,7 +126,8 @@ spec:
         # the operator's cephFSKernelMountOptions into the Driver CR, so set it
         # here (the chart default is an empty {}). Tracking: home-ops#12266.
         cephFsClientType: kernel
-        kernelMountOptions: "ms_mode=prefer-crc"
+        kernelMountOptions:
+          ms_mode: prefer-crc
         log: null
         clusterName: "rook-ceph"
         enableMetadata: false
