@@ -1,0 +1,22 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
+    {
+      description: "Pin digests for mutable/rolling tags — these silently re-point at new bits, so pin + review every change",
+      matchDatasources: ["docker"],
+      matchCurrentValue: "/^(latest|stable|rolling|edge|nightly|develop|main|master)$/",
+      pinDigests: true,
+    },
+    {
+      description: "Pin digests for third-party images outside the trusted ghcr.io/home-operations org",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["!ghcr.io/home-operations/**"],
+      pinDigests: true,
+    },
+    {
+      description: "Flux OCIRepository tag is a single field — appending @sha256 makes the registry 404 (keep last to win)",
+      matchFileNames: ["**/*ocirepository.yaml"],
+      pinDigests: false,
+    },
+  ],
+}
