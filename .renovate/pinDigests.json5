@@ -8,12 +8,6 @@
       pinDigests: true,
     },
     {
-      description: "Pin digests for third-party images outside the trusted ghcr.io/home-operations org",
-      matchDatasources: ["docker"],
-      matchPackageNames: ["!ghcr.io/home-operations/**"],
-      pinDigests: true,
-    },
-    {
       description: "Flux OCIRepository tag is a single field — appending @sha256 makes the registry 404 (keep last to win)",
       matchFileNames: ["**/*ocirepository.yaml"],
       pinDigests: false,
