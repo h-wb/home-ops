@@ -34,11 +34,11 @@ spec:
     # 0/2 (FailedCreate: serviceaccount not found), killing ceph-block + cephfs
     # attach/detach cluster-wide. Restore the subchart's own default prefix.
     # Renovate is pinned <1.20.0 alongside this until upstream is fixed.
-    ceph-csi-operator:
-      controllerManager:
-        manager:
-          env:
-            csiServiceAccountPrefix: "ceph-csi-operator-"
+    # ceph-csi-operator:
+    #   controllerManager:
+    #     manager:
+    #       env:
+    #         csiServiceAccountPrefix: "ceph-csi-operator-"
     csi:
       cephFSKernelMountOptions: ms_mode=prefer-crc
       enableLiveness: true
