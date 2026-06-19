@@ -23,9 +23,12 @@
   automerge: true,
   automergeType: "pr",
   platformAutomerge: true,
+  // Only rebase on an actual conflict — avoids re-firing the Claude review +
+  // CI every time a PR falls behind main (branch protection isn't strict).
+  rebaseWhen: "conflicted",
   dependencyDashboardTitle: "Renovate Dashboard 🤖",
   suppressNotifications: ["prEditedNotification", "prIgnoreNotification"],
-  ignorePaths: ["**/resources/**"],
+  ignorePaths: ["**/resources/**", "**/*.sops.*"],
   flux: {
     managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
   },
