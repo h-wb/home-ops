@@ -30,7 +30,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis
+      CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis@sha256:4db9bca5c2ce024ccf297ce3ce879d1d93a936149badae045c1fd77c7c9adc08
       CNPG_VERSION: "18-3-system-trixie"
   prune: true
   retryInterval: 1m
