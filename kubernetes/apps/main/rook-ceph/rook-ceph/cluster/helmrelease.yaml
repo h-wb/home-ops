@@ -24,6 +24,16 @@ spec:
     name: rook-ceph-cluster
   dependsOn: []
   interval: 1h
+  # Ceph version rollouts (mons + osds + mds + rgw) take far longer than the
+  # 5m Flux default; a short timeout previously triggered a rollback that tried
+  # to downgrade Ceph (unsupported) and crash-looped mon-b/osd-0.
+  timeout: 30m
+  upgrade:
+    remediation:
+      # Retry the upgrade instead of rolling back: a Ceph downgrade is
+      # unsupported and corrupts the daemon startup (tentacle ondisk layout).
+      retries: 3
+      remediateLastFailure: false
   values:
     monitoring:
       enabled: true
