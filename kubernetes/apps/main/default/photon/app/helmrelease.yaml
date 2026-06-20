@@ -22,7 +22,7 @@ spec:
           app: &photon
             image:
               repository: ghcr.io/rtuszik/photon-docker
-              tag: 2.2.0
+              tag: 2.3.0
             command: ["uv"]
             args: ["run", "--no-sync", "-m", "src.process_manager"]
             env:
