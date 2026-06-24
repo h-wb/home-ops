@@ -52,7 +52,7 @@ spec:
           rabbitmq:
             image:
               repository: rabbitmq
-              tag: 3-management-alpine
+              tag: 4-management-alpine
             env:
               RABBITMQ_DEFAULT_USER: reitti
               RABBITMQ_DEFAULT_PASS: reitti
