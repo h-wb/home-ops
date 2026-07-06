@@ -11,6 +11,8 @@ customization:
     - intel_iommu=on # PCI Passthrough
     - iommu=pt # PCI Passthrough
     - mitigations=off # Less security, faster puter
+    - nvme_core.default_ps_max_latency_us=0 # Disable NVMe APST deep power states (Samsung 990 PRO drops off PCIe bus / D3cold)
+    - pcie_aspm=off # Disable OS PCIe ASPM management (NVMe dropout mitigation, matches jory)
     - security=none # Less security, faster puter
     - sysctl.kernel.kexec_load_disabled=1 # Meteor Lake CPU & Intel iGPU
     - talos.auditd.disabled=1 # Less security, faster puter
