@@ -73,7 +73,7 @@ arg "[args]" help="Additional key/value pairs" var=#true
 description = "Render a minijinja template with BWS secrets injected"
 quiet = true
 run = '''
-bws run -- minijinja-cli ${usage_input?} ${usage_args}
+bws run -- minijinja-cli ${usage_input?} ${usage_args:-}
 '''
 usage = '''
 arg "<input>" help="Template file to render"
