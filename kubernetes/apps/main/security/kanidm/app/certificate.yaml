@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/cert-manager.io/certificate_v1.json
+# Dedicated per-host cert: kanidm terminates TLS itself, so it needs the key material
+# in-pod (the gateway's wildcard secret lives in the network namespace only).
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: idm
+spec:
+  secretName: idm-tls
+  dnsNames:
+    - idm.${SECRET_DOMAIN}
+  duration: 160h
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-production
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  usages:
+    - digital signature

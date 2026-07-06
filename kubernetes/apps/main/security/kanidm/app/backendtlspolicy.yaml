@@ -1,0 +1,17 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/gateway.networking.k8s.io/backendtlspolicy_v1.json
+# Kanidm serves HTTPS on 8443, so envoy must re-encrypt to it. The backend cert is
+# LE-signed for idm.${SECRET_DOMAIN}, so validate against the system CA bundle.
+apiVersion: gateway.networking.k8s.io/v1
+kind: BackendTLSPolicy
+metadata:
+  name: kanidm-upstream
+spec:
+  targetRefs:
+    - group: ""
+      kind: Service
+      name: kanidm
+      sectionName: http
+  validation:
+    wellKnownCACertificates: System
+    hostname: idm.${SECRET_DOMAIN}
