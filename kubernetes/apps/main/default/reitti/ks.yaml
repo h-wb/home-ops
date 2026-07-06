@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/dragonfly
-    - ../../../../../components/cnpg/restore
+    - ../../../../../components/cnpg/initdb
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
