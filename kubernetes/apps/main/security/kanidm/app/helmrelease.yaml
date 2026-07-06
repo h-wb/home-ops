@@ -1,0 +1,198 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app kanidm
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: true
+      # Critical IdP — protect from eviction under memory pressure.
+      priorityClassName: system-cluster-critical
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 2000
+        runAsGroup: 2000
+        fsGroup: 2000
+        fsGroupChangePolicy: OnRootMismatch
+    serviceAccount:
+      # Powerless SA for the internet-facing server pod; RBAC lives on `provision` only.
+      kanidm: {}
+      provision: {}
+    controllers:
+      kanidm:
+        type: statefulset
+        replicas: 1
+        serviceAccount:
+          identifier: kanidm
+        pod:
+          annotations:
+            reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/kanidm/server
+              tag: 1.10.4
+            env:
+              KANIDM_ADMIN_BIND_PATH: /var/run/kanidmd.sock
+              KANIDM_DOMAIN: idm.${SECRET_DOMAIN}
+              KANIDM_ORIGIN: https://idm.${SECRET_DOMAIN}
+              KANIDM_BINDADDRESS: "[::]:8443"
+              KANIDM_LDAPBINDADDRESS: "[::]:3636"
+              KANIDM_DB_PATH: /data/kanidm.db
+              KANIDM_TLS_CHAIN: /certs/tls.crt
+              KANIDM_TLS_KEY: /certs/tls.key
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /status
+                    port: &port 8443
+                    scheme: HTTPS
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 1
+                  failureThreshold: 3
+              readiness: *probe
+            resources:
+              requests:
+                cpu: 25m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop:
+                  - ALL
+      provision:
+        # Bootstrap: kept at 0 until the provisioning token exists (see README.md).
+        # Flip to 1 once kanidm-provision-token is populated in Bitwarden.
+        replicas: 0
+        serviceAccount:
+          identifier: provision
+        containers:
+          app:
+            image:
+              repository: ghcr.io/m00nwtchr/kanidm-provision
+              tag: main@sha256:1271844f1db6c3b7656f8954595591ab2c968b005ac4420127343fcb6a7d190f
+            env:
+              KANIDM_INSTANCE: https://idm.${SECRET_DOMAIN}
+              KANIDM_NAMESPACE: security
+              KANIDM_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: kanidm-provision-token
+                    key: token
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 128Mi
+            securityContext:
+              capabilities:
+                drop:
+                  - ALL
+    persistence:
+      data:
+        accessMode: ReadWriteOnce
+        size: 2Gi
+        storageClass: ceph-block
+        advancedMounts:
+          kanidm:
+            app:
+              - path: /data
+                subPath: data
+      certs:
+        type: secret
+        name: idm-tls
+        defaultMode: 0400
+        advancedMounts:
+          kanidm:
+            app:
+              - path: /certs
+      server-config:
+        type: configMap
+        name: kanidm-config
+        advancedMounts:
+          kanidm:
+            app:
+              - path: /data/server.toml
+                subPath: server.toml
+                readOnly: true
+      var-run:
+        type: emptyDir
+        globalMounts:
+          - path: /var/run
+      icon-cache:
+        accessMode: ReadWriteOnce
+        size: 1Gi
+        suffix: icon-cache
+        storageClass: ceph-block
+        advancedMounts:
+          provision:
+            app:
+              - path: /data/icons
+    rbac:
+      roles:
+        kanidm-write-secret:
+          type: ClusterRole
+          rules:
+            - apiGroups:
+                - ""
+              resources:
+                - "secrets"
+              verbs:
+                - "create"
+                - "patch"
+        kanidm-read-cm:
+          type: ClusterRole
+          rules:
+            - apiGroups:
+                - ""
+              resources:
+                - "configmaps"
+              verbs:
+                - "get"
+                - "list"
+                - "watch"
+      bindings:
+        kanidm-write-secret:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: kanidm-write-secret
+          subjects:
+            - identifier: provision
+        kanidm-read-cm:
+          type: ClusterRoleBinding
+          roleRef:
+            identifier: kanidm-read-cm
+          subjects:
+            - identifier: provision
+    service:
+      app:
+        controller: kanidm
+        ports:
+          http:
+            port: *port
+          ldap:
+            port: 3636
+    route:
+      app:
+        annotations:
+          gatus.home-operations.com/endpoint: |-
+            group: security
+        hostnames:
+          - idm.${SECRET_DOMAIN}
+        parentRefs:
+          - name: envoy-external
+            namespace: network

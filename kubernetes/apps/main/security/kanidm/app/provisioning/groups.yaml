@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-provision-groups
+  labels:
+    kanidm_config: "1"
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  # Base group hierarchy. Members are added during bootstrap
+  # (`kanidm group add-members ...`) or declared here once usernames exist.
+  groups.json: |-
+    {
+      "groups": {
+        "users":  { "present": true, "members": [], "overwriteMembers": false },
+        "admins": { "present": true, "members": [], "overwriteMembers": false }
+      },
+      "persons": {},
+      "systems": { "oauth2": {} }
+    }

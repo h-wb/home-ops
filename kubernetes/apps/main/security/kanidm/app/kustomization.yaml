@@ -1,0 +1,12 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecret.yaml
+  - ./certificate.yaml
+  - ./configmap.yaml
+  - ./helmrelease.yaml
+  - ./backendtlspolicy.yaml
+  - ./provisioning/groups.yaml
+  # - ./provisioning/oauth2.yaml  # PR 2: enable once romm OIDC client is defined

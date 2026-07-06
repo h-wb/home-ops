@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-config
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  server.toml: |-
+    version = "2"
+    domain = "idm.${SECRET_DOMAIN}"
+    origin = "https://idm.${SECRET_DOMAIN}"
+    bindaddress = "[::]:8443"
+    ldapbindaddress = "[::]:3636"
+    db_path = "/data/kanidm.db"
+    tls_chain = "/certs/tls.crt"
+    tls_key = "/certs/tls.key"
+    adminbindpath = "/var/run/kanidmd.sock"
+
+    [online_backup]
+    path = "/data/backups"
+    schedule = "3 */6 * * *"
+    versions = 14
+
+    # Trust X-Forwarded-For from the in-cluster pod CIDR (Cilium native routing) so
+    # audit logs and rate-limiting see real client IPs, not the envoy pod IP.
+    [http_client_address_info]
+    x-forward-for = ["10.42.0.0/16"]
