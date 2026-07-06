@@ -1,0 +1,18 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+# Enables PostGIS in the application database. Assumes the cluster runs the
+# CloudNativePG PostGIS image (CNPG_IMAGE=ghcr.io/cloudnative-pg/postgis) so the
+# extension binaries are present; this just runs CREATE EXTENSION at bootstrap.
+# Use alongside cnpg/initdb and list it AFTER initdb so bootstrap.initdb exists.
+patches:
+  - target:
+      group: postgresql.cnpg.io
+      version: v1
+      kind: Cluster
+    patch: |-
+      - op: add
+        path: /spec/bootstrap/initdb/postInitApplicationSQL
+        value:
+          - CREATE EXTENSION IF NOT EXISTS postgis;

@@ -13,6 +13,9 @@ spec:
   components:
     - ../../../../../components/dragonfly
     - ../../../../../components/cnpg/initdb
+    # reitti stores geometry columns; enable PostGIS on the fresh initdb DB so a
+    # rebuilt cluster self-heals (list after initdb so bootstrap.initdb exists).
+    - ../../../../../components/cnpg/extensions/postgis
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
