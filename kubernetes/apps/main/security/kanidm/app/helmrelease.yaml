@@ -74,9 +74,8 @@ spec:
                 drop:
                   - ALL
       provision:
-        # Bootstrap: kept at 0 until the provisioning token exists (see README.md).
-        # Flip to 1 once kanidm-provision-token is populated in Bitwarden.
-        replicas: 0
+        # Enabled — provisioning token bootstrapped into kanidm-provision-token (see README.md).
+        replicas: 1
         serviceAccount:
           identifier: provision
         containers:
