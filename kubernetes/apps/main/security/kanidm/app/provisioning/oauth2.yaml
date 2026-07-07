@@ -132,5 +132,18 @@ data:
             "clientSecretKey": "GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET",
             "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/grafana.svg"
           }
+        },
+        "karma": {
+          "present": true, "displayName": "Karma",
+          "originUrl": "https://karma.${SECRET_DOMAIN}/oauth2/callback",
+          "originLanding": "https://karma.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "client-id",
+            "clientSecretKey": "client-secret",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/prometheus.svg"
+          }
         }
       } } }

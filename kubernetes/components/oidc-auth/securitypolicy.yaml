@@ -1,0 +1,36 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+# Reusable forward-auth: gate an HTTPRoute with Envoy Gateway's native OIDC against
+# kanidm — no oauth2-proxy / no per-app auth pod. Add to an app's ks.yaml:
+#   spec:
+#     components: [../../../../../components/oidc-auth]
+#     postBuild:
+#       substitute:
+#         APP: <app>                       # kanidm client name + default host/route
+#         # OIDC_HOST: custom.${SECRET_DOMAIN}   (optional, defaults to ${APP}.${SECRET_DOMAIN})
+#         # OIDC_TARGET: <httproute-name>        (optional, defaults to ${APP})
+# Requires a matching kanidm-provision client named ${APP} with
+# allowInsecureClientDisablePkce (EG's OIDC flow sends no PKCE, kanidm enforces it)
+# and k8s.clientSecretKey "client-secret" → secret kanidm-${APP}-oidc.
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: ${APP}
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: ${OIDC_TARGET:=${APP}}
+  oidc:
+    provider:
+      issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/${APP}
+    clientID: ${APP}
+    clientSecret:
+      name: kanidm-${APP}-oidc
+    redirectURL: https://${OIDC_HOST:=${APP}.${SECRET_DOMAIN}}/oauth2/callback
+    logoutPath: /logout
+    cookieDomain: ${OIDC_HOST:=${APP}.${SECRET_DOMAIN}}
+    scopes:
+      - "openid"
+      - "email"
+      - "profile"
