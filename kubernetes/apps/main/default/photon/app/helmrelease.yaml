@@ -30,8 +30,6 @@ spec:
               UPDATE_STRATEGY: SEQUENTIAL
               UPDATE_INTERVAL: 30d
               ENABLE_METRICS: "TRUE"
-              PUID: 9011
-              PGID: 9011
             probes:
               liveness: &probe
                 enabled: true
