@@ -93,6 +93,7 @@ data:
           "originLanding": "https://karakeep.${SECRET_DOMAIN}/",
           "scopeMaps": { "users": ["openid", "email", "profile"] },
           "preferShortUsername": true,
+          "enableLegacyCrypto": true,
           "k8s": {
             "clientIdKey": "OAUTH_CLIENT_ID",
             "clientSecretKey": "OAUTH_CLIENT_SECRET",
