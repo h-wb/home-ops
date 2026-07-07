@@ -1,18 +1,18 @@
 # Kanidm
 
-Lightweight OIDC + LDAP identity provider, deployed alongside Authentik during migration
-(parallel-then-remove). Served on `idm.${SECRET_DOMAIN}`.
+Lightweight OIDC + LDAP identity provider on `idm.${SECRET_DOMAIN}`. Replaced Authentik.
 
 - Kanidm terminates TLS itself → dedicated cert (`certificate.yaml`) mounted in-pod, and a
   `BackendTLSPolicy` makes envoy re-encrypt/validate to the 8443 backend.
 - `provision` (kanidm-provision) reconciles groups/OIDC clients from ConfigMaps labeled
   `kanidm_config: "1"`, and writes generated client secrets back into the target namespace.
 
-## First-boot bootstrap (one-time, manual)
+## First-boot bootstrap (one-time, manual — already done)
 
-The provisioning token can't exist before the DB does, so `provision` ships at `replicas: 0`.
+The provisioning token can't exist before the DB does, so `provision` shipped at `replicas: 0`
+initially. Recorded here for disaster recovery / rebuilds.
 
-1. Merge this app; wait for the `kanidm` StatefulSet pod to be Running (`/status` probe green).
+1. Wait for the `kanidm` StatefulSet pod to be Running (`/status` probe green).
 2. Recover admin accounts:
    ```sh
    kubectl -n security exec -it sts/kanidm -c app -- kanidmd recover-account admin
@@ -27,12 +27,13 @@ The provisioning token can't exist before the DB does, so `provision` ships at `
    `KANIDM_PROVISION_TOKEN` (the `externalsecret.yaml` maps it to secret `kanidm-provision-token`).
 5. Scale up provisioning: set `controllers.provision.replicas: 1` in `helmrelease.yaml`.
 
-## PR 2 (cutover, follow-up)
+## Provisioning OIDC clients
 
-- Uncomment `provisioning/oauth2.yaml` (+ its line in `kustomization.yaml`), fill romm's real OIDC
-  redirect URI, and enable romm's native OIDC (`OIDC_*` in `../../media/romm/app/externalsecret.yaml`).
-- Delete `../../media/romm/app/securitypolicy.yaml` (authentik forward-auth).
-- Remove the `authentik` app and its `./authentik/ks.yaml` entry from the security kustomization.
+Add a ConfigMap to `provisioning/` labeled `kanidm_config: "1"` with an `oauth2.json` describing
+the client (see `provisioning/oauth2.yaml` — romm). `kanidm-provision` mints the client and writes
+`kanidm-<name>-oidc` into the target namespace with the keys set by `k8s.clientIdKey` /
+`k8s.clientSecretKey`; the app consumes it via `envFrom`. Clients without PKCE (e.g. romm) need
+`allowInsecureClientDisablePkce: true`.
 
 ## Verification
 

@@ -1,32 +1,31 @@
 ---
 # OAuth2 clients provisioned by kanidm-provision. Each ConfigMap targets one namespace;
-# the generated client secret is written back there as a k8s Secret (k8s.clientSecretKey).
-#
-# Scaffold for PR 2 (romm native OIDC — replaces the authentik forward-auth SecurityPolicy).
-# Kept commented until romm's OIDC redirect URI is wired and `provision` is scaled to 1.
-#
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: kanidm-provision-oauth2-media
-#   labels:
-#     kanidm_config: "1"
-#   annotations:
-#     reloader.stakater.com/match: "true"
-# data:
-#   targetNamespace: media
-#   oauth2.json: |
-#     {
-#       "groups": {}, "persons": {}, "systems": { "oauth2": {
-#         "romm": {
-#           "present": true, "displayName": "RomM",
-#           "originUrl": "https://romm.${SECRET_DOMAIN}/api/oauth/openid",
-#           "originLanding": "https://romm.${SECRET_DOMAIN}/",
-#           "scopeMaps": { "users": ["openid", "email", "profile"] },
-#           "k8s": {
-#             "clientIdKey": "OIDC_CLIENT_ID",
-#             "clientSecretKey": "OIDC_CLIENT_SECRET",
-#             "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/romm.svg"
-#           }
-#         }
-#       } } }
+# the generated client secret is written back there as Secret `kanidm-<name>-oidc` with
+# the keys named by k8s.clientIdKey / k8s.clientSecretKey.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-provision-oauth2-media
+  labels:
+    kanidm_config: "1"
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  targetNamespace: media
+  oauth2.json: |
+    {
+      "groups": {}, "persons": {}, "systems": { "oauth2": {
+        "romm": {
+          "present": true, "displayName": "RomM",
+          "originUrl": "https://romm.${SECRET_DOMAIN}/api/oauth/openid",
+          "originLanding": "https://romm.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "OIDC_CLIENT_ID",
+            "clientSecretKey": "OIDC_CLIENT_SECRET",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/romm.svg"
+          }
+        }
+      } } }
