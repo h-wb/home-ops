@@ -36,6 +36,9 @@ spec:
               OAUTH_PROVIDER_NAME: Kanidm
               OAUTH_WELLKNOWN_URL: "https://idm.${SECRET_DOMAIN}/oauth2/openid/karakeep/.well-known/openid-configuration"
               OAUTH_SCOPE: "openid email profile"
+              # NextAuth refuses to link OIDC to an existing password account by email
+              # unless this is set — needed to sign into the pre-existing admin account.
+              OAUTH_ALLOW_DANGEROUS_EMAIL_ACCOUNT_LINKING: "true"
               DISABLE_PASSWORD_AUTH: false
               DISABLE_SIGNUPS: true
               DISABLE_NEW_RELEASE_CHECK: true
