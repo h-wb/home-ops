@@ -14,9 +14,11 @@ spec:
       feedback_links_enabled: "false"
       reporting_enabled: "false"
     auth:
-      disable_login_form: "false"
+      # OIDC-only: hide the username/password form. Local admin still works via
+      # HTTP basic-auth on the API (break-glass); revert this to re-show the form.
+      disable_login_form: "true"
     auth.anonymous:
-      enabled: "true"
+      enabled: "false"
     auth.generic_oauth:
       # Kanidm OIDC. client_id/secret come via envFrom kanidm-grafana-oidc
       # (keys GF_AUTH_GENERIC_OAUTH_CLIENT_ID/_SECRET override these ini values).
