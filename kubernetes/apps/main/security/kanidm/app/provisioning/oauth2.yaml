@@ -37,6 +37,7 @@ data:
           "scopeMaps": { "users": ["openid", "email", "profile"] },
           "preferShortUsername": true,
           "allowInsecureClientDisablePkce": true,
+          "enableLegacyCrypto": true,
           "k8s": {
             "clientIdKey": "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_ID",
             "clientSecretKey": "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_SECRET",
