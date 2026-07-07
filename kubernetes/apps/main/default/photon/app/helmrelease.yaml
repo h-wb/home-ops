@@ -30,8 +30,6 @@ spec:
               UPDATE_STRATEGY: SEQUENTIAL
               UPDATE_INTERVAL: 30d
               ENABLE_METRICS: "TRUE"
-              PUID: 9011
-              PGID: 9011
             probes:
               liveness: &probe
                 enabled: true
@@ -63,9 +61,9 @@ spec:
     defaultPodOptions:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 9011
-        runAsGroup: 9011
-        fsGroup: 9011
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
