@@ -121,6 +121,12 @@ data:
           "originLanding": "https://grafana.${SECRET_DOMAIN}/",
           "scopeMaps": { "users": ["openid", "email", "profile"] },
           "preferShortUsername": true,
+          "claimMaps": {
+            "grafana_role": {
+              "joinType": "array",
+              "valuesByGroup": { "admins": ["Admin"], "users": ["Viewer"] }
+            }
+          },
           "k8s": {
             "clientIdKey": "GF_AUTH_GENERIC_OAUTH_CLIENT_ID",
             "clientSecretKey": "GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET",

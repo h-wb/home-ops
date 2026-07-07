@@ -13,8 +13,8 @@ data:
   groups.json: |-
     {
       "groups": {
-        "users":  { "present": true, "members": [], "overwriteMembers": false },
-        "admins": { "present": true, "members": [], "overwriteMembers": false }
+        "users":  { "present": true, "members": ["hugo"], "overwriteMembers": false },
+        "admins": { "present": true, "members": ["hugo"], "overwriteMembers": false }
       },
       "persons": {},
       "systems": { "oauth2": {} }
