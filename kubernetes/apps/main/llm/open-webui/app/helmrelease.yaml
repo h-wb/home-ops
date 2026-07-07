@@ -48,6 +48,9 @@ spec:
               # OIDC via Kanidm. OAUTH_CLIENT_ID/SECRET arrive via envFrom kanidm-open-webui-oidc.
               WEBUI_URL: "https://chat.${SECRET_DOMAIN}"
               ENABLE_OAUTH_SIGNUP: "true"
+              # Link the kanidm login onto the existing account with the same email
+              # instead of erroring "email already registered".
+              OAUTH_MERGE_ACCOUNTS_BY_EMAIL: "true"
               OAUTH_PROVIDER_NAME: Kanidm
               OAUTH_SCOPES: "openid email profile"
               OPENID_PROVIDER_URL: "https://idm.${SECRET_DOMAIN}/oauth2/openid/open-webui/.well-known/openid-configuration"
