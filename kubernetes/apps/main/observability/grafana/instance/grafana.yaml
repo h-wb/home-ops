@@ -17,6 +17,21 @@ spec:
       disable_login_form: "false"
     auth.anonymous:
       enabled: "true"
+    auth.generic_oauth:
+      # Kanidm OIDC. client_id/secret come via envFrom kanidm-grafana-oidc
+      # (keys GF_AUTH_GENERIC_OAUTH_CLIENT_ID/_SECRET override these ini values).
+      # Grafana supports PKCE, so the kanidm client keeps PKCE required.
+      enabled: "true"
+      name: Kanidm
+      auth_url: "https://idm.${SECRET_DOMAIN}/ui/oauth2"
+      token_url: "https://idm.${SECRET_DOMAIN}/oauth2/token"
+      api_url: "https://idm.${SECRET_DOMAIN}/oauth2/openid/grafana/userinfo"
+      scopes: "openid email profile"
+      use_pkce: "true"
+      login_attribute_path: preferred_username
+      email_attribute_path: email
+      name_attribute_path: name
+      allow_sign_up: "true"
     log:
       mode: console
     metrics:
@@ -44,6 +59,10 @@ spec:
                     secretKeyRef:
                       name: grafana-admin-password-secret
                       key: GF_SECURITY_ADMIN_PASSWORD
+              envFrom:
+                # kanidm-provision writes GF_AUTH_GENERIC_OAUTH_CLIENT_ID/_SECRET here.
+                - secretRef:
+                    name: kanidm-grafana-oidc
               securityContext:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true

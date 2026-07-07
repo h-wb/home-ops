@@ -99,3 +99,30 @@ data:
           }
         }
       } } }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-provision-oauth2-observability
+  labels:
+    kanidm_config: "1"
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  targetNamespace: observability
+  oauth2.json: |
+    {
+      "groups": {}, "persons": {}, "systems": { "oauth2": {
+        "grafana": {
+          "present": true, "displayName": "Grafana",
+          "originUrl": "https://grafana.${SECRET_DOMAIN}/login/generic_oauth",
+          "originLanding": "https://grafana.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "k8s": {
+            "clientIdKey": "GF_AUTH_GENERIC_OAUTH_CLIENT_ID",
+            "clientSecretKey": "GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/grafana.svg"
+          }
+        }
+      } } }
