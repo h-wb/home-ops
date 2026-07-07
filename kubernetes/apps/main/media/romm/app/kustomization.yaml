@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./externalsecret.yaml
-  # - ./securitypolicy.yaml
 configMapGenerator:
   - name: romm-configmap
     files:

@@ -43,9 +43,18 @@ spec:
                     name: postgres-romm-app
                     key: password
               HASHEOUS_API_ENABLED: "true"
+              # OIDC via Kanidm (kanidm-provision writes kanidm-romm-oidc into this ns).
+              # RomM has no PKCE; the client sets allowInsecureClientDisablePkce. Userpass
+              # login stays enabled (DISABLE_USERPASS_LOGIN=false) as a fallback.
+              OIDC_ENABLED: "true"
+              OIDC_PROVIDER: pocket-id
+              OIDC_REDIRECT_URI: https://romm.${SECRET_DOMAIN}/api/oauth/openid
+              OIDC_SERVER_APPLICATION_URL: https://idm.${SECRET_DOMAIN}/oauth2/openid/romm
             envFrom:
               - secretRef:
                   name: romm-secret
+              - secretRef:
+                  name: kanidm-romm-oidc
             ports:
               - name: http
                 containerPort: &port 8080
