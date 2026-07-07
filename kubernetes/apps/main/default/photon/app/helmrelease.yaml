@@ -64,6 +64,9 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+        # image bakes /photon as 0750 owned by photon (uid/gid 9011); join that
+        # group so a non-9011 user can traverse it to reach the venv + src
+        supplementalGroups: [9011]
         fsGroupChangePolicy: OnRootMismatch
     service:
       app:
