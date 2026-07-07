@@ -56,6 +56,7 @@ oxfmt = "latest"
 "python" = "3.14.6"
 uv = "latest"
 "aqua:bitwarden/sdk-sm" = "latest"
+"cargo:kanidm_tools" = "latest"
 
 [tasks.log]
 description = "Log a structured message with gum"
