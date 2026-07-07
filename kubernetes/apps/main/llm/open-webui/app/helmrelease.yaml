@@ -45,9 +45,16 @@ spec:
                   secretKeyRef:
                     name: "postgres-{{ .Release.Name }}-app"
                     key: uri
-            # envFrom:
-            #   - secretRef:
-            #       name: "{{ .Release.Name }}-secret"
+              # OIDC via Kanidm. OAUTH_CLIENT_ID/SECRET arrive via envFrom kanidm-open-webui-oidc.
+              WEBUI_URL: "https://chat.${SECRET_DOMAIN}"
+              ENABLE_OAUTH_SIGNUP: "true"
+              OAUTH_PROVIDER_NAME: Kanidm
+              OAUTH_SCOPES: "openid email profile"
+              OPENID_PROVIDER_URL: "https://idm.${SECRET_DOMAIN}/oauth2/openid/open-webui/.well-known/openid-configuration"
+              OPENID_REDIRECT_URI: "https://chat.${SECRET_DOMAIN}/oauth/oidc/callback"
+            envFrom:
+              - secretRef:
+                  name: kanidm-open-webui-oidc
             resources:
               requests:
                 cpu: 500m

@@ -1,7 +1,9 @@
 ---
-# OAuth2 clients provisioned by kanidm-provision. Each ConfigMap targets one namespace;
-# the generated client secret is written back there as Secret `kanidm-<name>-oidc` with
-# the keys named by k8s.clientIdKey / k8s.clientSecretKey.
+# OAuth2 clients provisioned by kanidm-provision. One ConfigMap per target namespace
+# (data.targetNamespace is ConfigMap-level, not per-client). For each client the
+# provisioner writes Secret `kanidm-<name>-oidc` into that namespace with the keys named
+# by k8s.clientIdKey / k8s.clientSecretKey — chosen here to match each app's own env vars
+# so the app can consume the secret directly via `envFrom`.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -26,6 +28,74 @@ data:
             "clientIdKey": "OIDC_CLIENT_ID",
             "clientSecretKey": "OIDC_CLIENT_SECRET",
             "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/romm.svg"
+          }
+        },
+        "komga": {
+          "present": true, "displayName": "Komga",
+          "originUrl": "https://komga.${SECRET_DOMAIN}/login/oauth2/code/kanidm",
+          "originLanding": "https://komga.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_ID",
+            "clientSecretKey": "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_SECRET",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/komga.svg"
+          }
+        }
+      } } }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-provision-oauth2-llm
+  labels:
+    kanidm_config: "1"
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  targetNamespace: llm
+  oauth2.json: |
+    {
+      "groups": {}, "persons": {}, "systems": { "oauth2": {
+        "open-webui": {
+          "present": true, "displayName": "Open WebUI",
+          "originUrl": "https://chat.${SECRET_DOMAIN}/oauth/oidc/callback",
+          "originLanding": "https://chat.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "OAUTH_CLIENT_ID",
+            "clientSecretKey": "OAUTH_CLIENT_SECRET",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/open-webui.svg"
+          }
+        }
+      } } }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-provision-oauth2-default
+  labels:
+    kanidm_config: "1"
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  targetNamespace: default
+  oauth2.json: |
+    {
+      "groups": {}, "persons": {}, "systems": { "oauth2": {
+        "karakeep": {
+          "present": true, "displayName": "Karakeep",
+          "originUrl": "https://karakeep.${SECRET_DOMAIN}/api/auth/callback/custom",
+          "originLanding": "https://karakeep.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "k8s": {
+            "clientIdKey": "OAUTH_CLIENT_ID",
+            "clientSecretKey": "OAUTH_CLIENT_SECRET",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/karakeep.svg"
           }
         }
       } } }

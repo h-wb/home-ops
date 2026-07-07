@@ -31,8 +31,11 @@ spec:
               CRAWLER_FULL_PAGE_ARCHIVE: true
               CRAWLER_FULL_PAGE_SCREENSHOT: true
               CRAWLER_VIDEO_DOWNLOAD: true
-              # OAuth setup
-              # OAUTH_PROVIDER_NAME: Authentik
+              # OAuth (Kanidm OIDC). Client id/secret arrive via envFrom kanidm-karakeep-oidc.
+              # NextAuth sends PKCE, so the kanidm client keeps PKCE required.
+              OAUTH_PROVIDER_NAME: Kanidm
+              OAUTH_WELLKNOWN_URL: "https://idm.${SECRET_DOMAIN}/oauth2/openid/karakeep/.well-known/openid-configuration"
+              OAUTH_SCOPE: "openid email profile"
               DISABLE_PASSWORD_AUTH: false
               DISABLE_SIGNUPS: true
               DISABLE_NEW_RELEASE_CHECK: true
@@ -41,6 +44,8 @@ spec:
             envFrom: &envFrom
               - secretRef:
                   name: karakeep-secret
+              - secretRef:
+                  name: kanidm-karakeep-oidc
             probes:
               liveness:
                 enabled: true
