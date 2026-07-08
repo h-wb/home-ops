@@ -143,7 +143,74 @@ data:
           "k8s": {
             "clientIdKey": "client-id",
             "clientSecretKey": "client-secret",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/karma.svg"
+          }
+        },
+        "victoria-logs": {
+          "present": true, "displayName": "VictoriaLogs",
+          "originUrl": "https://victoria-logs.${SECRET_DOMAIN}/oauth2/callback",
+          "originLanding": "https://victoria-logs.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "client-id",
+            "clientSecretKey": "client-secret",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/victoriametrics.svg"
+          }
+        },
+        "prometheus": {
+          "present": true, "displayName": "Prometheus",
+          "originUrl": "https://prometheus.${SECRET_DOMAIN}/oauth2/callback",
+          "originLanding": "https://prometheus.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "client-id",
+            "clientSecretKey": "client-secret",
             "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/prometheus.svg"
+          }
+        },
+        "alertmanager": {
+          "present": true, "displayName": "Alertmanager",
+          "originUrl": "https://alertmanager.${SECRET_DOMAIN}/oauth2/callback",
+          "originLanding": "https://alertmanager.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "client-id",
+            "clientSecretKey": "client-secret",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/prometheus.svg"
+          }
+        }
+      } } }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-provision-oauth2-storage
+  labels:
+    kanidm_config: "1"
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  targetNamespace: storage
+  oauth2.json: |
+    {
+      "groups": {}, "persons": {}, "systems": { "oauth2": {
+        "kopia": {
+          "present": true, "displayName": "Kopia",
+          "originUrl": "https://kopia.${SECRET_DOMAIN}/oauth2/callback",
+          "originLanding": "https://kopia.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "allowInsecureClientDisablePkce": true,
+          "k8s": {
+            "clientIdKey": "client-id",
+            "clientSecretKey": "client-secret",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/kopia.svg"
           }
         }
       } } }
