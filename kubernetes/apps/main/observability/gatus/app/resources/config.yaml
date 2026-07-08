@@ -55,7 +55,8 @@ endpoints:
     url: https://karma.${SECRET_DOMAIN}/
     interval: &agi 5m
     client: &agc
-      dns-resolver: tcp://192.168.1.200:53
+      # k8s-gateway DNS listens on UDP only — tcp:// hangs and the check times out.
+      dns-resolver: udp://192.168.1.200:53
     conditions: &agcond
       - "[STATUS] == 200"
       - "[BODY] == pat(*Kanidm*)"
