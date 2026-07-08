@@ -13,6 +13,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/volsync
+    - ../../../../../components/oidc-auth
 
   path: ./kubernetes/apps/main/downloads/sonarr-anm/app
   prune: true
