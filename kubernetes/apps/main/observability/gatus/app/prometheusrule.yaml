@@ -27,3 +27,14 @@ spec:
               The {{ $labels.name }} endpoint has a public DNS record and is exposed
           labels:
             severity: critical
+
+        - alert: GatusAuthGateFailing
+          expr: |-
+            gatus_results_endpoint_success{group="auth-gate"} == 0
+          for: 5m
+          annotations:
+            summary: >-
+              Auth gate for {{ $labels.name }} is not enforcing — SecurityPolicy
+              failed open (app exposed) or kanidm is unreachable
+          labels:
+            severity: critical
