@@ -42,6 +42,34 @@ endpoints:
     conditions:
       - "[CERTIFICATE_EXPIRATION] > 240h"
 
+  # --- Forward-auth gate verification (fail-open / IdP-down detection) ---
+  # These apps have no native auth (arrs run AUTH__METHOD=External); their only
+  # protection is the Envoy Gateway OIDC SecurityPolicy. Each check hits the app
+  # unauthenticated and follows the redirect: a healthy gate lands on the kanidm
+  # login page (body contains "Kanidm"). If the SecurityPolicy fails open (missing/
+  # invalid/deleted) the app serves its own content → check red → GatusAuthGateFailing.
+  # Centralized here (not per-route annotations) to keep the shared client/conditions
+  # defined once; dns-resolver = k8s-gateway (resolves internal hosts to the gateway).
+  - name: karma
+    group: &ag auth-gate
+    url: https://karma.${SECRET_DOMAIN}/
+    interval: &agi 5m
+    client: &agc
+      dns-resolver: tcp://192.168.1.200:53
+    conditions: &agcond
+      - "[STATUS] == 200"
+      - "[BODY] == pat(*Kanidm*)"
+  - { name: victoria-logs, group: *ag, url: "https://victoria-logs.${SECRET_DOMAIN}/", interval: *agi, client: *agc, conditions: *agcond }
+  - { name: prometheus,    group: *ag, url: "https://prometheus.${SECRET_DOMAIN}/",    interval: *agi, client: *agc, conditions: *agcond }
+  - { name: alertmanager,  group: *ag, url: "https://alertmanager.${SECRET_DOMAIN}/",  interval: *agi, client: *agc, conditions: *agcond }
+  - { name: kopia,         group: *ag, url: "https://kopia.${SECRET_DOMAIN}/",         interval: *agi, client: *agc, conditions: *agcond }
+  - { name: radarr,        group: *ag, url: "https://radarr.${SECRET_DOMAIN}/",        interval: *agi, client: *agc, conditions: *agcond }
+  - { name: radarr-uhd,    group: *ag, url: "https://radarr-uhd.${SECRET_DOMAIN}/",    interval: *agi, client: *agc, conditions: *agcond }
+  - { name: sonarr-anm,    group: *ag, url: "https://sonarr-anm.${SECRET_DOMAIN}/",    interval: *agi, client: *agc, conditions: *agcond }
+  - { name: sonarr-tv,     group: *ag, url: "https://sonarr-tv.${SECRET_DOMAIN}/",     interval: *agi, client: *agc, conditions: *agcond }
+  - { name: prowlarr,      group: *ag, url: "https://prowlarr.${SECRET_DOMAIN}/",      interval: *agi, client: *agc, conditions: *agcond }
+  - { name: bazarr,        group: *ag, url: "https://bazarr.${SECRET_DOMAIN}/",        interval: *agi, client: *agc, conditions: *agcond }
+
 metrics: true
 
 storage:
