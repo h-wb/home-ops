@@ -214,3 +214,26 @@ data:
           }
         }
       } } }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kanidm-provision-oauth2-downloads
+  labels:
+    kanidm_config: "1"
+  annotations:
+    reloader.stakater.com/match: "true"
+data:
+  targetNamespace: downloads
+  # Forward-auth (Envoy Gateway OIDC) for the *arrs. These already run with
+  # AUTH__METHOD=External (their own login disabled), so this adds the only auth.
+  oauth2.json: |
+    {
+      "groups": {}, "persons": {}, "systems": { "oauth2": {
+        "radarr":     { "present": true, "displayName": "Radarr",     "originUrl": "https://radarr.${SECRET_DOMAIN}/oauth2/callback",     "originLanding": "https://radarr.${SECRET_DOMAIN}/",     "scopeMaps": { "users": ["openid","email","profile"] }, "preferShortUsername": true, "allowInsecureClientDisablePkce": true, "k8s": { "clientIdKey": "client-id", "clientSecretKey": "client-secret", "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/radarr.svg" } },
+        "radarr-uhd": { "present": true, "displayName": "Radarr UHD", "originUrl": "https://radarr-uhd.${SECRET_DOMAIN}/oauth2/callback", "originLanding": "https://radarr-uhd.${SECRET_DOMAIN}/", "scopeMaps": { "users": ["openid","email","profile"] }, "preferShortUsername": true, "allowInsecureClientDisablePkce": true, "k8s": { "clientIdKey": "client-id", "clientSecretKey": "client-secret", "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/radarr.svg" } },
+        "sonarr-anm": { "present": true, "displayName": "Sonarr Anime", "originUrl": "https://sonarr-anm.${SECRET_DOMAIN}/oauth2/callback", "originLanding": "https://sonarr-anm.${SECRET_DOMAIN}/", "scopeMaps": { "users": ["openid","email","profile"] }, "preferShortUsername": true, "allowInsecureClientDisablePkce": true, "k8s": { "clientIdKey": "client-id", "clientSecretKey": "client-secret", "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/sonarr.svg" } },
+        "sonarr-tv":  { "present": true, "displayName": "Sonarr TV",  "originUrl": "https://sonarr-tv.${SECRET_DOMAIN}/oauth2/callback",  "originLanding": "https://sonarr-tv.${SECRET_DOMAIN}/",  "scopeMaps": { "users": ["openid","email","profile"] }, "preferShortUsername": true, "allowInsecureClientDisablePkce": true, "k8s": { "clientIdKey": "client-id", "clientSecretKey": "client-secret", "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/sonarr.svg" } },
+        "prowlarr":   { "present": true, "displayName": "Prowlarr",   "originUrl": "https://prowlarr.${SECRET_DOMAIN}/oauth2/callback",   "originLanding": "https://prowlarr.${SECRET_DOMAIN}/",   "scopeMaps": { "users": ["openid","email","profile"] }, "preferShortUsername": true, "allowInsecureClientDisablePkce": true, "k8s": { "clientIdKey": "client-id", "clientSecretKey": "client-secret", "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/prowlarr.svg" } },
+        "bazarr":     { "present": true, "displayName": "Bazarr",     "originUrl": "https://bazarr.${SECRET_DOMAIN}/oauth2/callback",     "originLanding": "https://bazarr.${SECRET_DOMAIN}/",     "scopeMaps": { "users": ["openid","email","profile"] }, "preferShortUsername": true, "allowInsecureClientDisablePkce": true, "k8s": { "clientIdKey": "client-id", "clientSecretKey": "client-secret", "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/bazarr.svg" } }
+      } } }

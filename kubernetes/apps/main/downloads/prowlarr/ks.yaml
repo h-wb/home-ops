@@ -12,6 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/volsync
+    - ../../../../../components/oidc-auth
 
   path: ./kubernetes/apps/main/downloads/prowlarr/app
   prune: true
