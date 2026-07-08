@@ -1,0 +1,47 @@
+---
+# Forward-auth via Envoy Gateway native OIDC. prometheus + alertmanager share one
+# ks.yaml, so they can't use the per-app components/oidc-auth (which is driven by a
+# single ${APP}); the policies are declared explicitly here instead.
+# Clients (prometheus, alertmanager) are provisioned by kanidm-provision →
+# secrets kanidm-<name>-oidc (key client-secret) in this namespace.
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: prometheus
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: kube-prometheus-stack-prometheus
+  oidc:
+    provider:
+      issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/prometheus
+    clientID: prometheus
+    clientSecret:
+      name: kanidm-prometheus-oidc
+    redirectURL: https://prometheus.${SECRET_DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    cookieDomain: prometheus.${SECRET_DOMAIN}
+    scopes: ["openid", "email", "profile"]
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: alertmanager
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: kube-prometheus-stack-alertmanager
+  oidc:
+    provider:
+      issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/alertmanager
+    clientID: alertmanager
+    clientSecret:
+      name: kanidm-alertmanager-oidc
+    redirectURL: https://alertmanager.${SECRET_DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    cookieDomain: alertmanager.${SECRET_DOMAIN}
+    scopes: ["openid", "email", "profile"]
