@@ -99,6 +99,18 @@ data:
             "clientSecretKey": "OAUTH_CLIENT_SECRET",
             "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/karakeep.svg"
           }
+        },
+        "airtrail": {
+          "present": true, "displayName": "AirTrail",
+          "originUrl": "https://airtrail.${SECRET_DOMAIN}/login",
+          "originLanding": "https://airtrail.${SECRET_DOMAIN}/",
+          "scopeMaps": { "users": ["openid", "email", "profile"] },
+          "preferShortUsername": true,
+          "k8s": {
+            "clientIdKey": "OAUTH_CLIENT_ID",
+            "clientSecretKey": "OAUTH_CLIENT_SECRET",
+            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/airtrail.svg"
+          }
         }
       } } }
 ---
