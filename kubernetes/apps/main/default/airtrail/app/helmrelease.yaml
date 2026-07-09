@@ -30,6 +30,18 @@ spec:
                   secretKeyRef:
                     name: postgres-airtrail-app
                     key: uri
+              # OIDC via Kanidm. openid-client v6 → PKCE + ES256 native, so the
+              # kanidm client keeps PKCE required and no legacy crypto. Auto-register
+              # creates SSO users as role=user; the first admin must still be a local
+              # account, and existing usernames must password-login once to link.
+              OAUTH_ENABLED: "true"
+              OAUTH_ISSUER_URL: "https://idm.${SECRET_DOMAIN}/oauth2/openid/airtrail/.well-known/openid-configuration"
+              OAUTH_SCOPE: "openid email profile"
+              OAUTH_BUTTON_TEXT: Log in with Kanidm
+            envFrom:
+              # OAUTH_CLIENT_ID / OAUTH_CLIENT_SECRET provisioned by kanidm-provision
+              - secretRef:
+                  name: kanidm-airtrail-oidc
             probes:
               liveness: &probes
                 enabled: true
