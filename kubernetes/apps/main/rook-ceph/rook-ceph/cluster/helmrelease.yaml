@@ -35,6 +35,15 @@ spec:
       retries: 3
       remediateLastFailure: false
   values:
+    # Pin explicitly instead of relying on the chart's default, which
+    # otherwise changes silently on chart bumps (grouped with the operator
+    # chart) and can trigger an unsupported Ceph downgrade if the cluster
+    # rollout doesn't finish before Flux's remediation kicks in. Must be set
+    # here (not cephClusterSpec.cephVersion) - the chart template renders
+    # this into cephVersion itself, so a nested override collides with it.
+    cephImage:
+      repository: quay.io/ceph/ceph
+      tag: v20.2.2
     monitoring:
       enabled: true
       createPrometheusRules: true
@@ -53,12 +62,6 @@ spec:
           - name: envoy-internal
             namespace: network
     cephClusterSpec:
-      # Pin explicitly instead of relying on the chart's default image, which
-      # otherwise changes silently on chart bumps (grouped with the operator
-      # chart) and can trigger an unsupported Ceph downgrade if the cluster
-      # rollout doesn't finish before Flux's remediation kicks in.
-      cephVersion:
-        image: quay.io/ceph/ceph:v20.2.2
       cephConfig:
         global:
           bdev_enable_discard: "true" # quote
