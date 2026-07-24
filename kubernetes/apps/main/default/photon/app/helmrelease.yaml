@@ -22,7 +22,7 @@ spec:
           app: &photon
             image:
               repository: ghcr.io/rtuszik/photon-docker
-              tag: 2.3.0
+              tag: 2.3.1
             command: ["/photon/.venv/bin/python"]
             args: ["-m", "src.process_manager"]
             env:
