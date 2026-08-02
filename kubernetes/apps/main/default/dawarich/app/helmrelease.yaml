@@ -18,7 +18,7 @@ spec:
           app: &dawarich
             image:
               repository: mirror.gcr.io/freikin/dawarich
-              tag: 1.10.0@sha256:25ba1dc02e5571cc915bd104aae9c4c28929848ad1741c1829f5c40f86489a16
+              tag: 1.10.3@sha256:d7457e7b27a9992f2fdd367fe22a515b1b44fc6e0cfb7a68f3c69c439c465a6b
             env:
               TIME_ZONE: "Europe/Paris"
               PHOTON_API_HOST: photon.default.svc.cluster.local:2322
