@@ -43,7 +43,7 @@ spec:
     # this into cephVersion itself, so a nested override collides with it.
     cephImage:
       repository: quay.io/ceph/ceph
-      tag: v20.2.2
+      tag: v21.1.0
     monitoring:
       enabled: true
       createPrometheusRules: true
