@@ -9,6 +9,7 @@ resources:
   - ./gatus/ks.yaml
   - ./grafana/ks.yaml
   - ./victoria-logs/ks.yaml
+  - ./vector/ks.yaml
   - ./karma/ks.yaml
   - ./kube-prometheus-stack/ks.yaml
   - ./prometheus-adapter/ks.yaml
