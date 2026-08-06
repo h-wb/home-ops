@@ -25,6 +25,9 @@ spec:
   dependsOn: []
   interval: 1h
   values:
+    global:
+      image:
+        registry: quay.io
     fullnameOverride: victoria-logs
     retentionPeriod: 14d
     server:
