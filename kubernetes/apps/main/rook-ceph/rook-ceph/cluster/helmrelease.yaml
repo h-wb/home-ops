@@ -74,7 +74,12 @@ spec:
         disable: false
       csi:
         readAffinity:
-          enabled: true
+          # Disabled: crush_location-based localized reads (read_from_replica=localize)
+          # are the mechanism behind a known Ceph Tentacle data-loss/stability bug
+          # class (ceph/ceph-csi#5772, rook/rook#16839) and pin reads to the local
+          # host's OSD replica, which can wedge/blocklist a node's krbd client if
+          # that local OSD hiccups instead of transparently failing over.
+          enabled: false
       dashboard:
         enabled: true
         urlPrefix: /
