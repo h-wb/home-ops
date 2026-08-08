@@ -17,7 +17,7 @@ spec:
           app:
             image:
               repository: ghcr.io/0x2e/fusion
-              tag: 1.1.1@sha256:9d4f9f041f138b4ed84c6673d9c754a9f4dab6173b723872ecbf8ae3e97dfe33
+              tag: 1.2.1@sha256:4fa7eead46976f2090cfbb7e60f29946eccf0a5979c1fc168d7a9d89648a6a9b
             env:
               FUSION_PORT: &port 80
               FUSION_ALLOW_EMPTY_PASSWORD: "true"
