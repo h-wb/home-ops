@@ -22,7 +22,7 @@ spec:
         pod:
           priorityClassName: system-cluster-critical
         container:
-          image: mirror.gcr.io/envoyproxy/envoy:v1.38.3
+          image: mirror.gcr.io/envoyproxy/envoy:v1.39.0
           resources:
             requests:
               cpu: 100m
