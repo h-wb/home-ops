@@ -22,6 +22,8 @@ spec:
               tag: 3.1.0@sha256:bd451b411051f3ef221affadd1231b8fe1dfdc749947c3d01cf6ab8bc67002b3
             env:
               TZ: Europe/Paris
+              PUID: "1000"
+              PGID: "1000"
               MUSIC_DIR: /music
               DB_PATH: /data/music_grabber.db
               ENABLE_MUSICBRAINZ: "true"
@@ -38,9 +40,6 @@ spec:
                   timeoutSeconds: 5
                   failureThreshold: 3
               readiness: *probes
-            securityContext:
-              allowPrivilegeEscalation: false
-              capabilities: { drop: ["ALL"] }
             resources:
               requests:
                 cpu: 50m
@@ -49,9 +48,7 @@ spec:
                 memory: 2Gi
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
+        # image entrypoint must start as root to apply PUID/PGID, then drops privileges
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
