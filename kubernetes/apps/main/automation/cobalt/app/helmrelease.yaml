@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/imputnet/cobalt
-              tag: 11.4.3-d577d5e
+              tag: 11.7.1-a636575@sha256:63186dd68afd57ce3bb1f62cc4c139f5fa95b9c3e87a3cf5c6e4c7a570523f62
             env:
               # API_URL: "{{ .Release.Name }}.${SECRET_DOMAIN}"
               API_URL: http://cobalt.automation:9000
