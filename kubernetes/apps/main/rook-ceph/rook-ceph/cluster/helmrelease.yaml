@@ -105,6 +105,12 @@ spec:
         connections:
           requireMsgr2: true
       resources:
+        mgr:
+          limits:
+            # Chart default (1Gi) is too tight for the active mgr - it OOMKilled
+            # repeatedly (~every 4-5h), climbing to 846Mi within 5h of a fresh
+            # start while the standby mgr held steady at 151Mi.
+            memory: 2Gi
         osd:
           limits:
             memory: 8Gi
