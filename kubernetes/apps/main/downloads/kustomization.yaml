@@ -10,6 +10,7 @@ resources:
   # - ./bitmagnet/ks.yaml
   # - ./byparr/ks.yaml
   - ./flaresolverr/ks.yaml
+  - ./musicgrabber/ks.yaml
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
   - ./qbittorrent-vpn/ks.yaml
