@@ -29,6 +29,7 @@ spec:
               REGION: planet
               UPDATE_STRATEGY: SEQUENTIAL
               UPDATE_INTERVAL: 30d
+              FORCE_UPDATE: "TRUE"
               ENABLE_METRICS: "TRUE"
             probes:
               liveness: &probe
