@@ -1,17 +1,15 @@
-experimental_monorepo_root = true
+monorepo_root = true
 
 [settings]
 experimental = true
-unix_default_inline_shell_args = "bash -euo pipefail -c"
 
 [monorepo]
 config_roots = ["bootstrap", "kubernetes", "talos", "talos/*"]
 
 [env]
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
-CLUSTER = "main"
+CLUSTER = "{{ get_env(name=\"CLUSTER\", default=\"main\") }}"
 BWS_ACCESS_TOKEN = { required = true }
-# CLUSTER = "edge"
 SHARED_APPS = "{{config_root}}/kubernetes/apps/main"
 CLUSTER_APPS = "{{config_root}}/kubernetes/apps/{{env.CLUSTER}}"
 KUBECONFIG = "{{config_root}}/kubernetes/clusters/{{env.CLUSTER}}/kubeconfig"
