@@ -26,8 +26,7 @@ spec:
               repository: ghcr.io/m1k1o/neko/intel-firefox
               tag: "3.1.5"
             env:
-              # Bundled web client still speaks the v2 API; keep legacy mode on.
-              NEKO_LEGACY: "true"
+              NEKO_LEGACY: "false"
               NEKO_DESKTOP_SCREEN: 1920x1080@30
               NEKO_SERVER_PROXY: "true"
               NEKO_WEBRTC_TCPMUX: &mux "5101"
