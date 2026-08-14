@@ -26,15 +26,15 @@ spec:
               repository: ghcr.io/m1k1o/neko/intel-firefox
               tag: "3.1.5"
             env:
-              NEKO_SCREEN: 1920x1080@30
-              NEKO_PROXY: "true"
-              NEKO_TCPMUX: &mux "5101"
-              NEKO_UDPMUX: *mux
-              NEKO_ICELITE: "true"
-              NEKO_NAT1TO1: 192.168.1.133
+              # Bundled web client still speaks the v2 API; keep legacy mode on.
+              NEKO_LEGACY: "true"
+              NEKO_DESKTOP_SCREEN: 1920x1080@30
+              NEKO_SERVER_PROXY: "true"
+              NEKO_WEBRTC_TCPMUX: &mux "5101"
+              NEKO_WEBRTC_UDPMUX: *mux
+              NEKO_WEBRTC_ICELITE: "true"
               NEKO_SESSION_HEARTBEAT_INTERVAL: 30
-              NEKO_HWENC: vaapi
-              NEKO_VIDEO_CODEC: h264
+              NEKO_CAPTURE_VIDEO_CODEC: h264
             envFrom:
               - secretRef:
                   name: neko-secret
