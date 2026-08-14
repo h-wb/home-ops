@@ -11,6 +11,10 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      resourceClaims:
+        - name: gpu
+          resourceClaimTemplateName: neko-gpu
     controllers:
       neko:
         replicas: 1
@@ -19,7 +23,7 @@ spec:
         containers:
           app:
             image:
-              repository: ghcr.io/m1k1o/neko/firefox
+              repository: ghcr.io/m1k1o/neko/intel-firefox
               tag: "3.1.5"
             env:
               NEKO_SCREEN: 1920x1080@30
@@ -29,10 +33,14 @@ spec:
               NEKO_ICELITE: "true"
               NEKO_NAT1TO1: 192.168.1.133
               NEKO_SESSION_HEARTBEAT_INTERVAL: 30
+              NEKO_HWENC: vaapi
+              NEKO_VIDEO_CODEC: h264
             envFrom:
               - secretRef:
                   name: neko-secret
             resources:
+              claims:
+                - name: gpu
               requests:
                 cpu: 10m
     service:
