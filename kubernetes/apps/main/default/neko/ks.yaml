@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/gpu
-    - ../../../../../components/oidc-auth
+    # - ../../../../../components/oidc-auth # disabled for now, easier sharing
   dependsOn: []
   interval: 30m
   path: ./kubernetes/apps/main/default/neko/app
