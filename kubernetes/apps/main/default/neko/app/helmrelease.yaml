@@ -36,7 +36,11 @@ spec:
               NEKO_WEBRTC_UDPMUX: *mux
               NEKO_WEBRTC_ICELITE: "true"
               NEKO_SESSION_HEARTBEAT_INTERVAL: 30
-              NEKO_CAPTURE_VIDEO_CODEC: h264
+              # NEKO_CAPTURE_VIDEO_CODEC (v3) isn't honored in legacy mode —
+              # the legacy client picks its own codec (defaults to vp8, which
+              # this image has no VAAPI encoder for: "no element vaapivp8enc").
+              # The v2-named var is what the legacy layer actually reads.
+              NEKO_VIDEO_CODEC: h264
             envFrom:
               - secretRef:
                   name: neko-secret
