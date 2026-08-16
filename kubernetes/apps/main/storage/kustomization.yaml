@@ -9,5 +9,6 @@ resources:
   - ./openebs/ks.yaml
   - ./garage/ks.yaml
   - ./kopia/ks.yaml
+  - ./kopiur/ks.yaml
   - ./snapshot-controller/ks.yaml
   - ./volsync/ks.yaml

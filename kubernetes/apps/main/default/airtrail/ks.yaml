@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/cnpg/initdb
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/migrate
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
@@ -26,7 +26,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 1Gi
   prune: true
   retryInterval: 1m
   sourceRef:

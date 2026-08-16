@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kopiur.home-operations.com/clusterrepository_v1alpha1.json
+apiVersion: kopiur.home-operations.com/v1alpha1
+kind: ClusterRepository
+metadata:
+  name: nas
+spec:
+  allowedNamespaces:
+    all: true
+  # Same NFS export volsync's kopia repository already lives on, so the
+  # existing repository (and its snapshot history) is reused rather than
+  # bootstrapping a second one. `create` is idempotent - connects instead
+  # of recreating if the repository already exists.
+  backend:
+    filesystem:
+      path: /repository
+      volume:
+        nfs:
+          server: ${NFS_ADDR}
+          path: /mnt/tank/backup/volsync
+  encryption:
+    passwordSecretRef:
+      name: kopiur-repository-secret
+      namespace: storage
+      key: KOPIA_PASSWORD
