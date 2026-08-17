@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/cnpg/initdb
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/migrate
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
