@@ -13,17 +13,19 @@ spec:
   # kopiur-repository-secret into every consuming namespace automatically.
   credentialProjection:
     allowed: true
-  # Same NFS export volsync's kopia repository already lives on, so the
-  # existing repository (and its snapshot history) is reused rather than
-  # bootstrapping a second one. `create` is idempotent - connects instead
-  # of recreating if the repository already exists.
+  # Deliberately NOT volsync's existing repo path: reusing it forced kopiur's
+  # bootstrap to scanCatalog volsync's entire history (~1175 snapshots) on
+  # every spec change, fighting volsync's own concurrent hourly jobs for the
+  # same NFS directory. We don't need that history - the PVCs already hold
+  # current data, kopiur just needs to start backing up from here on. A
+  # fresh, empty, kopiur-only repo bootstraps in seconds instead of ~30min.
   backend:
     filesystem:
       path: /repository
       volume:
         nfs:
           server: ${NFS_ADDR}
-          path: /mnt/tank/backup/volsync
+          path: /mnt/tank/backup/kopiur
   encryption:
     passwordSecretRef:
       name: kopiur-repository-secret
@@ -38,10 +40,9 @@ spec:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
-  # This repository already holds months of hourly volsync snapshots across
-  # ~40 apps (hundreds of shard dirs), so the bootstrap catalog scan over NFS
-  # outruns the 120s default and gets killed by activeDeadlineSeconds before
-  # it can finish, forever retrying. Give it real headroom.
+  # Generous headroom kept as a safety margin; a fresh empty repo shouldn't
+  # need anywhere near this, but bumping this after the fact costs a full
+  # re-bootstrap, so there's no upside to trimming it back down.
   bootstrap:
     failurePolicy:
       activeDeadlineSeconds: 3600
