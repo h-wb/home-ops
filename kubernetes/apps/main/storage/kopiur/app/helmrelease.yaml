@@ -10,6 +10,12 @@ spec:
     kind: OCIRepository
     name: kopiur
   values:
+    # spec.credentialProjection on the ClusterRepository is not enough on its
+    # own - the operator's own RBAC needs this to actually be granted
+    # cluster-wide secrets create/patch, or every projection attempt 403s.
+    features:
+      credentialProjection:
+        enabled: true
     monitoring:
       dashboards:
         enabled: true
