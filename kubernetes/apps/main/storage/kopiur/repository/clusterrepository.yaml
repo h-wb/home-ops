@@ -44,4 +44,4 @@ spec:
   # it can finish, forever retrying. Give it real headroom.
   bootstrap:
     failurePolicy:
-      activeDeadlineSeconds: 1800
+      activeDeadlineSeconds: 3600
