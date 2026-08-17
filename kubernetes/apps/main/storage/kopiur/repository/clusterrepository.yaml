@@ -7,6 +7,12 @@ metadata:
 spec:
   allowedNamespaces:
     all: true
+  # Each app's mover Job runs in the app's own namespace and reads the repo
+  # secret via envFrom, which is namespace-local - without this, only apps
+  # actually living in `storage` could back up. This lets the operator copy
+  # kopiur-repository-secret into every consuming namespace automatically.
+  credentialProjection:
+    allowed: true
   # Same NFS export volsync's kopia repository already lives on, so the
   # existing repository (and its snapshot history) is reused rather than
   # bootstrapping a second one. `create` is idempotent - connects instead
