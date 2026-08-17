@@ -32,3 +32,10 @@ spec:
       runAsUser: 1000
       runAsGroup: 1000
       fsGroup: 1000
+  # This repository already holds months of hourly volsync snapshots across
+  # ~40 apps (hundreds of shard dirs), so the bootstrap catalog scan over NFS
+  # outruns the 120s default and gets killed by activeDeadlineSeconds before
+  # it can finish, forever retrying. Give it real headroom.
+  bootstrap:
+    failurePolicy:
+      activeDeadlineSeconds: 1800
