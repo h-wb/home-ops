@@ -31,6 +31,11 @@ spec:
       name: kopiur-repository-secret
       namespace: storage
       key: KOPIA_PASSWORD
+  # An absent `create` block means "this repo must already exist" - the
+  # enabled:true default only applies once the block itself is present.
+  # This path is genuinely empty, so we need it to actually initialize one.
+  create:
+    enabled: true
   # The NFS export is owned by UID/GID 1000 (volsync's convention); movers
   # default to 65532 and silently hang against the export instead of failing
   # fast, so every mover this repository spawns (bootstrap included) needs to
