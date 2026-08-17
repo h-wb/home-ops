@@ -23,3 +23,12 @@ spec:
       name: kopiur-repository-secret
       namespace: storage
       key: KOPIA_PASSWORD
+  # The NFS export is owned by UID/GID 1000 (volsync's convention); movers
+  # default to 65532 and silently hang against the export instead of failing
+  # fast, so every mover this repository spawns (bootstrap included) needs to
+  # match.
+  moverDefaults:
+    podSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      fsGroup: 1000
