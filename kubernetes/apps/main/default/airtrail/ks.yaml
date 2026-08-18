@@ -26,6 +26,7 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      NAMESPACE: *namespace
       VOLSYNC_CAPACITY: 1Gi
   prune: true
   retryInterval: 1m
