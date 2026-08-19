@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/dragonfly
     - ../../../../../components/dragonfly/lua-undeclared-keys
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
     - ../../../../../components/cnpg/restore
   dependsOn:
     - name: plugin-barman-cloud
@@ -32,7 +32,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 1Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 1Gi
       CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis
       CNPG_VERSION: "18-3-system-trixie"
   prune: true

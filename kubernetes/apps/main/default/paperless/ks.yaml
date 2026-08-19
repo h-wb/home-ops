@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/dragonfly
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
     - ../../../../../components/cnpg/restore
   dependsOn:
     - name: plugin-barman-cloud
@@ -40,7 +40,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 15Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 15Gi
 ---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -54,7 +55,7 @@ spec:
     labels:
       app.kubernetes.io/name: paperless-gpt
   components:
-    - ../../../../../../../components/volsync
+    - ../../../../../../../components/kopiur/backup
   dependsOn:
     - name: paperless
   interval: 30m
@@ -70,4 +71,5 @@ spec:
   postBuild:
     substitute:
       APP: paperless-gpt
-      VOLSYNC_CAPACITY: 1Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 1Gi
