@@ -7,7 +7,7 @@ metadata:
 spec:
   targetNamespace: downloads
   components:
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
     - ../../../../../components/anubis
   path: ./kubernetes/apps/main/downloads/overseerr/app
   prune: true
@@ -22,5 +22,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 5Gi
+      NAMESPACE: downloads
+      KOPIUR_CAPACITY: 5Gi
       ANUBIS_TARGET: "http://overseerr.downloads.svc.cluster.local:80"
