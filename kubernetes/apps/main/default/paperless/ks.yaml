@@ -41,6 +41,7 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      KOPIUR_SCHEDULE: "10 * * * *"
       KOPIUR_CAPACITY: 15Gi
 ---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -72,4 +73,5 @@ spec:
     substitute:
       APP: paperless-gpt
       NAMESPACE: *namespace
+      KOPIUR_SCHEDULE: "11 * * * *"
       KOPIUR_CAPACITY: 1Gi

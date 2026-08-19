@@ -23,5 +23,6 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: downloads
+      KOPIUR_SCHEDULE: "16 * * * *"
       KOPIUR_CAPACITY: 5Gi
       ANUBIS_TARGET: "http://overseerr.downloads.svc.cluster.local:80"

@@ -23,4 +23,5 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: downloads
+      KOPIUR_SCHEDULE: "22 * * * *"
       KOPIUR_CAPACITY: 2Gi

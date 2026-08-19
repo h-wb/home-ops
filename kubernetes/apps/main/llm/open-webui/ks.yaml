@@ -32,6 +32,7 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      KOPIUR_SCHEDULE: "29 * * * *"
       KOPIUR_CAPACITY: 5Gi
   prune: true
   retryInterval: 1m

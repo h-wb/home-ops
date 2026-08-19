@@ -29,4 +29,5 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      KOPIUR_SCHEDULE: "26 * * * *"
       KOPIUR_CAPACITY: 10Gi

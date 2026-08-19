@@ -8,4 +8,9 @@ spec:
   policyRef:
     name: ${APP}
   schedule:
-    cron: H * * * *
+    # Explicit per-app minute (set via KOPIUR_SCHEDULE in each app's ks.yaml)
+    # rather than relying solely on H's hash - with ~35 apps sharing this
+    # component, hash collisions still cluster enough mover pods on one node
+    # at once to overwhelm its RBD kernel client (see 2026-08-19 incident:
+    # OSDs blocklisted tal0s, remounted nextcloud's volume read-only).
+    cron: ${KOPIUR_SCHEDULE:=H * * * *}

@@ -23,4 +23,5 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: media
+      KOPIUR_SCHEDULE: "31 * * * *"
       KOPIUR_CAPACITY: 2Gi

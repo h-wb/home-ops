@@ -27,6 +27,7 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: media
+      KOPIUR_SCHEDULE: "37 * * * *"
       KOPIUR_CAPACITY: 30Gi
 ---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
@@ -115,4 +116,5 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      KOPIUR_SCHEDULE: "38 * * * *"
       KOPIUR_CAPACITY: 500Mi
