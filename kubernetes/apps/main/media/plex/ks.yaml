@@ -11,7 +11,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
     - ../../../../../components/gpu
   path: ./kubernetes/apps/main/media/plex/app
   prune: true
@@ -26,8 +26,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 30Gi
-      VOLSYNC_CACHE_CAPACITY: 30Gi
+      NAMESPACE: media
+      KOPIUR_CAPACITY: 30Gi
 ---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
@@ -97,7 +97,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
   dependsOn:
     - name: plex
       namespace: *namespace
@@ -114,4 +114,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 500Mi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 500Mi
