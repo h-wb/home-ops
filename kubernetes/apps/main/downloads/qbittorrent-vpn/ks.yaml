@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
   path: ./kubernetes/apps/main/downloads/qbittorrent-vpn/app
   prune: true
   sourceRef:
@@ -26,4 +26,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 2Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 2Gi
