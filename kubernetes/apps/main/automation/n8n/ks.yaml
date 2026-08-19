@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
   path: ./kubernetes/apps/main/automation/n8n/app
   prune: true
   sourceRef:
@@ -26,3 +26,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 5Gi
