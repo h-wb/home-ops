@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
 
   path: ./kubernetes/apps/main/downloads/musicgrabber/app
   prune: true
@@ -27,4 +27,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 2Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 2Gi
