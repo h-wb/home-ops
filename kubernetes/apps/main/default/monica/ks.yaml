@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/dragonfly
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
     - ../../../../../components/cnpg/restore
   dependsOn:
     - name: plugin-barman-cloud
@@ -39,4 +39,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 2Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 2Gi

@@ -8,7 +8,7 @@ spec:
   targetNamespace: media
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
   path: ./kubernetes/apps/main/media/kavita/app
   prune: true
   sourceRef:
@@ -22,4 +22,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 2Gi
+      NAMESPACE: media
+      KOPIUR_CAPACITY: 2Gi

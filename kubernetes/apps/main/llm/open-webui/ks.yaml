@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/dragonfly
     - ../../../../../components/cnpg/restore
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
@@ -31,7 +31,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 5Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 5Gi
   prune: true
   retryInterval: 1m
   sourceRef:
