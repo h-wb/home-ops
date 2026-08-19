@@ -13,19 +13,22 @@ spec:
   # kopiur-repository-secret into every consuming namespace automatically.
   credentialProjection:
     allowed: true
-  # Deliberately NOT volsync's existing repo path: reusing it forced kopiur's
-  # bootstrap to scanCatalog volsync's entire history (~1175 snapshots) on
-  # every spec change, fighting volsync's own concurrent hourly jobs for the
-  # same NFS directory. We don't need that history - the PVCs already hold
-  # current data, kopiur just needs to start backing up from here on. A
-  # fresh, empty, kopiur-only repo bootstraps in seconds instead of ~30min.
+  # S3 (garage, already running in-cluster) instead of NFS: kopia's access
+  # pattern (thousands of small objects, heavy metadata operations) is
+  # fundamentally slow against ZFS+NFSv4 (xattr/ACL overhead) - a full
+  # bootstrap/maintenance cycle against the NFS repo took 20min-4h depending
+  # on backlog. S3 skips the POSIX/ACL layer entirely: plain HTTP GET/PUT/LIST.
   backend:
-    filesystem:
-      path: /repository
-      volume:
-        nfs:
-          server: ${NFS_ADDR}
-          path: /mnt/tank/backup/kopiur
+    s3:
+      auth:
+        secretRef:
+          name: kopiur-repository-secret
+          namespace: storage
+      bucket: kopiur
+      endpoint: garage.storage.svc.cluster.local:3900
+      region: ca-west-1
+      tls:
+        disableTls: true
   encryption:
     passwordSecretRef:
       name: kopiur-repository-secret
@@ -33,21 +36,7 @@ spec:
       key: KOPIA_PASSWORD
   # An absent `create` block means "this repo must already exist" - the
   # enabled:true default only applies once the block itself is present.
-  # This path is genuinely empty, so we need it to actually initialize one.
+  # The kopiur bucket is genuinely empty, so we need it to actually
+  # initialize a repo there.
   create:
     enabled: true
-  # The NFS export is owned by UID/GID 1000 (volsync's convention); movers
-  # default to 65532 and silently hang against the export instead of failing
-  # fast, so every mover this repository spawns (bootstrap included) needs to
-  # match.
-  moverDefaults:
-    podSecurityContext:
-      runAsUser: 1000
-      runAsGroup: 1000
-      fsGroup: 1000
-  # Generous headroom kept as a safety margin; a fresh empty repo shouldn't
-  # need anywhere near this, but bumping this after the fact costs a full
-  # re-bootstrap, so there's no upside to trimming it back down.
-  bootstrap:
-    failurePolicy:
-      activeDeadlineSeconds: 3600

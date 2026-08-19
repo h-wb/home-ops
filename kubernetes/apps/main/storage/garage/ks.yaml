@@ -10,8 +10,6 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
-  components:
-    - ../../../../../components/zeroscaler
   path: ./kubernetes/apps/main/storage/garage/app
   prune: true
   sourceRef:
