@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
 
   path: ./kubernetes/apps/main/media/suwayomi/app
   prune: true
@@ -27,5 +27,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 5Gi
-      VOLSYNC_CACHE_CAPACITY: 7Gi
+      NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 5Gi
