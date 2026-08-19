@@ -8,7 +8,7 @@ spec:
   targetNamespace: downloads
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
   path: ./kubernetes/apps/main/downloads/qbittorrent/app
   prune: true
   sourceRef:
@@ -22,4 +22,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 2Gi
+      NAMESPACE: downloads
+      KOPIUR_CAPACITY: 2Gi

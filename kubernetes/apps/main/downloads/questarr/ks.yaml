@@ -7,7 +7,7 @@ metadata:
 spec:
   targetNamespace: downloads
   components:
-    - ../../../../../components/volsync
+    - ../../../../../components/kopiur/backup
   path: ./kubernetes/apps/main/downloads/questarr/app
   prune: true
   sourceRef:
@@ -21,4 +21,5 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      VOLSYNC_CAPACITY: 5Gi
+      NAMESPACE: downloads
+      KOPIUR_CAPACITY: 5Gi
