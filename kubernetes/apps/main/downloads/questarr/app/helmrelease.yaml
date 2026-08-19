@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: ghcr.io/doezer/questarr
-              tag: dev@sha256:a0f9a11e5fb5c65755a0e0a6749fe749ab05e98cd9fb2e069fa7b0a322205956
+              tag: dev@sha256:64ca0b3cb24202d5fc2e73dd4ff10e8a3de5db668d39398ebf681f9f87e06071
             env:
               TZ: Europe/Paris
               PUID: "1000"
