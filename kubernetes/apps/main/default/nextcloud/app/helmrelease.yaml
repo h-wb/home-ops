@@ -31,6 +31,10 @@ spec:
       reloader.stakater.com/auto: "true"
     image:
       flavor: fpm-alpine
+      # Chart 9.2.6's default appVersion (34.0.2) is older than what's
+      # already on disk (34.0.3.2, per Nextcloud's own downgrade-guard
+      # check) - pin explicitly until the chart catches up upstream.
+      tag: 34.0.3-fpm-alpine
     nextcloud:
       host: nextcloud.${SECRET_DOMAIN}
       existingSecret:
