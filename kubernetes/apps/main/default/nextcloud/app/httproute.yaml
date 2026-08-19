@@ -33,7 +33,7 @@ spec:
             statusCode: 301
     - backendRefs:
         - name: nextcloud
-          port: 80
+          port: 8080
       matches:
         - path:
             type: PathPrefix
