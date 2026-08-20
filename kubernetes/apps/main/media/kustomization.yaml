@@ -6,6 +6,7 @@ namespace: media
 components:
   - ../../../components/common
 resources:
+  - ./agregarr/ks.yaml
   - ./plex/ks.yaml
   - ./tautulli/ks.yaml
   - ./suwayomi/ks.yaml
