@@ -62,15 +62,6 @@ spec:
           - name: envoy-internal
             namespace: network
     cephClusterSpec:
-      # Rook refuses daemon version upgrades while ceph health != OK. mon/mgr/
-      # osd are already on v20.2.4 but mds/rgw are stuck on v20.2.2 because
-      # health has been HEALTH_ERR from the AUTH_INSECURE_* warnings (weak
-      # cephx key types - unrelated to data/PG integrity, which stayed fully
-      # healthy throughout) since 2026-08-19. That left the HelmRelease
-      # cycling upgrade->rollback->upgrade every ~30m for 7+ hours straight.
-      # Force past the check so mds/rgw catch up; the AUTH_INSECURE_* issue
-      # itself is a separate, lower-urgency key-rotation task.
-      skipUpgradeChecks: true
       cephConfig:
         global:
           bdev_enable_discard: "true" # quote
