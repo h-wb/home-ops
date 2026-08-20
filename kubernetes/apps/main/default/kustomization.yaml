@@ -10,13 +10,11 @@ resources:
   - ./airtrail/ks.yaml
   - ./immich/ks.yaml
   - ./homepage/ks.yaml
-  # - ./monica/ks.yaml
   - ./karakeep/ks.yaml
   - ./photon/ks.yaml
   - ./dawarich/ks.yaml
   - ./reitti/ks.yaml
   - ./paperless/ks.yaml
-  # - ./syncthing/ks.yaml
   # - ./strava-statistics/ks.yaml
   # - ./fusion/ks.yaml
   - ./ghostfolio/ks.yaml
