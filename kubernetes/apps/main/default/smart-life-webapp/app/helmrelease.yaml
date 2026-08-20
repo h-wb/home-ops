@@ -100,7 +100,7 @@ spec:
           gethomepage.dev/icon: mdi-home-automation
           gethomepage.dev/description: Control Smart Life / Tuya devices
         hostnames:
-          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          - "smartlife.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network
