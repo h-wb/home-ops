@@ -505,13 +505,13 @@ sonarr:
 
     # Guide-backed quality profile: pulls qualities, custom formats, and
     # scores directly from the TRaSH Guide for this trash_id.
-    # name: overridden to "WEB-1080p" (pre-v8 template default was
-    # "FR-MULTi-VO-WEB-1080p", renamed here to distinguish it from the
-    # regular sonarr instance's profile) - existing assign_scores_to
-    # references below already use this name.
+    # name: must match the profile's actual existing name in this Sonarr
+    # instance ("FR-MULTi-VO-WEB-1080p") so Recyclarr adopts it instead of
+    # creating a duplicate. A prior "WEB-1080p" rename was configured but
+    # never actually took effect on the live profile.
     quality_profiles:
       - trash_id: 4c48f506c1116a3a57ae33f12346bd15 # [French MULTi.VO] HD Bluray + WEB (1080p)
-        name: WEB-1080p
+        name: FR-MULTi-VO-WEB-1080p
 
     # ══════════════════════════════════════════════════════════════════════════
     # Additional Custom Formats Configuration
@@ -527,29 +527,29 @@ sonarr:
       - trash_ids:
           - 026d5aadd1a6b4e550b134cb6c72b3ca # Uncensored
         assign_scores_to:
-          - name: WEB-1080p
+          - name: FR-MULTi-VO-WEB-1080p
             score: 0 # Neutral - adjust if you prefer uncensored versions
 
       - trash_ids:
           - b2550eb333d27b75833e25b8c2557b38 # 10bit
         assign_scores_to:
-          - name: WEB-1080p
+          - name: FR-MULTi-VO-WEB-1080p
             score: 0 # Neutral - 10bit color depth
 
       - trash_ids:
           - 418f50b10f1907201b6cfdf881f467b7 # Anime Dual Audio
         assign_scores_to:
-          - name: WEB-1080p
+          - name: FR-MULTi-VO-WEB-1080p
             score: 0 # Neutral - adjust if you prefer dual audio
 
       # Codec Settings for Anime
       - trash_ids:
           - 47435ece6b99a0b477caf360e79ba0bb # x265 (HD)
         assign_scores_to:
-          - name: WEB-1080p
+          - name: FR-MULTi-VO-WEB-1080p
             score: 101
       - trash_ids:
           - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
         assign_scores_to:
-          - name: WEB-1080p
+          - name: FR-MULTi-VO-WEB-1080p
             score: 0
