@@ -13,6 +13,8 @@ spec:
   values:
     controllers:
       smart-life-webapp:
+        replicas: ${REPLICAS:=1}
+        strategy: RollingUpdate
         initContainers:
           # No upstream image or Dockerfile exists for this project, so we build the
           # static SPA from a pinned commit on every pod start and hand the output to
@@ -100,7 +102,7 @@ spec:
           gethomepage.dev/icon: mdi-home-automation
           gethomepage.dev/description: Control Smart Life / Tuya devices
         hostnames:
-          - "smartlife.${SECRET_DOMAIN}"
+          - "${SUBDOMAIN}.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network

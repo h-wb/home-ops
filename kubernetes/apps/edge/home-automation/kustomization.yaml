@@ -10,3 +10,4 @@ resources:
   - ./matter-server/ks.yaml
   - ./mosquitto/ks.yaml
   - ./zigbee/ks.yaml
+  - ./smart-life-webapp/ks.yaml

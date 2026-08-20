@@ -1,10 +1,10 @@
 ---
-# yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
   name: &app smart-life-webapp
-  namespace: &namespace default
+  namespace: &namespace home-automation
 spec:
   targetNamespace: *namespace
   commonMetadata:
@@ -16,8 +16,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
-      SUBDOMAIN: smartlife
-      REPLICAS: "3"
+      SUBDOMAIN: smartlife-${CLUSTER}
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
   prune: true
   retryInterval: 1m
   sourceRef:
@@ -25,4 +25,4 @@ spec:
     name: flux-system
     namespace: flux-system
   timeout: 5m
-  wait: false # no flux ks dependents
+  wait: false
