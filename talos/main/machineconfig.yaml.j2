@@ -104,6 +104,16 @@ machine:
     sunrpc.tcp_max_slot_table_entries: "128"
     sunrpc.tcp_slot_table_entries: "128"
     user.max_user_namespaces: "11255"
+    # Protect etcd fdatasync latency on the same NVMe as the Ceph OSD - cap
+    # dirty page buildup so a heavy write burst (bulk PVC copies, backup
+    # movers) can't accumulate into a multi-GB flush storm that stalls I/O
+    # long enough for Ceph's OSD watch timeout to blocklist the node's krbd
+    # client (2026-08-19 incident: tal0s and tal1s both blocklisted, one
+    # volume's ext4 remounted read-only mid-write). Matches joryirving/home-ops.
+    vm.dirty_background_bytes: "268435456"
+    vm.dirty_bytes: "536870912"
+    vm.dirty_expire_centisecs: "3000"
+    vm.dirty_writeback_centisecs: "500"
     vm.nr_hugepages: "1024"
   token: {{ ENV['MACHINE_TOKEN'] }}
   udev:

@@ -34,6 +34,16 @@ spec:
       name: kopiur-repository-secret
       namespace: storage
       key: KOPIA_PASSWORD
+  # Without this, movers default to an ephemeral cache - every hourly backup
+  # across ~40 apps re-fetches the full kopia metadata/content index from S3
+  # cold, extending each mover's runtime (and therefore how long it holds its
+  # RWO PVC's RBD mount open) for no reason. A small persistent cache lets
+  # each app's mover reuse its own warm index between runs.
+  moverDefaults:
+    cache:
+      mode: Persistent
+      capacity: 5Gi
+      storageClassName: local-hostpath
   # An absent `create` block means "this repo must already exist" - the
   # enabled:true default only applies once the block itself is present.
   # The kopiur bucket is genuinely empty, so we need it to actually
