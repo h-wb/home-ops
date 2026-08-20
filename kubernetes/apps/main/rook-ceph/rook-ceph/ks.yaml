@@ -46,7 +46,7 @@ metadata:
 spec:
   dependsOn:
     - name: rook-ceph
-    - name: volsync
+    - name: kopiur
       namespace: storage
   healthChecks:
     - apiVersion: helm.toolkit.fluxcd.io/v2
