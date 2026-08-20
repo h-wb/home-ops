@@ -12,6 +12,15 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/kopiur/backup
+  # TODO(2026-08-20): kopiur backups for photon are suspended LIVE (out-of-band,
+  # not tracked here) while it re-downloads its ~58GB planet index after the
+  # kopiur-controller incident (see project memory: kopiur-controller was
+  # scaled to 0 with no Git record, backlog burst on resume fenced several
+  # apps' RBD volumes, including photon's). Taking a snapshot mid-download was
+  # producing a broken clone that hung the mover job for 1h+.
+  # Resume once the download completes:
+  #   kubectl -n default patch snapshotschedule.kopiur.home-operations.com photon \
+  #     --type merge -p '{"spec":{"schedule":{"suspend":false}}}'
   interval: 30m
   path: ./kubernetes/apps/main/default/photon/app
   postBuild:
