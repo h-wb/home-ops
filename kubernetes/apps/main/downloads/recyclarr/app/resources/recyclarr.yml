@@ -6,52 +6,43 @@ radarr:
     api_key: !env_var RADARR_API_KEY
 
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
 
-    # Uncomment to override the quality profile name from the template
-    # (default from template is "FR-MULTi-VO-HD")
-    # quality_profiles:
-    #   - name: HD-1080p
+    # ──────────────────────────────────────────────────────────────────────
+    # Language Profile: MULTi.VO
+    # ──────────────────────────────────────────────────────────────────────
+    # This profile prioritizes releases with BOTH Original + French audio
+    # tracks, but falls back to Original audio only if dual-audio is unavailable.
+    # ┌────────────────────────────────────────────────────────────────────┐
+    # │ Language Profile Comparison:                                        │
+    # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
+    # │ Profile   │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
+    # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
+    # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
+    # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
+    # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
+    # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
+    # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
+    # ──────────────────────────────────────────────────────────────────────
 
-    include:
-      # ──────────────────────────────────────────────────────────────────────
-      # Quality Definition: Sets the file size ranges for each quality tier
-      # ──────────────────────────────────────────────────────────────────────
-      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/quality-definitions/radarr-quality-definition-movie.yml
-      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/radarr/quality-size/movie.json
-      - template: radarr-quality-definition-movie
-      # ──────────────────────────────────────────────────────────────────────
-      # Language Profile: MULTi.VO
-      # ──────────────────────────────────────────────────────────────────────
-      # This profile prioritizes releases with BOTH Original + French audio
-      # tracks, but falls back to Original audio only if dual-audio is unavailable.
-      # ┌────────────────────────────────────────────────────────────────────┐
-      # │ Language Profile Comparison:                                        │
-      # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
-      # │ Profile   │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
-      # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
-      # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
-      # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
-      # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
-      # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
-      # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
-      # ──────────────────────────────────────────────────────────────────────
+    # Quality Definition: Sets the file size ranges for each quality tier
+    # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/radarr/quality-size/movie.json
+    quality_definition:
+      type: movie
 
-      # Quality Profile: Defines the quality tiers and upgrade rules
-      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/quality-profiles/radarr-quality-profile-hd-bluray-web-french-multi-vo.yml
-      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/radarr/quality-profiles/french-multi-vo-hd-bluray-web.json
-      - template: radarr-quality-profile-hd-bluray-web-french-multi-vo
-
-      # Custom Formats: Defines the scoring rules for language preferences and release quality
-      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/custom-formats/radarr-custom-formats-hd-bluray-web-french-multi-vo.yml
-      - template: radarr-custom-formats-hd-bluray-web-french-multi-vo
+    # Guide-backed quality profile: pulls qualities, custom formats, and
+    # scores directly from the TRaSH Guide for this trash_id.
+    # name: kept identical to the pre-v8 template's profile name so existing
+    # assign_scores_to references below don't need to change.
+    quality_profiles:
+      - trash_id: 2572ce3ea4eef1c19d59e0e20ed1cea7 # [French MULTi.VO] HD Bluray + WEB
+        name: FR-MULTi-VO-HD
 
     # ══════════════════════════════════════════════════════════════════════════
     # Additional Custom Formats Configuration
     # ══════════════════════════════════════════════════════════════════════════
-    # The following section adds extra custom formats on top of the base
-    # radarr-custom-formats-hd-bluray-web-french-multi-vo template.
-    # These allow you to fine-tune scoring for specific movie versions,
+    # The following section adds extra custom formats on top of the
+    # guide-backed defaults synced automatically via the quality_profiles
+    # trash_id above. These allow you to fine-tune scoring for specific movie versions,
     # French audio types, and codec preferences.
     #
     # Reference: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
@@ -118,7 +109,7 @@ radarr:
       - trash_ids:
           - 533f782474f0819643c2ec0c1eeeb0ac # Language: Not French
         assign_scores_to:
-          - name: FR-MULTi-VO-UHD
+          - name: FR-MULTi-VO-HD
             score: -1500
 
       - trash_ids:
@@ -167,51 +158,43 @@ radarr:
     api_key: !env_var RADARR_API_KEY
 
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
 
-    # Uncomment to override the quality profile name from the template
-    # (default from template is "FR-MULTi-VO-UHD")
-    # quality_profiles:
-    #   - name: UHD-2160p
+    # ──────────────────────────────────────────────────────────────────────
+    # Language Profile: MULTi.VO (UHD)
+    # ──────────────────────────────────────────────────────────────────────
+    # This profile prioritizes releases with BOTH Original + French audio
+    # tracks, but falls back to Original audio only if dual-audio is unavailable.
+    # ┌────────────────────────────────────────────────────────────────────┐
+    # │ Language Profile Comparison:                                        │
+    # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
+    # │ Profile  │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
+    # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
+    # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
+    # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
+    # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
+    # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
+    # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
+    # ──────────────────────────────────────────────────────────────────────
 
-    include:
-      # ──────────────────────────────────────────────────────────────────────
-      # Quality Definition: Sets the file size ranges for each quality tier
-      # ──────────────────────────────────────────────────────────────────────
-      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/quality-definitions/radarr-quality-definition-movie.yml
-      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/radarr/quality-size/movie.json
-      - template: radarr-quality-definition-movie
-      # ──────────────────────────────────────────────────────────────────────
-      # Language Profile: MULTi.VO (UHD)
-      # ──────────────────────────────────────────────────────────────────────
-      # This profile prioritizes releases with BOTH Original + French audio
-      # tracks, but falls back to Original audio only if dual-audio is unavailable.
-      # ┌────────────────────────────────────────────────────────────────────┐
-      # │ Language Profile Comparison:                                        │
-      # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
-      # │ Profile  │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
-      # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
-      # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
-      # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
-      # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
-      # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
-      # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
-      # ──────────────────────────────────────────────────────────────────────
+    # Quality Definition: Sets the file size ranges for each quality tier
+    # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/radarr/quality-size/movie.json
+    quality_definition:
+      type: movie
 
-      # Quality Profile: Defines the quality tiers and upgrade rules for UHD
-      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/quality-profiles/radarr-quality-profile-uhd-bluray-web-french-multi-vo.yml
-      - template: radarr-quality-profile-uhd-bluray-web-french-multi-vo
-
-      # Custom Formats: Defines the scoring rules for language preferences and release quality
-      # Source: https://github.com/recyclarr/config-templates/blob/master/radarr/includes/custom-formats/radarr-custom-formats-uhd-bluray-web-french-multi-vo.yml
-      - template: radarr-custom-formats-uhd-bluray-web-french-multi-vo
+    # Guide-backed quality profile: pulls qualities, custom formats, and
+    # scores directly from the TRaSH Guide for this trash_id.
+    # name: kept identical to the pre-v8 template's profile name so existing
+    # assign_scores_to references below don't need to change.
+    quality_profiles:
+      - trash_id: 92ead7022d13a7858d54e328e6a2f8f9 # [French MULTi.VO] UHD Bluray + WEB
+        name: FR-MULTi-VO-UHD
 
     # ══════════════════════════════════════════════════════════════════════════
     # Additional Custom Formats Configuration
     # ══════════════════════════════════════════════════════════════════════════
-    # The following section adds extra custom formats on top of the base
-    # radarr-custom-formats-uhd-bluray-web-french-multi-vo template.
-    # These allow you to fine-tune scoring for HDR/DV, audio formats,
+    # The following section adds extra custom formats on top of the
+    # guide-backed defaults synced automatically via the quality_profiles
+    # trash_id above. These allow you to fine-tune scoring for HDR/DV, audio formats,
     # French audio types, and codec preferences.
     #
     # Reference: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
@@ -281,7 +264,7 @@ radarr:
           - name: FR-MULTi-VO-UHD
 
       # Codec Settings for UHD
-      # x265 (HD) should remain commented for UHD (native 4K sources preferred)
+      # x265 is fine - boost HD-encoded x265 releases rather than avoiding them
       - trash_ids:
           - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
         assign_scores_to:
@@ -368,52 +351,43 @@ sonarr:
 
     # Custom change on release groups
     delete_old_custom_formats: false
-    replace_existing_custom_formats: false
 
-    # Uncomment to override the quality profile name from the template
-    # (default from template is "FR-MULTi-VO-WEB-1080p")
-    # quality_profiles:
-    #   - name: HD-1080p
+    # ──────────────────────────────────────────────────────────────────────
+    # Language Profile: MULTi.VO
+    # ──────────────────────────────────────────────────────────────────────
+    # This profile prioritizes releases with BOTH Original + French audio
+    # tracks, but falls back to Original audio only if dual-audio is unavailable.
+    # ┌────────────────────────────────────────────────────────────────────┐
+    # │ Language Profile Comparison:                                        │
+    # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
+    # │ Profile  │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
+    # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
+    # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
+    # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
+    # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
+    # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
+    # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
+    # ──────────────────────────────────────────────────────────────────────
 
-    include:
-      # ──────────────────────────────────────────────────────────────────────
-      # Quality Definition: Sets the file size ranges for each quality tier
-      # ──────────────────────────────────────────────────────────────────────
-      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-definitions/sonarr-quality-definition-series.yml
-      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-size/series.json
-      - template: sonarr-quality-definition-series
-      # ──────────────────────────────────────────────────────────────────────
-      # Language Profile: MULTi.VO
-      # ──────────────────────────────────────────────────────────────────────
-      # This profile prioritizes releases with BOTH Original + French audio
-      # tracks, but falls back to Original audio only if dual-audio is unavailable.
-      # ┌────────────────────────────────────────────────────────────────────┐
-      # │ Language Profile Comparison:                                        │
-      # ├──────────┬──────────────┬──────────────┬──────────────┬──────┬─────┤
-      # │ Profile  │ MULTi        │ Only VO      │ Only VF      │ EN   │ FR  │
-      # │          │ (Orig+FR)    │ (Original)   │ (French)     │ Subs │ Subs│
-      # ├──────────┼──────────────┼──────────────┼──────────────┼──────┼─────┤
-      # │ VOSTFR   │ Avoid        │ Prefer       │ Avoid        │ OK   │ Need│
-      # │ MULTi.VF │ Prefer       │ Avoid        │ Prefer       │ OK   │ OK  │
-      # │ MULTi.VO │ Prefer       │ Prefer       │ Avoid        │ OK   │ OK  │
-      # └──────────┴──────────────┴──────────────┴──────────────┴──────┴─────┘
-      # ──────────────────────────────────────────────────────────────────────
+    # Quality Definition: Sets the file size ranges for each quality tier
+    # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-size/series.json
+    quality_definition:
+      type: series
 
-      # Quality Profile: Defines the quality tiers and upgrade rules
-      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-profiles/sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo.yml
-      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-profiles/french-multi-vo-bluray-web-1080p.json
-      - template: sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo
-
-      # Custom Formats: Defines the scoring rules for language preferences and release quality
-      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/custom-formats/sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo.yml
-      - template: sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo
+    # Guide-backed quality profile: pulls qualities, custom formats, and
+    # scores directly from the TRaSH Guide for this trash_id.
+    # name: kept identical to the pre-v8 template's profile name so existing
+    # assign_scores_to references below don't need to change.
+    quality_profiles:
+      - trash_id: 4c48f506c1116a3a57ae33f12346bd15 # [French MULTi.VO] HD Bluray + WEB (1080p)
+        name: FR-MULTi-VO-WEB-1080p
 
     # ══════════════════════════════════════════════════════════════════════════
     # Additional Custom Formats Configuration
     # ══════════════════════════════════════════════════════════════════════════
-    # The following section adds extra custom formats on top of the base
-    # sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo template.
-    # These allow you to fine-tune scoring for French audio types and codec preferences.
+    # The following section adds extra custom formats on top of the
+    # guide-backed defaults synced automatically via the quality_profiles
+    # trash_id above. These allow you to fine-tune scoring for French audio types and codec preferences.
     #
     # Reference: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
     # ══════════════════════════════════════════════════════════════════════════
@@ -514,51 +488,37 @@ sonarr:
     api_key: !env_var SONARR_API_KEY
 
     delete_old_custom_formats: true
-    replace_existing_custom_formats: true
 
-    # Override quality profile name to match the French Bluray/WEB template
-    # (template default is "FR-MULTi-VO-WEB-1080p", we rename it for anime)
+    # Quality Definition: Sets the file size ranges for anime content
+    # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-size/anime.json
+    quality_definition:
+      type: anime
+
+    # ──────────────────────────────────────────────────────────────────────
+    # NOTE: Using French Bluray/WEB profile instead of default anime profile
+    # ──────────────────────────────────────────────────────────────────────
+    # The default anime profile focuses on Remux quality, which results in
+    # very large file sizes. Instead, we're using the French Bluray/WEB
+    # profile which prioritizes WEB-DL and smaller Bluray releases - better
+    # for storage and still great quality.
+    # ──────────────────────────────────────────────────────────────────────
+
+    # Guide-backed quality profile: pulls qualities, custom formats, and
+    # scores directly from the TRaSH Guide for this trash_id.
+    # name: overridden to "WEB-1080p" (pre-v8 template default was
+    # "FR-MULTi-VO-WEB-1080p", renamed here to distinguish it from the
+    # regular sonarr instance's profile) - existing assign_scores_to
+    # references below already use this name.
     quality_profiles:
-      - name: WEB-1080p
-
-    include:
-      # ──────────────────────────────────────────────────────────────────────
-      # Quality Definition: Sets the file size ranges for anime content
-      # ──────────────────────────────────────────────────────────────────────
-      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-definitions/sonarr-quality-definition-anime.yml
-      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-size/anime.json
-      - template: sonarr-quality-definition-anime
-
-      # ──────────────────────────────────────────────────────────────────────
-      # NOTE: Using French Bluray/WEB profile instead of default anime profile
-      # ──────────────────────────────────────────────────────────────────────
-      # The default anime profile (sonarr-v4-quality-profile-anime) focuses on
-      # Remux quality, which results in very large file sizes. Instead, we're
-      # using the French Bluray/WEB profile which prioritizes WEB-DL and
-      # smaller Bluray releases - better for storage and still great quality.
-      #
-      # Default anime profile (commented out - focuses on Remux):
-      # - template: sonarr-v4-quality-profile-anime
-      # - template: sonarr-v4-custom-formats-anime
-      #
-      # Using instead (Bluray/WEB focused):
-      # ──────────────────────────────────────────────────────────────────────
-
-      # Quality Profile: Defines the quality tiers and upgrade rules
-      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/quality-profiles/sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo.yml
-      # Uses: https://github.com/TRaSH-Guides/Guides/blob/master/docs/json/sonarr/quality-profiles/french-multi-vo-bluray-web-1080p.json
-      - template: sonarr-v4-quality-profile-bluray-web-1080p-french-multi-vo
-
-      # Custom Formats: Defines the scoring rules for language preferences and release quality
-      # Source: https://github.com/recyclarr/config-templates/blob/master/sonarr/includes/custom-formats/sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo.yml
-      - template: sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo
+      - trash_id: 4c48f506c1116a3a57ae33f12346bd15 # [French MULTi.VO] HD Bluray + WEB (1080p)
+        name: WEB-1080p
 
     # ══════════════════════════════════════════════════════════════════════════
     # Additional Custom Formats Configuration
     # ══════════════════════════════════════════════════════════════════════════
-    # The following section adds extra custom formats on top of the base
-    # sonarr-v4-custom-formats-bluray-web-1080p-french-multi-vo template.
-    # These allow you to fine-tune scoring for anime-specific preferences.
+    # The following section adds extra custom formats on top of the
+    # guide-backed defaults synced automatically via the quality_profiles
+    # trash_id above. These allow you to fine-tune scoring for anime-specific preferences.
     #
     # Reference: https://recyclarr.dev/wiki/yaml/config-reference/custom-formats/
     # ══════════════════════════════════════════════════════════════════════════
