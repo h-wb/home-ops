@@ -42,11 +42,16 @@ spec:
                 # mon/mgr/OSD pods anyway (they're Deployments pinned to a
                 # specific node by device/PV affinity, not DaemonSets) - it
                 # would just bounce them and briefly degrade PGs/mon quorum
-                # for no balancing benefit on a 3-node cluster. Exclude the
-                # namespace outright rather than relying on that pin to save it.
-                namespaces:
-                  exclude:
-                    - rook-ceph
+                # for no balancing benefit on a 3-node cluster. DefaultEvictor
+                # has no namespace include/exclude field in v1alpha2 - only a
+                # label selector - so exclude via the namespace's built-in
+                # kubernetes.io/metadata.name label instead.
+                namespaceLabelSelector:
+                  matchExpressions:
+                    - key: kubernetes.io/metadata.name
+                      operator: NotIn
+                      values:
+                        - rook-ceph
             - name: LowNodeUtilization
               args:
                 metricsUtilization:
