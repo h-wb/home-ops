@@ -22,3 +22,4 @@ resources:
   - ./ghostfolio/ks.yaml
   - ./neko/ks.yaml
   - ./nextcloud/ks.yaml
+  - ./smart-life-webapp/ks.yaml
