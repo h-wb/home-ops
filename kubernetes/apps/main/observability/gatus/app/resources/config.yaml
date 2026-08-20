@@ -63,7 +63,6 @@ endpoints:
   - { name: victoria-logs, group: *ag, url: "https://victoria-logs.${SECRET_DOMAIN}/", interval: *agi, client: *agc, conditions: *agcond }
   - { name: prometheus,    group: *ag, url: "https://prometheus.${SECRET_DOMAIN}/",    interval: *agi, client: *agc, conditions: *agcond }
   - { name: alertmanager,  group: *ag, url: "https://alertmanager.${SECRET_DOMAIN}/",  interval: *agi, client: *agc, conditions: *agcond }
-  - { name: kopia,         group: *ag, url: "https://kopia.${SECRET_DOMAIN}/",         interval: *agi, client: *agc, conditions: *agcond }
   - { name: radarr,        group: *ag, url: "https://radarr.${SECRET_DOMAIN}/",        interval: *agi, client: *agc, conditions: *agcond }
   - { name: radarr-uhd,    group: *ag, url: "https://radarr-uhd.${SECRET_DOMAIN}/",    interval: *agi, client: *agc, conditions: *agcond }
   - { name: sonarr-anm,    group: *ag, url: "https://sonarr-anm.${SECRET_DOMAIN}/",    interval: *agi, client: *agc, conditions: *agcond }
