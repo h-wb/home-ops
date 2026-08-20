@@ -6,6 +6,10 @@ metadata:
   name: &app smart-life-webapp
 spec:
   interval: 1h
+  # The build initContainer clones+builds the SPA from scratch on every pod
+  # start; on slower edge hardware this alone can take ~6m, well past
+  # helm-controller's 5m default install/upgrade timeout.
+  timeout: 15m
   chartRef:
     kind: OCIRepository
     name: app-template
