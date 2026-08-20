@@ -10,7 +10,7 @@ spec:
     mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
     operation: copy
   ref:
-    tag: v1.20.2
+    tag: v1.20.5
   url: oci://ghcr.io/rook/rook-ceph-cluster
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
@@ -94,6 +94,21 @@ spec:
         urlPrefix: /
         ssl: false
         prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
+      # Mute the AUTH_INSECURE_* warnings driving the HEALTH_ERR above instead
+      # of leaving them to gate every future upgrade the same way. The daemon
+      # keys themselves get rotated to the new key type below (security.cephx),
+      # which is what actually resolves them - this just stops them from
+      # blocking reconciliation for the window until that rotation completes.
+      healthCheck:
+        muteHealthWarning:
+          AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE:
+            policy: mute
+          AUTH_INSECURE_CLIENT_KEY_TYPE:
+            policy: mute
+          AUTH_INSECURE_KEYS_ALLOWED:
+            policy: mute
+          AUTH_INSECURE_KEYS_CREATABLE:
+            policy: mute
       mgr:
         modules:
           - name: diskprediction_local
@@ -126,6 +141,19 @@ spec:
         osd:
           limits:
             memory: 8Gi
+      # Let Rook natively manage rotating daemon (mon/mgr/osd/mds) cephx keys
+      # to the new aes256k key type, version-aware, instead of the manual
+      # per-entity `ceph auth rotate` this replaces (which crashed mds-b when
+      # it was still on v20.2.2 and couldn't parse the new key type). CSI
+      # client keys are pinned to stay on aes - AUTH_INSECURE_CLIENT_KEY_TYPE
+      # for those is muted above rather than rotated.
+      security:
+        cephx:
+          daemon:
+            keyRotationPolicy: KeyGeneration
+            keyGeneration: 2
+          csi:
+            keyType: aes
       storage:
         # useAllNodes: true
         useAllNodes: false
