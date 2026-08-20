@@ -47,7 +47,13 @@ spec:
                   httpGet:
                     path: /status
                     port: *port
-                  failureThreshold: 1080 # ~3h grace for first planet index load
+                  # Observed cycle: ~2h20m download + ~30m checksum + extraction
+                  # (uncertain, ceph-block-dependent) - a 3h budget killed the
+                  # container mid-extraction every time, wiping progress and
+                  # restarting the whole download from scratch in an infinite
+                  # loop. 8h gives real headroom; this only matters once per
+                  # UPDATE_INTERVAL (30d) so being generous costs nothing.
+                  failureThreshold: 2880 # ~8h grace for first planet index load
                   periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
@@ -102,4 +108,4 @@ spec:
             patch: |
               - op: add
                 path: /spec/progressDeadlineSeconds
-                value: 7200
+                value: 28800
