@@ -1,0 +1,91 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: chaski
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: chaski
+  interval: 1h
+  values:
+    replicaCount: 2
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    env:
+      TZ: Europe/Paris
+    envFrom:
+      - secretRef:
+          name: chaski-secret
+    config:
+      targets:
+        arr:
+          apprise:
+            url: pover://{{ env "PUSHOVER_USER_KEY" }}@{{ env "PUSHOVER_TOKEN" }}
+      routes:
+        # Sonarr/Radarr each need two separate Connections (Settings > Connect)
+        # of type Webhook, since a route == one path, and each Connection only
+        # fires the event types you tick:
+        #   radarr-download  -> http://chaski.default.svc.cluster.local:8080/hooks/radarr-download   (On Import, On Upgrade)
+        #   radarr-manual    -> http://chaski.default.svc.cluster.local:8080/hooks/radarr-manual      (On Manual Interaction Required)
+        #   sonarr-download  -> http://chaski.default.svc.cluster.local:8080/hooks/sonarr-download    (On Import, On Upgrade)
+        #   sonarr-manual    -> http://chaski.default.svc.cluster.local:8080/hooks/sonarr-manual       (On Manual Interaction Required)
+        radarr-download:
+          target: arr
+          title: Movie {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}
+          message: |-
+            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b>
+            <small>{{ .payload.movie.overview | ellipsis 300 }}</small>
+            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+          params:
+            format: html
+            priority: low
+            url: "{{ .payload.applicationUrl }}/movie/{{ .payload.movie.tmdbId }}"
+            url_title: View Movie
+          whenExpr: payload.eventType == "Download"
+        radarr-manual:
+          target: arr
+          title: Movie Requires Manual Interaction
+          message: |-
+            <b>{{ .payload.movie.title }} ({{ .payload.movie.year }})</b>
+            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+          params:
+            format: html
+            priority: high
+            url: "{{ .payload.applicationUrl }}/activity/queue"
+            url_title: View Queue
+          whenExpr: payload.eventType == "ManualInteractionRequired"
+        sonarr-download:
+          target: arr
+          title: Episode {{ if .payload.isUpgrade }}Upgraded{{ else }}Added{{ end }}
+          message: |-
+            <b>{{ .payload.series.title }} ({{ printf "S%02dE%02d" (toInt (index .payload.episodes 0).seasonNumber) (toInt (index .payload.episodes 0).episodeNumber) }})</b>
+            <small>{{ (index .payload.episodes 0).title }}</small>
+            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+          params:
+            format: html
+            priority: low
+            url: "{{ .payload.applicationUrl }}/series/{{ .payload.series.titleSlug }}"
+            url_title: View Series
+          whenExpr: payload.eventType == "Download"
+        sonarr-manual:
+          target: arr
+          title: Episode Requires Manual Interaction
+          message: |-
+            <b>{{ .payload.series.title }}</b>
+            <small><b>Client:</b> {{ .payload.downloadClient | default "unknown" }}</small>
+          params:
+            format: html
+            priority: high
+            url: "{{ .payload.applicationUrl }}/activity/queue"
+            url_title: View Queue
+          whenExpr: payload.eventType == "ManualInteractionRequired"
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    resources:
+      requests:
+        cpu: 10m
+      limits:
+        memory: 128Mi

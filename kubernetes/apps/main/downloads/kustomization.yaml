@@ -9,6 +9,8 @@ resources:
   - ./bazarr/ks.yaml
   # - ./bitmagnet/ks.yaml
   # - ./byparr/ks.yaml
+  - ./brrpolice/ks.yaml
+  - ./deduparr/ks.yaml
   - ./flaresolverr/ks.yaml
   - ./musicgrabber/ks.yaml
   - ./prowlarr/ks.yaml
