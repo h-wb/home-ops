@@ -1,0 +1,28 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rook-ceph-custom
+spec:
+  groups:
+    - name: rook-ceph-custom.rules
+      rules:
+        # CephHealthError fires on any HEALTH_ERR, but AUTH_INSECURE_* has
+        # been chronically active for a long time (pending Ceph version
+        # upgrade) - a real incident's notification is indistinguishable
+        # from that routine noise. ceph_health_detail exposes every check as
+        # its own metric, so fire distinctly (with the actual check name) on
+        # anything AUTH_INSECURE_* doesn't cover - this would have caught
+        # the 2026-08-19 incident (PG_DEGRADED/OSD_DOWN during the tal0s/
+        # tal1s RBD blocklist events) instead of blending into the noise.
+        - alert: CephHealthCheckActiveExcludingKnownChronic
+          expr: |-
+            ceph_health_detail{name!~"AUTH_INSECURE.*"} == 1
+          annotations:
+            summary: >-
+              Ceph health check {{ $labels.name }} is active (severity
+              {{ $labels.severity }}) - run `ceph health detail` for specifics
+          for: 1m
+          labels:
+            severity: critical
