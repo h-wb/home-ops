@@ -17,6 +17,10 @@ spec:
   oidc:
     provider:
       issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/prometheus
+      # See components/oidc-auth/securitypolicy.yaml - explicit so EG skips
+      # the well-known fetch at reconcile time (envoyproxy/gateway#6123).
+      authorizationEndpoint: https://idm.${SECRET_DOMAIN}/ui/oauth2
+      tokenEndpoint: https://idm.${SECRET_DOMAIN}/oauth2/token
     clientID: prometheus
     clientSecret:
       name: kanidm-prometheus-oidc
@@ -38,6 +42,8 @@ spec:
   oidc:
     provider:
       issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/alertmanager
+      authorizationEndpoint: https://idm.${SECRET_DOMAIN}/ui/oauth2
+      tokenEndpoint: https://idm.${SECRET_DOMAIN}/oauth2/token
     clientID: alertmanager
     clientSecret:
       name: kanidm-alertmanager-oidc

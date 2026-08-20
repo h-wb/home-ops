@@ -24,6 +24,14 @@ spec:
   oidc:
     provider:
       issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/${APP}
+      # Explicit so EG's control-plane skips fetching /.well-known/openid-
+      # configuration from kanidm at reconcile time. That fetch has no retry
+      # loop (envoyproxy/gateway#6123): if it fails once - e.g. kanidm restarting -
+      # every route on this policy 500s until *some* unrelated resource change
+      # nudges a fresh reconcile. Same for every app using this component,
+      # since kanidm shares one authorize/token endpoint for all clients.
+      authorizationEndpoint: https://idm.${SECRET_DOMAIN}/ui/oauth2
+      tokenEndpoint: https://idm.${SECRET_DOMAIN}/oauth2/token
     clientID: ${APP}
     clientSecret:
       name: kanidm-${APP}-oidc
