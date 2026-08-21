@@ -13,6 +13,18 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
+  # PVC repeatedly corrupted (SQLite disk I/O errors surviving pod/volume
+  # restarts) starting 2026-08-20; wiped fresh 2026-08-21 rather than
+  # restoring the same corrupted history. dataSourceRef is immutable once
+  # set, so this drops it permanently for this app instead of a temporary
+  # patch - banned-peer state is cheap to rebuild, not worth chasing further.
+  patches:
+    - patch: |-
+        - op: remove
+          path: /spec/dataSourceRef
+      target:
+        kind: PersistentVolumeClaim
+        name: *app
   path: ./kubernetes/apps/main/downloads/brrpolice/app
   prune: true
   sourceRef:
