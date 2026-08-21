@@ -98,14 +98,7 @@ spec:
           pm.min_spare_servers = 3
           pm.max_spare_servers = 12
           pm.max_requests = 500
-      # www-data (fpm-alpine's image uid) - existing data is already
-      # group-writable by gid 82, so this doesn't need a recursive chown.
-      securityContext:
-        runAsUser: 82
-        runAsGroup: 82
-        runAsNonRoot: true
       podSecurityContext:
-        fsGroup: 82
         fsGroupChangePolicy: OnRootMismatch
     nginx:
       enabled: true
@@ -135,14 +128,9 @@ spec:
     cronjob:
       enabled: true
       # Real CronJob instead of a crond sidecar riding along in the main
-      # pod for the pod's whole life - crond needs root, `php cron.php`
-      # doesn't, so this also drops to non-root.
+      # pod for the pod's whole life.
       type: cronjob
       cronjob:
-        securityContext:
-          runAsUser: 82
-          runAsGroup: 82
-          runAsNonRoot: true
         # config PVC is RWO - the cron pod must land on the same node as
         # the main deployment pod to mount it.
         affinity:
@@ -181,18 +169,3 @@ spec:
         enabled: true
         existingClaim: nextcloud-data
         accessMode: ReadWriteMany
-  postRenderers:
-    - kustomize:
-        patches:
-          - target:
-              kind: Deployment
-              name: *name
-            patch: |-
-              apiVersion: apps/v1
-              kind: Deployment
-              metadata:
-                name: nextcloud
-              spec:
-                template:
-                  spec:
-                    hostUsers: false
