@@ -38,6 +38,19 @@ spec:
     redirectURL: https://${OIDC_HOST:=${APP}.${SECRET_DOMAIN}}/oauth2/callback
     logoutPath: /logout
     cookieDomain: ${OIDC_HOST:=${APP}.${SECRET_DOMAIN}}
+    # Background XHR/polling (Socket.IO, SignalR, etc.) hitting an expired/missing
+    # session otherwise gets a 302 to the authorize endpoint instead of a 401 - the
+    # request just fails, the app's UI reads that as "disconnected", and its own
+    # retry loop keeps re-triggering fresh OAuth2 flows every few seconds. Sec-Fetch-Mode
+    # is browser-set on every request and is "navigate" only for a real page load.
+    denyRedirect:
+      headers:
+        - name: Sec-Fetch-Mode
+          type: RegularExpression
+          value: "cors|no-cors|same-origin"
+        - name: X-Requested-With
+          type: Exact
+          value: XMLHttpRequest
     scopes:
       - "openid"
       - "email"
