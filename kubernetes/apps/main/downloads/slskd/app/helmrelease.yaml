@@ -17,6 +17,21 @@ spec:
           reloader.stakater.com/auto: "true"
         pod:
           terminationGracePeriodSeconds: 30
+        initContainers:
+          init-dirs:
+            # slskd validates its configured directories exist at startup
+            # and refuses to create them itself.
+            image:
+              repository: mirror.gcr.io/library/busybox
+              tag: "1.36"
+            command:
+              - sh
+              - -c
+              - mkdir -p /data/Downloads/soulseek/complete /data/Downloads/soulseek/incomplete /data/Downloads/soulseek/shared
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
