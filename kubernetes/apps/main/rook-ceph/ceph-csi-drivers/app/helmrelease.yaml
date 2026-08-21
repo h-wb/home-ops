@@ -24,8 +24,7 @@ spec:
     name: ceph-csi-drivers
   interval: 1h
   values:
-    # Rook-compatible values, see
-    # https://github.com/rook/rook/blob/v1.20.5/deploy/charts/ceph-csi-drivers/values.yaml
+    # Rook-compatible values: https://github.com/rook/rook/blob/v1.20.5/deploy/charts/ceph-csi-drivers/values.yaml
     operatorConfig:
       namespace: rook-ceph
       driverSpecDefaults:
@@ -49,10 +48,7 @@ spec:
                 memory: 128Mi
         controllerPlugin:
           priorityClassName: system-cluster-critical
-          # Carried over from rook v1.19, which ran the CSI controller plugins
-          # with hostNetwork: true so they can reach the Ceph public network
-          # directly; chart default is false.
-          hostNetwork: true
+          hostNetwork: true # chart default is false; needed to reach the Ceph public network
           resources:
             attacher:
               limits:
@@ -94,12 +90,7 @@ spec:
         enabled: true
         name: rook-ceph.rbd.csi.ceph.com
         grpcTimeout: 150
-        # Chart default is "none", which silently dropped the csi-snapshotter
-        # sidecar during the ceph-csi-operator migration and broke VolumeSnapshot
-        # create/delete for every ceph-block volsync backup (e.g. media/tautulli).
-        # Deliberately NOT volumeGroupSnapshot: that disables single-PVC
-        # VolumeSnapshot support, which is what volsync's backups rely on.
-        snapshotPolicy: volumeSnapshot
+        snapshotPolicy: volumeSnapshot # not volumeGroupSnapshot: volsync backups need single-PVC VolumeSnapshot support
         log:
           rotation:
             enabled: false
@@ -109,10 +100,7 @@ spec:
         enabled: true
         name: rook-ceph.cephfs.csi.ceph.com
         grpcTimeout: 150
-        # Talos kernel cephfs client needs ms_mode set to complete the msgr-v2
-        # (port 3300) handshake; without it mounts fail with the misleading
-        # "no mds is up … or you may not be authorized".
-        cephFsClientType: kernel
+        cephFsClientType: kernel # ms_mode also set in rook-ceph-cluster's cephClusterSpec.csi.cephfs
         kernelMountOptions:
           ms_mode: prefer-crc
         log:

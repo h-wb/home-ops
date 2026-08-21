@@ -73,6 +73,8 @@ spec:
       crashCollector:
         disable: false
       csi:
+        cephfs:
+          kernelMountOptions: ms_mode=prefer-crc # required for Talos kernel client msgr-v2 handshake
         readAffinity:
           # Disabled: crush_location-based localized reads (read_from_replica=localize)
           # are the mechanism behind a known Ceph Tentacle data-loss/stability bug
