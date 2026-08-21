@@ -29,12 +29,11 @@ spec:
   values:
     deploymentAnnotations:
       reloader.stakater.com/auto: "true"
+    global:
+      image:
+        registry: mirror.gcr.io
     image:
       flavor: fpm-alpine
-      # Chart 9.2.6's default appVersion (34.0.2) is older than what's
-      # already on disk (34.0.3.2, per Nextcloud's own downgrade-guard
-      # check) - pin explicitly until the chart catches up upstream.
-      tag: 34.0.3-fpm-alpine
     nextcloud:
       host: nextcloud.${SECRET_DOMAIN}
       existingSecret:
@@ -67,6 +66,8 @@ spec:
             'overwriteprotocol' => 'https',
             'default_phone_region' => 'FR',
             'maintenance_window_start' => 20,
+            'check_data_directory_permissions' => false,
+            'skeletondirectory' => '',
           );
       extraVolumes:
         - name: nfs-tank
@@ -81,8 +82,41 @@ spec:
           value: nextcloud-dragonfly.default.svc.cluster.local
         - name: REDIS_HOST_PORT
           value: "6379"
+      # Stock image ships pm.max_children: 5, which saturates from baseline
+      # sync/heartbeat traffic alone - each public-share download also holds
+      # a worker for its entire transfer (no X-Accel-Redirect offload to
+      # nginx), so a handful of concurrent downloads exhausts the pool
+      # entirely, including the worker nginx needs to answer its own
+      # status.php health check - causing nginx to fail probes and get
+      # killed/restarted by kubelet under load.
+      phpConfigs:
+        zzz-pool.conf: |
+          [www]
+          pm = dynamic
+          pm.max_children = 30
+          pm.start_servers = 6
+          pm.min_spare_servers = 3
+          pm.max_spare_servers = 12
+          pm.max_requests = 500
+      # www-data (fpm-alpine's image uid) - existing data is already
+      # group-writable by gid 82, so this doesn't need a recursive chown.
+      securityContext:
+        runAsUser: 82
+        runAsGroup: 82
+        runAsNonRoot: true
+      podSecurityContext:
+        fsGroup: 82
+        fsGroupChangePolicy: OnRootMismatch
     nginx:
       enabled: true
+      image:
+        repository: mirror.gcr.io/library/nginx
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          memory: 128Mi
       config:
         headers:
           Strict-Transport-Security: "max-age=15552000; includeSubDomains; preload;"
@@ -100,10 +134,46 @@ spec:
         passwordKey: password
     cronjob:
       enabled: true
+      # Real CronJob instead of a crond sidecar riding along in the main
+      # pod for the pod's whole life - crond needs root, `php cron.php`
+      # doesn't, so this also drops to non-root.
+      type: cronjob
+      cronjob:
+        securityContext:
+          runAsUser: 82
+          runAsGroup: 82
+          runAsNonRoot: true
+        # config PVC is RWO - the cron pod must land on the same node as
+        # the main deployment pod to mount it.
+        affinity:
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/instance
+                      operator: In
+                      values:
+                        - nextcloud
+                    - key: app.kubernetes.io/component
+                      operator: In
+                      values:
+                        - app
+                topologyKey: kubernetes.io/hostname
+        resources:
+          requests:
+            cpu: 25m
+            memory: 128Mi
+          limits:
+            memory: 512Mi
     startupProbe:
       enabled: true
-    securityContext:
-      fsGroupChangePolicy: OnRootMismatch
+    # Sized for pm.max_children: 30 above (~100-150Mi RSS/worker under load).
+    resources:
+      requests:
+        cpu: 300m
+        memory: 768Mi
+      limits:
+        memory: 3Gi
     persistence:
       enabled: true
       existingClaim: *name
@@ -111,3 +181,18 @@ spec:
         enabled: true
         existingClaim: nextcloud-data
         accessMode: ReadWriteMany
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+              name: *name
+            patch: |-
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: nextcloud
+              spec:
+                template:
+                  spec:
+                    hostUsers: false
