@@ -131,6 +131,15 @@ spec:
       # pod for the pod's whole life.
       type: cronjob
       cronjob:
+        # Unlike the sidecar's cron.sh (which resolves the right user
+        # dynamically), this mode runs `php cron.php` directly as
+        # whatever uid the container has - occ's ownership check then
+        # requires an exact match with config.php's actual owner (1000
+        # here, a leftover from how this instance was originally
+        # provisioned - not 82/www-data despite the fpm-alpine image).
+        securityContext:
+          runAsUser: 1000
+          runAsGroup: 1000
         # config PVC is RWO - the cron pod must land on the same node as
         # the main deployment pod to mount it.
         affinity:
