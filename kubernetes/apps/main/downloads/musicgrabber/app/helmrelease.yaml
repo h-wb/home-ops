@@ -81,6 +81,15 @@ spec:
         path: /mnt/tank/hwe/Audio/Music
         globalMounts:
           - path: /music
+      soulseek-downloads:
+        # slskd's completed-downloads folder only - never its shares folder.
+        # Read-only: MusicGrabber's "move" mode isn't in use, it only copies.
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared/Downloads/soulseek/complete
+        globalMounts:
+          - path: /downloads
+            readOnly: true
       shm:
         type: emptyDir
         medium: Memory
