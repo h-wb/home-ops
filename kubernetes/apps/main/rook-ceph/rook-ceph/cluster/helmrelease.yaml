@@ -90,7 +90,7 @@ spec:
           - name: pg_autoscaler
             enabled: true
           - name: rook
-            enabled: false # rook/rook#18124, fixed upstream in v1.20.6 (rook/rook#18213)
+            enabled: false # rook/rook#18124 - our list replaces the chart default, so this must stay explicit
       network:
         provider: host
         addressRanges:
