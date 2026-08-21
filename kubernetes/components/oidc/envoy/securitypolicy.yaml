@@ -1,0 +1,45 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/securitypolicy_v1alpha1.json
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: &app ${APP}
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: *app
+  oidc:
+    provider:
+      issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/${APP}
+      # Explicit so EG's control-plane skips fetching /.well-known/openid-
+      # configuration from kanidm at reconcile time. That fetch has no retry
+      # loop (envoyproxy/gateway#6123): if it fails once - e.g. kanidm restarting -
+      # every route on this policy 500s until *some* unrelated resource change
+      # nudges a fresh reconcile. Same for every app using this component,
+      # since kanidm shares one authorize/token endpoint for all clients.
+      authorizationEndpoint: https://idm.${SECRET_DOMAIN}/ui/oauth2
+      tokenEndpoint: https://idm.${SECRET_DOMAIN}/oauth2/token
+    clientID: *app
+    clientSecret:
+      name: kanidm-${APP}-oidc
+    redirectURL: https://${SUBDOMAIN:=${APP}}.${SECRET_DOMAIN}/oauth2/callback
+    logoutPath: /logout
+    cookieDomain: ${SUBDOMAIN:=${APP}}.${SECRET_DOMAIN}
+    # Background XHR/polling (Socket.IO, SignalR, etc.) hitting an expired/missing
+    # session otherwise gets a 302 to the authorize endpoint instead of a 401 - the
+    # request just fails, the app's UI reads that as "disconnected", and its own
+    # retry loop keeps re-triggering fresh OAuth2 flows every few seconds. Sec-Fetch-Mode
+    # is browser-set on every request and is "navigate" only for a real page load.
+    denyRedirect:
+      headers:
+        - name: Sec-Fetch-Mode
+          type: RegularExpression
+          value: "cors|no-cors|same-origin"
+        - name: X-Requested-With
+          type: Exact
+          value: XMLHttpRequest
+    scopes:
+      - "openid"
+      - "email"
+      - "profile"
