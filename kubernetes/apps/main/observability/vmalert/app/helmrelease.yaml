@@ -1,0 +1,73 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: vmalert
+spec:
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 0.47.0
+  url: oci://ghcr.io/victoriametrics/helm-charts/victoria-metrics-alert
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: vmalert
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: vmalert
+  values:
+    server:
+      fullnameOverride: vmalert
+      # VictoriaLogs is the datasource here (not Prometheus/VictoriaMetrics) -
+      # this vmalert instance exists specifically to alert on log CONTENT
+      # (chronic per-pod storage errors) that no metric captures, since the
+      # apps affected by RBD fencing this week (kanidm, gatus, prometheus,
+      # musicgrabber, brrpolice...) mostly stay "Running" and never crash-loop,
+      # so KubePodCrashLooping never catches them - only their logs show it.
+      datasource:
+        url: http://victoria-logs-server.observability.svc.cluster.local:9428
+      notifier:
+        url: http://alertmanager-operated.observability.svc.cluster.local:9093
+      extraArgs:
+        rule.defaultRuleType: vlogs
+      resources:
+        requests:
+          cpu: 10m
+        limits:
+          memory: 128Mi
+      config:
+        alerts:
+          groups:
+            - name: chronic-storage-errors
+              type: vlogs
+              interval: 2m
+              rules:
+                - alert: ChronicStorageIOErrors
+                  # Matches the exact error signatures seen across every RBD-fencing
+                  # incident this week (2026-08-20/21): ext4 defensively going
+                  # read-only, SQLite reporting disk I/O errors / locking-protocol
+                  # violations against a fenced watch, or a wedged connection pool
+                  # that never recovers on its own. `for: 3m` requires this to be
+                  # sustained across ~2 evaluation cycles, not a one-off blip.
+                  expr: |-
+                    ("disk I/O error" OR "read-only file system" OR "readonly database" OR EROFS OR "unable to retrieve connection from pool" OR "locking protocol" OR "unable to open database file") | stats by (kubernetes.pod_namespace, kubernetes.pod_name) count() as errs | filter errs:>=5
+                  for: 3m
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: >-
+                      {{ index .Labels "kubernetes.pod_namespace" }}/{{ index .Labels "kubernetes.pod_name" }}
+                      has logged {{ $value }} storage I/O errors in the last 2m.
+                      Every occurrence of this pattern this week has needed a
+                      manual pod/statefulset restart to clear - it does not
+                      self-heal.
+    serviceMonitor:
+      enabled: true
