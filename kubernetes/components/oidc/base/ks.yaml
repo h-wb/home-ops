@@ -17,6 +17,7 @@ spec:
     substitute:
       APP: *app
       APP_NAMESPACE: ${APP_NAMESPACE}
+      SECRET_DOMAIN: ${SECRET_DOMAIN}
       SUBDOMAIN: ${SUBDOMAIN:=${APP}}
       DOMAIN: ${q:="}${DOMAIN:=}${q:="}
 
