@@ -16,6 +16,16 @@ spec:
     features:
       credentialProjection:
         enabled: true
+    # Default reconcileConcurrency (8, per-controller across 8 controllers)
+    # let a resumed/backlogged controller fire ~8 concurrent VolumeSnapshot
+    # creates + staged-PVC clones + mover Job attaches at once. On a 3-node
+    # Ceph cluster that burst repeatedly leaked ceph-csi rbd operation-lock
+    # state ("an operation with the given Volume ID ... already exists",
+    # rook/rook#7122) and triggered exclusive-lock fencing on unrelated
+    # live volumes. Bound to 1 so backups process strictly one at a time,
+    # even when catching up a backlog.
+    reconcileConcurrency: 1
+    maxConcurrentDeleteJobs: 1
     monitoring:
       dashboards:
         enabled: true

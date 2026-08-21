@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: kopiur-rules
+spec:
+  groups:
+    - name: kopiur.rules
+      rules:
+        - alert: KopiurControllerScaledToZero
+          expr: |-
+            kube_deployment_spec_replicas{namespace="storage", deployment="kopiur-controller"} == 0
+          for: 15m
+          annotations:
+            summary: >-
+              kopiur-controller has had 0 replicas for 15+ minutes - no
+              scheduled backups are running cluster-wide. Nothing in Git
+              sets this deployment's replicas, so this is either an
+              out-of-band scale (kubectl) or a crash loop; either way it
+              was the root cause of the 2026-08-20/21 incident where a
+              resumed controller replayed its whole backlog at once and
+              fenced unrelated apps' RBD volumes.
+          labels:
+            severity: critical
