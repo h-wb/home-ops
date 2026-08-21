@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}
+spec:
+  accessModes:
+    - ${KOPIUR_ACCESSMODES:=ReadWriteOnce}
+  resources:
+    requests:
+      storage: ${KOPIUR_CAPACITY:=5Gi}
+  storageClassName: ${KOPIUR_STORAGECLASS:=ceph-block}
