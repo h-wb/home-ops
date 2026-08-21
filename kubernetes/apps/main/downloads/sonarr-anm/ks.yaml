@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
-    - ../../../../../components/oidc-auth
+    - ../../../../../components/oidc/envoy
 
   path: ./kubernetes/apps/main/downloads/sonarr-anm/app
   prune: true
@@ -29,5 +29,10 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "26 * * * *"
       KOPIUR_CAPACITY: 10Gi
+      OIDC_DISPLAY_NAME: Sonarr Anime
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
+      OIDC_IMAGE_NAME: sonarr

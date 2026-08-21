@@ -13,7 +13,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
-    - ../../../../../components/oidc-auth
+    - ../../../../../components/oidc/envoy
 
   path: ./kubernetes/apps/main/downloads/radarr-uhd/app
   prune: true
@@ -29,5 +29,10 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "23 * * * *"
       KOPIUR_CAPACITY: 5Gi
+      OIDC_DISPLAY_NAME: Radarr UHD
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
+      OIDC_IMAGE_NAME: radarr

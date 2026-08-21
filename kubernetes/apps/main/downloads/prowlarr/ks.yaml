@@ -12,7 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/kopiur/backup
-    - ../../../../../components/oidc-auth
+    - ../../../../../components/oidc/envoy
 
   path: ./kubernetes/apps/main/downloads/prowlarr/app
   prune: true
@@ -28,5 +28,9 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "17 * * * *"
       KOPIUR_CAPACITY: 1Gi
+      OIDC_DISPLAY_NAME: Prowlarr
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"

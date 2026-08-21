@@ -6,7 +6,7 @@ metadata:
   name: victoria-logs
 spec:
   components:
-    - ../../../../../components/oidc-auth
+    - ../../../../../components/oidc/envoy
   dependsOn:
     - name: rook-ceph
       namespace: rook-ceph
@@ -22,7 +22,12 @@ spec:
   postBuild:
     substitute:
       APP: victoria-logs
+      APP_NAMESPACE: observability
       OIDC_TARGET: victoria-logs-server
+      OIDC_DISPLAY_NAME: VictoriaLogs
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
+      OIDC_IMAGE_NAME: victoriametrics
 ---
 # yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1

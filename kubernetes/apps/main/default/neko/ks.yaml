@@ -12,13 +12,17 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/gpu
-    - ../../../../../components/oidc-auth
+    - ../../../../../components/oidc/envoy
   dependsOn: []
   interval: 30m
   path: ./kubernetes/apps/main/default/neko/app
   postBuild:
     substitute:
       APP: *app
+      APP_NAMESPACE: *namespace
+      OIDC_DISPLAY_NAME: Neko
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
   prune: true
   retryInterval: 1m
   sourceRef:
