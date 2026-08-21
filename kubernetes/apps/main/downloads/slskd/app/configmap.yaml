@@ -1,0 +1,55 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slskd-configmap
+  annotations:
+    # slskd resolves ${SLSKD_API_KEY} itself from its own process env at
+    # runtime - this must survive Flux's postBuild.substitute untouched.
+    kustomize.toolkit.fluxcd.io/substitute: disabled
+data:
+  slskd.yml: |
+    ---
+    directories:
+      downloads: /data/Downloads/soulseek/complete
+      incomplete: /data/Downloads/soulseek/incomplete
+    flags:
+      no_version_check: true
+    integrations:
+      vpn:
+        enabled: true
+        port_forwarding: true
+        polling_interval: 2500
+        gluetun:
+          url: http://localhost:8000
+          timeout: 1000
+    metrics:
+      enabled: true
+      url: /metrics
+      authentication:
+        disabled: true
+    remote_configuration: false
+    shares:
+      directories:
+        - /data/Downloads/soulseek/shared
+      filters:
+        - \.ini$
+        - Thumbs.db$
+        - \.DS_Store$
+    transfers:
+      download:
+        destination:
+          permissions:
+            mode: 777 # 777 so other apps sharing the NFS export can manage completed files
+        retry:
+          incomplete: overwrite # restart from scratch; resuming across different Soulseek sources yields corrupt files
+          attempts: 3
+          delay: 5000 # ms, first retry
+          max_delay: 60000 # ms, backoff ceiling
+    web:
+      authentication:
+        api_keys:
+          my_api_key:
+            key: ${SLSKD_API_KEY}
+            cidr: 0.0.0.0/0,::/0

@@ -22,6 +22,7 @@ resources:
   - ./radarr/ks.yaml
   - ./radarr-uhd/ks.yaml
   - ./recyclarr/ks.yaml
+  - ./slskd/ks.yaml
   - ./sonarr-tv/ks.yaml
   - ./sonarr-anm/ks.yaml
   - ./overseerr/ks.yaml
