@@ -9,13 +9,6 @@ spec:
     compressor: zstd
   credentialProjection:
     enabled: true
-  # Pin to volsync's own identity convention (<app>@<namespace>:/data) so any
-  # pre-migration history synced into this repository (see sync-to notes)
-  # reads as one continuous series with new snapshots, not a disconnected one
-  # under the ClusterRepository's default identity.
-  identity:
-    hostname: ${NAMESPACE}
-    username: ${APP}
   mover:
     podSecurityContext:
       runAsUser: ${KOPIUR_PUID:=1000}
