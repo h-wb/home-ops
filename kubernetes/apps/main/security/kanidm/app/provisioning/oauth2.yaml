@@ -1,119 +1,8 @@
 ---
-# OAuth2 clients provisioned by kanidm-provision. One ConfigMap per target namespace
-# (data.targetNamespace is ConfigMap-level, not per-client). For each client the
-# provisioner writes Secret `kanidm-<name>-oidc` into that namespace with the keys named
-# by k8s.clientIdKey / k8s.clientSecretKey — chosen here to match each app's own env vars
-# so the app can consume the secret directly via `envFrom`.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kanidm-provision-oauth2-media
-  labels:
-    kanidm_config: "1"
-  annotations:
-    reloader.stakater.com/match: "true"
-data:
-  targetNamespace: media
-  oauth2.json: |
-    {
-      "groups": {}, "persons": {}, "systems": { "oauth2": {
-        "romm": {
-          "present": true, "displayName": "RomM",
-          "originUrl": "https://romm.${SECRET_DOMAIN}/api/oauth/openid",
-          "originLanding": "https://romm.${SECRET_DOMAIN}/",
-          "scopeMaps": { "users": ["openid", "email", "profile"] },
-          "preferShortUsername": true,
-          "allowInsecureClientDisablePkce": true,
-          "k8s": {
-            "clientIdKey": "OIDC_CLIENT_ID",
-            "clientSecretKey": "OIDC_CLIENT_SECRET",
-            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/romm.svg"
-          }
-        },
-        "komga": {
-          "present": true, "displayName": "Komga",
-          "originUrl": "https://komga.${SECRET_DOMAIN}/login/oauth2/code/kanidm",
-          "originLanding": "https://komga.${SECRET_DOMAIN}/",
-          "scopeMaps": { "users": ["openid", "email", "profile"] },
-          "preferShortUsername": true,
-          "allowInsecureClientDisablePkce": true,
-          "enableLegacyCrypto": true,
-          "k8s": {
-            "clientIdKey": "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_ID",
-            "clientSecretKey": "SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_SECRET",
-            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/komga.svg"
-          }
-        }
-      } } }
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kanidm-provision-oauth2-llm
-  labels:
-    kanidm_config: "1"
-  annotations:
-    reloader.stakater.com/match: "true"
-data:
-  targetNamespace: llm
-  oauth2.json: |
-    {
-      "groups": {}, "persons": {}, "systems": { "oauth2": {
-        "open-webui": {
-          "present": true, "displayName": "Open WebUI",
-          "originUrl": "https://chat.${SECRET_DOMAIN}/oauth/oidc/callback",
-          "originLanding": "https://chat.${SECRET_DOMAIN}/",
-          "scopeMaps": { "users": ["openid", "email", "profile"] },
-          "preferShortUsername": true,
-          "allowInsecureClientDisablePkce": true,
-          "k8s": {
-            "clientIdKey": "OAUTH_CLIENT_ID",
-            "clientSecretKey": "OAUTH_CLIENT_SECRET",
-            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/open-webui.svg"
-          }
-        }
-      } } }
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kanidm-provision-oauth2-default
-  labels:
-    kanidm_config: "1"
-  annotations:
-    reloader.stakater.com/match: "true"
-data:
-  targetNamespace: default
-  oauth2.json: |
-    {
-      "groups": {}, "persons": {}, "systems": { "oauth2": {
-        "karakeep": {
-          "present": true, "displayName": "Karakeep",
-          "originUrl": "https://karakeep.${SECRET_DOMAIN}/api/auth/callback/custom",
-          "originLanding": "https://karakeep.${SECRET_DOMAIN}/",
-          "scopeMaps": { "users": ["openid", "email", "profile"] },
-          "preferShortUsername": true,
-          "enableLegacyCrypto": true,
-          "k8s": {
-            "clientIdKey": "OAUTH_CLIENT_ID",
-            "clientSecretKey": "OAUTH_CLIENT_SECRET",
-            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/karakeep.svg"
-          }
-        },
-        "airtrail": {
-          "present": true, "displayName": "AirTrail",
-          "originUrl": "https://airtrail.${SECRET_DOMAIN}/login",
-          "originLanding": "https://airtrail.${SECRET_DOMAIN}/",
-          "scopeMaps": { "users": ["openid", "email", "profile"] },
-          "preferShortUsername": true,
-          "k8s": {
-            "clientIdKey": "OAUTH_CLIENT_ID",
-            "clientSecretKey": "OAUTH_CLIENT_SECRET",
-            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/airtrail.svg"
-          }
-        }
-      } } }
----
+# OAuth2 clients that can't use components/oidc (which needs one ${APP} per
+# Kustomization): prometheus + alertmanager share kube-prometheus-stack's one
+# ks.yaml, so their SecurityPolicy is hand-written too, in
+# kubernetes/apps/main/observability/kube-prometheus-stack/app/securitypolicy.yaml.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -127,24 +16,6 @@ data:
   oauth2.json: |
     {
       "groups": {}, "persons": {}, "systems": { "oauth2": {
-        "grafana": {
-          "present": true, "displayName": "Grafana",
-          "originUrl": "https://grafana.${SECRET_DOMAIN}/login/generic_oauth",
-          "originLanding": "https://grafana.${SECRET_DOMAIN}/",
-          "scopeMaps": { "users": ["openid", "email", "profile"] },
-          "preferShortUsername": true,
-          "claimMaps": {
-            "grafana_role": {
-              "joinType": "array",
-              "valuesByGroup": { "admins": ["Admin"], "users": ["Viewer"] }
-            }
-          },
-          "k8s": {
-            "clientIdKey": "GF_AUTH_GENERIC_OAUTH_CLIENT_ID",
-            "clientSecretKey": "GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET",
-            "imageUrl": "https://raw.githubusercontent.com/homarr-labs/dashboard-icons/main/svg/grafana.svg"
-          }
-        },
         "prometheus": {
           "present": true, "displayName": "Prometheus",
           "originUrl": "https://prometheus.${SECRET_DOMAIN}/oauth2/callback",

@@ -12,6 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc
   path: ./kubernetes/apps/main/default/karakeep/app
   prune: true
   sourceRef:
@@ -26,5 +27,12 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "7 * * * *"
       KOPIUR_CAPACITY: 5Gi
+      OIDC_DISPLAY_NAME: Karakeep
+      OIDC_CALLBACK: /api/auth/callback/custom
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_LEGACY_CRYPTO: "true"
+      OIDC_CLIENT_ID_KEY: OAUTH_CLIENT_ID
+      OIDC_CLIENT_SECRET_KEY: OAUTH_CLIENT_SECRET

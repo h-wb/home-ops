@@ -14,6 +14,7 @@ spec:
     - ../../../../../components/dragonfly
     - ../../../../../components/cnpg/restore
     - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
@@ -32,8 +33,16 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "29 * * * *"
       KOPIUR_CAPACITY: 5Gi
+      OIDC_DISPLAY_NAME: Open WebUI
+      SUBDOMAIN: chat
+      OIDC_CALLBACK: /oauth/oidc/callback
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
+      OIDC_CLIENT_ID_KEY: OAUTH_CLIENT_ID
+      OIDC_CLIENT_SECRET_KEY: OAUTH_CLIENT_SECRET
   prune: true
   retryInterval: 1m
   sourceRef:

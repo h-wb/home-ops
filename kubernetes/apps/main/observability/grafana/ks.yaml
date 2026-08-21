@@ -8,11 +8,20 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/oidc
   interval: 1h
   path: ./kubernetes/apps/main/observability/grafana/app
   postBuild:
     substitute:
       APP: *app
+      APP_NAMESPACE: observability
+      OIDC_DISPLAY_NAME: Grafana
+      OIDC_CALLBACK: /login/generic_oauth
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_CLIENT_ID_KEY: GF_AUTH_GENERIC_OAUTH_CLIENT_ID
+      OIDC_CLIENT_SECRET_KEY: GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET
+      OIDC_CLAIM_MAPS: '{"grafana_role":{"joinType":"array","valuesByGroup":{"admins":["Admin"],"users":["Viewer"]}}}'
   prune: true
   sourceRef:
     kind: GitRepository

@@ -13,6 +13,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc
   path: ./kubernetes/apps/main/media/komga/app
   prune: true
   sourceRef:
@@ -27,5 +28,13 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "35 * * * *"
       KOPIUR_CAPACITY: 2Gi
+      OIDC_DISPLAY_NAME: Komga
+      OIDC_CALLBACK: /login/oauth2/code/kanidm
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
+      OIDC_LEGACY_CRYPTO: "true"
+      OIDC_CLIENT_ID_KEY: SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_ID
+      OIDC_CLIENT_SECRET_KEY: SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KANIDM_CLIENT_SECRET
