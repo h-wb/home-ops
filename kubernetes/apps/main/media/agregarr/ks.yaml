@@ -12,7 +12,17 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    - ../../../../../components/kopiur/backup
+  # kopiur backup dropped temporarily: agregarr's PVC filesystem was corrupted
+  # (persistent EROFS - confirmed via `rbd status` showing zero watchers, so
+  # not an active lock, and reproducing even on a genuinely fresh pod/mount -
+  # ext4-level corruption, not a transient Ceph fencing blip) from the
+  # 2026-08-20/21 kopiur-controller incident. Its own hourly snapshots
+  # dutifully backed up the corrupted state, so restoring from the latest one
+  # would just recreate the same broken filesystem - hence the plain PVC
+  # below instead of the usual Restore-sourced one. Re-enabling backups needs
+  # more than just re-adding components/kopiur/backup: that would try to
+  # (re-)apply a PVC with a dataSourceRef against a live object that no
+  # longer has one, which is an illegal immutable-field change.
   path: ./kubernetes/apps/main/media/agregarr/app
   prune: true
   sourceRef:
@@ -27,5 +37,3 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
-      KOPIUR_SCHEDULE: "43 * * * *"
-      KOPIUR_CAPACITY: 2Gi
