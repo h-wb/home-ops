@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/persistentvolumeclaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: photon
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 260Gi
+  storageClassName: ceph-block
