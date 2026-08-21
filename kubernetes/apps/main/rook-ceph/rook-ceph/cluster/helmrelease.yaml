@@ -24,23 +24,12 @@ spec:
     name: rook-ceph-cluster
   dependsOn: []
   interval: 1h
-  # Ceph version rollouts (mons + osds + mds + rgw) take far longer than the
-  # 5m Flux default; a short timeout previously triggered a rollback that tried
-  # to downgrade Ceph (unsupported) and crash-looped mon-b/osd-0.
   timeout: 30m
   upgrade:
     remediation:
-      # Retry the upgrade instead of rolling back: a Ceph downgrade is
-      # unsupported and corrupts the daemon startup (tentacle ondisk layout).
       retries: 3
       remediateLastFailure: false
   values:
-    # Pin explicitly instead of relying on the chart's default, which
-    # otherwise changes silently on chart bumps (grouped with the operator
-    # chart) and can trigger an unsupported Ceph downgrade if the cluster
-    # rollout doesn't finish before Flux's remediation kicks in. Must be set
-    # here (not cephClusterSpec.cephVersion) - the chart template renders
-    # this into cephVersion itself, so a nested override collides with it.
     cephImage:
       repository: quay.io/ceph/ceph
       tag: v20.2.4
@@ -76,22 +65,12 @@ spec:
         cephfs:
           kernelMountOptions: ms_mode=prefer-crc # required for Talos kernel client msgr-v2 handshake
         readAffinity:
-          # Disabled: crush_location-based localized reads (read_from_replica=localize)
-          # are the mechanism behind a known Ceph Tentacle data-loss/stability bug
-          # class (ceph/ceph-csi#5772, rook/rook#16839) and pin reads to the local
-          # host's OSD replica, which can wedge/blocklist a node's krbd client if
-          # that local OSD hiccups instead of transparently failing over.
-          enabled: false
+          enabled: false # ceph/ceph-csi#5772, rook/rook#16839
       dashboard:
         enabled: true
         urlPrefix: /
         ssl: false
         prometheusEndpoint: http://prometheus-operated.observability.svc.cluster.local:9090
-      # Mute the AUTH_INSECURE_* warnings driving the HEALTH_ERR above instead
-      # of leaving them to gate every future upgrade the same way. The daemon
-      # keys themselves get rotated to the new key type below (security.cephx),
-      # which is what actually resolves them - this just stops them from
-      # blocking reconciliation for the window until that rotation completes.
       healthCheck:
         muteHealthWarning:
           AUTH_INSECURE_ROTATING_SERVICE_KEY_TYPE:
@@ -110,11 +89,8 @@ spec:
             enabled: true
           - name: pg_autoscaler
             enabled: true
-          # rook module crash-loops on node_proxy_fullreport (NotImplementedError)
-          # and spams RECENT_MGR_MODULE_CRASH; not required for CSI/orchestrator
-          # functionality (orchestrator module stays "always on" regardless).
           - name: rook
-            enabled: false
+            enabled: false # rook/rook#18124, fixed upstream in v1.20.6 (rook/rook#18213)
       network:
         provider: host
         addressRanges:
@@ -127,28 +103,18 @@ spec:
       resources:
         mgr:
           limits:
-            # Chart default (1Gi) is too tight for the active mgr - it OOMKilled
-            # repeatedly (~every 4-5h), climbing to 846Mi within 5h of a fresh
-            # start while the standby mgr held steady at 151Mi.
-            memory: 2Gi
+            memory: 2Gi # chart default (1Gi) OOMKilled the active mgr
         osd:
           limits:
             memory: 8Gi
-      # Let Rook natively manage rotating daemon (mon/mgr/osd/mds) cephx keys
-      # to the new aes256k key type, version-aware, instead of the manual
-      # per-entity `ceph auth rotate` this replaces (which crashed mds-b when
-      # it was still on v20.2.2 and couldn't parse the new key type). CSI
-      # client keys are pinned to stay on aes - AUTH_INSECURE_CLIENT_KEY_TYPE
-      # for those is muted above rather than rotated.
       security:
         cephx:
           daemon:
             keyRotationPolicy: KeyGeneration
             keyGeneration: 2
           csi:
-            keyType: aes
+            keyType: aes # aes256k requires kernel 7.0+
       storage:
-        # useAllNodes: true
         useAllNodes: false
         nodes:
           - name: "tal0s"
@@ -161,7 +127,6 @@ spec:
             devices:
               - name: /dev/disk/by-id/nvme-Samsung_SSD_990_PRO_2TB_S7KHNU0X416048K
         useAllDevices: false
-        devicePathFilter: /dev/disk/by-id/nvme-Samsung_SSD_980_PRO_500GB_S5GYNL_.*
         config:
           osdsPerDevice: "1"
     cephBlockPools:
@@ -188,6 +153,8 @@ spec:
             csi.storage.k8s.io/provisioner-secret-namespace: "{{ .Release.Namespace }}"
             csi.storage.k8s.io/controller-expand-secret-name: rook-csi-rbd-provisioner
             csi.storage.k8s.io/controller-expand-secret-namespace: "{{ .Release.Namespace }}"
+            csi.storage.k8s.io/controller-publish-secret-name: rook-csi-rbd-provisioner
+            csi.storage.k8s.io/controller-publish-secret-namespace: "{{ .Release.Namespace }}"
             csi.storage.k8s.io/node-stage-secret-name: rook-csi-rbd-node
             csi.storage.k8s.io/node-stage-secret-namespace: "{{ .Release.Namespace }}"
             csi.storage.k8s.io/fstype: ext4
