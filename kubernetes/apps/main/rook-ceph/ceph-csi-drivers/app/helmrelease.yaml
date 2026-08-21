@@ -1,0 +1,128 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/source.toolkit.fluxcd.io/ocirepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: OCIRepository
+metadata:
+  name: ceph-csi-drivers
+spec:
+  interval: 15m
+  layerSelector:
+    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
+    operation: copy
+  ref:
+    tag: 1.0.4
+  url: oci://ghcr.io/home-operations/charts-mirror/ceph-csi-drivers
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ceph-csi-drivers
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: ceph-csi-drivers
+  interval: 1h
+  values:
+    # Rook-compatible values, see
+    # https://github.com/rook/rook/blob/v1.20.5/deploy/charts/ceph-csi-drivers/values.yaml
+    operatorConfig:
+      namespace: rook-ceph
+      driverSpecDefaults:
+        imageSet:
+          name: rook-csi-operator-image-set-configmap
+        fsGroupPolicy: File # chart default is None
+        nodePlugin:
+          priorityClassName: system-node-critical
+          resources:
+            plugin:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+            registrar:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 50m
+                memory: 128Mi
+        controllerPlugin:
+          priorityClassName: system-cluster-critical
+          # Carried over from rook v1.19, which ran the CSI controller plugins
+          # with hostNetwork: true so they can reach the Ceph public network
+          # directly; chart default is false.
+          hostNetwork: true
+          resources:
+            attacher:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            omapGenerator:
+              limits:
+                memory: 1Gi
+              requests:
+                cpu: 250m
+                memory: 512Mi
+            plugin:
+              limits:
+                memory: 1Gi
+              requests:
+                memory: 512Mi
+            provisioner:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            resizer:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            snapshotter:
+              limits:
+                memory: 256Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+    drivers:
+      rbd:
+        enabled: true
+        name: rook-ceph.rbd.csi.ceph.com
+        grpcTimeout: 150
+        # Chart default is "none", which silently dropped the csi-snapshotter
+        # sidecar during the ceph-csi-operator migration and broke VolumeSnapshot
+        # create/delete for every ceph-block volsync backup (e.g. media/tautulli).
+        # Deliberately NOT volumeGroupSnapshot: that disables single-PVC
+        # VolumeSnapshot support, which is what volsync's backups rely on.
+        snapshotPolicy: volumeSnapshot
+        log:
+          rotation:
+            enabled: false
+        controllerPlugin:
+          replicas: 2
+      cephfs:
+        enabled: true
+        name: rook-ceph.cephfs.csi.ceph.com
+        grpcTimeout: 150
+        # Talos kernel cephfs client needs ms_mode set to complete the msgr-v2
+        # (port 3300) handshake; without it mounts fail with the misleading
+        # "no mds is up … or you may not be authorized".
+        cephFsClientType: kernel
+        kernelMountOptions:
+          ms_mode: prefer-crc
+        log:
+          rotation:
+            enabled: false
+        controllerPlugin:
+          replicas: 2
+      nfs:
+        enabled: false
+        name: rook-ceph.nfs.csi.ceph.com
+      nvmeof:
+        enabled: false
+        name: rook-ceph.nvmeof.csi.ceph.com
