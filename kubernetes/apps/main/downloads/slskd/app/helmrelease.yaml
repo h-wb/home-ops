@@ -95,9 +95,14 @@ spec:
               SERVER_COUNTRIES: Netherlands
               VPN_PORT_FORWARDING: "on"
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
+              # slskd's value depends on being reachable (inbound uploads,
+              # queue priority) - fail closed instead of silently degrading
+              # to outbound-only if port forwarding doesn't succeed.
+              PORT_FORWARD_ONLY: "on"
               DNS_UPSTREAM_RESOLVERS: cloudflare
               HEALTH_SUCCESS_WAIT_DURATION: 10s
               FIREWALL_INPUT_PORTS: "80"
+              BLOCK_IPV6: "on"
               PUID: "1000"
               PGID: "1000"
             envFrom:
