@@ -23,7 +23,11 @@ data:
         polling_interval: 2500
         gluetun:
           url: http://localhost:8000
-          timeout: 1000
+          # 1000ms (upstream default) was too tight - ProtonVPN's port-forward
+          # lease renewal occasionally makes gluetun's control server take
+          # slightly longer to answer, and slskd was treating that as "VPN
+          # down" and force-disconnecting from Soulseek every ~10 minutes.
+          timeout: 5000
     metrics:
       enabled: true
       url: /metrics
