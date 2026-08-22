@@ -45,7 +45,10 @@ spec:
                 cpu: 50m
                 memory: 256Mi
               limits:
-                memory: 2Gi
+                # Spotify's headless-browser fallback (and MP3Phoenix, when
+                # enabled) each spin up a real Chromium instance - 2Gi was
+                # getting OOM-killed under concurrent watched-playlist syncs.
+                memory: 4Gi
     defaultPodOptions:
       securityContext:
         # image entrypoint must start as root to apply PUID/PGID, then drops privileges
