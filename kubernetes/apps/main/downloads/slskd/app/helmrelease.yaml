@@ -23,7 +23,7 @@ spec:
             # and refuses to create them itself.
             image:
               repository: mirror.gcr.io/library/busybox
-              tag: "1.36"
+              tag: "1.38"
             command:
               - sh
               - -c
