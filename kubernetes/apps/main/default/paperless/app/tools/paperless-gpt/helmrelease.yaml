@@ -19,15 +19,18 @@ spec:
           app:
             image:
               repository: docker.io/icereed/paperless-gpt
-              tag: v0.25.1@sha256:c0ce6186028911101a2cfe68353f14a9dbb2653596f3f1cff94de4b6db3114ff
+              tag: v0.27.0@sha256:855d9df5bacb2bed60bd520f1ffe0d118695aef9f77d37466ae85823001f547d
             env:
               TZ: Europe/Paris
+              PUID: "1000"
+              PGID: "1000"
               PAPERLESS_BASE_URL: http://paperless.default.svc.cluster.local:8000
               OLLAMA_HOST: http://ollama.llm.svc.cluster.local:11434
               # LLM Configuration
               LLM_LANGUAGE: English
               LLM_PROVIDER: ollama
               LLM_MODEL: qwen3.5:0.8b
+              OLLAMA_THINK: "false"
               OCR_PROVIDER: llm
               VISION_LLM_PROVIDER: ollama
               VISION_LLM_MODEL: minicpm-v:8b
@@ -56,7 +59,6 @@ spec:
                   name: "{{ .Release.Name }}-secret"
             securityContext:
               allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
             resources:
               requests:
@@ -66,9 +68,6 @@ spec:
                 memory: 893Mi
     defaultPodOptions:
       securityContext:
-        runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
     service:
