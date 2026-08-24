@@ -13,6 +13,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc/envoy
   path: ./kubernetes/apps/main/automation/prefect/app
   prune: true
   sourceRef:
@@ -27,6 +28,11 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
       ZEROSCALER_TARGET: prefect-worker
       KOPIUR_SCHEDULE: "2 * * * *"
       KOPIUR_CAPACITY: 5Gi
+      OIDC_TARGET: prefect-app
+      OIDC_DISPLAY_NAME: Prefect
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"

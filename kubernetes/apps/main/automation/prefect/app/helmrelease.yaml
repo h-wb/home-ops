@@ -88,6 +88,18 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
+      api:
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /api
+            backendRefs: [{}]
     persistence:
       data:
         existingClaim: prefect
