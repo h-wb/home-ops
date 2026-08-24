@@ -22,9 +22,13 @@ spec:
               tag: 0.16.4
             env:
               BASE_URL: https://multiscrobbler.${SECRET_DOMAIN}
+              LASTFM_ID: lastfm
               LASTFM_REDIRECT_URI: https://multiscrobbler.${SECRET_DOMAIN}/lastfm/callback
+              SPOTIFY_ID: spotify
               SPOTIFY_REDIRECT_URI: https://multiscrobbler.${SECRET_DOMAIN}/callback
+              PLEX_ID: plex
               PLEX_URL: http://plex.media:32400
+              LZ_ID: listenbrainz
               WS_ENABLE: true
             envFrom:
               - secretRef:
