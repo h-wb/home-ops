@@ -27,5 +27,6 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      ZEROSCALER_TARGET: prefect-worker
       KOPIUR_SCHEDULE: "2 * * * *"
       KOPIUR_CAPACITY: 5Gi

@@ -1,0 +1,114 @@
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${APP}-server
+spec:
+  minReplicas: 0
+  maxReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${APP}-server
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: probe_success
+          selector:
+            matchLabels:
+              job: nfs_probe
+        target:
+          type: Value
+          value: "1"
+  behavior:
+    scaleDown:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+    scaleUp:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${APP}-microservices
+spec:
+  minReplicas: 0
+  maxReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${APP}-microservices
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: probe_success
+          selector:
+            matchLabels:
+              job: nfs_probe
+        target:
+          type: Value
+          value: "1"
+  behavior:
+    scaleDown:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+    scaleUp:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ${APP}-machine-learning
+spec:
+  minReplicas: 0
+  maxReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ${APP}-machine-learning
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: probe_success
+          selector:
+            matchLabels:
+              job: nfs_probe
+        target:
+          type: Value
+          value: "1"
+  behavior:
+    scaleDown:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0
+    scaleUp:
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 15
+      selectPolicy: Max
+      stabilizationWindowSeconds: 0

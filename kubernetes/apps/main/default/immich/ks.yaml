@@ -13,7 +13,6 @@ spec:
   components:
     - ../../../../../components/dragonfly
     - ../../../../../components/dragonfly/lua-undeclared-keys
-    - ../../../../../components/zeroscaler
     - ../../../../../components/cnpg/restore
     - ../../../../../components/cnpg/extensions/vchord
     - ../../../../../components/gpu
