@@ -26,7 +26,7 @@ spec:
           build:
             image:
               repository: docker.io/library/node
-              tag: 22-alpine
+              tag: 24-alpine
             env:
               HOME: /tmp
             # Pinned commit (not a $VAR, since Flux postBuild.substitute rewrites
