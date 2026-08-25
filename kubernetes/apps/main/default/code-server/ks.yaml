@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app code-server
+  namespace: &namespace default
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc/envoy
+  dependsOn: []
+  interval: 30m
+  path: ./kubernetes/apps/main/default/code-server/app
+  postBuild:
+    substitute:
+      APP: *app
+      APP_NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 20Gi
+      KOPIUR_SCHEDULE: "35 4 * * *"
+      OIDC_DISPLAY_NAME: Code Server
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false
