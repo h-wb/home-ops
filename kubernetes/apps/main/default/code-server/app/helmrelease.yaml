@@ -23,6 +23,25 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
+          # The code-server image ships no kubectl, which would leave the
+          # mounted kubeconfig useless. Stage the CLIs into an emptyDir shared
+          # with the app container, mounted on /usr/local/sbin because that is
+          # already on PATH and — unlike /usr/local/bin — empty in the image
+          # (masking it would hide the setuid fixuid the entrypoint needs).
+          tools:
+            image:
+              repository: docker.io/alpine/k8s
+              tag: 1.36.2
+            command:
+              - /bin/sh
+              - -c
+              - cp -f /usr/bin/kubectl /usr/bin/helm /usr/bin/kustomize /usr/bin/jq /usr/bin/yq /usr/local/sbin/
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
           # Seed the workspace on first boot only; afterwards the clone lives
           # on the PVC and is managed from inside the editor like any checkout.
           clone:
@@ -92,6 +111,15 @@ spec:
               - path: /home/coder
             app:
               - path: /home/coder
+      tools:
+        type: emptyDir
+        advancedMounts:
+          code-server:
+            tools:
+              - path: /usr/local/sbin
+            app:
+              - path: /usr/local/sbin
+                readOnly: true
       kubeconfig:
         type: secret
         name: code-server-secret
