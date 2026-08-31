@@ -69,6 +69,10 @@ machine:
     disableManifestsDirectory: true
     extraConfig:
       serializeImagePulls: false
+      imageGCHighThresholdPercent: 60
+      imageGCLowThresholdPercent: 50
+      imageMinimumGCAge: 2m
+      imageMaximumGCAge: 168h
     image: ghcr.io/siderolabs/kubelet:v1.36.4
     extraMounts:
       - destination: /var/openebs/local
