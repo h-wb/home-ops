@@ -91,6 +91,10 @@ spec:
           gethomepage.dev/description: Remote XFCE desktop
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+          # Short alias for typing on a phone. Both names hit the same route,
+          # so both need to be registered OIDC callbacks (OIDC_EXTRA_CALLBACKS
+          # in ks.yaml) or login breaks on whichever one is not.
+          - "nkd.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-external
             namespace: network

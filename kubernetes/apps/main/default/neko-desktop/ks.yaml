@@ -27,6 +27,7 @@ spec:
       OIDC_SHORT_USERNAME: "true"
       OIDC_DISABLE_PKCE: "true"
       OIDC_IMAGE_NAME: xfce
+      OIDC_EXTRA_CALLBACKS: '["https://nkd.${SECRET_DOMAIN}/oauth2/callback"]'
   prune: true
   retryInterval: 1m
   sourceRef:
