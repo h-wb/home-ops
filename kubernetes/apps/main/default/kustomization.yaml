@@ -21,5 +21,6 @@ resources:
   # - ./fusion/ks.yaml
   - ./ghostfolio/ks.yaml
   - ./neko/ks.yaml
+  - ./neko-desktop/ks.yaml
   - ./nextcloud/ks.yaml
   - ./smart-life-webapp/ks.yaml

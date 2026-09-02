@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app neko-desktop
+  namespace: &namespace default
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/gpu
+    - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc/envoy
+  dependsOn: []
+  interval: 30m
+  path: ./kubernetes/apps/main/default/neko-desktop/app
+  postBuild:
+    substitute:
+      APP: *app
+      APP_NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 20Gi
+      KOPIUR_SCHEDULE: "45 4 * * *"
+      OIDC_DISPLAY_NAME: Neko Desktop
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
+      OIDC_IMAGE_NAME: xfce
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false

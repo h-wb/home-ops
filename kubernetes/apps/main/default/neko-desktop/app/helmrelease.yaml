@@ -1,0 +1,111 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app neko-desktop
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    defaultPodOptions:
+      # The image creates neko as uid/gid 1000 and owns /home/neko to it, but
+      # a fresh ceph-block PVC mounts as root — fsGroup is what makes the
+      # home directory writable on first boot.
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      resourceClaims:
+        - name: gpu
+          resourceClaimTemplateName: neko-desktop-gpu
+    controllers:
+      neko-desktop:
+        replicas: 1
+        # A desktop holds unsaved state; never run two against one RWO volume.
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/m1k1o/neko/intel-xfce
+              tag: "3.1.5"
+            env:
+              # Same as the firefox instance: the bundled web UI still calls
+              # the v2 /ws endpoint, which 404s without this.
+              NEKO_LEGACY: "true"
+              NEKO_DESKTOP_SCREEN: 1920x1080@60
+              NEKO_SERVER_PROXY: "true"
+              # 5101 belongs to the firefox instance; this needs its own mux
+              # port forwarded on the Freebox (TCP *and* UDP).
+              NEKO_WEBRTC_TCPMUX: &mux "5102"
+              NEKO_WEBRTC_UDPMUX: *mux
+              NEKO_WEBRTC_ICELITE: "true"
+              NEKO_SESSION_HEARTBEAT_INTERVAL: 30
+              # v2-named vars are the ones the legacy layer reads — the v3
+              # NEKO_CAPTURE_* equivalents are ignored in legacy mode.
+              NEKO_VIDEO_CODEC: h264
+              NEKO_MAX_FPS: 60
+              NEKO_VIDEO_BITRATE: 6000
+              # Lets the browser hand files to the desktop by dropping them on
+              # the canvas, and routes GTK open/save dialogs through neko's own
+              # upload/download rather than the container filesystem.
+              NEKO_DESKTOP_UPLOAD_DROP: "true"
+              NEKO_DESKTOP_FILE_CHOOSER_DIALOG: "true"
+            envFrom:
+              - secretRef:
+                  name: neko-desktop-secret
+            resources:
+              claims:
+                - name: gpu
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              limits:
+                memory: 8Gi
+    service:
+      app:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.1.134
+        ports:
+          http:
+            port: 80
+            targetPort: 8080
+          mux:
+            port: &port 5102
+          muxudp:
+            port: *port
+            protocol: UDP
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/group: Home
+          gethomepage.dev/name: Neko Desktop
+          gethomepage.dev/icon: xfce.png
+          gethomepage.dev/description: Remote XFCE desktop
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+    persistence:
+      # Only /home/neko survives a restart. Anything apt installs lands in
+      # /usr and is lost on the next roll.
+      home:
+        existingClaim: *app
+        globalMounts:
+          - path: /home/neko
+      # Xorg/XFCE and the gstreamer pipeline both want real shared memory;
+      # the 64Mi default /dev/shm shows up as X errors under load.
+      dshm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 2Gi
+        globalMounts:
+          - path: /dev/shm
