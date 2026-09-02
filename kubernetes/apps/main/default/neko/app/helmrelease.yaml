@@ -30,7 +30,7 @@ spec:
               # without this — confirmed via `wget /ws` returning 404 with
               # NEKO_LEGACY=false, vs 400 (reachable) on /api/ws.
               NEKO_LEGACY: "true"
-              NEKO_DESKTOP_SCREEN: 1920x1080@30
+              NEKO_DESKTOP_SCREEN: 1920x1080@60
               NEKO_SERVER_PROXY: "true"
               NEKO_WEBRTC_TCPMUX: &mux "5101"
               NEKO_WEBRTC_UDPMUX: *mux
@@ -41,6 +41,8 @@ spec:
               # this image has no VAAPI encoder for: "no element vaapivp8enc").
               # The v2-named var is what the legacy layer actually reads.
               NEKO_VIDEO_CODEC: h264
+              NEKO_MAX_FPS: 60
+              NEKO_VIDEO_BITRATE: 6000
             envFrom:
               - secretRef:
                   name: neko-secret
