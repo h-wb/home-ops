@@ -1,0 +1,42 @@
+---
+# Lets the prefect ServiceAccount (namespace: automation) exec into pods in
+# this namespace, so a Prefect flow can trigger/retrieve a Dawarich full
+# backup the same way this was done manually (kubectl exec ... rails
+# runner). Scoped to this namespace, not this app: `pods/exec` has no
+# label-selector support and dawarich's pod name rotates on every
+# redeploy, so this can't be pinned to just the dawarich pod — it covers
+# every pod in `default`, Postgres StatefulSets included. Accepted
+# knowingly; do not widen further (e.g. to a ClusterRole) without the
+# same conversation.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prefect-exec
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: dawarich
+    app.kubernetes.io/name: dawarich
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prefect-exec
+  namespace: default
+  labels:
+    app.kubernetes.io/instance: dawarich
+    app.kubernetes.io/name: dawarich
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prefect-exec
+subjects:
+  - kind: ServiceAccount
+    name: prefect
+    namespace: automation
