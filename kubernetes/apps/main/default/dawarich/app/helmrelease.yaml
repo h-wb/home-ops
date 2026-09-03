@@ -127,3 +127,18 @@ spec:
         type: emptyDir
         globalMounts:
           - path: /var/app/tmp/imports/watched
+      shared-backups:
+        # Same NFS share the prefect worker mounts at /root/.prefect/data
+        # (kubernetes/apps/main/automation/prefect/app/helmrelease.yaml),
+        # just this one subdirectory — lets a Prefect flow trigger a full
+        # account export (via rails-runner exec) and then read the result
+        # straight off this mount, no file transfer needed. Deliberately
+        # NOT the same PVC as `data` above: that one is Ceph RBD
+        # (ReadWriteOnce, single-mounter), so it can't be shared
+        # cross-namespace the way NFS can.
+        enabled: true
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/hwe/Documents/data/dawarich/backups
+        globalMounts:
+          - path: /var/app/tmp/shared-backups
