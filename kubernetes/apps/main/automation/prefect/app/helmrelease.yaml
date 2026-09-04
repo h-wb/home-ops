@@ -43,6 +43,8 @@ spec:
       worker:
         annotations:
           reloader.stakater.com/auto: "true"
+        pod:
+          automountServiceAccountToken: true
         containers:
           app:
             image:
