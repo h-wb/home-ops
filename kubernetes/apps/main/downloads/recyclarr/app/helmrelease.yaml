@@ -16,7 +16,7 @@ spec:
         type: cronjob
         cronjob:
           schedule: 0 0 * * *
-          backoffLimit: 0
+          backoffLimit: 3
           concurrencyPolicy: Forbid
           successfulJobsHistory: 1
           failedJobsHistory: 1
