@@ -15,11 +15,11 @@ spec:
     apiBase: http://192.168.27.65:1234/v1
     apiKey: lm-studio
     additional:
-      # Matches the slot count LM Studio loads the model with (PARALLEL 4 in
-      # `lms ps`), so bulk consumption is not serialised here. paperless-gpt's OCR
-      # path is single-threaded regardless; this only helps paperless' own AI
-      # suggestions, which run as concurrent celery tasks (PAPERLESS_TASK_WORKERS).
-      max_parallel_requests: 4
+      # Keep at 1. Raising this to LM Studio's slot count made it terminate vision
+      # requests mid-flight ({'error': 'terminated'}) — OCR pages are rasterised at
+      # 600 DPI, so several concurrent ones do not fit. paperless-gpt's OCR path is
+      # single-threaded anyway, so there was nothing to gain here.
+      max_parallel_requests: 1
   info:
     mode: chat
     # Must match the context LM Studio loads with (defaultContextLength in
