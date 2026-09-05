@@ -1,0 +1,32 @@
+---
+# LM Studio runs on the MacBook and is reachable over its WireGuard tunnel.
+apiVersion: v1
+kind: Service
+metadata:
+  name: &app lmstudio
+  labels:
+    app.kubernetes.io/name: *app
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 1234
+      targetPort: 1234
+      protocol: TCP
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: lmstudio
+  labels:
+    kubernetes.io/service-name: lmstudio
+    app.kubernetes.io/name: lmstudio
+addressType: IPv4
+ports:
+  - name: http
+    port: 1234
+    protocol: TCP
+endpoints:
+  - addresses: ["192.168.27.65"]
+    conditions:
+      ready: true
