@@ -1,0 +1,48 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: litellm
+spec:
+  groups:
+    - name: litellm.rules
+      rules:
+        # The only backend is LM Studio on the MacBook, reachable solely while its
+        # WireGuard tunnel is up and the machine is awake. This is the alert that
+        # actually fires in normal life.
+        - alert: LiteLLMDeploymentOutage
+          expr: |-
+            max by (litellm_model_name) (litellm_deployment_state) >= 2
+            and on (litellm_model_name)
+            sum by (litellm_model_name) (rate(litellm_deployment_failure_responses_total[15m])) > 0
+          for: 10m
+          annotations:
+            summary: >-
+              LiteLLM {{ $labels.litellm_model_name }} is out of rotation and still failing
+              (MacBook asleep or WireGuard tunnel down?)
+          labels:
+            severity: warning
+        - alert: LiteLLMHighErrorRate
+          expr: |-
+            sum by (requested_model) (rate(litellm_proxy_failed_requests_metric_total[10m]))
+            /
+            clamp_min(sum by (requested_model) (rate(litellm_proxy_total_requests_metric_total[10m])), 0.001)
+            > 0.25
+          for: 10m
+          annotations:
+            summary: LiteLLM {{ $labels.requested_model }} failing more than 25% of requests
+          labels:
+            severity: warning
+        # Kept for when ordered fallbacks are added; inert until then.
+        - alert: LiteLLMFallbackChainExhausted
+          expr: |-
+            sum by (requested_model, exception_status, exception_class) (
+              increase(litellm_deployment_failed_fallbacks_total[15m])
+            ) > 0
+          annotations:
+            summary: >-
+              LiteLLM {{ $labels.requested_model }} fallback chain exhausted
+              ({{ $labels.exception_status }} {{ $labels.exception_class }})
+          labels:
+            severity: critical

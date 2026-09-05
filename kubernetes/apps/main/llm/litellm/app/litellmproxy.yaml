@@ -70,6 +70,14 @@ spec:
     cooldown_time: 30
     enable_pre_call_checks: true
   litellmSettings:
+    success_callback:
+      - prometheus
+    failure_callback:
+      - prometheus
+    prometheus_adapter: true
+    # /metrics is only reachable in-cluster; requiring a key would just mean
+    # handing the ServiceMonitor one.
+    require_auth_for_metrics_endpoint: false
     cache: true
     cache_params:
       type: redis

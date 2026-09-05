@@ -1,0 +1,16 @@
+---
+# Scoped key for paperless-gpt so it never holds the master key. The generated
+# secret lands in the llm namespace; paperless-gpt runs in default and there is no
+# reflector here, so the value is copied into the Bitwarden `paperless` item and
+# pulled back down by that app's own ExternalSecret.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: paperless-gpt
+spec:
+  proxyRef: litellm
+  keyAlias: Paperless GPT
+  secretName: litellm-key-paperless-gpt
+  secretKey: api-key
+  models:
+    - local
