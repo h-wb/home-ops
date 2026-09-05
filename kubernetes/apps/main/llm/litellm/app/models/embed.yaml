@@ -15,5 +15,7 @@ spec:
     apiKey: lm-studio
   info:
     mode: embedding
-    # nomic-embed-text-v1.5 returns 768-dimension vectors.
-    outputVectorSize: 768
+    extra:
+      # nomic-embed-text-v1.5 returns 768-dimension vectors. Not a typed field on
+      # the CR, so it goes through `extra` into litellm's model_info verbatim.
+      output_vector_size: 768
