@@ -54,6 +54,13 @@ spec:
               # OCR
               PAPERLESS_OCR_LANGUAGES: fra eng
               PAPERLESS_OCR_LANGUAGE: fra
+              # Tesseract is not invoked at all: it was producing near-empty text on
+              # these scans (3 characters on a handwritten page), and the local vision
+              # model does the job properly. PDFs that already carry a text layer are
+              # still read with pdftotext, so only image-based documents are affected —
+              # those land with empty content, which trips the "OCR rescue" workflow
+              # and hands them to paperless-gpt.
+              PAPERLESS_OCR_MODE: "off"
               # AI (paperless-ngx 3.x native): suggestions + RAG document chat, served
               # by litellm which fronts LM Studio on the MacBook. Remote OCR is not
               # configured here because paperless only supports Azure AI for that;
