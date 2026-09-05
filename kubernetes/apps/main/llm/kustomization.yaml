@@ -8,7 +8,6 @@ components:
 resources:
   - ./litellm-operator/ks.yaml
   - ./litellm/ks.yaml
-  - ./lmstudio/ks.yaml
   # - ./local-ai/ks.yaml
   # - ./ollama/ks.yaml
   # - ./open-webui/ks.yaml

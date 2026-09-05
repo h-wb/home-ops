@@ -7,9 +7,12 @@ spec:
   modelName: local
   proxyRef: litellm
   params:
-    # LM Studio on the MacBook, reached over WireGuard via the lmstudio Service.
+    # LM Studio on the MacBook. It sits on a different LAN (192.168.18.0/24) than
+    # the cluster and is reachable only while its WireGuard tunnel is up, where it
+    # holds this static address — `Address` in wg0.home.conf, pinned to the peer's
+    # public key rather than a DHCP lease, so it does not drift.
     model: openai/qwen/qwen3-vl-8b
-    apiBase: http://lmstudio.llm.svc.cluster.local:1234/v1
+    apiBase: http://192.168.27.65:1234/v1
     apiKey: lm-studio
     additional:
       # LM Studio serves one loaded model; concurrent requests thrash it.
