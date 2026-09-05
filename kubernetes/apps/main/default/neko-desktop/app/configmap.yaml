@@ -1,0 +1,59 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neko-desktop-provision
+data:
+  # Bootstraps the desktop from ~/.dotfiles at every XFCE session start.
+  #
+  # This lives in the cluster rather than in the PVC because of a chicken-and-egg
+  # problem: the dotfiles ship their own autostart entry, but on a fresh PVC
+  # nothing has cloned them yet. A system-wide entry in /etc/xdg/autostart always
+  # exists, so the first session can clone the repo and provision itself with no
+  # manual step. Once the dotfiles are applied they drop an entry of the SAME
+  # filename into ~/.config/autostart, which per the XDG spec overrides this one
+  # — so exactly one bootstrap runs, not two.
+  #
+  # Everything real happens in the repo (home/bin/neko-bootstrap): apt packages,
+  # mise tools, dotfiles, XFCE settings, GUI apps. Keep this file dumb.
+  neko-provision: |
+    #!/bin/sh
+    set -u
+    LOG="${HOME}/.local/state/neko-provision.log"
+    mkdir -p "$(dirname "$LOG")"
+    exec >>"$LOG" 2>&1
+    echo "=== $(date -Is) provision start ==="
+
+    export PATH="${HOME}/.local/bin:${PATH}"
+    REPO_URL="${REPO_URL:-https://github.com/h-wb/dotfiles.git}"
+
+    # /usr is image state and resets on every pod roll, so git may be missing
+    # even though the repo itself is sitting on the PVC.
+    if ! command -v git >/dev/null 2>&1; then
+      sudo apt-get update -qq
+      sudo apt-get install -y -qq --no-install-recommends git
+    fi
+
+    if [ ! -d "${HOME}/.dotfiles/.git" ]; then
+      echo "[info] cloning ${REPO_URL}"
+      git clone "$REPO_URL" "${HOME}/.dotfiles" || exit 1
+    else
+      # Fast-forward only: never clobber work in progress on the desktop.
+      git -C "${HOME}/.dotfiles" pull --ff-only || echo "[warn] pull skipped (local changes?)"
+    fi
+
+    exec "${HOME}/.dotfiles/home/bin/neko-bootstrap"
+
+  # Runs neko-provision through sh, so the ConfigMap's mount mode does not have
+  # to carry an executable bit.
+  mise-bootstrap.desktop: |
+    [Desktop Entry]
+    Type=Application
+    Name=mise bootstrap
+    Comment=Clone/refresh ~/.dotfiles and provision this container at session start
+    Exec=/bin/sh /usr/local/bin/neko-provision
+    Icon=preferences-system
+    Terminal=false
+    StartupNotify=false
+    X-XFCE-Autostart-Override=true

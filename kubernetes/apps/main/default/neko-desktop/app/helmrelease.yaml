@@ -99,6 +99,23 @@ spec:
           - name: envoy-external
             namespace: network
     persistence:
+      # Provisioning entrypoint: a system-wide autostart entry that clones
+      # ~/.dotfiles on a fresh PVC and then runs the repo's own bootstrap
+      # (apt packages, mise tools, dotfiles, XFCE settings, apps) at every
+      # session start. subPath mounts, because mounting a whole ConfigMap over
+      # /etc/xdg/autostart would hide XFCE's own entries and break the session.
+      provision:
+        name: neko-desktop-provision
+        type: configMap
+        advancedMounts:
+          neko-desktop:
+            app:
+              - path: /usr/local/bin/neko-provision
+                readOnly: true
+                subPath: neko-provision
+              - path: /etc/xdg/autostart/mise-bootstrap.desktop
+                readOnly: true
+                subPath: mise-bootstrap.desktop
       # Only /home/neko survives a restart. Anything apt installs lands in
       # /usr and is lost on the next roll.
       home:
