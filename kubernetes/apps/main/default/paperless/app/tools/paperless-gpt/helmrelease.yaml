@@ -28,12 +28,11 @@ spec:
               # LLM Configuration
               LLM_LANGUAGE: English
               LLM_PROVIDER: openai
-              OPENAI_BASE_URL: http://lmstudio.llm.svc.cluster.local:1234/v1
-              OPENAI_API_KEY: lm-studio
-              LLM_MODEL: qwen/qwen3-vl-8b
+              OPENAI_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
+              LLM_MODEL: local
               OCR_PROVIDER: llm
               VISION_LLM_PROVIDER: openai
-              VISION_LLM_MODEL: qwen/qwen3-vl-8b
+              VISION_LLM_MODEL: local
               # Document Processing Settings
               AUTO_GENERATE_TITLE: true
               AUTO_GENERATE_TAGS: true
