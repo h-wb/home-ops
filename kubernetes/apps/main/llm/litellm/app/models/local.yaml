@@ -1,0 +1,24 @@
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: local
+spec:
+  modelName: local
+  proxyRef: litellm
+  params:
+    # LM Studio on the MacBook, reached over WireGuard via the lmstudio Service.
+    model: openai/qwen/qwen3-vl-8b
+    apiBase: http://lmstudio.llm.svc.cluster.local:1234/v1
+    apiKey: lm-studio
+    additional:
+      # LM Studio serves one loaded model; concurrent requests thrash it.
+      max_parallel_requests: 1
+  info:
+    mode: chat
+    # Must match the context LM Studio loads with (defaultContextLength in
+    # ~/.lmstudio/settings.json). At 8k a dense page truncates mid-transcription.
+    maxInputTokens: 32768
+    maxOutputTokens: 8192
+    supportsVision: true
+    supportsFunctionCalling: true
