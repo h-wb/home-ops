@@ -1,0 +1,15 @@
+---
+# Key for paperless-ngx's own AI features (suggestions + RAG chat), separate from
+# the paperless-gpt key so the two consumers are tracked and scoped independently.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: paperless
+spec:
+  proxyRef: litellm
+  keyAlias: Paperless
+  secretName: litellm-key-paperless
+  secretKey: api-key
+  models:
+    - local
+    - embed

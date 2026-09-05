@@ -1,0 +1,19 @@
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: embed
+spec:
+  modelName: embed
+  proxyRef: litellm
+  params:
+    # Same LM Studio instance as `local`; see models/local.yaml for the address.
+    # LM Studio keeps an embedding model resident alongside the chat model, so this
+    # does not contend for the single chat slot.
+    model: openai/text-embedding-nomic-embed-text-v1.5
+    apiBase: http://192.168.27.65:1234/v1
+    apiKey: lm-studio
+  info:
+    mode: embedding
+    # nomic-embed-text-v1.5 returns 768-dimension vectors.
+    outputVectorSize: 768
