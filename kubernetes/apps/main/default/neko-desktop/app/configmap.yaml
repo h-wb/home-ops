@@ -4,6 +4,12 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: neko-desktop-provision
+  annotations:
+    # This ConfigMap is a shell script, and ks.yaml runs Flux post-build
+    # substitution over everything it renders — in strict mode, so every
+    # ${HOME}/${PATH} in here is read as an unset Flux variable and the whole
+    # Kustomization fails to apply. Nothing in this file needs substituting.
+    kustomize.toolkit.fluxcd.io/substitute: disabled
 data:
   # Bootstraps the desktop from ~/.dotfiles at every XFCE session start.
   #
