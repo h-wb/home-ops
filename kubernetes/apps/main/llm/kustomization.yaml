@@ -6,6 +6,7 @@ namespace: llm
 components:
   - ../../../components/common
 resources:
+  - ./litellm/ks.yaml
   - ./lmstudio/ks.yaml
   # - ./local-ai/ks.yaml
   # - ./ollama/ks.yaml

@@ -1,0 +1,93 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app litellm
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      litellm:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              # -database variant bundles the prisma migrations for the postgres schema
+              repository: ghcr.io/berriai/litellm-database
+              tag: v1.99.1@sha256:f227f1cd77f7a7dbd5264e137a926f2670332f19938ff6c58c2dab90b2375dee
+            args: ["--config", "/app/config.yaml"]
+            env:
+              TZ: Europe/Paris
+              LITELLM_LOG: INFO
+              LITELLM_MODE: PRODUCTION
+              STORE_MODEL_IN_DB: "true"
+              PROXY_BASE_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+              REDIS_HOST: "{{ .Release.Name }}-dragonfly"
+              REDIS_PORT: "6379"
+              DATABASE_URL:
+                valueFrom:
+                  secretKeyRef:
+                    name: "postgres-{{ .Release.Name }}-app"
+                    key: uri
+            envFrom:
+              - secretRef:
+                  name: "{{ .Release.Name }}-secret"
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health/liveliness
+                    port: &port 4000
+                  initialDelaySeconds: 30
+                  periodSeconds: 30
+                  failureThreshold: 5
+              readiness: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        type: configMap
+        name: litellm-config
+        globalMounts:
+          - path: /app/config.yaml
+            subPath: config.yaml
+            readOnly: true
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
