@@ -3,8 +3,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 configMapGenerator:
-  - name: litellm-dashboard
+  - name: litellm
     files:
       - litellm.json
 generatorOptions:
   disableNameSuffixHash: true
+  annotations:
+    # Grafana dashboards are full of ${datasource}-style template variables that
+    # flux's envsubst would otherwise try to resolve and fail on in strict mode.
+    kustomize.toolkit.fluxcd.io/substitute: disabled

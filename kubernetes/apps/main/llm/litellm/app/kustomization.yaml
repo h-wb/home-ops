@@ -8,5 +8,6 @@ resources:
   - ./models
   - ./virtualkeys
   - ./dashboard
-  - ./observability.yaml
+  - ./grafanadashboard.yaml
   - ./prometheusrule.yaml
+  - ./servicemonitor.yaml
