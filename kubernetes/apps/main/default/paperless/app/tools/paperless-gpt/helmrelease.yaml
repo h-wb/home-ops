@@ -34,11 +34,13 @@ spec:
               VISION_LLM_PROVIDER: openai
               VISION_LLM_MODEL: local
               # Document Processing Settings
-              AUTO_GENERATE_TITLE: true
-              AUTO_GENERATE_TAGS: true
-              AUTO_GENERATE_CORRESPONDANTS: true
-              AUTO_GENERATE_DOCUMENT_TYPE: true
-              AUTO_GENERATE_CREATED_DATE: true
+              # Metadata suggestions are paperless-ngx's own AI now; paperless-gpt is
+              # kept solely for LLM OCR, which paperless only supports via Azure AI.
+              AUTO_GENERATE_TITLE: false
+              AUTO_GENERATE_TAGS: false
+              AUTO_GENERATE_CORRESPONDANTS: false
+              AUTO_GENERATE_DOCUMENT_TYPE: false
+              AUTO_GENERATE_CREATED_DATE: false
               # Tagging Settings
               AUTO_TAG: _paperless-gpt_auto_
               AUTO_OCR_TAG: _paperless-gpt_ocr-auto_

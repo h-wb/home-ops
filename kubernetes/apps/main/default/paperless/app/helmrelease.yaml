@@ -54,6 +54,21 @@ spec:
               # OCR
               PAPERLESS_OCR_LANGUAGES: fra eng
               PAPERLESS_OCR_LANGUAGE: fra
+              # AI (paperless-ngx 3.x native): suggestions + RAG document chat, served
+              # by litellm which fronts LM Studio on the MacBook. Remote OCR is not
+              # configured here because paperless only supports Azure AI for that;
+              # LLM OCR against the local model stays with paperless-gpt.
+              PAPERLESS_AI_ENABLED: "true"
+              PAPERLESS_AI_LLM_BACKEND: openai-like
+              PAPERLESS_AI_LLM_ENDPOINT: http://litellm.llm.svc.cluster.local:4000/v1
+              PAPERLESS_AI_LLM_MODEL: local
+              PAPERLESS_AI_LLM_EMBEDDING_BACKEND: openai-like
+              PAPERLESS_AI_LLM_EMBEDDING_MODEL: embed
+              # Matches the context LM Studio loads the model with.
+              PAPERLESS_AI_LLM_CONTEXT_SIZE: "32768"
+              # A page through a local vision model takes tens of seconds; the 
+              # default timeout is tuned for hosted APIs.
+              PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
               # Redis
               PAPERLESS_REDIS: "redis://paperless-dragonfly.default.svc.cluster.local:6379"
               # User Permissions
