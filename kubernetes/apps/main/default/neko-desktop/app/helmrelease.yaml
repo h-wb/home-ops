@@ -36,8 +36,16 @@ spec:
           - svc.cluster.local
           - cluster.local
         options:
+          # ndots:1, not the usual 5. At 5, a name like foo.${SECRET_DOMAIN} is
+          # tried against the search domains BEFORE being tried absolutely — and
+          # cluster CoreDNS runs `autopath @kubernetes`, which strips the search
+          # suffix, resolves the real name itself (upstream, so Cloudflare) and
+          # answers from that very first query. The absolute lookup that would
+          # reach the sidecar's zone block then never happens. At 1, anything
+          # containing a dot is tried absolutely first, so the zone block wins.
+          # Short unqualified service names still use the search list.
           - name: ndots
-            value: "5"
+            value: "1"
     controllers:
       neko-desktop:
         replicas: 1
