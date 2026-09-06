@@ -23,6 +23,10 @@ spec:
       APP_NAMESPACE: *namespace
       KOPIUR_CAPACITY: 20Gi
       KOPIUR_SCHEDULE: "45 4 * * *"
+      # k8s-gateway serves the internal records for ${SECRET_DOMAIN}; the DNS
+      # sidecar forwards that zone to it and everything else to cluster DNS.
+      SVC_K8S_GATEWAY: "192.168.1.200"
+      SVC_CLUSTER_DNS: "10.43.0.10"
       OIDC_DISPLAY_NAME: Neko Desktop
       OIDC_SHORT_USERNAME: "true"
       OIDC_DISABLE_PKCE: "true"

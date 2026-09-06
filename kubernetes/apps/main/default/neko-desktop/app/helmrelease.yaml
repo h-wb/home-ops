@@ -21,6 +21,23 @@ spec:
       resourceClaims:
         - name: gpu
           resourceClaimTemplateName: neko-desktop-gpu
+      # None + explicit config, because the sidecar has to come first. 10.43.0.10
+      # is listed second so DNS still works if the sidecar is unhealthy: a refused
+      # connection on 127.0.0.1 falls through to the next nameserver, where an
+      # NXDOMAIN would not. The searches/ndots reproduce what ClusterFirst would
+      # have written, so in-cluster service discovery is unchanged.
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 127.0.0.1
+          - "${SVC_CLUSTER_DNS}"
+        searches:
+          - default.svc.cluster.local
+          - svc.cluster.local
+          - cluster.local
+        options:
+          - name: ndots
+            value: "5"
     controllers:
       neko-desktop:
         replicas: 1
@@ -66,6 +83,31 @@ spec:
                 memory: 1Gi
               limits:
                 memory: 8Gi
+          # Per-pod DNS, so ${SECRET_DOMAIN} resolves to the in-cluster
+          # LoadBalancer addresses instead of Cloudflare's proxy — the same thing
+          # /etc/resolver/${SECRET_DOMAIN} does on a Mac. Scoped to this pod on
+          # purpose: the alternative is forwarding the zone in cluster CoreDNS,
+          # which would change resolution for every workload.
+          dns:
+            image:
+              repository: mirror.gcr.io/coredns/coredns
+              tag: "1.14.6"
+            args:
+              - -conf
+              - /etc/coredns/Corefile
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+                # port 53 is privileged; this is the one capability that needs
+                add: ["NET_BIND_SERVICE"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 128Mi
     service:
       app:
         controller: *app
@@ -104,6 +146,15 @@ spec:
       # (apt packages, mise tools, dotfiles, XFCE settings, apps) at every
       # session start. subPath mounts, because mounting a whole ConfigMap over
       # /etc/xdg/autostart would hide XFCE's own entries and break the session.
+      dns:
+        name: neko-desktop-dns
+        type: configMap
+        advancedMounts:
+          neko-desktop:
+            dns:
+              - path: /etc/coredns/Corefile
+                readOnly: true
+                subPath: Corefile
       provision:
         name: neko-desktop-provision
         type: configMap
