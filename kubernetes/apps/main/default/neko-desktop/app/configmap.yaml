@@ -63,3 +63,31 @@ data:
     Terminal=false
     StartupNotify=false
     X-XFCE-Autostart-Override=true
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neko-desktop-dns
+data:
+  # Per-domain DNS routing for this pod, which is what /etc/resolver/<domain>
+  # gives a Mac. Kubernetes has no per-domain equivalent: dnsConfig is an ordered
+  # list of nameservers and resolution stops at the first that answers, and
+  # cluster CoreDNS *does* answer for the domain — with the public Cloudflare
+  # record — so simply listing k8s-gateway second would never be consulted.
+  #
+  # Hence a resolver in the pod that can route per zone.
+  Corefile: |
+    ${SECRET_DOMAIN}:53 {
+        errors
+        cache 30
+        forward . ${SVC_K8S_GATEWAY}
+    }
+    .:53 {
+        errors
+        cache 30
+        # The cluster DNS address explicitly, NOT /etc/resolv.conf: this pod's
+        # resolv.conf points at 127.0.0.1, i.e. back at this server, which would
+        # be an immediate loop.
+        forward . ${SVC_CLUSTER_DNS}
+    }
