@@ -48,6 +48,12 @@ spec:
               # OCR Settings
               OCR_LIMIT_PAGES: 50
               OCR_PROCESS_MODE: image
+              # Pages are rasterised concurrently, so peak memory is a whole batch of
+              # them at once. At the 600 DPI default a Letter page is 5100x6600 (~134MB
+              # of RGBA) and a six-page document peaked at 1149Mi, over the old limit.
+              # 300 DPI quarters that to 271Mi measured, and costs nothing: qwen3-vl
+              # downsamples to ~1M pixels, so 33.7Mpx was 33x more than it can read.
+              IMAGE_MAX_RENDER_DPI: 300
             envFrom:
               - secretRef:
                   name: "{{ .Release.Name }}-secret"
@@ -56,9 +62,11 @@ spec:
             resources:
               requests:
                 cpu: 10m
-                memory: 893Mi
               limits:
-                memory: 893Mi
+                # Headroom for a long document: rasterisation runs one page per core,
+                # so the ceiling is GOMAXPROCS (16 on tal1s) x ~34MB at 300 DPI, not
+                # OCR_LIMIT_PAGES.
+                memory: 1536Mi
     defaultPodOptions:
       securityContext:
         fsGroup: 1000
