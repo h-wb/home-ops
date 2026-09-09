@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/ashdevfr/codex
-              tag: 2.4.15
+              tag: 2.4.16
             env:
               TZ: Europe/Paris
               PUID: 1000
