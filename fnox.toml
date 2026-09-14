@@ -1,0 +1,26 @@
+[providers.protonpass]
+type = "proton-pass"
+vault = "Homeops"
+
+[secrets]
+BITWARDEN_KUBERNETES_TOKEN = { provider = "protonpass", value = "pass://Homeops/homeops-bootstrap/bitwarden-kubernetes-token" }
+CLUSTER_SECRETS            = { provider = "protonpass", value = "pass://Homeops/homeops-bootstrap/cluster-secrets" }
+AGE_KEY                    = { provider = "protonpass", value = "pass://Homeops/homeops-bootstrap/age-key" }
+SECRET_DOMAIN               = { provider = "protonpass", value = "pass://Homeops/homeops-bootstrap/secret-domain" }
+LETS_ENCRYPT_TLS            = { provider = "protonpass", value = "pass://Homeops/homeops-bootstrap/lets-encrypt-tls" }
+
+MACHINE_CA_CRT = { provider = "protonpass", value = "pass://Homeops/talos-machine/ca-crt" }
+MACHINE_CA_KEY = { provider = "protonpass", value = "pass://Homeops/talos-machine/ca-key" }
+MACHINE_TOKEN  = { provider = "protonpass", value = "pass://Homeops/talos-machine/token" }
+
+CLUSTER_CA_CRT                     = { provider = "protonpass", value = "pass://Homeops/talos-cluster/ca-crt" }
+CLUSTER_CA_KEY                     = { provider = "protonpass", value = "pass://Homeops/talos-cluster/ca-key" }
+CLUSTER_ID                         = { provider = "protonpass", value = "pass://Homeops/talos-cluster/id" }
+CLUSTER_SECRET                     = { provider = "protonpass", value = "pass://Homeops/talos-cluster/secret" }
+CLUSTER_TOKEN                      = { provider = "protonpass", value = "pass://Homeops/talos-cluster/token" }
+CLUSTER_AGGREGATORCA_CRT           = { provider = "protonpass", value = "pass://Homeops/talos-cluster/aggregatorca-crt" }
+CLUSTER_AGGREGATORCA_KEY           = { provider = "protonpass", value = "pass://Homeops/talos-cluster/aggregatorca-key" }
+CLUSTER_ETCD_CA_CRT                = { provider = "protonpass", value = "pass://Homeops/talos-cluster/etcd-ca-crt" }
+CLUSTER_ETCD_CA_KEY                = { provider = "protonpass", value = "pass://Homeops/talos-cluster/etcd-ca-key" }
+CLUSTER_SECRETBOXENCRYPTIONSECRET  = { provider = "protonpass", value = "pass://Homeops/talos-cluster/secretboxencryptionsecret" }
+CLUSTER_SERVICEACCOUNT_KEY         = { provider = "protonpass", value = "pass://Homeops/talos-cluster/serviceaccount-key" }

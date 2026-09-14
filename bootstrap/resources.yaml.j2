@@ -52,4 +52,4 @@ metadata:
     cert-manager.io/uri-sans: ""
   labels:
     controller.cert-manager.io/fao: "true"
-data: {{ ENV['lets-encrypt-tls'] | safe }}
+data: {{ ENV['LETS_ENCRYPT_TLS'] | safe }}

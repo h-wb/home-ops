@@ -43,6 +43,24 @@ gum confirm "Reboot node ${usage_node}?" --default="No" && \
     talosctl -n "${usage_node}" reboot -m powercycle || exit 0
 '''
 
+[tasks.gen-talosconfig]
+description = "Generate/regenerate the talosconfig client file from PKI secrets"
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+endpoint=$(mise run //:template "${TALOS_DIR}/machineconfig.yaml.j2" | yq -e 'select(.cluster) | .cluster.controlPlane.endpoint')
+talosctl gen config "${CLUSTER}" "${endpoint}" \
+    --with-secrets <(mise run //:template "$(dirname "${TALOS_DIR}")/secrets.yaml.j2") \
+    -o "${TALOS_DIR}/talosconfig" -t talosconfig -f
+nodes=()
+for f in "${TALOS_DIR}"/nodes/*.yaml.j2; do
+    nodes+=("$(basename "${f%.yaml.j2}")")
+done
+talosctl --talosconfig "${TALOS_DIR}/talosconfig" config endpoint "${nodes[@]}"
+talosctl --talosconfig "${TALOS_DIR}/talosconfig" config node "${nodes[@]}"
+mise //:log info "Generated talosconfig" cluster "${CLUSTER}"
+'''
+
 [tasks.render-config]
 description = "Render Talos config for a node"
 usage = '''
