@@ -26,7 +26,7 @@
       description: "Talos machineconfig images",
       managerFilePatterns: ["/talos/.+\\.yaml\\.j2$/"], // only Talos files
       matchStrings: [
-        "# renovate: datasource=docker depName=(?<depName>\\S+)\\nimage:\\s*(?<currentValue>.+)",
+        "# renovate: datasource=docker depName=(?<depName>\\S+)\\n[ \\t]*image:[ \\t]*\\S+:(?<currentValue>v[^\\s@:]+)",
       ],
       datasourceTemplate: "docker",
     },

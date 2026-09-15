@@ -73,6 +73,7 @@ machine:
       imageGCLowThresholdPercent: 50
       imageMinimumGCAge: 2m
       imageMaximumGCAge: 168h
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
     image: ghcr.io/siderolabs/kubelet:v1.37.0
     extraMounts:
       - destination: /var/openebs/local
