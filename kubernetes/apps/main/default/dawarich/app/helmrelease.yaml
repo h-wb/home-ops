@@ -17,7 +17,7 @@ spec:
         containers:
           app: &dawarich
             image:
-              repository: mirror.gcr.io/freikin/dawarich
+              repository: docker.io/freikin/dawarich
               tag: 1.14.4@sha256:2fecbaf093b9544b5733fe972d422100c2bc5be896e706c58eab8bdb6860fe06
             env:
               TIME_ZONE: "Europe/Paris"
