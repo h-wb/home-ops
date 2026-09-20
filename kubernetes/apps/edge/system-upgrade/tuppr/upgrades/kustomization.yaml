@@ -3,5 +3,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - ./kubernetesupgrade.yaml
   - ./talosupgrade.yaml
+  # Re-enable once the node is on Talos v1.14.0.
+  #
+  # tuppr runs the Kubernetes upgrade first and parks the Talos one on
+  # WaitingForOtherUpgrade, which deadlocks here: the job shells out to
+  # talosctl v1.13.0, and Talos 1.13 rejects the 1.36 -> 1.37 jump with
+  # "unsupported upgrade path 1.36->1.37". Talos has to land first.
+  # - ./kubernetesupgrade.yaml
