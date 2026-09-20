@@ -69,5 +69,46 @@ spec:
                       Every occurrence of this pattern this week has needed a
                       manual pod/statefulset restart to clear - it does not
                       self-heal.
+
+            - name: storage-substrate
+              type: vlogs
+              interval: 2m
+              rules:
+                - alert: Ext4VolumeWentReadOnly
+                  expr: |-
+                    facility:kern ("Aborting journal" OR "EXT4-fs error" OR "Remounting filesystem read-only") | stats by (host) count() as hits | filter hits:>0
+                  keep_firing_for: 30m
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: >-
+                      {{ index .Labels "host" }} put ext4 into emergency read-only
+                      ({{ $value }} kernel errors). Affected PVCs will NOT self-heal
+                      and most pods stay Running without crash-looping.
+                    description: >-
+                      Find them with: talosctl -n {{ index .Labels "host" }} read /proc/mounts
+                      | grep emergency_ro | grep -oE 'pvc-[0-9a-f-]{36}' | sort -u
+                      (do NOT filter on globalmount - that silently drops volumes).
+                      Check `ceph osd blocklist ls` and remove any node entry, then
+                      restart the consuming pods in small batches to remount.
+
+                - alert: NodeLinkDegraded
+                  expr: |-
+                    facility:kern "NIC Link is Up" ("100 Mbps" OR "10 Mbps") | stats by (host) count() as hits | filter hits:>0
+                  keep_firing_for: 1h
+                  labels:
+                    severity: critical
+                  annotations:
+                    summary: >-
+                      {{ index .Labels "host" }} renegotiated its NIC down to 100Mb
+                      or less - Ceph and etcd will starve and RBD volumes will go
+                      read-only within hours.
+                    description: >-
+                      Confirm with: talosctl -n {{ index .Labels "host" }} get links
+                      <iface> -o yaml | grep speedMbit. A reboot (--mode=powercycle)
+                      re-latches the full speed but only buys ~a day; the durable fix
+                      is replacing the cable or moving switch port. Do NOT force
+                      speed 1000 - 100BASE-TX uses 2 pairs where 1000/2500 need 4,
+                      so forcing it on a damaged cable drops the link entirely.
     serviceMonitor:
       enabled: true
