@@ -11,3 +11,4 @@ resources:
   - ./network
   - ./observability
   - ./storage
+  - ./system-upgrade
