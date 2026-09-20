@@ -35,7 +35,12 @@ spec:
                     port: *port
                   initialDelaySeconds: 0
                   periodSeconds: 10
-                  timeoutSeconds: 1
+                  # 1s (the k8s default) is too tight on the edge VM: with only a
+                  # 10m CPU request this container gets near-minimum cgroup weight,
+                  # so it loses scheduling races and answers /healthz late. It was
+                  # crash-looping on "Client.Timeout exceeded while awaiting
+                  # headers" while serving 200s perfectly well in between.
+                  timeoutSeconds: 5
                   failureThreshold: 3
               readiness: *probes
             securityContext:
