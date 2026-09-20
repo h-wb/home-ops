@@ -38,16 +38,24 @@ machine:
     image: factory.talos.dev/installer/97dc72954d99d9baec927ede36517f09da68d78a27be7ea5c9f6984afcc03eae:v1.14.0
     wipe: false
   kubelet:
+    defaultRuntimeSeccompProfileEnabled: true
+    disableManifestsDirectory: true
     extraConfig:
+      serializeImagePulls: false
       imageGCHighThresholdPercent: 60
       imageGCLowThresholdPercent: 50
       imageMinimumGCAge: 2m
       imageMaximumGCAge: 168h
+    # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
+    image: ghcr.io/siderolabs/kubelet:v1.37.0
     extraMounts:
       - destination: /var/openebs/local
         type: bind
         source: /var/openebs/local
         options: ["bind", "rshared", "rw"]
+    nodeIP:
+      validSubnets:
+        - 192.168.18.0/24
   network:
     nameservers:
       - 1.1.1.1
