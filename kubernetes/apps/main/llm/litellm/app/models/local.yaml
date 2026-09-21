@@ -15,11 +15,15 @@ spec:
     apiBase: http://192.168.27.65:1234/v1
     apiKey: lm-studio
     additional:
-      # Keep at 1. Raising this to LM Studio's slot count made it terminate vision
-      # requests mid-flight ({'error': 'terminated'}) — OCR pages are rasterised at
-      # 600 DPI, so several concurrent ones do not fit. paperless-gpt's OCR path is
-      # single-threaded anyway, so there was nothing to gain here.
-      max_parallel_requests: 1
+      # Matches the slot count LM Studio loads the model with. paperless-gpt renders
+      # and submits every page of a document concurrently, so a lower cap does not
+      # serialise the work — it queues requests until the client gives up and the
+      # connection aborts (LM Studio logs `TypeError: terminated` from its fetch).
+      #
+      # This was 1 because raising it failed back when pages were rasterised at 600
+      # DPI (~2.6MB each); 333f23d1d dropped that to 300 DPI, so a page is now
+      # 300-600KB and four in flight is comfortable.
+      max_parallel_requests: 4
   info:
     mode: chat
     # Must match the context LM Studio loads with (defaultContextLength in
