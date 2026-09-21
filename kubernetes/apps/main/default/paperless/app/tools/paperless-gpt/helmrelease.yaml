@@ -43,6 +43,11 @@ spec:
               AUTO_GENERATE_CREATED_DATE: false
               # Tagging Settings
               AUTO_TAG: _paperless-gpt_auto_
+              # Empty disables it. paperless-gpt otherwise leaves a
+              # `paperless-gpt-auto-complete` tag on every document it touches, which
+              # is noise once the AI suggestions workflow is what actually gates
+              # reprocessing (it keys off document_type, not this tag).
+              AUTO_TAG_COMPLETE: ""
               AUTO_OCR_TAG: _paperless-gpt_ocr-auto_
               MANUAL_TAG: _paperless-gpt_manual_
               # OCR Settings
