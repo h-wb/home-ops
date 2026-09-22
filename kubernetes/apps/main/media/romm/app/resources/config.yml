@@ -45,5 +45,12 @@ system:
   # Asociate one platform to it's main version
   versions: {} # { naomi: 'arcade' }
 
-# The folder name where your roms are located
-filesystem: {} # { roms_folder: 'roms' } For example if your folder structure is /home/user/library/roms_folder
+# Library layout. Since 5.3.0 this must be declared explicitly; RomM no longer
+# auto-detects it and refuses to start without it. These are the "structure A"
+# defaults, which is what our NFS library already looks like:
+#   /romm/library/roms/{platform}/{game}
+#   /romm/library/bios/{platform}
+filesystem:
+  structure:
+    default: "roms/{platform}/{game}"
+    firmware: "bios/{platform}"
