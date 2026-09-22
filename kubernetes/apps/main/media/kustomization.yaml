@@ -18,5 +18,6 @@ resources:
   - ./romm/ks.yaml
   # - ./tdarr/ks.yaml
   - ./multiscrobbler/ks.yaml
+  - ./crosswatch/ks.yaml
   # - ./wizarr/ks.yaml
   # - ./clu/ks.yaml
