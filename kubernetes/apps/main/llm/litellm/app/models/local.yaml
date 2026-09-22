@@ -24,6 +24,12 @@ spec:
       # DPI (~2.6MB each); 333f23d1d dropped that to 300 DPI, so a page is now
       # 300-600KB and four in flight is comfortable.
       max_parallel_requests: 4
+      # Dense numeric pages (payslips especially) make the vision model loop, re-emitting
+      # table rows until it blows the 32k context — 10 "Context size has been exceeded"
+      # failures in one 56-document import, each burning the full 300s timeout first.
+      # A page transcribes in well under 4096 tokens, so this truncates the runaway
+      # without touching legitimate output.
+      max_tokens: 4096
   info:
     mode: chat
     # Must match the context LM Studio loads with (defaultContextLength in
