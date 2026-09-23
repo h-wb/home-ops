@@ -134,12 +134,13 @@ spec:
         # Unlike the sidecar's cron.sh (which resolves the right user
         # dynamically), this mode runs `php cron.php` directly as
         # whatever uid the container has - occ's ownership check then
-        # requires an exact match with config.php's actual owner (1000
-        # here, a leftover from how this instance was originally
-        # provisioned - not 82/www-data despite the fpm-alpine image).
+        # requires an exact match with config.php's owner. Must stay
+        # 82/www-data (fpm-alpine): the image entrypoint runs
+        # `occ upgrade` as www-data, so any other owner silently skips
+        # the DB upgrade on image bumps and leaves "Update needed".
         securityContext:
-          runAsUser: 1000
-          runAsGroup: 1000
+          runAsUser: 82
+          runAsGroup: 82
         # config PVC is RWO - the cron pod must land on the same node as
         # the main deployment pod to mount it.
         affinity:
