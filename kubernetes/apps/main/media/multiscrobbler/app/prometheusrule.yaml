@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/monitoring.coreos.com/prometheusrule_v1.json
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: multiscrobbler
+spec:
+  groups:
+    - name: multiscrobbler.rules
+      rules:
+        # Sources (Spotify) stop polling for good once maxPollRetries is exhausted,
+        # and need a manual restart/re-auth from the web UI.
+        - alert: MultiScrobblerSourceIssue
+          expr: max by (name, type) (multiscrobbler_source_issues) > 0
+          for: 15m
+          annotations:
+            summary: >-
+              multi-scrobbler source {{ $labels.name }} ({{ $labels.type }}) is not polling
+              or needs re-auth
+          labels:
+            severity: warning
+        - alert: MultiScrobblerClientIssue
+          expr: max by (name, type) (multiscrobbler_client_issues) > 0
+          for: 15m
+          annotations:
+            summary: >-
+              multi-scrobbler client {{ $labels.name }} ({{ $labels.type }}) is not ready
+              or needs re-auth
+          labels:
+            severity: warning
+        - alert: MultiScrobblerMetricsAbsent
+          expr: absent(up{job="multiscrobbler", namespace="media"} == 1)
+          for: 15m
+          annotations:
+            summary: multi-scrobbler metrics endpoint is down
+          labels:
+            severity: warning

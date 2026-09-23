@@ -1,0 +1,7 @@
+{
+  "sourceDefaults": {
+    "maxPollRetries": 10,
+    "maxRequestRetries": 3,
+    "retryMultiplier": 1.5
+  }
+}

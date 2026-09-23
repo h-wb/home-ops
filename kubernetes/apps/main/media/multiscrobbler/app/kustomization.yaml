@@ -5,3 +5,12 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./prometheusrule.yaml
+configMapGenerator:
+  - name: multiscrobbler-configmap
+    files:
+      - ./config/config.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    kustomize.toolkit.fluxcd.io/substitute: disabled

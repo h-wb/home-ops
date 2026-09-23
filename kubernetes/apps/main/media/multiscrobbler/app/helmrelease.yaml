@@ -30,6 +30,8 @@ spec:
               PLEX_URL: http://plex.media:32400
               LZ_ID: listenbrainz
               WS_ENABLE: true
+              # Pod has no IPv6 route; Spotify AAAA answers caused ENETUNREACH poll failures
+              NODE_OPTIONS: --dns-result-order=ipv4first
             envFrom:
               - secretRef:
                   name: multiscrobbler-secret
@@ -55,6 +57,11 @@ spec:
         ports:
           http:
             port: &port 9078
+    serviceMonitor:
+      app:
+        endpoints:
+          - port: http
+            path: /api/metrics
     route:
       app:
         annotations:
@@ -71,3 +78,10 @@ spec:
     persistence:
       config:
         existingClaim: *app
+      config-file:
+        type: configMap
+        name: multiscrobbler-configmap
+        globalMounts:
+          - path: /config/config.json
+            subPath: config.json
+            readOnly: true
