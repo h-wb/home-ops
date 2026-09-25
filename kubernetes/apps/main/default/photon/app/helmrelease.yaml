@@ -27,7 +27,7 @@ spec:
             args: ["-m", "src.process_manager"]
             env:
               REGION: planet
-              UPDATE_STRATEGY: PARALLEL # keep serving the old index while the new one downloads; SEQUENTIAL stops Photon and the liveness probe kills the update
+              UPDATE_STRATEGY: PARALLEL
               UPDATE_INTERVAL: 30d
               FORCE_UPDATE: "FALSE"
               ENABLE_METRICS: "TRUE"
@@ -51,8 +51,7 @@ spec:
                   # (uncertain, ceph-block-dependent) - a 3h budget killed the
                   # container mid-extraction every time, wiping progress and
                   # restarting the whole download from scratch in an infinite
-                  # loop. 8h gives real headroom for the initial load; scheduled
-                  # updates run after startup, so they rely on PARALLEL instead.
+                  # loop. 8h gives real headroom.
                   failureThreshold: 2880 # ~8h grace for first planet index load
                   periodSeconds: 10
             securityContext:

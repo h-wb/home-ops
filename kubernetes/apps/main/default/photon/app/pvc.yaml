@@ -9,5 +9,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 300Gi # old index + download + extracted new index peak ~245G during PARALLEL update
+      storage: 300Gi
   storageClassName: ceph-block
