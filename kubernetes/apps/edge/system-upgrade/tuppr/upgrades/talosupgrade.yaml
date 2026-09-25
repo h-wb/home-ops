@@ -7,7 +7,7 @@ metadata:
 spec:
   talos:
     # renovate: datasource=custom.talos-factory depName=siderolabs/talos
-    version: v1.14.0
+    version: v1.14.1
   policy:
     # kexec is disabled on this node (sysctl.kernel.kexec_load_disabled=1)
     rebootMode: powercycle
