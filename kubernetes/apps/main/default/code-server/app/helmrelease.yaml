@@ -47,7 +47,7 @@ spec:
           clone:
             image: &image
               repository: ghcr.io/coder/code-server
-              tag: 4.138.0
+              tag: 4.139.1
             command:
               - /bin/sh
               - -c
