@@ -19,7 +19,6 @@ services:
     volumes:
       - /mnt/ssd-storage/docker/plex/config:/config
       - /mnt/ssd-storage/docker/plex/transcode:/transcode
-      - logs:/config/Library/Application Support/Plex Media Server/Logs
       - /mnt/tank/shared:/media:ro
       - /mnt/tank/fwe:/manual:ro
     healthcheck:
@@ -35,6 +34,3 @@ services:
           memory: 8g
         reservations:
           memory: 2g
-
-volumes:
-  logs: {}
