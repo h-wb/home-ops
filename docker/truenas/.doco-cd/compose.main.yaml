@@ -1,10 +1,10 @@
 ---
-# doco-cd itself — it can't manage itself, so this is installed once as a
-# TrueNAS "Custom App" (Apps → Discover → Custom App, paste this file).
-# Bump the image here and in the Custom App together.
+# Main doco-cd instance: deploys every stack in ./docker/truenas and the updater
+# (compose.updater.yaml). It is itself deployed by the updater through
+# ../.doco-cd.updater.yaml, so both instances are updated from Git.
 #
 # Host prerequisites (not in Git):
-#   /mnt/ssd-storage/docker/doco-cd/data               (dataset, root-owned)
+#   /mnt/ssd-storage/docker/doco-cd/data
 #   /mnt/ssd-storage/docker/doco-cd/secrets/api_secret
 #   /mnt/ssd-storage/docker/doco-cd/secrets/webhook_secret
 name: doco-cd
@@ -36,6 +36,7 @@ services:
       - webhook_secret
     ports:
       - "8880:8880"
+      - "9120:9120"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/ssd-storage/docker/doco-cd/data:/data

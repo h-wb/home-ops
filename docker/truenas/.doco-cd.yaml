@@ -9,3 +9,8 @@ auto_discovery:
 reconciliation:
   enabled: true
   interval: 3600
+---
+name: doco-cd-updater
+working_dir: ./docker/truenas/.doco-cd
+compose_files:
+  - compose.updater.yaml

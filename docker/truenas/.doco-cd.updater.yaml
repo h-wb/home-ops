@@ -1,0 +1,7 @@
+---
+# Deploy config for the updater instance (poll target "updater"): it only
+# deploys the main doco-cd instance.
+name: doco-cd
+working_dir: ./docker/truenas/.doco-cd
+compose_files:
+  - compose.main.yaml

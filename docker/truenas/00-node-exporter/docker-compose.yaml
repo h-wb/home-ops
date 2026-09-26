@@ -14,7 +14,7 @@ services:
       - --path.sysfs=/host/sys
       - --path.udev.data=/host/root/run/udev/data
       - --web.listen-address=0.0.0.0:9100
-      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
     volumes:
       - /:/host/root:ro,rslave
       - /proc:/host/proc:ro

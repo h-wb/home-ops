@@ -1,0 +1,39 @@
+---
+# Updater doco-cd instance: only deploys the main instance (target "updater" →
+# ../.doco-cd.updater.yaml). Deployed in turn by the main instance.
+#
+# Bootstrap from scratch (on the NAS, from a checkout of this repo):
+#   docker compose -f docker/truenas/.doco-cd/compose.updater.yaml up -d
+name: doco-cd-updater
+
+services:
+  doco-cd-updater:
+    image: ghcr.io/kimdre/doco-cd:0.121.0
+    container_name: doco-cd-updater
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: info
+      HTTP_PORT: 8880
+      DEPLOY_CONFIG_BASE_DIR: ./docker/truenas/
+      TZ: America/Los_Angeles
+      SCHEDULER_ENABLED: "false"
+      POLL_CONFIG: |-
+        - url: https://github.com/h-wb/home-ops.git
+          reference: main
+          interval: 300
+          target: updater
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /mnt/ssd-storage/docker/doco-cd/updater:/data
+    healthcheck:
+      test: ["CMD", "/doco-cd", "healthcheck"]
+      start_period: 15s
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 64m
