@@ -1,0 +1,58 @@
+---
+# Reached from the cluster through the selector-less `garage` Service in the
+# storage namespace (kubernetes/apps/main/storage/garage).
+name: garage
+
+services:
+  garage:
+    image: dxflrs/garage:v2.4.1@sha256:9c96caa2612d3411acc5b0e6701fb238dbfba33e533a6d7d3d811a4b12d0d020
+    container_name: garage
+    restart: unless-stopped
+    user: "1000:1000"
+    environment:
+      TZ: America/Los_Angeles
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+    configs:
+      - source: garage-toml
+        target: /etc/garage.toml
+    ports:
+      - "3900:3900" # S3 API
+      - "3903:3903" # admin API + metrics
+    volumes:
+      - /mnt/ssd-storage/docker/garage/meta:/meta
+      - /mnt/tank/backup/garage/data:/data
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+        reservations:
+          memory: 256m
+
+configs:
+  garage-toml:
+    content: |
+      metadata_dir = "/meta"
+      data_dir = "/data"
+      db_engine = "lmdb"
+      metadata_auto_snapshot_interval = "24h"
+
+      replication_factor = 1
+      compression_level = 2
+
+      rpc_bind_addr = "[::]:3901"
+      rpc_public_addr = "127.0.0.1:3901"
+
+      [s3_api]
+      s3_region = "ca-west-1"
+      api_bind_addr = "[::]:3900"
+      root_domain = ".s3.${SECRET_DOMAIN}"
+
+      [admin]
+      api_bind_addr = "[::]:3903"

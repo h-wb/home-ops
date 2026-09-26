@@ -1,0 +1,37 @@
+---
+# Garage runs on the NAS (docker/truenas/20-garage, deployed by doco-cd).
+# Selector-less Service + EndpointSlice keep garage.storage.svc working for
+# in-cluster consumers (kopiur, Prometheus, garage-webui).
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage
+spec:
+  ports:
+    - name: s3
+      port: 3900
+      targetPort: 3900
+    - name: api
+      port: 3903
+      targetPort: 3903
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: garage-nas
+  labels:
+    kubernetes.io/service-name: garage
+    endpointslice.kubernetes.io/managed-by: flux
+addressType: IPv4
+endpoints:
+  - addresses:
+      - ${NFS_ADDR:=temp}
+    conditions:
+      ready: true
+ports:
+  - name: s3
+    port: 3900
+    protocol: TCP
+  - name: api
+    port: 3903
+    protocol: TCP

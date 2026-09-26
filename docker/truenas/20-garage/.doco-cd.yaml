@@ -1,0 +1,6 @@
+---
+# Merged on top of ../.doco-cd.yaml; only this stack resolves these secrets.
+external_secrets:
+  GARAGE_RPC_SECRET: 3d18147b-4c7d-4ca2-83cb-b4d100317602 # garage-rpc-secret
+  GARAGE_ADMIN_TOKEN: a3d9ab7e-6951-41c7-ad29-b4d100317649 # garage-admin-token
+  SECRET_DOMAIN: 302d4b3f-247b-4076-b69f-b2f70182b4b2 # SECRET_DOMAIN

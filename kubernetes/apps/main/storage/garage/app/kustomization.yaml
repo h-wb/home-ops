@@ -5,7 +5,8 @@ kind: Kustomization
 resources:
   - ./grafanadashboard.yaml
   - ./externalsecret.yaml
-  - ./helmrelease.yaml
+  - ./service.yaml
+  - ./httproute.yaml
 configMapGenerator:
   - name: garage-configmap
     files:
