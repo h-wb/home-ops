@@ -42,7 +42,7 @@ spec:
       APP: *app
       NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "9 * * * *"
-      KOPIUR_CAPACITY: 20Gi
+      KOPIUR_CAPACITY: 30Gi
       # config.php is 0640 82:82 (www-data, fpm-alpine) - mover must match
       KOPIUR_PUID: "82"
       KOPIUR_PGID: "82"

@@ -68,6 +68,8 @@ spec:
             'maintenance_window_start' => 20,
             'check_data_directory_permissions' => false,
             'skeletondirectory' => '',
+            // Photos live in Immich; no preview cache (was 48 GiB of thumbnails).
+            'enable_previews' => false,
           );
       extraVolumes:
         - name: nfs-tank
@@ -172,10 +174,8 @@ spec:
         memory: 768Mi
       limits:
         memory: 3Gi
+    # Data dir lives in the main (kopiur-backed) volume under the `data` subPath;
+    # user files come from the /mnt/tank/hwe external storage mount.
     persistence:
       enabled: true
       existingClaim: *name
-      nextcloudData:
-        enabled: true
-        existingClaim: nextcloud-data
-        accessMode: ReadWriteMany
