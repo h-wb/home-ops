@@ -1,7 +1,7 @@
 metadata_dir = "/meta"
 data_dir = "/data"
 db_engine = "lmdb"
-metadata_auto_snapshot_interval = "6h"
+metadata_auto_snapshot_interval = "24h"
 
 replication_factor = 1
 compression_level = 2
