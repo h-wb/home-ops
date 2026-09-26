@@ -22,6 +22,9 @@ services:
     volumes:
       - /mnt/ssd-storage/docker/garage/meta:/meta
       - /mnt/tank/backup/garage/data:/data
+      # Daily LMDB snapshots next to the data so Cloud Sync task 3
+      # (/mnt/tank/backup/garage) ships a restorable pair offsite.
+      - /mnt/tank/backup/garage/snapshots:/snapshots
     healthcheck:
       test: ["CMD", "/garage", "status"]
       interval: 30s
@@ -42,6 +45,7 @@ configs:
       data_dir = "/data"
       db_engine = "lmdb"
       metadata_auto_snapshot_interval = "24h"
+      metadata_snapshots_dir = "/snapshots"
 
       replication_factor = 1
       compression_level = 2
