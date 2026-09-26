@@ -7,6 +7,7 @@
 #   /mnt/ssd-storage/docker/doco-cd/data
 #   /mnt/ssd-storage/docker/doco-cd/secrets/api_secret
 #   /mnt/ssd-storage/docker/doco-cd/secrets/webhook_secret
+#   /mnt/ssd-storage/docker/doco-cd/secrets/bws_token  (external-secrets machine account)
 name: doco-cd
 
 secrets:
@@ -14,6 +15,8 @@ secrets:
     file: /mnt/ssd-storage/docker/doco-cd/secrets/api_secret
   webhook_secret:
     file: /mnt/ssd-storage/docker/doco-cd/secrets/webhook_secret
+  bws_token:
+    file: /mnt/ssd-storage/docker/doco-cd/secrets/bws_token
 
 services:
   doco-cd:
@@ -31,9 +34,12 @@ services:
           interval: 300
       API_SECRET_FILE: /run/secrets/api_secret
       WEBHOOK_SECRET_FILE: /run/secrets/webhook_secret
+      SECRET_PROVIDER: bitwarden_sm
+      SECRET_PROVIDER_ACCESS_TOKEN_FILE: /run/secrets/bws_token
     secrets:
       - api_secret
       - webhook_secret
+      - bws_token
     ports:
       - "8880:8880"
       - "9120:9120"
