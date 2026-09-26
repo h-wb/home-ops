@@ -8,8 +8,6 @@ services:
     restart: unless-stopped
     privileged: true
     user: root
-    command:
-      - --smartctl.device-exclude=nvme0
     ports:
       - "9633:9633"
     deploy:
