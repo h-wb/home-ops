@@ -14,12 +14,11 @@ home-ops/
 │   │   ├── main/
 │   │   └── edge/
 │   └── components/      # reusable kustomize Components consumed by app ks.yaml's
+├── docker/truenas/      # NAS docker-compose stacks deployed by doco-cd (see its README.md)
 ├── talos/               # Talos Linux machine configs (one dir per cluster)
-├── bootstrap/           # one-time cluster bootstrap (helmfile.d + mise)
-├── scripts/             # bootstrap-apps.sh + lib/
-├── docs/                # mdBook
-├── Taskfile.yml         # entrypoint for ops tasks (see `.taskfiles/`)
-├── .mise.toml           # tool versions + env (sets KUBECONFIG from $CLUSTER)
+├── bootstrap/           # one-time cluster bootstrap (helmfile.d + mise tasks)
+├── .mise.toml           # tool versions, env (KUBECONFIG from $CLUSTER), root tasks; monorepo config_roots
+├── fnox.toml            # bootstrap secrets from ProtonPass (Bitwarden token, Talos CAs, age key)
 └── age.key              # SOPS age private key (gitignored in spirit; managed locally)
 ```
 
@@ -47,8 +46,8 @@ Switch clusters by setting `CLUSTER=edge` (or `main`) in the shell or `.mise.tom
 | Caches/KV           | Dragonfly                                                                                         | redis-compatible                                                |
 | Block storage       | Rook-Ceph (`ceph-block`, `ceph-filesystem`, `ceph-bucket`)                                        | hyper-converged on the 3 Talos nodes                            |
 | Local hostpath      | `local-hostpath` storage class (`WaitForFirstConsumer`)                                           | used by CNPG, etc.                                              |
-| Backup              | volsync (Kopia repo on NFS), CNPG → Barman → Garage S3                                            |                                                                 |
-| Object storage      | Garage (`s3.${SECRET_DOMAIN}`)                                                                    | for CNPG Barman + other                                         |
+| Backup              | kopiur (Kopia repo on Garage S3), CNPG → Barman → Garage S3                                       |                                                                 |
+| Object storage      | Garage on the NAS (`s3.${SECRET_DOMAIN}`, `garage.storage.svc`)                                   | selector-less Service → NAS; for CNPG Barman + kopiur           |
 | OCI mirror          | spegel                                                                                            | per-node local image cache                                      |
 | CI                  | Renovate + GitHub Actions                                                                         |                                                                 |
 | App chart           | bjw-s `app-template` (v5.x)                                                                       | shared OCIRepository at `components/common/repos/app-template/` |
@@ -75,7 +74,7 @@ cnpg/
 ├── initdb/            # bootstrap.initdb (plain empty DB) — for net-new apps
 ├── import/            # bootstrap.initdb.import (one-shot live import from external Postgres)
 ├── restore/           # bootstrap.recovery from Barman ← default for steady-state apps
-├── pooler/            # opt-in PgBouncer Pooler (only authentik uses it today)
+├── pooler/            # opt-in PgBouncer Pooler
 └── extensions/
     └── vchord/        # PG 18 extension-mount for VectorChord (immich)
 ```
@@ -105,18 +104,26 @@ postBuild:
 - Extensions: standard CNPG postgres image is used; per-app extension `.so` files are mounted from separate `vchord-scratch`-style images via `spec.postgresql.extensions` (PG 18 feature). See `cnpg/extensions/vchord/` for the pattern — it's a Component you reference alongside `cnpg/restore` and the Cluster picks up the patch.
 - Image override (PostGIS, etc.): pass `CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis` + `CNPG_VERSION: 18-3-system-trixie` in the app's `postBuild.substitute`. No variant Component needed.
 
+## TrueNAS (doco-cd)
+
+- NAS containers (Plex, exporters, Garage) are GitOps-deployed from `docker/truenas/NN-name/docker-compose.yaml` by doco-cd (self-updating main + updater pair). No TrueNAS catalog apps; app data in `/mnt/ssd-storage/docker/<app>`.
+- Per-stack secrets: plain Bitwarden SM secret **IDs** in the stack's `.doco-cd.yaml` (`external_secrets`). doco-cd can't read fields from the JSON-per-app secrets.
+- Don't add `# renovate:` comments to compose files — the built-in docker-compose manager handles them and the generic regex would misparse `image:` lines.
+- Rebuild / Garage restore runbook: `docker/truenas/README.md`.
+
 ## Secrets
 
 - **Bitwarden Secrets Manager** is the ClusterSecretStore. Per-app secrets are usually `ExternalSecret`s under each app's `app/externalsecret.yaml`, extracting from a Bitwarden item by name.
 - The CNPG component's S3 creds (`postgresql-bucket` Bitwarden item) are shared across all apps.
-- SOPS-encrypted secrets in Git use the age key at `age.key`. Tasks have a `sops:` namespace.
+- SOPS-encrypted secrets in Git use the age key at `age.key`. `mise run encrypt` / `mise run decrypt` handle `*.sops.yaml`.
+- Bootstrap-time secrets (the Bitwarden machine token, Talos CAs) come from ProtonPass via `fnox` (`fnox.toml`), so they work with the cluster down.
 
 ## Conventions
 
 - One directory per app: `kubernetes/apps/${CLUSTER}/${ns}/${app}/{ks.yaml, app/{helmrelease.yaml, kustomization.yaml, ...}}`.
 - App namespace and Flux Kustomization name match the app name.
-- Almost everything is a `HelmRelease`, mostly using bjw-s `app-template` v5.x (shared OCIRepository at `components/common/repos/app-template/`). A few use upstream charts (nextcloud, cloudnative-pg, authentik, kube-prometheus-stack, etc.).
-- Reusable Components live at `kubernetes/components/{cnpg,common,volsync,zeroscaler,gpu}/`. App ks.yaml's reference them via relative paths.
+- Almost everything is a `HelmRelease`, mostly using bjw-s `app-template` v5.x (shared OCIRepository at `components/common/repos/app-template/`). A few use upstream charts (nextcloud, cloudnative-pg, kube-prometheus-stack, etc.).
+- Reusable Components live at `kubernetes/components/{anubis,cnpg,common,dragonfly,gpu,kopiur,oidc,zeroscaler}/`. App ks.yaml's reference them via relative paths.
 - `${SECRET_DOMAIN}`, `${NFS_ADDR}`, `${CLUSTER}` come from cluster-level postBuild substitution.
 - Memory: set **explicit `requests.memory`** lower than `limits.memory`. Kubernetes defaults request=limit if request is omitted, which over-commits the scheduler. (Learned the hard way after `Cluster has overcommitted memory` alert.)
 
@@ -126,7 +133,7 @@ postBuild:
 - **Reconcile a thing**: `flux -n <ns> reconcile kustomization <name>` (use `--force` for `HelmRelease`)
 - **Fetch latest git**: `flux -n flux-system reconcile source git flux-system`
 - **App in trouble**: check `kubectl get hr -n <ns> <app>`, then pod logs, then events.
-- **Mise/Taskfile**: `task` lists; tasks live under `.taskfiles/{ExternalSecrets,Flux,Kubernetes,sops,volsync}/`.
+- **Mise tasks**: `mise tasks ls --all`. Monorepo config roots (`bootstrap`, `docker/truenas`, `kubernetes`, `talos`) — run as `mise run //bootstrap:default`, `mise run //docker/truenas:garage:bootstrap`, etc.
 - **Stale pod blocking PVC**: usually `kubectl delete pod -n <ns> <pod>` and CNPG/whoever owns it will recreate. For wedged CNPG bootstrap, `kubectl delete pvc -l cnpg.io/cluster=<cluster>` and the operator re-bootstraps.
 
 ## Common pitfalls
