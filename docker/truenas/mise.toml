@@ -1,0 +1,58 @@
+[tools]
+"aqua:bitwarden/sdk-sm" = "2.1.0"
+
+[env]
+NAS_HOST = "TN1"
+# Bitwarden Secrets Manager project read by external-secrets / doco-cd
+BWS_PROJECT_ID = "99bcb77b-0b5a-4fa8-bc6b-b1ee001565a6"
+
+[tasks."garage:bootstrap"]
+description = "Declare Garage layout, key and buckets on the NAS (idempotent)"
+quiet = true
+usage = '''
+flag "--zone <zone>" default="ca-west-1" help="Layout zone for the node"
+flag "--capacity <capacity>" default="200GB" help="Layout capacity (single node: relative only)"
+'''
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+
+garage() { ssh "${NAS_HOST}" sudo docker exec -e RUST_LOG=warn garage /garage "$@"; }
+
+# 1. Layout: give the node a role if it has none (fresh metadata).
+node_id=$(garage node id -q | cut -d@ -f1)
+if garage layout show | grep -q "^${node_id:0:16} "; then
+    mise //:log info "Layout already has a role" node "${node_id:0:16}"
+else
+    version=$(garage layout show | sed -n 's/^Current cluster layout version: //p')
+    garage layout assign -z "${usage_zone?}" -c "${usage_capacity?}" "${node_id}"
+    garage layout apply --version "$((version + 1))"
+    mise //:log info "Layout applied" node "${node_id:0:16}" version "$((version + 1))"
+fi
+
+# 2. Access key: import the one consumers already use (BWS postgresql-bucket),
+#    so CNPG and kopiur work unchanged against a fresh node.
+export BWS_ACCESS_TOKEN
+BWS_ACCESS_TOKEN=$(fnox get -c "$(git rev-parse --show-toplevel)/fnox.toml" BITWARDEN_KUBERNETES_TOKEN)
+creds=$(bws secret list "${BWS_PROJECT_ID}" -o json | jq -er '.[] | select(.key == "postgresql-bucket") | .value')
+key_id=$(jq -er .AWS_ACCESS_KEY_ID <<<"${creds}")
+key_secret=$(jq -er .AWS_SECRET_ACCESS_KEY <<<"${creds}")
+if garage key info "${key_id}" &>/dev/null; then
+    mise //:log info "Key already present" key "${key_id}"
+else
+    garage key import --yes -n admin_key "${key_id}" "${key_secret}" >/dev/null
+    mise //:log info "Key imported" key "${key_id}"
+fi
+
+# 3. Buckets consumed by the cluster: CNPG Barman and kopiur.
+for bucket in postgresql kopiur; do
+    if garage bucket info "${bucket}" &>/dev/null; then
+        mise //:log info "Bucket already present" bucket "${bucket}"
+    else
+        garage bucket create "${bucket}" >/dev/null
+        mise //:log info "Bucket created" bucket "${bucket}"
+    fi
+    garage bucket allow --read --write --owner "${bucket}" --key "${key_id}" >/dev/null
+done
+mise //:log info "Garage bootstrap complete"
+'''
