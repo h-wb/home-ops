@@ -1,0 +1,40 @@
+---
+# The plexpass tag self-updates PMS on container start.
+name: plex
+
+services:
+  plex:
+    image: plexinc/pms-docker:plexpass
+    container_name: plex
+    restart: unless-stopped
+    environment:
+      TZ: America/Los_Angeles
+      PLEX_UID: "1000"
+      PLEX_GID: "1000"
+      ALLOWED_NETWORKS: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+    group_add:
+      - "568"
+    ports:
+      - "32400:32400"
+    volumes:
+      - /mnt/ssd-storage/docker/plex/config:/config
+      - /mnt/ssd-storage/docker/plex/transcode:/transcode
+      - logs:/config/Library/Application Support/Plex Media Server/Logs
+      - /mnt/tank/shared:/media:ro
+      - /mnt/tank/fwe:/manual:ro
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8g
+        reservations:
+          memory: 2g
+
+volumes:
+  logs: {}

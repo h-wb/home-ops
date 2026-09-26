@@ -1,0 +1,11 @@
+---
+# Root deploy config for the TrueNAS host. Every subdirectory holding a
+# docker-compose.yaml is its own stack; removing the directory removes the stack.
+working_dir: ./docker/truenas
+auto_discovery:
+  enabled: true
+  depth: 1
+  delete: true
+reconciliation:
+  enabled: true
+  interval: 3600
