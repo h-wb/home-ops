@@ -31,8 +31,6 @@ spec:
               tag: 2026.9.4@sha256:e5cc0dd5231efe95eff8424146e559903bb8446ead0c5407818944c9c99f7aba
             env:
               TZ: America/Toronto
-              HASS_HTTP_TRUSTED_PROXY_1: 10.43.0.0/16
-              HASS_HTTP_TRUSTED_PROXY_2: 10.42.0.0/16
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -92,7 +90,7 @@ spec:
                 port: &port 8123
       codeserver:
         hostnames:
-          - code.${SECRET_DOMAIN}
+          - hass-code-${CLUSTER}.${SECRET_DOMAIN}
         parentRefs:
           - name: envoy-internal
             namespace: network
