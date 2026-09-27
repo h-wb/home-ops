@@ -36,7 +36,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1g
+          # Counts the mmap'd LMDB metadata pages; live metadata is ~1 GB
+          # (see snapshot size), so 1g thrashed it (major page fault alerts).
+          memory: 4g
         reservations:
           memory: 256m
 
