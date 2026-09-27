@@ -44,11 +44,15 @@ spec:
               limits:
                 memory: 2Gi
           codeserver:
-            image:
+            image: &codeserverImage
               repository: ghcr.io/coder/code-server
               tag: 4.139.1@sha256:0c067c3cf09ed1830ce282387826be8feefef8a5828f462791c2df3f1007ee17
-            env:
+            env: &gitEnv
               TZ: America/Toronto
+              # /config is root-owned (PVC root); git refuses it without this.
+              GIT_CONFIG_COUNT: "1"
+              GIT_CONFIG_KEY_0: safe.directory
+              GIT_CONFIG_VALUE_0: /config
             args:
               [
                 "--auth",
@@ -66,6 +70,41 @@ spec:
                 cpu: 10m
               limits:
                 memory: 1Gi
+      # Nightly commit + push of /config to github.com/h-wb/home-assistant-config
+      # (repo remote, deploy key and .gitignore allowlist live in /config itself).
+      # Uses the code-server image because the HA image has no passwd entry for
+      # uid 1000, which ssh refuses to run without. PVC is RWO but edge is one node.
+      git-sync:
+        type: cronjob
+        cronjob:
+          schedule: "0 4 * * *"
+          timeZone: America/Toronto
+          concurrencyPolicy: Forbid
+          successfulJobsHistory: 1
+          failedJobsHistory: 1
+        containers:
+          app:
+            image: *codeserverImage
+            env: *gitEnv
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                set -eu
+                cd /config
+                git add -A
+                if git diff --cached --quiet; then
+                  echo "no changes"
+                else
+                  git commit -q -m "Auto-commit $(date +%F)"
+                  git --no-pager show --stat --format=%s HEAD
+                fi
+                git push -q origin HEAD:main
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
@@ -100,6 +139,7 @@ spec:
                 port: &codeserverPort 12321
     service:
       app:
+        controller: home-assistant
         type: LoadBalancer
         annotations:
           lbipam.cilium.io/ips: 192.168.18.77
