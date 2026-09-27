@@ -7,7 +7,6 @@ components:
   - ../../../components/common
 resources:
   - ./home-assistant/ks.yaml
-  - ./matter-server/ks.yaml
   - ./mosquitto/ks.yaml
   - ./zigbee/ks.yaml
   - ./smart-life-webapp/ks.yaml
