@@ -5,7 +5,32 @@
 
 exclude:
   # Exclude platforms to be scanned
-  platforms: [] # ['my_excluded_platform_1', 'my_excluded_platform_2']
+  # Questarr imports into hardcoded display-name folders (roms/Nintendo DS/...), so each of
+  # those is a symlink to the real slug folder (Nintendo DS -> nds) on the NFS share.
+  # Exclude the symlinks so RomM only sees each platform once, via its slug folder.
+  platforms:
+    - Atari 2600
+    - Dreamcast
+    - Game Boy
+    - Game Boy Advance
+    - Game Boy Color
+    - Game Gear
+    - GameCube
+    - Master System
+    - Mega Drive
+    - N64
+    - NES
+    - Neo Geo
+    - Nintendo 3DS
+    - Nintendo DS
+    - PC
+    - PS2
+    - PS3
+    - PSP
+    - PlayStation
+    - SNES
+    - Switch
+    - Wii
 
   # Exclude roms or parts of roms to be scanned
   roms:
