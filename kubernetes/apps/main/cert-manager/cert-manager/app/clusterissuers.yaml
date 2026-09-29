@@ -34,6 +34,9 @@ metadata:
   name: home-selfsigned-ca
 spec:
   isCA: true
+  # Long-lived so leaf renewals never embed a CA that expires under them
+  duration: 87600h # 10y
+  renewBefore: 720h
   commonName: home-selfsigned-ca
   subject:
     organizations:
