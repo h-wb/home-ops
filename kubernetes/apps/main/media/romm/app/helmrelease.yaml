@@ -25,7 +25,7 @@ spec:
             env:
               TZ: Europe/Paris
               ENABLE_SCHEDULED_RESCAN: "true"
-              SCHEDULED_RESCAN_CRON: "0 3 * * *"
+              SCHEDULED_RESCAN_CRON: "7 * * * *" # hourly quick scan: inotify misses NFS writes from Questarr
               # ENABLE_SCHEDULED_UPDATE_SWITCH_TITLEDB: "false"
               # ENABLE_SCHEDULED_UPDATE_MAME_XML: "false"
               ENABLE_RESCAN_ON_FILESYSTEM_CHANGE: "true"
