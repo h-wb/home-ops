@@ -121,3 +121,14 @@ spec:
         globalMounts:
           - path: /data/paperless/media
             subPath: Documents/Paperless/media
+      # Overrides the stock AI classification prompt so journal exports get a
+      # consistent "YYYY-MM-DD — topic" title. Upstream file: re-check on upgrade.
+      ai-prompt:
+        type: configMap
+        name: paperless-ai-prompt
+        advancedMounts:
+          paperless:
+            app:
+              - path: /usr/src/paperless/src/paperless_ai/prompts/classification.j2
+                subPath: classification.j2
+                readOnly: true
