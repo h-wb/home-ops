@@ -3,18 +3,54 @@
 name: Renovate PR Review
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  schedule:
+    # 02:00 EDT (06:00 UTC); 01:00 EST after the November DST change
+    - cron: 0 6 * * *
+  workflow_dispatch:
 
-concurrency:
-  group: renovate-review-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
-  review:
-    if: github.event.pull_request.user.login == 'wlab-bot[bot]'
-    name: Breaking Change Analysis
+  list:
+    name: List PRs needing review
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      prs: ${{ steps.list.outputs.prs }}
+    steps:
+      - name: List open Renovate PRs without a review on their current head
+        id: list
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          out='[]'
+          while read -r num sha; do
+            reviewed=$(gh api "repos/$GH_REPO/pulls/$num/reviews" --paginate \
+              --jq "[.[] | select(.user.login == \"claude[bot]\" and .commit_id == \"$sha\")] | length" |
+              awk '{s+=$1} END {print s+0}')
+            if [ "$reviewed" -eq 0 ]; then
+              out=$(jq -c --argjson n "$num" '. + [$n]' <<< "$out")
+            fi
+          done < <(gh pr list --author 'app/wlab-bot' --state open --limit 100 \
+            --json number,headRefOid --jq '.[] | "\(.number) \(.headRefOid)"')
+          echo "prs=$out" >> "$GITHUB_OUTPUT"
+
+  review:
+    needs: list
+    if: needs.list.outputs.prs != '[]'
+    name: Breaking Change Analysis (#${{ matrix.pr }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        pr: ${{ fromJSON(needs.list.outputs.prs) }}
+    concurrency:
+      group: renovate-review-${{ matrix.pr }}
+      cancel-in-progress: true
     timeout-minutes: 15
     permissions:
       contents: read
@@ -24,6 +60,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: refs/pull/${{ matrix.pr }}/head
           fetch-depth: 0
           persist-credentials: false
 
@@ -40,7 +77,7 @@ jobs:
             with your findings. You do not make changes to files; you investigate and report.
 
             REPO: ${{ github.repository }}
-            PR: #${{ github.event.pull_request.number }}
+            PR: #${{ matrix.pr }}
 
             ## Context
 
