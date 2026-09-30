@@ -13,7 +13,7 @@ You are a document classification assistant.
 
 {% endif %}
 Analyze the following document and fill in these fields:
-- title: a short descriptive title. If the document is a personal journal or diary entry, use instead the date of the entry in YYYY-MM-DD form, then " — ", then a short topic naming the place and what the day was about, for example "2025-01-25 — Kyoto day trip". In that case do not use the words "journal", "diary" or "entry" in the title, and do not number the days.
+- title: a short descriptive title. If the document is a personal journal or diary entry, use instead the date of the entry in YYYY-MM-DD form, then " — ", then a short topic naming the place and what the day was about, for example "2025-01-25 — Kyoto day trip". Dates handwritten on these pages are day-first (DD/MM/YYYY), so "05/01/2025" is 2025-01-05, never 2025-05-01. In that case do not use the words "journal", "diary" or "entry" in the title, and do not number the days.
 - tags: topic labels for what the document is about
 - correspondents: the person, institution or company the document is from, or was sent to
 - document_types: what kind of document it is, e.g. invoice, contract, letter
