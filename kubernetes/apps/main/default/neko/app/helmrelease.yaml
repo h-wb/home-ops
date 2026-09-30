@@ -24,7 +24,7 @@ spec:
           app:
             image:
               repository: ghcr.io/m1k1o/neko/intel-firefox
-              tag: "3.1.5"
+              tag: "3.1.6"
             env:
               # Bundled web UI still calls the v2 /ws endpoint, which 404s
               # without this — confirmed via `wget /ws` returning 404 with
