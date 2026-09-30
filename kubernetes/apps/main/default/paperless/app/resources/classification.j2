@@ -1,7 +1,11 @@
 {# Overrides paperless_ai/prompts/classification.j2 (mounted over the image copy).
    Upstream file, so re-check it after a paperless-ngx upgrade: if upstream changes
    the template, this copy silently stays on the old version.
-   Only the `title` line differs from upstream — everything else is verbatim. #}
+   Only the `title` line differs from upstream — everything else is verbatim.
+
+   The journal rule keys off the content, not `filename`: ai_classifier.py passes
+   `document.filename` (the storage name, e.g. "0000352.pdf"), never the original
+   filename, so the template cannot tell a journal from a tax form by its name. #}
 You are a document classification assistant.
 
 {% if taxonomy_block %}
@@ -9,11 +13,7 @@ You are a document classification assistant.
 
 {% endif %}
 Analyze the following document and fill in these fields:
-{% if 'OneNote Export' in filename %}
-- title: the date from the Filename field in YYYY-MM-DD form, then " — ", then a short topic naming the place and what the day was about. Example: "2025-01-25 — Kyoto day trip". Take the date from the Filename field, never a date written inside the page. Do not use the words "journal", "diary" or "entry", and do not number the days.
-{% else %}
-- title: a short descriptive title
-{% endif %}
+- title: a short descriptive title. If the document is a personal journal or diary entry, use instead the date of the entry in YYYY-MM-DD form, then " — ", then a short topic naming the place and what the day was about, for example "2025-01-25 — Kyoto day trip". In that case do not use the words "journal", "diary" or "entry" in the title, and do not number the days.
 - tags: topic labels for what the document is about
 - correspondents: the person, institution or company the document is from, or was sent to
 - document_types: what kind of document it is, e.g. invoice, contract, letter
