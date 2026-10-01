@@ -1,0 +1,24 @@
+- search:
+    provider: [duckduckgo, google]
+    focus: false
+    target: _blank
+- greeting:
+    text_size: xl
+    text: "Hello!"
+- kubernetes:
+    cluster:
+      cpu: true
+      memory: true
+      show: true
+      showLabel: true
+    nodes:
+      cpu: true
+      memory: true
+      show: false
+      showLabel: true
+- datetime:
+    text_size: l
+    format:
+      timeStyle: short
+      dateStyle: short
+      hourCycle: h23

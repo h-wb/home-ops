@@ -188,6 +188,12 @@ spec:
     route:
       app:
         annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: kanidm
+          gethomepage.dev/group: Infrastructure
+          gethomepage.dev/name: Kanidm
+          gethomepage.dev/icon: kanidm.png
+          gethomepage.dev/description: Identity & SSO
           gatus.home-operations.com/endpoint: |-
             group: security
         hostnames:

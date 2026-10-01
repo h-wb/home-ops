@@ -84,6 +84,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: bazarr
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Bazarr
           gethomepage.dev/icon: bazarr.png

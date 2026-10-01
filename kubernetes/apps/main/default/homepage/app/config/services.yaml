@@ -1,0 +1,66 @@
+- Network:
+    - Cloudflared:
+        href: https://dash.cloudflare.com/
+        icon: cloudflare-zero-trust.png
+        description: Cloudflared Tunnel Status
+        widget:
+          type: cloudflared
+          accountid: {{HOMEPAGE_VAR_CLOUDFLARED_ACCOUNTID}}
+          tunnelid: {{HOMEPAGE_VAR_CLOUDFLARED_TUNNELID}}
+          key: {{HOMEPAGE_VAR_CLOUDFLARED_API_TOKEN}}
+          fields: ["status"]
+    - Healthchecks:
+        href: https://healthchecks.io/
+        icon: healthchecks.png
+        description: Healthchecks Internet Uptime
+        widget:
+          type: healthchecks
+          url: https://healthchecks.io/
+          key: {{HOMEPAGE_VAR_HEALTHCHECK_TOKEN}}
+          uuid: {{HOMEPAGE_VAR_HEALTHCHECK_UUID}}
+
+- Calendar:
+    - Agenda:
+        widget:
+          type: calendar
+          view: agenda # optional - possible values monthly, agenda
+          maxEvents: 20 # optional - defaults to 10
+          integrations: # optional
+            - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
+              service_group: Downloads # group name where widget exists
+              service_name: Sonarr TV # service name for that widget
+            - type: sonarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
+              service_group: Downloads # group name where widget exists
+              service_name: Sonarr ANM # service name for that widget
+            - type: radarr # active widget type that is currently enabled on homepage - possible values: radarr, sonarr>
+              service_group: Downloads # group name where widget exists
+              service_name: Radarr # service name for that widget
+            - type: radarr
+              service_group: Downloads
+              service_name: Radarr-UHD
+- Infrastructure:
+    - Router:
+        href: http://192.168.1.1
+        icon: router.png
+        description: WAN Connection
+        siteMonitor: http://192.168.1.1
+    - Supermicro:
+        href: http://192.168.1.160
+        icon: supermicro.png
+        description: IPMI
+        siteMonitor: http://192.168.1.160
+    - Truenas:
+        href: http://192.168.1.161
+        icon: truenas-scale.png
+        description: NAS
+        siteMonitor: http://192.168.1.161
+    - PiKVM:
+        href: https://192.168.1.48/
+        icon: pikvm.png
+        description: PiKVM
+        siteMonitor: http://192.168.1.48
+    - Home Assistant:
+        href: https://hass-edge.${SECRET_DOMAIN}
+        icon: home-assistant.png
+        description: Edge cluster
+        siteMonitor: https://hass-edge.${SECRET_DOMAIN}

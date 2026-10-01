@@ -66,6 +66,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: multiscrobbler
           gethomepage.dev/group: Media
           gethomepage.dev/name: multiscrobbler
           gethomepage.dev/icon: multi-scrobbler.png

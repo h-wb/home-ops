@@ -107,7 +107,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: dawarich
+          gethomepage.dev/group: Tracking
           gethomepage.dev/name: Dawarich
           gethomepage.dev/icon: google-maps.png
         hostnames:

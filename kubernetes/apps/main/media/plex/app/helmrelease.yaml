@@ -82,7 +82,8 @@ spec:
           gatus.home-operations.com/endpoint: |-
             conditions: ["[STATUS] == 401"]
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Video
+          gethomepage.dev/app: plex
+          gethomepage.dev/group: Media
           gethomepage.dev/name: Plex
           gethomepage.dev/icon: plex.png
           gethomepage.dev/description: Media Player

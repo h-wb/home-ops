@@ -6,7 +6,8 @@ metadata:
   name: nextcloud
   annotations:
     gethomepage.dev/enabled: "true"
-    gethomepage.dev/group: Home
+    gethomepage.dev/app: nextcloud
+    gethomepage.dev/group: Personal
     gethomepage.dev/name: Nextcloud
     gethomepage.dev/icon: nextcloud.png
     gethomepage.dev/description: File Hosting

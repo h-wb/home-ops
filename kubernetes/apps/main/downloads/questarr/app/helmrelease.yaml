@@ -60,6 +60,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: questarr
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Questarr
           gethomepage.dev/icon: mdi-gamepad-variant

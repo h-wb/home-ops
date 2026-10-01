@@ -97,13 +97,15 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: paperless
+          gethomepage.dev/group: Personal
           gethomepage.dev/name: Paperless
           gethomepage.dev/icon: paperless.png
           gethomepage.dev/description: Document OCR Software
           gethomepage.dev/widget.type: paperlessngx
           gethomepage.dev/widget.url: http://paperless.default:8000
-          gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_PAPERLESS_TOKEN}}` }}"
+          gethomepage.dev/widget.username: "{{ `{{HOMEPAGE_VAR_PAPERLESS_USERNAME}}` }}"
+          gethomepage.dev/widget.password: "{{ `{{HOMEPAGE_VAR_PAPERLESS_PASSWORD}}` }}"
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:

@@ -46,6 +46,13 @@ spec:
             port: 5000
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: kavita
+          gethomepage.dev/group: Library
+          gethomepage.dev/name: Kavita
+          gethomepage.dev/icon: kavita.png
+          gethomepage.dev/description: Ebook/Comic Reader
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:

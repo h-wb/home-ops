@@ -82,6 +82,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: qbittorrent
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: qBittorrent
           gethomepage.dev/icon: qbittorrent.png

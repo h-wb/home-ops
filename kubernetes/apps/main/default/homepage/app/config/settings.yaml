@@ -1,0 +1,52 @@
+title: Dashboard
+useEqualHeights: true
+theme: dark
+color: slate
+headerStyle: clean
+statusStyle: dot
+showStats: true
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: true
+  showSearchSuggestions: true
+  hideVisitURL: true
+layout:
+  Network:
+    style: row
+    columns: 3
+    icon: mdi-network
+  Calendar:
+    style: column
+    icon: mdi-calendar
+  Media:
+    style: row
+    columns: 4
+    icon: mdi-multimedia
+  Library:
+    style: row
+    columns: 3
+    icon: mdi-book-open-variant
+  Downloads:
+    style: row
+    columns: 3
+    icon: mdi-download-circle
+  Personal:
+    style: row
+    columns: 4
+    icon: mdi-account-circle
+  Tracking:
+    style: row
+    columns: 4
+    icon: mdi-map-marker-path
+  Tools:
+    style: row
+    columns: 3
+    icon: mdi-tools
+  Observability:
+    style: row
+    columns: 4
+    icon: mdi-chart-line
+  Infrastructure:
+    style: row
+    columns: 3
+    icon: mdi-server

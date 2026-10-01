@@ -70,6 +70,13 @@ spec:
             port: 8080
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: open-webui
+          gethomepage.dev/group: Tools
+          gethomepage.dev/name: Open WebUI
+          gethomepage.dev/icon: open-webui.png
+          gethomepage.dev/description: LLM Chat
         hostnames:
           - "chat.${SECRET_DOMAIN}"
         parentRefs:

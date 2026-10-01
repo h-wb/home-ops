@@ -149,7 +149,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: karakeep
+          gethomepage.dev/group: Personal
           gethomepage.dev/name: Karakeep
           gethomepage.dev/icon: karakeep.png
           gethomepage.dev/description: Bookmarks

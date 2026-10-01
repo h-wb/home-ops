@@ -1,0 +1,25 @@
+- Cloud:
+      - OVH:
+            - icon: ovh.png
+              href: https://www.ovh.com/
+- Social:
+    - Discord:
+        - icon: discord.png
+          href: 'https://discord.com/app'
+    - Reddit:
+        - icon: reddit.png
+          href: 'https://reddit.com'
+- Media:
+    - YouTube:
+        - icon: youtube.png
+          href: 'https://youtube.com/feed/subscriptions'
+    - Spotify:
+        - icon: spotify.png
+          href: 'http://open.spotify.com'
+- Dev:
+    - kubesearch:
+        - icon: kubernetes-dashboard.png
+          href: 'https://kubesearch.dev/'
+    - home-ops:
+        - icon: github.png
+          href: 'https://github.com/h-wb/home-ops'

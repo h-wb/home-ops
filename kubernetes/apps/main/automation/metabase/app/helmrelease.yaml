@@ -45,6 +45,13 @@ spec:
             port: 3000
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: metabase
+          gethomepage.dev/group: Tools
+          gethomepage.dev/name: Metabase
+          gethomepage.dev/icon: metabase.png
+          gethomepage.dev/description: Dashboards & Analytics
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:

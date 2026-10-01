@@ -93,7 +93,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: code-server
+          gethomepage.dev/group: Tools
           gethomepage.dev/name: Code Server
           gethomepage.dev/icon: code-server.png
           gethomepage.dev/description: VS Code

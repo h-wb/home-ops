@@ -61,6 +61,13 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: overseerr
+          gethomepage.dev/group: Media
+          gethomepage.dev/name: Overseerr
+          gethomepage.dev/icon: overseerr.png
+          gethomepage.dev/description: Media Requests
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
           - "requests.${SECRET_DOMAIN}"

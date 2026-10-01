@@ -56,7 +56,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Books
+          gethomepage.dev/app: suwayomi
+          gethomepage.dev/group: Library
           gethomepage.dev/name: Suwayomi
           gethomepage.dev/icon: https://raw.githubusercontent.com/Suwayomi/Suwayomi-Server/master/server/src/main/resources/icon/faviconlogo.png
           gethomepage.dev/description: Manga Web Reader/Downloader

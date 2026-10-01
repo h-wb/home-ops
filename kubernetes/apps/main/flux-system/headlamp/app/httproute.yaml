@@ -3,6 +3,13 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  annotations:
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: headlamp
+    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/name: Headlamp
+    gethomepage.dev/icon: headlamp.png
+    gethomepage.dev/description: Kubernetes UI
   name: headlamp
 spec:
   hostnames:

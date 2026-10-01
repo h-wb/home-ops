@@ -88,6 +88,7 @@ spec:
         annotations:
           gatus.home-operations.com/enabled: "false"
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: gatus
           gethomepage.dev/group: Observability
           gethomepage.dev/name: Gatus
           gethomepage.dev/icon: gatus.png

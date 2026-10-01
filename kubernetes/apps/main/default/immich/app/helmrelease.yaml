@@ -95,7 +95,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/group: Personal
           gethomepage.dev/name: immich
           gethomepage.dev/icon: immich.png
           gethomepage.dev/app: immich

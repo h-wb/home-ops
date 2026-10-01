@@ -66,6 +66,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: musicgrabber
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: MusicGrabber
           gethomepage.dev/description: Music acquisition & watched playlists

@@ -80,7 +80,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: airtrail
+          gethomepage.dev/group: Tracking
           gethomepage.dev/name: AirTrail
           gethomepage.dev/icon: airtrail.png
           gethomepage.dev/description: Flight tracking

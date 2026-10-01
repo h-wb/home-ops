@@ -69,6 +69,13 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: agregarr
+          gethomepage.dev/group: Media
+          gethomepage.dev/name: Agregarr
+          gethomepage.dev/icon: mdi-playlist-plus
+          gethomepage.dev/description: Plex Collection Aggregator
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         parentRefs:

@@ -55,7 +55,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Finance
+          gethomepage.dev/app: ghostfolio
+          gethomepage.dev/group: Personal
           gethomepage.dev/name: Ghostfolio
           gethomepage.dev/icon: ghostfolio.png
           gethomepage.dev/description: Wealth Management

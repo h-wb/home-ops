@@ -49,7 +49,8 @@ spec:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Video
+          gethomepage.dev/app: wizarr
+          gethomepage.dev/group: Media
           gethomepage.dev/name: Wizarr
           gethomepage.dev/icon: wizarr.png
           gethomepage.dev/description: Plex Invite Management

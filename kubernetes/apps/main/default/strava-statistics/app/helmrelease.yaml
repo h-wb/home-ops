@@ -55,7 +55,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: strava-statistics
+          gethomepage.dev/group: Tracking
           gethomepage.dev/name: Strava Stats
           gethomepage.dev/icon: mdi-run
         hostnames:

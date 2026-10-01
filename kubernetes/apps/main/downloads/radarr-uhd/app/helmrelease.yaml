@@ -77,6 +77,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: radarr-uhd
           gethomepage.dev/group: Downloads
           gethomepage.dev/name: Radarr-UHD
           gethomepage.dev/icon: radarr.png

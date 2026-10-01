@@ -61,6 +61,13 @@ spec:
             port: *port
     route:
       app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: n8n
+          gethomepage.dev/group: Tools
+          gethomepage.dev/name: n8n
+          gethomepage.dev/icon: n8n.png
+          gethomepage.dev/description: Workflow Automation
         hostnames:
           - *hostName
         parentRefs:

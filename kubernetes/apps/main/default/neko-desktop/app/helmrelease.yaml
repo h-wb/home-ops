@@ -135,7 +135,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: neko-desktop
+          gethomepage.dev/group: Tools
           gethomepage.dev/name: Neko Desktop
           gethomepage.dev/icon: xfce.png
           gethomepage.dev/description: Remote XFCE desktop

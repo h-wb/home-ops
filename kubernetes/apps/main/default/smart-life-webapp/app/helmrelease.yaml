@@ -101,7 +101,8 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/group: Home
+          gethomepage.dev/app: smart-life-webapp
+          gethomepage.dev/group: Tools
           gethomepage.dev/name: Smart Life
           gethomepage.dev/icon: mdi-home-automation
           gethomepage.dev/description: Control Smart Life / Tuya devices

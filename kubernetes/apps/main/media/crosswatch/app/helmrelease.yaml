@@ -49,6 +49,7 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: crosswatch
           gethomepage.dev/group: Media
           gethomepage.dev/name: CrossWatch
           gethomepage.dev/icon: https://raw.githubusercontent.com/cenodude/CrossWatch/main/images/CrossWatch.png
