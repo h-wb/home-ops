@@ -26,6 +26,9 @@ spec:
               tag: v2.4.0
             env:
               TZ: Europe/Paris
+              # Pinned: the image stamps a per-start value, so each replica returned a different
+              # /api/hash and the page reloaded whenever the poll hit the other pod.
+              HOMEPAGE_BUILDTIME: "1"
               HOMEPAGE_ALLOWED_HOSTS: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             envFrom:
               - secretRef:

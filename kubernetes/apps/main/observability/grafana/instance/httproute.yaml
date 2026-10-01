@@ -5,6 +5,8 @@ kind: HTTPRoute
 metadata:
   annotations:
     gethomepage.dev/enabled: "true"
+    gethomepage.dev/app: grafana
+    gethomepage.dev/pod-selector: app=grafana
     gethomepage.dev/group: Observability
     gethomepage.dev/name: Grafana
     gethomepage.dev/icon: grafana.png

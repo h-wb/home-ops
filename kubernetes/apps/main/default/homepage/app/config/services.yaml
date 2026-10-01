@@ -58,9 +58,8 @@
         href: https://192.168.1.48/
         icon: pikvm.png
         description: PiKVM
-        siteMonitor: http://192.168.1.48
+        siteMonitor: https://192.168.1.48
     - Home Assistant:
         href: https://hass-edge.${SECRET_DOMAIN}
         icon: home-assistant.png
         description: Edge cluster
-        siteMonitor: https://hass-edge.${SECRET_DOMAIN}
