@@ -79,7 +79,7 @@ spec:
         path: /mnt/tank/hwe
         globalMounts:
           - path: /vault
-            subPath: Documents/Vault
+            subPath: Documents/Obsidian
       # The Selkies stream and Chromium both want real shared memory; the 64Mi
       # default /dev/shm shows up as crashes and blank frames.
       dshm:
