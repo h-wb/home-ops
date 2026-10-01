@@ -15,7 +15,10 @@ spec:
       automountServiceAccountToken: true
     controllers:
       homepage:
-        replicas: 2
+        # Single replica on purpose: the image stamps HOMEPAGE_BUILDTIME per start (entrypoint
+        # overwrites any env override), so replicas return different /api/hash values and the
+        # page reloads whenever the poll lands on the other pod.
+        replicas: 1
         strategy: RollingUpdate
         annotations:
           reloader.stakater.com/auto: "true"
@@ -26,9 +29,6 @@ spec:
               tag: v2.4.0
             env:
               TZ: Europe/Paris
-              # Pinned: the image stamps a per-start value, so each replica returned a different
-              # /api/hash and the page reloaded whenever the poll hit the other pod.
-              HOMEPAGE_BUILDTIME: "1"
               HOMEPAGE_ALLOWED_HOSTS: "{{ .Release.Name }}.${SECRET_DOMAIN}"
             envFrom:
               - secretRef:
