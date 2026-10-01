@@ -71,7 +71,7 @@ spec:
           gethomepage.dev/icon: tautulli.png
           gethomepage.dev/description: Plex Manager
           gethomepage.dev/widget.type: tautulli
-          gethomepage.dev/widget.url: http://tautulli.media:8080
+          gethomepage.dev/widget.url: http://tautulli.media
           gethomepage.dev/widget.key: "{{ `{{HOMEPAGE_VAR_TAUTULLI_TOKEN}}` }}"
         hostnames:
           - "{{ .Release.Name }}.${SECRET_DOMAIN}"
