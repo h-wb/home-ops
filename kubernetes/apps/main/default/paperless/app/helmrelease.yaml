@@ -123,24 +123,6 @@ spec:
         globalMounts:
           - path: /data/paperless/media
             subPath: Documents/Paperless/media
-      # The Obsidian vault, so obsidian-journal-sync.py can mirror journal
-      # entries into it. Same share the obsidian HelmRelease mounts.
-      vault:
-        type: nfs
-        server: ${NFS_ADDR:=temp}
-        path: /mnt/tank/hwe
-        globalMounts:
-          - path: /vault
-            subPath: Documents/Obsidian/Vault
-      scripts:
-        type: configMap
-        name: paperless-scripts
-        defaultMode: 0755
-        advancedMounts:
-          paperless:
-            app:
-              - path: /scripts
-                readOnly: true
       # Overrides the stock AI classification prompt so journal exports get a
       # consistent "YYYY-MM-DD — topic" title. Upstream file: re-check on upgrade.
       ai-prompt:

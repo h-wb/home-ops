@@ -9,9 +9,6 @@ configMapGenerator:
   - name: paperless-ai-prompt
     files:
       - ./resources/classification.j2
-  - name: paperless-scripts
-    files:
-      - ./resources/obsidian-journal-sync.py
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
