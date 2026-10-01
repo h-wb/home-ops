@@ -52,6 +52,14 @@ spec:
         ports:
           http:
             port: 3000
+          # Local REST API plugin. n8n writes journal notes through it rather
+          # than straight to the NFS share: inotify does not cross NFS clients,
+          # so a write from another pod never reaches Obsidian's watcher and
+          # Obsidian Sync never learns the file changed. The plugin's insecure
+          # server is h2c, not HTTP/1.1, so this is the TLS port with a
+          # self-signed cert (callers skip verification).
+          restapi:
+            port: 27124
     route:
       app:
         annotations:
