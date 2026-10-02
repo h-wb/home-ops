@@ -101,6 +101,10 @@ settings:
   verify_ssl: true
   check_nightly: false
 
+mdblist:
+  apikey: <<MDBLIST_API_KEY>>
+  cache_expiration: 60
+
 plex:
   url: http://plex.media:32400
   token: <<PLEX_API_KEY>>
