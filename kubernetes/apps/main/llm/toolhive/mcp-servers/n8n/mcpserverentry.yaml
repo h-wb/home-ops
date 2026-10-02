@@ -1,0 +1,19 @@
+---
+# n8n's own instance-level MCP server (Settings → MCP), reached in-cluster rather
+# than through n8n-webhook's public route.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: n8n
+spec:
+  remoteUrl: http://n8n.automation.svc.cluster.local:8080/mcp-server/http
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: Authorization
+        valueSecretRef:
+          name: toolhive-n8n
+          key: authorization
+  groupRef:
+    name: mcp-tools

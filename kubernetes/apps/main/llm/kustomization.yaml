@@ -9,6 +9,7 @@ resources:
   - ./litellm-operator/ks.yaml
   - ./embed/ks.yaml
   - ./litellm/ks.yaml
+  - ./toolhive/ks.yaml
   # - ./local-ai/ks.yaml
   # - ./ollama/ks.yaml
   # - ./open-webui/ks.yaml

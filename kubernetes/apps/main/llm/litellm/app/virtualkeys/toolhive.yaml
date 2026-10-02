@@ -1,0 +1,14 @@
+---
+# Embeddings for the ToolHive gateway's tool-search optimizer. Both live in llm, so
+# the gateway reads the generated secret directly.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: toolhive
+spec:
+  proxyRef: litellm
+  keyAlias: ToolHive
+  secretName: litellm-key-toolhive
+  secretKey: api-key
+  models:
+    - embed

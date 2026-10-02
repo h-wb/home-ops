@@ -1,0 +1,45 @@
+---
+# One MCP endpoint aggregating every server in the `mcp-tools` group. Tool-name
+# clashes are resolved with a `{workload}_` prefix. Authentication happens at the
+# Envoy route (securitypolicy.yaml), so in-cluster callers come in anonymously.
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: VirtualMCPServer
+metadata:
+  name: mcp-gateway
+spec:
+  groupRef:
+    name: mcp-tools
+  config:
+    aggregation:
+      conflictResolution: prefix
+      conflictResolutionConfig:
+        prefixFormat: "{workload}_"
+    # Tool search over embeddings, so clients get the relevant tools instead of the
+    # whole catalogue. Uses LiteLLM's in-cluster `embed`.
+    optimizer:
+      embeddingModel: embed
+      embeddingProvider: openai
+      embeddingService: http://litellm.llm.svc.cluster.local:4000/v1
+      embeddingServiceTimeout: 60s
+  incomingAuth:
+    type: anonymous
+  outgoingAuth:
+    source: discovered
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: vmcp
+          env:
+            # Scoped LiteLLM key (litellm virtualkeys/toolhive.yaml); the operator
+            # writes it into this namespace, so no Bitwarden round-trip.
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-key-toolhive
+                  key: api-key
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+            limits:
+              memory: 1Gi

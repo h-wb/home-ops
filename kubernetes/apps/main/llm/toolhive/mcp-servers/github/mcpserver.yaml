@@ -1,0 +1,26 @@
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: github
+spec:
+  image: ghcr.io/github/github-mcp-server:v1.13.0@sha256:15b28878c7d46edf07e16c373e48144fbeb2c5cc464e723f252677fd82a91f5f
+  transport: stdio
+  proxyMode: streamable-http
+  proxyPort: 8080
+  env:
+    # Read-only to start: drop this to let tools open issues/PRs and comment.
+    - name: GITHUB_READ_ONLY
+      value: "1"
+  secrets:
+    - name: toolhive-github
+      key: token
+      targetEnvName: GITHUB_PERSONAL_ACCESS_TOKEN
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  groupRef:
+    name: mcp-tools

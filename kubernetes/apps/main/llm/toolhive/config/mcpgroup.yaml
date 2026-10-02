@@ -1,0 +1,7 @@
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPGroup
+metadata:
+  name: mcp-tools
+spec:
+  description: Tool servers aggregated by the mcp-gateway VirtualMCPServer

@@ -1,0 +1,20 @@
+---
+# Metabase's built-in MCP endpoint. Interactive clients use its OAuth flow; the
+# gateway authenticates with a Metabase API key instead (Admin → Authentication →
+# API keys), so tools see what that key's group can see.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: metabase
+spec:
+  remoteUrl: http://metabase.automation.svc.cluster.local:3000/api/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: X-API-Key
+        valueSecretRef:
+          name: toolhive-metabase
+          key: api-key
+  groupRef:
+    name: mcp-tools
