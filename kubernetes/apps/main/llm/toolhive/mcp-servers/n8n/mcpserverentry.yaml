@@ -1,6 +1,9 @@
 ---
 # n8n's own instance-level MCP server (Settings → MCP), reached in-cluster rather
 # than through n8n-webhook's public route.
+#
+# The gateway pod mounts this entry's header secret itself, so if the secret is
+# missing the whole gateway fails to start, not just this backend.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServerEntry
 metadata:

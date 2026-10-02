@@ -2,6 +2,9 @@
 # Metabase's built-in MCP endpoint. Interactive clients use its OAuth flow; the
 # gateway authenticates with a Metabase API key instead (Admin → Authentication →
 # API keys), so tools see what that key's group can see.
+#
+# The gateway pod mounts this entry's header secret itself, so if the secret is
+# missing the whole gateway fails to start, not just this backend.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServerEntry
 metadata:
