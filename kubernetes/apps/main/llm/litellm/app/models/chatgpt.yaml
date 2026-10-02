@@ -4,6 +4,11 @@
 # The first request after a fresh token dir starts a device-code login; the URL and
 # code are printed in the litellm pod log. Tokens live on the shared
 # `litellm-chatgpt` PVC so both replicas use the same login.
+#
+# The login happens at proxy startup and the pod is not Ready until it completes
+# (each code expires and the pod restarts with a new one), so enabling this file
+# stalls a rollout until someone runs through it: `kubectl -n llm logs -f
+# deploy/litellm`, then auth.openai.com/codex/device.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
@@ -47,3 +52,24 @@ spec:
     supportsVision: true
     supportsFunctionCalling: true
     supportsPromptCaching: true
+---
+# local-pool rung 2, see local-pool.yaml.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: local-pool-chatgpt
+spec:
+  modelName: local-pool
+  proxyRef: litellm
+  params:
+    model: chatgpt/gpt-6-luna
+    additional:
+      order: 2
+      additional_drop_params:
+        - temperature
+  info:
+    mode: responses
+    maxInputTokens: 272000
+    maxOutputTokens: 128000
+    supportsVision: true
+    supportsFunctionCalling: true

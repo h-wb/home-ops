@@ -1,5 +1,6 @@
 ---
-# `local-pool`: the MacBook first, ChatGPT when it is asleep or off the tunnel.
+# `local-pool`: the MacBook first, ChatGPT when it is asleep or off the tunnel
+# (that rung lives in chatgpt.yaml so it is enabled together with the login).
 # Rungs are tried in `order:`; LiteLLM falls to the next one once a rung fails.
 #
 # Only for consumers whose data may leave the house. Paperless stays pinned to
@@ -30,25 +31,5 @@ spec:
     mode: chat
     maxInputTokens: 32768
     maxOutputTokens: 8192
-    supportsVision: true
-    supportsFunctionCalling: true
----
-apiVersion: litellm.home-operations.com/v1alpha1
-kind: LiteLLMModel
-metadata:
-  name: local-pool-chatgpt
-spec:
-  modelName: local-pool
-  proxyRef: litellm
-  params:
-    model: chatgpt/gpt-6-luna
-    additional:
-      order: 2
-      additional_drop_params:
-        - temperature
-  info:
-    mode: responses
-    maxInputTokens: 272000
-    maxOutputTokens: 128000
     supportsVision: true
     supportsFunctionCalling: true
