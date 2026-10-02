@@ -19,6 +19,8 @@ spec:
   env:
     - name: TZ
       value: Europe/Paris
+    - name: CHATGPT_TOKEN_DIR
+      value: /app/chatgpt_tokens
     - name: LITELLM_LOG
       value: INFO
     - name: LITELLM_MODE
@@ -60,9 +62,14 @@ spec:
   volumes:
     - name: cache
       emptyDir: {}
+    - name: chatgpt-tokens
+      persistentVolumeClaim:
+        claimName: litellm-chatgpt
   volumeMounts:
     - name: cache
       mountPath: /app/cache
+    - name: chatgpt-tokens
+      mountPath: /app/chatgpt_tokens
   routerSettings:
     redis_host: os.environ/REDIS_HOST
     redis_port: os.environ/REDIS_PORT

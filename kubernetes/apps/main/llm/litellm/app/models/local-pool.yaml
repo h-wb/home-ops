@@ -1,0 +1,54 @@
+---
+# `local-pool`: the MacBook first, ChatGPT when it is asleep or off the tunnel.
+# Rungs are tried in `order:`; LiteLLM falls to the next one once a rung fails.
+#
+# Only for consumers whose data may leave the house. Paperless stays pinned to
+# `local` so personal documents never reach a cloud model.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: local-pool-macbook
+spec:
+  modelName: local-pool
+  proxyRef: litellm
+  params:
+    # Same LM Studio model as `local`; see local.yaml for the address.
+    model: openai/qwen/qwen3-vl-8b
+    apiBase: http://192.168.27.65:1234/v1
+    apiKey: lm-studio
+    additional:
+      order: 1
+      max_parallel_requests: 4
+      max_tokens: 4096
+      # A sleeping Mac does not refuse the connection, it just never answers, so
+      # without a short timeout and no retries every request would sit out the
+      # proxy-wide 300s (x3) before reaching rung 2. A failure also cools the rung
+      # down, so a burst skips it straight away.
+      timeout: 120
+      num_retries: 0
+  info:
+    mode: chat
+    maxInputTokens: 32768
+    maxOutputTokens: 8192
+    supportsVision: true
+    supportsFunctionCalling: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: local-pool-chatgpt
+spec:
+  modelName: local-pool
+  proxyRef: litellm
+  params:
+    model: chatgpt/gpt-6-luna
+    additional:
+      order: 2
+      additional_drop_params:
+        - temperature
+  info:
+    mode: responses
+    maxInputTokens: 272000
+    maxOutputTokens: 128000
+    supportsVision: true
+    supportsFunctionCalling: true

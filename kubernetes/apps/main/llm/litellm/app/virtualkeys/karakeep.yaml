@@ -1,0 +1,17 @@
+---
+# Key for karakeep's tagging/summaries. Bookmarks are public web content, so it may
+# use `local-pool` and reach ChatGPT when the MacBook is asleep. Like the paperless
+# keys, the generated value is copied into the Bitwarden `karakeep` item and pulled
+# back down by karakeep's own ExternalSecret.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: karakeep
+spec:
+  proxyRef: litellm
+  keyAlias: Karakeep
+  secretName: litellm-key-karakeep
+  secretKey: api-key
+  models:
+    - local-pool
+    - embed

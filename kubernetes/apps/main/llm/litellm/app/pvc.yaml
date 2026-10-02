@@ -1,0 +1,14 @@
+---
+# ChatGPT OAuth tokens (see models/chatgpt.yaml). ReadWriteMany so both proxy
+# replicas share one login. Not backed up: losing it only means logging in again.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: litellm-chatgpt
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ceph-filesystem

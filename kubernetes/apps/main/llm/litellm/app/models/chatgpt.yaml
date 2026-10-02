@@ -1,0 +1,49 @@
+---
+# ChatGPT Plus through LiteLLM's `chatgpt/` provider: the Codex OAuth login, not the
+# metered API, so usage counts against the subscription's rolling + weekly quota.
+# The first request after a fresh token dir starts a device-code login; the URL and
+# code are printed in the litellm pod log. Tokens live on the shared
+# `litellm-chatgpt` PVC so both replicas use the same login.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: chatgpt-gpt-6-astra
+spec:
+  modelName: chatgpt/gpt-6-astra
+  proxyRef: litellm
+  params:
+    model: chatgpt/gpt-6-astra
+    additional:
+      additional_drop_params:
+        - temperature
+  info:
+    mode: responses
+    # The real window is ~1M, but past 272k the whole request is billed at a
+    # multiplier against the quota, so declare the cheap ceiling.
+    maxInputTokens: 272000
+    maxOutputTokens: 128000
+    supportsVision: true
+    supportsFunctionCalling: true
+    supportsPromptCaching: true
+---
+# The light tier: it draws far less of the subscription quota per request, so it is
+# the one background consumers fall back to.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: chatgpt-gpt-6-luna
+spec:
+  modelName: chatgpt/gpt-6-luna
+  proxyRef: litellm
+  params:
+    model: chatgpt/gpt-6-luna
+    additional:
+      additional_drop_params:
+        - temperature
+  info:
+    mode: responses
+    maxInputTokens: 272000
+    maxOutputTokens: 128000
+    supportsVision: true
+    supportsFunctionCalling: true
+    supportsPromptCaching: true
