@@ -7,6 +7,7 @@ components:
   - ../../../components/common
 resources:
   - ./litellm-operator/ks.yaml
+  - ./embed/ks.yaml
   - ./litellm/ks.yaml
   # - ./local-ai/ks.yaml
   # - ./ollama/ks.yaml

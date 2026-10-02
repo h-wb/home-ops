@@ -1,0 +1,96 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app embed
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  values:
+    controllers:
+      embed:
+        replicas: 2
+        strategy: RollingUpdate
+        containers:
+          app:
+            image:
+              repository: ghcr.io/ggml-org/llama.cpp
+              tag: server@sha256:970168341efef973da5666ea5c362fa428ee66ba0dfa621b0f69bf3feb3320f7
+            env:
+              TZ: Europe/Paris
+              LLAMA_CACHE: /models
+            # Same model LM Studio served, so vectors already stored by paperless stay
+            # comparable and no reindex is needed. nomic-embed-text-v1.5 is a 2048-token
+            # model: four slots of 2048, and a ubatch at least that large because
+            # embeddings are non-causal and a sequence has to fit in one ubatch.
+            args:
+              - --hf-repo
+              - nomic-ai/nomic-embed-text-v1.5-GGUF:Q8_0
+              - --alias
+              - nomic-embed-text-v1.5
+              - --embeddings
+              - --pooling
+              - mean
+              - --ctx-size
+              - "8192"
+              - --parallel
+              - "4"
+              - --batch-size
+              - "2048"
+              - --ubatch-size
+              - "2048"
+              - --threads
+              - "2"
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8080"
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 8080
+                  periodSeconds: 30
+                  failureThreshold: 3
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: 8080
+                  periodSeconds: 5
+                  failureThreshold: 60
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: *app
+                topologyKey: kubernetes.io/hostname
+    service:
+      app:
+        ports:
+          http:
+            port: 8080
+    persistence:
+      models:
+        type: emptyDir
+        globalMounts:
+          - path: /models
