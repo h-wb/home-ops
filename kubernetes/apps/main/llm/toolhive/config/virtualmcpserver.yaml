@@ -21,6 +21,12 @@ spec:
       embeddingProvider: openai
       embeddingService: http://litellm.llm.svc.cluster.local:4000/v1
       embeddingServiceTimeout: 60s
+      # Every hit comes back with its full input schema (~3k chars each), so the
+      # default 8 floods a small model's context; 4 is enough to pick from.
+      maxToolsToReturn: 4
+      # Lean on keywords: the small nomic embedder doesn't link "workout" to
+      # Metabase, but a literal "metabase"/"sql" in the query should land.
+      hybridSearchSemanticRatio: "0.3"
   incomingAuth:
     type: anonymous
   outgoingAuth:
