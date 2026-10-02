@@ -22,21 +22,36 @@ spec:
               tag: v0.11.4@sha256:9591b13f13843c7721c2b8eaf7382846c81b3ffe126526d1888d1fed50c6a33f
             env:
               TZ: Europe/Paris
-              # Image Generation
-              ENABLE_OPENAI_API: False
-              ENABLE_OLLAMA_API: True
-              ENABLE_IMAGE_GENERATION: True
-              IMAGE_GENERATION_ENGINE: comfyui
-              IMAGE_GENERATION_MODEL: dreamshaper_8
-              IMAGE_SIZE: 400x400
-              IMAGE_STEPS: 8
-              COMFYUI_BASE_URL: http://smurf-pc:8188
-              # Open-webui settings
-              OLLAMA_BASE_URL: http://ollama.llm.svc.cluster.local:11434
-              # ENABLE_RAG_WEB_SEARCH: true
-              # ENABLE_SEARCH_QUERY: true
-              # RAG_WEB_SEARCH_ENGINE: searxng
-              # SEARXNG_QUERY_URL: http://searxng.llm.svc.cluster.local:8080/search?q=<query>
+              # Settings come from here, not the database: the DB was restored from
+              # a backup that still points at the old ollama setup, and with
+              # persistence on its stored values win over these variables. Admin
+              # panel changes therefore do not survive a restart; change them here.
+              ENABLE_PERSISTENT_CONFIG: "False"
+              # Models: everything through LiteLLM (local, local-pool, embed and the
+              # ChatGPT aliases once enabled), on a scoped key from virtualkeys/.
+              ENABLE_OLLAMA_API: "False"
+              ENABLE_OPENAI_API: "True"
+              OPENAI_API_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
+              OPENAI_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-key-open-webui
+                    key: api-key
+              # RAG / knowledge embeddings on the same in-cluster embed model.
+              RAG_EMBEDDING_ENGINE: openai
+              RAG_EMBEDDING_MODEL: embed
+              RAG_OPENAI_API_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
+              RAG_OPENAI_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: litellm-key-open-webui
+                    key: api-key
+              # Tools: the ToolHive MCP gateway, reached in-cluster (the x-api-key
+              # check lives on its Envoy route, not on the service).
+              TOOL_SERVER_CONNECTIONS: >-
+                [{"type": "mcp", "url": "http://vmcp-mcp-gateway.llm.svc.cluster.local:4483/mcp",
+                "auth_type": "none", "config": {"enable": true},
+                "info": {"id": "toolhive", "name": "ToolHive", "description": "kubectl, flux, GitHub, n8n and Metabase"}}]
               ENABLE_WEBSOCKET_SUPPORT: "true"
               WEBSOCKET_MANAGER: "redis"
               WEBSOCKET_REDIS_URL: "redis://open-webui-dragonfly.llm.svc.cluster.local:6379"

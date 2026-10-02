@@ -18,6 +18,10 @@ spec:
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
+    - name: litellm
+      namespace: llm
+    - name: toolhive-config
+      namespace: llm
   healthCheckExprs:
     - apiVersion: dragonflydb.io/v1alpha1
       kind: Dragonfly

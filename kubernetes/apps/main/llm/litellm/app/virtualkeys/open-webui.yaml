@@ -1,0 +1,12 @@
+---
+# Open WebUI's chat, RAG embeddings and title/tag generation. No `models:` list:
+# it is the interactive front end, so it may pick any alias LiteLLM serves.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: open-webui
+spec:
+  proxyRef: litellm
+  keyAlias: Open WebUI
+  secretName: litellm-key-open-webui
+  secretKey: api-key

@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./karakeep.yaml
   - ./kritika.yaml
+  - ./open-webui.yaml
   - ./paperless-gpt.yaml
   - ./paperless.yaml
   - ./toolhive.yaml
