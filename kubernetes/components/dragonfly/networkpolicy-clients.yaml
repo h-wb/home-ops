@@ -1,0 +1,34 @@
+---
+# Client and replication access. dragonfly-operator created an equivalent policy
+# itself until v1.7.0, which removed operator-managed NetworkPolicies; instances
+# created before that still carry the operator's (now orphaned) copy. Without this
+# one, the metrics policy alone isolates the pods and 6379 is closed to every app.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ${APP}-dragonfly-clients
+spec:
+  podSelector:
+    matchLabels:
+      app: ${APP}-dragonfly
+      app.kubernetes.io/name: dragonfly
+      app.kubernetes.io/part-of: dragonfly
+  policyTypes:
+    - Ingress
+  ingress:
+    # Apps in the same namespace.
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Replication between the instance's own pods.
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ${APP}-dragonfly
+              app.kubernetes.io/name: dragonfly
+              app.kubernetes.io/part-of: dragonfly
+      ports:
+        - protocol: TCP
+          port: 9999
