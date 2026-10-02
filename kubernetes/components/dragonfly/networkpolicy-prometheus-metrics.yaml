@@ -19,6 +19,15 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/name: prometheus
+        # Operator v1.7+ checks pod readiness on the admin port before it marks the
+        # instance Ready and writes its own NetworkPolicy (which opens 6379). Without
+        # this rule a new instance deadlocks in ResourcesCreated.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              control-plane: controller-manager
       ports:
         - protocol: TCP
           port: 9999
