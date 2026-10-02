@@ -1,0 +1,50 @@
+---
+# kritika runs as three roles and refuses to start without the split:
+# - owner: CNPG's initdb owner `kritika` (postgres-kritika-app), runs migrations;
+# - kritika_app: serves everything else, must not own the tables (RLS applies);
+# - kritika_runner: handed to runner Jobs, can only write its own run.
+# The operator creates the extensions as superuser so the owner never needs it.
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: kritika
+spec:
+  cluster:
+    name: postgres-kritika
+  name: kritika
+  owner: kritika
+  extensions:
+    - name: vector
+      ensure: present
+    # Move with the vchord-scratch tag in components/cnpg/extensions/vchord.
+    - name: vchord
+      version: "1.1.1"
+      ensure: present
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: kritika-app
+spec:
+  cluster:
+    name: postgres-kritika
+  name: kritika_app
+  login: true
+  passwordSecret:
+    name: kritika-db-app
+  # Deleting this resource leaves the role, so a running kritika keeps its
+  # connections.
+  databaseRoleReclaimPolicy: retain
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: kritika-runner
+spec:
+  cluster:
+    name: postgres-kritika
+  name: kritika_runner
+  login: true
+  passwordSecret:
+    name: kritika-db-runner
+  databaseRoleReclaimPolicy: retain

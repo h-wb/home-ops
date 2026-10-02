@@ -1,0 +1,110 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kritika
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: kritika
+  interval: 1h
+  values:
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
+    database:
+      owner:
+        # CNPG's generated initdb owner secret.
+        existingSecret: postgres-kritika-app
+      app:
+        existingSecret: kritika-db-app
+      runner:
+        existingSecret: kritika-db-runner
+    config:
+      webUrl: https://kritika.${SECRET_DOMAIN}
+      authAdminPassword:
+        valueFrom:
+          secretKeyRef: { name: kritika-secret, key: ADMIN_PASSWORD }
+      authOidcName: Kanidm
+      authOidcIssuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/kritika
+      # kanidm's client id is the client name.
+      authOidcClientId: kritika
+      authOidcClientSecret:
+        valueFrom:
+          secretKeyRef: { name: kanidm-kritika-oidc, key: client-secret }
+      authOidcRolesClaim: kritika_role
+      authOidcRoleMappingExpr: '"admin" in roles ? "admin" : ("member" in roles ? "member" : "")'
+    envFrom:
+      - secretRef:
+          name: kritika-secret
+    configFile:
+      apps:
+        github:
+          accounts: [h-wb]
+          # TODO: the GitHub App's client ID, from its settings page.
+          clientId: Iv23-REPLACE-ME
+          privateKey: { env: GITHUB_APP_PRIVATE_KEY }
+          webhookSecret: { env: GITHUB_APP_WEBHOOK_SECRET }
+      # Everything goes through LiteLLM, so reviews ride the MacBook / ChatGPT
+      # subscription rather than a pay-per-token key.
+      providers:
+        litellm:
+          type: openai
+          baseUrl: http://litellm.llm.svc.cluster.local:4000/v1
+          apiKey: { env: LITELLM_API_KEY }
+          # local-pool falls over to its next rung on a retry.
+          retries: 2
+      embedding:
+        model: litellm/embed
+        # nomic-embed-text-v1.5: 768 dimensions and a 2048-token window, so cap
+        # each chunk well under it (code runs ~3 characters a token).
+        dims: 768
+        maxItemChars: 5000
+        # A small general-purpose embedder scores most chunks of a repo of
+        # similar files above the 0.5 default.
+        similarFloor: 0.7
+      defaults:
+        models:
+          review: litellm/local-pool
+        feedback: standard
+        settle: 60s
+        # Big generated diffs aren't worth the context; `@<bot> review` still forces one.
+        maxChangedLines: 2000
+        agent:
+          commands: [gh, curl, fd, jq, rg, yq]
+        limits:
+          # Protects the ChatGPT weekly quota once it backs local-pool.
+          reviewsPerDay: 40
+          concurrency: 2
+        rules:
+          - id: renovate
+            rule: Say what the update breaks, from the release notes linked in the body.
+            whenExpr: pr.headRef.startsWith("renovate/")
+      egress:
+        # Release notes and raw files the agent fetches with curl/gh.
+        allowHosts: ["*.githubusercontent.com"]
+    runner:
+      resources:
+        requests: { cpu: 10m, memory: 128Mi }
+        limits: { memory: 1Gi }
+    resources:
+      requests:
+        cpu: 25m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+    networkPolicy:
+      enabled: true
+      type: cilium
+      # 443 for GitHub and kanidm, 4000 for LiteLLM in-cluster.
+      egressPorts: [443, 4000]
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    httpRoute:
+      enabled: true
+      hostnames:
+        - kritika.${SECRET_DOMAIN}
+      parentRefs:
+        - name: envoy-external
+          namespace: network
