@@ -8,3 +8,4 @@ resources:
   - ./embed.yaml
   - ./local.yaml
   - ./local-pool.yaml
+  - ./qwen3.5-9b.yaml

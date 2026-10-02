@@ -1,0 +1,54 @@
+---
+# Qwen3.5-9B in LM Studio on the MacBook: natively multimodal, tool-calling, with a
+# reasoning mode. Two aliases, one loaded model (same weights and slots):
+# - `qwen3.5-9b` keeps reasoning on: the one for agentic work. With a short data
+#   map in the system prompt it answered a Metabase question through ToolHive in
+#   two steps where qwen3-vl-8b looped; without one it wandered and ran out of
+#   context.
+# - `qwen3.5-9b-chat` turns it off: fast plain answers and structured output.
+#   LM Studio ignores /no_think and chat_template_kwargs for this model; only
+#   `reasoning_effort: none` works, and it is sent through extra_body so
+#   drop_params cannot strip it.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: qwen3-5-9b
+spec:
+  modelName: qwen3.5-9b
+  proxyRef: litellm
+  params:
+    model: openai/qwen/qwen3.5-9b
+    apiBase: ${LMSTUDIO_URL}
+    apiKey: lm-studio
+    additional:
+      max_parallel_requests: 4
+  info:
+    mode: chat
+    # LM Studio's JIT load uses defaultContextLength (32k) unless the model's own
+    # default is raised in LM Studio; keep these in step.
+    maxInputTokens: 32768
+    maxOutputTokens: 8192
+    supportsVision: true
+    supportsFunctionCalling: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: qwen3-5-9b-chat
+spec:
+  modelName: qwen3.5-9b-chat
+  proxyRef: litellm
+  params:
+    model: openai/qwen/qwen3.5-9b
+    apiBase: ${LMSTUDIO_URL}
+    apiKey: lm-studio
+    additional:
+      max_parallel_requests: 4
+      extra_body:
+        reasoning_effort: none
+  info:
+    mode: chat
+    maxInputTokens: 32768
+    maxOutputTokens: 8192
+    supportsVision: true
+    supportsFunctionCalling: true
