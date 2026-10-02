@@ -1,40 +1,59 @@
 ---
-# Secrets come from env: <<FOO>> is replaced by $KOMETA_FOO (kometa-secret)
+# Secrets come from env: <<FOO>> is replaced by $KOMETA_FOO (kometa-secret).
+# Don't use names Kometa reserves for CLI args (e.g. KOMETA_PLEX_TOKEN) - those aren't substituted.
 # Defaults reference: https://kometa.wiki/en/latest/defaults/guide/
 libraries:
-  Movies: &movies
-    collection_files:
+  Movies:
+    radarr:
+      url: http://radarr.downloads
+      root_folder_path: /data/Video/Movies
+      quality_profile: FR-MULTi-VO-HD
+    collection_files: &movie_collections
       - default: basic
       - default: imdb
       - default: tmdb
       - default: tautulli
       - default: franchise
       - default: universe
-    overlay_files:
+    overlay_files: &overlays
       - remove_overlays: false
       - default: resolution
-  Movies UHD: *movies
+  Movies UHD:
+    radarr:
+      url: http://radarr-uhd.downloads
+      root_folder_path: /data/Video/Movies UHD
+      quality_profile: FR-MULTi-VO-UHD
+    collection_files: *movie_collections
+    overlay_files: *overlays
 
-  Series: &series
-    collection_files:
+  Series:
+    sonarr:
+      url: http://sonarr-tv.downloads
+      root_folder_path: /data/Video/Series
+      quality_profile: FR-MULTi-VO-WEB-1080p
+    collection_files: &series_collections
       - default: basic
       - default: imdb
       - default: tmdb
       - default: tautulli
       - default: network
-    overlay_files:
-      - remove_overlays: false
-      - default: resolution
-  Series UHD: *series
+    overlay_files: *overlays
+  # No Sonarr instance manages Series UHD
+  Series UHD:
+    collection_files: *series_collections
+    overlay_files: *overlays
 
   Animes:
+    sonarr:
+      url: http://sonarr-anm.downloads
+      root_folder_path: /data/Video/Animes
+      quality_profile: FR-MULTi-VO-WEB-1080p
+      series_type: anime
     collection_files:
       - default: basic
       - default: anilist
       - default: tautulli
-    overlay_files:
-      - remove_overlays: false
-      - default: resolution
+    overlay_files: *overlays
 
 settings:
   cache: true
@@ -61,11 +80,35 @@ settings:
 
 plex:
   url: http://plex.media:32400
-  token: <<PLEX_TOKEN>>
+  token: <<PLEX_API_KEY>>
   timeout: 60
   clean_bundles: false
   empty_trash: false
   optimize: false
+
+# Shared defaults; url/root/profile are set per library above.
+# Kometa only reads these for add_missing/add_existing (off) or collection-level opt-ins.
+radarr:
+  url: http://radarr.downloads
+  token: <<RADARR_API_KEY>>
+  add_missing: false
+  add_existing: false
+  monitor: true
+  availability: announced
+  search: false
+  upgrade_existing: false
+
+sonarr:
+  url: http://sonarr-tv.downloads
+  token: <<SONARR_API_KEY>>
+  add_missing: false
+  add_existing: false
+  monitor: all
+  series_type: standard
+  season_folder: true
+  search: false
+  cutoff_search: false
+  upgrade_existing: false
 
 tautulli:
   url: http://tautulli.media
