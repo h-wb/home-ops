@@ -47,10 +47,11 @@ spec:
                     name: litellm-key-open-webui
                     key: api-key
               # Tools: the ToolHive MCP gateway, reached in-cluster (the x-api-key
-              # check lives on its Envoy route, not on the service).
+              # check lives on its Envoy route, not on the service). `path` and `key`
+              # are unused for MCP but the admin API 500s without them.
               TOOL_SERVER_CONNECTIONS: >-
                 [{"type": "mcp", "url": "http://vmcp-mcp-gateway.llm.svc.cluster.local:4483/mcp",
-                "auth_type": "none", "config": {"enable": true},
+                "path": "", "key": "", "auth_type": "none", "config": {"enable": true},
                 "info": {"id": "toolhive", "name": "ToolHive", "description": "kubectl, flux, GitHub, n8n and Metabase"}}]
               ENABLE_WEBSOCKET_SUPPORT: "true"
               WEBSOCKET_MANAGER: "redis"
