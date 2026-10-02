@@ -1,0 +1,23 @@
+---
+# Dawarich's built-in MCP endpoint (read-only: get_timeline, get_latest_location,
+# search_visits). Authenticates with a user API key (Account → API access), so
+# tools see that user's location history.
+#
+# The gateway pod mounts this entry's header secret itself, so if the secret is
+# missing the whole gateway fails to start, not just this backend.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: dawarich
+spec:
+  remoteUrl: http://dawarich.default.svc.cluster.local:3000/api/v1/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: Authorization
+        valueSecretRef:
+          name: toolhive-dawarich
+          key: authorization
+  groupRef:
+    name: mcp-tools
