@@ -22,13 +22,13 @@ spec:
             env:
               TZ: Europe/Paris
               LLAMA_CACHE: /models
-            # Same model LM Studio served, so vectors already stored by paperless stay
-            # comparable and no reindex is needed. nomic-embed-text-v1.5 is a 2048-token
+            # Same model and quant (Q4_K_M) LM Studio served, so vectors already
+            # stored by paperless stay comparable and no reindex is needed. nomic-embed-text-v1.5 is a 2048-token
             # model: four slots of 2048, and a ubatch at least that large because
             # embeddings are non-causal and a sequence has to fit in one ubatch.
             args:
               - --hf-repo
-              - nomic-ai/nomic-embed-text-v1.5-GGUF:Q8_0
+              - nomic-ai/nomic-embed-text-v1.5-GGUF:Q4_K_M
               - --alias
               - nomic-embed-text-v1.5
               - --embeddings

@@ -9,10 +9,11 @@ spec:
   params:
     # LM Studio on the MacBook. It sits on a different LAN (192.168.18.0/24) than
     # the cluster and is reachable only while its WireGuard tunnel is up, where it
-    # holds this static address — `Address` in wg0.home.conf, pinned to the peer's
-    # public key rather than a DHCP lease, so it does not drift.
+    # holds a static address — `Address` in wg0.home.conf, pinned to the peer's
+    # public key rather than a DHCP lease, so it does not drift. The URL is set once
+    # as LMSTUDIO_URL in litellm's ks.yaml.
     model: openai/qwen/qwen3-vl-8b
-    apiBase: http://192.168.27.65:1234/v1
+    apiBase: ${LMSTUDIO_URL}
     apiKey: lm-studio
     additional:
       # Matches the slot count LM Studio loads the model with. paperless-gpt renders

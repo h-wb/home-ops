@@ -11,7 +11,7 @@ spec:
     # LM Studio keeps an embedding model resident alongside the chat model, so this
     # does not contend for the single chat slot.
     model: openai/text-embedding-nomic-embed-text-v1.5
-    apiBase: http://192.168.27.65:1234/v1
+    apiBase: ${LMSTUDIO_URL}
     apiKey: lm-studio
   info:
     mode: embedding

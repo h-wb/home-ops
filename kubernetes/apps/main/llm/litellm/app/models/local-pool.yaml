@@ -14,7 +14,7 @@ spec:
   params:
     # Same LM Studio model as `local`; see local.yaml for the address.
     model: openai/qwen/qwen3-vl-8b
-    apiBase: http://192.168.27.65:1234/v1
+    apiBase: ${LMSTUDIO_URL}
     apiKey: lm-studio
     additional:
       order: 1

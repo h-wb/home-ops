@@ -33,6 +33,9 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      # LM Studio on the MacBook, over its WireGuard tunnel (static peer address in
+      # wg0.home.conf). Every model CR that targets the Mac uses this.
+      LMSTUDIO_URL: http://192.168.27.65:1234/v1
       CNPG_REPLICAS: "2"
       CNPG_SIZE: 2Gi
   prune: true
