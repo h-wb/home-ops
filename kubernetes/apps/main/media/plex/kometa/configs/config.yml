@@ -1,0 +1,77 @@
+---
+# Secrets come from env: <<FOO>> is replaced by $KOMETA_FOO (kometa-secret)
+# Defaults reference: https://kometa.wiki/en/latest/defaults/guide/
+libraries:
+  Movies: &movies
+    collection_files:
+      - default: basic
+      - default: imdb
+      - default: tmdb
+      - default: tautulli
+      - default: franchise
+      - default: universe
+    overlay_files:
+      - remove_overlays: false
+      - default: resolution
+  Movies UHD: *movies
+
+  Series: &series
+    collection_files:
+      - default: basic
+      - default: imdb
+      - default: tmdb
+      - default: tautulli
+      - default: network
+    overlay_files:
+      - remove_overlays: false
+      - default: resolution
+  Series UHD: *series
+
+  Animes:
+    collection_files:
+      - default: basic
+      - default: anilist
+      - default: tautulli
+    overlay_files:
+      - remove_overlays: false
+      - default: resolution
+
+settings:
+  cache: true
+  cache_expiration: 60
+  asset_directory: config/assets
+  asset_folders: false
+  create_asset_folders: false
+  download_url_assets: true
+  show_asset_not_needed: false
+  sync_mode: sync
+  minimum_items: 1
+  delete_below_minimum: true
+  delete_not_scheduled: false
+  run_again_delay: 2
+  show_unmanaged: false
+  show_filtered: false
+  show_options: false
+  show_missing: false
+  show_missing_assets: false
+  save_report: false
+  tvdb_language: eng
+  verify_ssl: true
+  check_nightly: false
+
+plex:
+  url: http://plex.media:32400
+  token: <<PLEX_TOKEN>>
+  timeout: 60
+  clean_bundles: false
+  empty_trash: false
+  optimize: false
+
+tautulli:
+  url: http://tautulli.media
+  apikey: <<TAUTULLI_API_KEY>>
+
+tmdb:
+  apikey: <<TMDB_API_KEY>>
+  language: en
+  cache_expiration: 60

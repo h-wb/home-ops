@@ -1,0 +1,13 @@
+---
+# Cache + downloaded assets only, everything is regenerable so no backups
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kometa
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: ceph-block
