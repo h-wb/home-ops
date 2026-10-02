@@ -74,6 +74,8 @@ spec:
             envFrom:
               - secretRef:
                   name: kanidm-open-webui-oidc
+              - secretRef:
+                  name: open-webui-secret
             resources:
               requests:
                 cpu: 500m
