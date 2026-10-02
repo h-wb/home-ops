@@ -7,12 +7,11 @@ spec:
   modelName: embed
   proxyRef: litellm
   params:
-    # Same LM Studio instance as `local`; see models/local.yaml for the address.
-    # LM Studio keeps an embedding model resident alongside the chat model, so this
-    # does not contend for the single chat slot.
-    model: openai/text-embedding-nomic-embed-text-v1.5
-    apiBase: ${LMSTUDIO_URL}
-    apiKey: lm-studio
+    # llama.cpp on CPU in-cluster (llm/embed), so embeddings keep working while
+    # the MacBook sleeps. Same model and quant LM Studio used to serve here.
+    model: openai/nomic-embed-text-v1.5
+    apiBase: http://embed.llm.svc.cluster.local:8080/v1
+    apiKey: none
   info:
     mode: embedding
     extra:
