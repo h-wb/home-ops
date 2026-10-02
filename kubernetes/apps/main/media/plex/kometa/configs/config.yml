@@ -29,6 +29,7 @@ libraries:
     overlay_files: &overlays
       - remove_overlays: false
       - default: resolution
+      - default: ribbon
   Movies UHD:
     radarr:
       <<: *radarr
