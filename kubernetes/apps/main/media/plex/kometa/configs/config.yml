@@ -22,6 +22,7 @@ libraries:
       - default: basic
       - default: imdb
       - default: tmdb
+      - default: letterboxd
       - default: tautulli
       - default: franchise
       - default: universe
