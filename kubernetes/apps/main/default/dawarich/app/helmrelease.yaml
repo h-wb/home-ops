@@ -26,7 +26,7 @@ spec:
               SELF_HOSTED: "true"
               STORE_GEODATA: "true"
               DISTANCE_UNIT: km
-              APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN}"
+              APPLICATION_HOSTS: "dawarich.${SECRET_DOMAIN},dawarich.default.svc.cluster.local" # svc host for the ToolHive MCP gateway
               REDIS_URL: redis://dawarich-dragonfly.default.svc.cluster.local:6379
               RAILS_ENV: production
               DATABASE_NAME: *app
