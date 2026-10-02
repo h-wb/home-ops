@@ -8,10 +8,8 @@ spec:
   transport: stdio
   proxyMode: streamable-http
   proxyPort: 8080
-  env:
-    # Read-only to start: drop this to let tools open issues/PRs and comment.
-    - name: GITHUB_READ_ONLY
-      value: "1"
+  # Not read-only: the PAT grants write on issues and pull requests only, so tools
+  # can open/comment on issues and PRs but cannot push code (contents is read).
   secrets:
     - name: toolhive-github
       key: token
