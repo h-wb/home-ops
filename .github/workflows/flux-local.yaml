@@ -60,7 +60,8 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        cluster: ["main", "edge"]
+        # main is diffed by konflate (flux-system/konflate), which only renders one cluster
+        cluster: ["edge"]
       fail-fast: false
     steps:
       - name: Checkout
