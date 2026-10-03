@@ -5,6 +5,7 @@ Thumbs.db
 kubeconfig
 .decrypted~*.yaml
 .config.env
+cluster-secrets.local.yaml
 *.agekey
 *.pub
 *.key

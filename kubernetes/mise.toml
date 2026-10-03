@@ -8,10 +8,21 @@ arg "<ns>" help="Namespace of the Kustomization"
 arg "<ks>" help="Name of the Kustomization"
 '''
 run = '''
-flux-local build ks "${usage_ks?}" \
-    --path "kubernetes/apps/${CLUSTER}" \
+set -eu
+# flate renders offline, so hand it the live cluster-secrets or every
+# ${SECRET_DOMAIN}-style postBuild variable renders empty.
+secrets="kubernetes/clusters/${CLUSTER}/cluster-secrets.local.yaml"
+trap 'rm -f "$secrets"' EXIT
+for ns in flux-system "${usage_ns?}"; do
+    echo "---"
+    kubectl -n "$ns" get secret cluster-secrets -o yaml
+done > "$secrets"
+flate build ks "${usage_ks?}" \
+    --path "kubernetes/clusters/${CLUSTER}" \
     --namespace "${usage_ns?}" \
-    --sources "flux-system=."
+    --skip-secrets=false \
+    --skip-crds=false \
+    --no-progress
 '''
 
 [tasks."apply-ks"]
