@@ -44,8 +44,12 @@ spec:
               - "2048"
               - --ubatch-size
               - "2048"
+              # Six of a node's sixteen threads: at two, kritika's repository index
+              # (thousands of tokens per request) outran its 60 s request deadline.
               - --threads
-              - "2"
+              - "6"
+              - --threads-batch
+              - "6"
               - --host
               - 0.0.0.0
               - --port

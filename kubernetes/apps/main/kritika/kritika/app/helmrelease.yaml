@@ -56,8 +56,21 @@ spec:
           baseUrl: http://litellm.llm.svc.cluster.local:4000/v1
           apiKey: { env: LITELLM_API_KEY }
           retries: 2
-      # No `embedding`: the similar-code index is off. It adds little to one-line
-      # version bumps, and indexing ~1300 chunks on the CPU embedder timed out.
+      # The similar-code index, on the in-cluster CPU embedder (ChatGPT Plus has no
+      # embeddings, and a hosted embedder would be a pay-per-token key).
+      embedding:
+        model: litellm/embed
+        # nomic-embed-text-v1.5: 768 dimensions and a 2048-token window, so cap
+        # each chunk well under it (code runs ~3 characters a token).
+        dims: 768
+        maxItemChars: 5000
+        # kritika allows one embeddings request 60 s. Measured on the CPU embedder
+        # at two threads: 8 full-size chunks took 32 s, 16 took 71 s; batches of 64
+        # (the default) timed out and the index never built.
+        maxBatch: 8
+        # A small general-purpose embedder scores most chunks of a repo of
+        # similar files above the 0.5 default.
+        similarFloor: 0.7
       defaults:
         models:
           # No fallback on purpose: out of quota means the pull request waits.

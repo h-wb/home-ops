@@ -53,5 +53,11 @@ Severity decides whether the pull request is approved, so use it precisely:
 - **nit**: a new feature worth adopting later, or a cleanup the upgrade makes possible.
   Nits do not withhold the approval.
 
-Raise nothing for changes that do not touch this repository. If the upgrade is safe, the
-summary says so in a line or two, with the versions and which sources were checked.
+Raise nothing for changes that do not touch this repository.
+
+## 5. The summary
+
+Start the summary with a verdict: **Safe to merge** or **Not safe to merge**, with the
+package and its old and new version. Then name the sources you read (release notes,
+changelog, compare view), so a reader can tell what the verdict rests on. If no source
+could be found, say that instead of implying the upgrade was checked.
