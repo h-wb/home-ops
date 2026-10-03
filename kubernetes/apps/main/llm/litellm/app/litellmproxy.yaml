@@ -21,6 +21,9 @@ spec:
       value: Europe/Paris
     - name: CHATGPT_TOKEN_DIR
       value: /app/chatgpt_tokens
+    # Lets the proxy import the workaround modules under patches/ as callbacks.
+    - name: PYTHONPATH
+      value: /app/patches
     - name: LITELLM_LOG
       value: INFO
     - name: LITELLM_MODE
@@ -65,11 +68,17 @@ spec:
     - name: chatgpt-tokens
       persistentVolumeClaim:
         claimName: litellm-chatgpt
+    - name: patches
+      configMap:
+        name: litellm-patches
   volumeMounts:
     - name: cache
       mountPath: /app/cache
     - name: chatgpt-tokens
       mountPath: /app/chatgpt_tokens
+    - name: patches
+      mountPath: /app/patches
+      readOnly: true
   routerSettings:
     redis_host: os.environ/REDIS_HOST
     redis_port: os.environ/REDIS_PORT
@@ -77,6 +86,10 @@ spec:
     cooldown_time: 30
     enable_pre_call_checks: true
   litellmSettings:
+    # Imported for its side effect: makes chatgpt/* answer non-streaming requests
+    # (BerriAI/litellm#37039). Remove with patches/ once the upstream fix ships.
+    callbacks:
+      - homeops_chatgpt_nonstream.patch_instance
     success_callback:
       - prometheus
     failure_callback:
