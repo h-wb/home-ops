@@ -46,10 +46,10 @@ spec:
           clientId: Iv23liZw13NGq9jhSodg
           privateKey: { env: GITHUB_APP_PRIVATE_KEY }
           webhookSecret: { env: GITHUB_APP_WEBHOOK_SECRET }
-      # Everything goes through LiteLLM (no pay-per-token key). Two models:
-      # - the default is local, so a repository is never sent to a cloud model
-      #   just because the App got installed on it;
-      # - h-wb/home-ops, which is public, is reviewed by ChatGPT (see repositories).
+      # Reviews go through LiteLLM to ChatGPT on the Plus subscription (no
+      # pay-per-token key, no local model). That makes the App's installation the
+      # boundary: whatever repository bot-dupont is installed on is sent to ChatGPT,
+      # so install it on public repositories only.
       providers:
         litellm:
           type: openai
@@ -67,7 +67,8 @@ spec:
         similarFloor: 0.7
       defaults:
         models:
-          review: litellm/qwen3.5-9b-chat
+          # No fallback on purpose: out of quota means the pull request waits.
+          review: litellm/chatgpt/gpt-6-luna
         feedback: standard
         # Renovate pushes in bursts (rebases); review the last head once.
         settle: 60s
@@ -81,16 +82,11 @@ spec:
           reviewsPerDay: 40
           concurrency: 2
       repositories:
-        # Public repository: reviewed by ChatGPT on the Plus subscription. This
-        # replaces the Claude Code "Renovate PR Review" workflow as the approval
-        # the main-require-review ruleset needs: a review with nothing blocking or
+        # Replaces the Claude Code "Renovate PR Review" workflow as the approval the
+        # main-require-review ruleset needs: a review with nothing blocking or
         # important approves the pull request, a later one that finds something
         # withdraws it. The review rules live in the repository (.kritika.yaml).
-        # No fallback model on purpose: if ChatGPT is out of quota the pull request
-        # waits, rather than being approved by the small local model.
         h-wb/home-ops:
-          models:
-            review: litellm/chatgpt/gpt-6-luna
           approve: true
       egress:
         # Where the agent's curl/gh may go for release notes, changelogs and charts.
