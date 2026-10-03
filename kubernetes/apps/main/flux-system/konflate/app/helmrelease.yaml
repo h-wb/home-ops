@@ -1,0 +1,43 @@
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/helm.toolkit.fluxcd.io/helmrelease_v2.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: konflate
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: konflate
+  interval: 1h
+  values:
+    # No secret: anonymous and read-only, which is enough for a public repo.
+    # PR comments / status checks need a GitHub App credential (secret.existingSecret
+    # + config.appClientId, config.prComments, config.statusChecks, config.publicUrl).
+    config:
+      repo: github://h-wb/home-ops
+      # One instance renders one cluster; edge PRs are covered by the CI diff.
+      clusterPath: ./kubernetes/clusters/main
+      kubeVersion: "{{ .Capabilities.KubeVersion.Version }}"
+    httpRoute:
+      enabled: true
+      annotations:
+        gethomepage.dev/enabled: "true"
+        gethomepage.dev/app: konflate
+        gethomepage.dev/group: Infrastructure
+        gethomepage.dev/name: Konflate
+        gethomepage.dev/icon: flux-cd.png
+        gethomepage.dev/description: Rendered Flux PR diffs
+      parentRefs:
+        - name: envoy-internal
+          namespace: network
+      hostnames:
+        - "konflate.${SECRET_DOMAIN}"
+    monitoring:
+      serviceMonitor:
+        enabled: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        memory: 1Gi
