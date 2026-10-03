@@ -150,6 +150,20 @@ jobs:
             Map each finding from the research step against what this repository actually uses. A
             breaking change that affects a feature we don't use is not actionable.
 
+            Then check what the change actually renders to. konflate renders this PR's Flux
+            manifests before and after, and reports the result on the PR itself:
+
+            - one comment per cluster from `wlab-bot[bot]` (`gh pr view <number> --comments`),
+              listing the resources that change, image changes and cautions
+            - the `Konflate (main)` and `Konflate (edge)` check runs on the head commit
+              (`gh api repos/<repo>/commits/<sha>/check-runs`), whose output holds the same summary
+
+            Use it to judge blast radius: a chart bump that rewrites many resources, touches a
+            StatefulSet's volume claims or selectors, or changes RBAC deserves a closer read of
+            the changelog than one that only moves an image tag. A failed Konflate check (render
+            failure, or an image that does not exist in its registry) means the PR cannot deploy:
+            request changes and say why. If konflate has not reported yet, say so and carry on.
+
             ### 4. Categorize
 
             Sort actionable findings into three buckets:
