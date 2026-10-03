@@ -20,7 +20,6 @@ resources:
   # - ./strava-statistics/ks.yaml
   # - ./fusion/ks.yaml
   - ./ghostfolio/ks.yaml
-  - ./neko/ks.yaml
   - ./neko-desktop/ks.yaml
   - ./nextcloud/ks.yaml
   - ./obsidian/ks.yaml
