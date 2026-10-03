@@ -1,5 +1,5 @@
 ---
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/gateway.envoyproxy.io/httproutefilter_v1alpha1.json
 # Rewrites requests for the gzip-only Komelia webui assets to their stored
 # ".gz" name, e.g. /komelia-app.js -> /komelia-app.js.gz, /<hash>.wasm ->
 # /<hash>.wasm.gz. komf bundles these assets pre-compressed only, and Ktor
