@@ -33,7 +33,7 @@ values, Kustomizations, ConfigMaps, environment variables, and anything that dep
 it. A breaking change in a feature this repository does not use is not a finding.
 
 konflate renders the pull request's Flux manifests before and after and reports the
-result on the pull request: one comment per cluster from `wlab-bot[bot]`
+result on the pull request: one comment per cluster from `bot-dupond[bot]`
 (`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` check
 runs on the head commit (`gh api repos/<owner>/<repo>/commits/<sha>/check-runs`). Use it
 to judge blast radius: a bump that rewrites many resources, touches a StatefulSet's volume

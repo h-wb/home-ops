@@ -34,7 +34,7 @@ jobs:
             if [ "$reviewed" -eq 0 ]; then
               out=$(jq -c --argjson n "$num" '. + [$n]' <<< "$out")
             fi
-          done < <(gh pr list --author 'app/wlab-bot' --state open --limit 100 \
+          done < <(gh pr list --author 'app/bot-dupond' --state open --limit 100 \
             --json number,headRefOid --jq '.[] | "\(.number) \(.headRefOid)"')
           echo "prs=$out" >> "$GITHUB_OUTPUT"
 
@@ -68,7 +68,7 @@ jobs:
         uses: anthropics/claude-code-action@fd1c128679612beff4ca259c78021c506e8aa7a7 # v1.0.237
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          allowed_bots: "wlab-bot[bot]"
+          allowed_bots: "bot-dupond[bot]"
           claude_args: |
             --model claude-sonnet-4-6
             --allowedTools "Read,Glob,Grep,Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh pr review:*),Bash(gh api:*),Bash(gh release view:*),Bash(gh release list:*),Bash(git log:*),Bash(curl:*),WebFetch,WebSearch"
@@ -153,7 +153,7 @@ jobs:
             Then check what the change actually renders to. konflate renders this PR's Flux
             manifests before and after, and reports the result on the PR itself:
 
-            - one comment per cluster from `wlab-bot[bot]` (`gh pr view <number> --comments`),
+            - one comment per cluster from `bot-dupond[bot]` (`gh pr view <number> --comments`),
               listing the resources that change, image changes and cautions
             - the `Konflate (main)` and `Konflate (edge)` check runs on the head commit
               (`gh api repos/<repo>/commits/<sha>/check-runs`), whose output holds the same summary
