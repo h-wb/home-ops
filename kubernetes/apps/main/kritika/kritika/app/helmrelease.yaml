@@ -41,8 +41,9 @@ spec:
       apps:
         github:
           accounts: [h-wb]
-          # TODO: the GitHub App's client ID, from its settings page.
-          clientId: Iv23-REPLACE-ME
+          # The bot-dupont GitHub App (the reviewer; bot-dupond is the Renovate/konflate
+          # one). An identifier, not a secret.
+          clientId: Iv23liZw13NGq9jhSodg
           privateKey: { env: GITHUB_APP_PRIVATE_KEY }
           webhookSecret: { env: GITHUB_APP_WEBHOOK_SECRET }
       # Everything goes through LiteLLM (no pay-per-token key). Two models:

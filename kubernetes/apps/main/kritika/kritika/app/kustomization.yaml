@@ -5,6 +5,5 @@ kind: Kustomization
 resources:
   - ./database.yaml
   - ./externalsecret.yaml
-  # Enabled once the GitHub App exists and the Bitwarden `kritika` item is filled.
-  # - ./helmrelease.yaml
+  - ./helmrelease.yaml
   - ./ocirepository.yaml
