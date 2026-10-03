@@ -1,11 +1,10 @@
 ---
-# kritika's reviews and repository index.
+# kritika's reviews.
 # - `chatgpt/gpt-6-luna`: the review model, on the Plus subscription. Reviews are
 #   tool calls, hence `allow_cloud_tools`: this is the one key the cloud tool guard
 #   lets through (patches/homeops_cloud_tool_guard.py). The tools kritika's agent
 #   runs read the repository under review, not ToolHive. Only public repositories
 #   should have the bot-dupont App installed, since everything it reviews goes here.
-# - `embed`: the in-cluster embedder for the similar-code index (stays local).
 # The value is copied into the Bitwarden `kritika` item, since kritika runs in its
 # own namespace.
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -21,4 +20,3 @@ spec:
     allow_cloud_tools: "true"
   models:
     - chatgpt/gpt-6-luna
-    - embed

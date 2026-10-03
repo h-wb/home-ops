@@ -56,15 +56,8 @@ spec:
           baseUrl: http://litellm.llm.svc.cluster.local:4000/v1
           apiKey: { env: LITELLM_API_KEY }
           retries: 2
-      embedding:
-        model: litellm/embed
-        # nomic-embed-text-v1.5: 768 dimensions and a 2048-token window, so cap
-        # each chunk well under it (code runs ~3 characters a token).
-        dims: 768
-        maxItemChars: 5000
-        # A small general-purpose embedder scores most chunks of a repo of
-        # similar files above the 0.5 default.
-        similarFloor: 0.7
+      # No `embedding`: the similar-code index is off. It adds little to one-line
+      # version bumps, and indexing ~1300 chunks on the CPU embedder timed out.
       defaults:
         models:
           # No fallback on purpose: out of quota means the pull request waits.
@@ -82,12 +75,13 @@ spec:
           reviewsPerDay: 40
           concurrency: 2
       repositories:
-        # Replaces the Claude Code "Renovate PR Review" workflow as the approval the
-        # main-require-review ruleset needs: a review with nothing blocking or
-        # important approves the pull request, a later one that finds something
-        # withdraws it. The review rules live in the repository (.kritika.yaml).
-        h-wb/home-ops:
-          approve: true
+        # Advisory for now: kritika comments and sets its status, but does not
+        # approve. Its first two reviews (2026-10-03) approved in 16 s without the
+        # repository's rules, because .kritika.yaml is read from each pull request's
+        # merge base and those branches predated it. Set `approve: true` here only
+        # once a review on a current branch shows the Renovate rules being applied;
+        # until then the Claude Code workflow stays the approval the ruleset needs.
+        h-wb/home-ops: {}
       egress:
         # Where the agent's curl/gh may go for release notes, changelogs and charts.
         # github.com and api.github.com are allowed by the app itself.
