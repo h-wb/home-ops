@@ -1,21 +1,11 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
-    "config:recommended",
-    "docker:enableMajor",
-    "helpers:pinGitHubActionDigests",
-    "github>h-wb/home-ops//.renovate/autoMerge.json5",
-    "github>h-wb/home-ops//.renovate/changelogs.json5",
-    "github>h-wb/home-ops//.renovate/customManagers.json5",
-    "github>h-wb/home-ops//.renovate/grafanaDashboards.json5",
-    "github>h-wb/home-ops//.renovate/groups.json5",
-    "github>h-wb/home-ops//.renovate/labels.json5",
-    "github>h-wb/home-ops//.renovate/overrides.json5",
-    "github>h-wb/home-ops//.renovate/pinDigests.json5",
-    "github>h-wb/home-ops//.renovate/semanticCommits.json5",
+    // Managers, commit messages and zer0ver handling come from the shared presets;
+    // everything below is this repo's own policy.
+    "github>home-operations/renovate-presets#8.1.0",
+    "github>home-operations/renovate-presets//apps/grafanaDashboards.json5#8.1.0",
     "github>home-operations/renovate-presets//apps/talosFactory.json5#8.1.0",
-    ":disableRateLimiting",
-    ":dependencyDashboard",
     ":semanticCommits",
     ":timezone(America/New_York)",
   ],
@@ -28,16 +18,262 @@
   // Only rebase on an actual conflict — avoids re-firing the Claude review +
   // CI every time a PR falls behind main (branch protection isn't strict).
   rebaseWhen: "conflicted",
-  dependencyDashboardTitle: "Renovate Dashboard 🤖",
   suppressNotifications: ["prEditedNotification", "prIgnoreNotification"],
   ignorePaths: ["**/resources/**", "**/*.sops.*"],
-  flux: {
-    managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
-  },
-  "helm-values": {
-    managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
-  },
-  kubernetes: {
-    managerFilePatterns: ["/\\.yaml(?:\\.j2)?$/"],
-  },
+  customManagers: [
+    {
+      customType: "regex",
+      description: "Talos machineconfig images",
+      managerFilePatterns: ["/talos/.+\\.yaml\\.j2$/"], // only Talos files
+      matchStrings: [
+        "# renovate: datasource=docker depName=(?<depName>\\S+)\\n[ \\t]*image:[ \\t]*\\S+:(?<currentValue>v[^\\s@:]+)",
+      ],
+      datasourceTemplate: "docker",
+    },
+  ],
+  packageRules: [
+    {
+      description: "Changelog URL for Spegel",
+      matchPackageNames: ["/spegel/"],
+      changelogUrl: "https://github.com/spegel-org/spegel/blob/main/CHANGELOG.md",
+    },
+    // Auto-merge rules
+    {
+      description: "Auto-merge trusted container digests",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["digest"],
+      matchPackageNames: ["/home-operations/"],
+      ignoreTests: false,
+    },
+    {
+      description: "Auto-merge OCI Charts",
+      matchDatasources: ["docker"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch"],
+      matchPackageNames: ["/kube-prometheus-stack/", "/grafana/"],
+      ignoreTests: false,
+    },
+    {
+      description: "Auto-merge GitHub Actions",
+      matchManagers: ["github-actions"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      minimumReleaseAge: "3 days",
+      ignoreTests: false,
+    },
+    {
+      description: "Auto-merge trusted GitHub Actions",
+      matchManagers: ["github-actions"],
+      matchPackageNames: ["/^actions\//", "/^renovatebot\//"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch", "digest"],
+      minimumReleaseAge: "1 minute",
+      ignoreTests: false,
+    },
+    {
+      description: "Auto-merge GitHub Releases",
+      matchDatasources: ["github-releases"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch"],
+      matchPackageNames: ["/external-dns/", "/gateway-api/", "/prometheus-operator/"],
+      ignoreTests: false,
+    },
+    {
+      description: "Auto-merge Mise Tools",
+      matchManagers: ["mise"],
+      automerge: true,
+      automergeType: "pr",
+      matchUpdateTypes: ["minor", "patch"],
+      ignoreTests: false,
+    },
+    // --- Gates: override the global automerge:true. Kept last so they win. ---
+    {
+      description: "Majors always wait for a human — Claude still reviews, but you click merge",
+      matchUpdateTypes: ["major"],
+      automerge: false,
+    },
+    {
+      description: "Never auto-merge Talos (custom.talos-factory datasource)",
+      matchPackageNames: ["siderolabs/talos"],
+      automerge: false,
+    },
+    {
+      description: "Never auto-merge high-blast-radius components (Talos, Kubernetes, Rook-Ceph, CloudNativePG) for any update type",
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "/kube-apiserver/",
+        "/kube-controller-manager/",
+        "/kube-proxy/",
+        "/kube-scheduler/",
+        "/kubelet/",
+        "/installer/",
+        "/talosctl/",
+        "/rook-ceph/",
+        "/rook-ceph-cluster/",
+        "/cloudnative-pg/",
+        "/plugin-barman-cloud/",
+        "/barman-cloud/",
+      ],
+      automerge: false,
+    },
+  
+    {
+      description: "Auto-merge Grafana dashboards (after the major gate so it wins)",
+      matchDatasources: ["custom.grafana-dashboards"],
+      matchUpdateTypes: ["major"],
+      addLabels: ["renovate/grafana-dashboard"],
+      automerge: true,
+      automergeType: "branch",
+      ignoreTests: true,
+    },
+    // Grouping rules
+    {
+      description: "Actions Runner Controller Group",
+      groupName: "actions-runner-controller",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/gha-runner-scale-set-controller/", "/gha-runner-scale-set/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
+      description: "Cert-Manager Group",
+      groupName: "cert-manager",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/cert-manager/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
+      description: "CloudNativePG Group",
+      groupName: "cloudnative-pg",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/cloudnative-pg/", "/plugin-barman-cloud/", "/barman-cloud/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
+      description: "External Secrets Operator Group",
+      groupName: "external-secrets",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/external-secrets/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
+      description: "Flux Operator Group",
+      groupName: "flux-operator",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/flux-operator/", "/flux-instance/", "/flux-operator-manifests/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 3,
+    },
+    {
+      description: "Intel Device Plugins Group",
+      groupName: "intel-device-plugins",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/intel-device-plugins-operator/", "/intel-device-plugins-gpu/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
+      description: "Kubernetes Group",
+      groupName: "kubernetes",
+      matchDatasources: ["docker"],
+      matchPackageNames: [
+        "/kube-apiserver/",
+        "/kube-controller-manager/",
+        "/kube-proxy/",
+        "/kube-scheduler/",
+        "/kubelet/",
+      ],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 5,
+    },
+    {
+      description: "Rook-Ceph Group",
+      groupName: "rook-ceph",
+      matchDatasources: ["docker"],
+      matchPackageNames: ["/rook-ceph/", "/rook-ceph-cluster/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+      minimumGroupSize: 2,
+    },
+    {
+      description: "Talos Group",
+      groupName: "Talos",
+      matchPackageNames: ["siderolabs/talos", "/talosctl/"],
+      group: {
+        commitMessageTopic: "{{{groupName}}} group",
+      },
+    },
+  
+    // Labeling rules
+    {
+      matchUpdateTypes: ["major"],
+      labels: ["type/major"],
+    },
+    {
+      matchUpdateTypes: ["minor"],
+      labels: ["type/minor"],
+    },
+    {
+      matchUpdateTypes: ["patch"],
+      labels: ["type/patch"],
+    },
+    {
+      matchUpdateTypes: ["digest"],
+      labels: ["type/digest"],
+    },
+    {
+      matchDatasources: ["docker"],
+      addLabels: ["renovate/container"],
+    },
+    {
+      matchDatasources: ["helm"],
+      addLabels: ["renovate/helm"],
+    },
+    {
+      matchManagers: ["github-actions"],
+      addLabels: ["renovate/github-action"],
+    },
+    {
+      matchDatasources: ["github-releases"],
+      addLabels: ["renovate/github-release"],
+    },
+  
+    // Digest pinning rules
+    {
+      description: "Pin digests for mutable/rolling tags — these silently re-point at new bits, so pin + review every change",
+      matchDatasources: ["docker"],
+      matchCurrentValue: "/^(latest|stable|rolling|edge|nightly|develop|main|master)$/",
+      pinDigests: true,
+    },
+    {
+      description: "Flux OCIRepository tag is a single field — appending @sha256 makes the registry 404 (keep last to win)",
+      matchFileNames: ["**/*ocirepository.yaml"],
+      pinDigests: false,
+    },
+  
+  ],
 }

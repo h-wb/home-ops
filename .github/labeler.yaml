@@ -17,7 +17,6 @@ area/kubernetes:
 area/renovate:
   - changed-files:
       - any-glob-to-any-file:
-          - .renovate/**/*
           - .renovaterc.json5
 
 area/talos:
