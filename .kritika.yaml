@@ -1,15 +1,9 @@
 # yaml-language-server: $schema=https://kritika.home-operations.com/kritika.schema.json
 # How kritika (the self-hosted PR reviewer, kubernetes/apps/main/kritika) reviews this
-# repository. Read from the merge base, so a pull request cannot weaken its own review.
+# repository. Read from each pull request's merge base, so a pull request cannot weaken
+# its own review, and a branch older than this file is reviewed without it.
 # The model and whether a clean review approves are set by the admin config
 # (kritika's HelmRelease), not here.
-comments:
-  # kritika's built-in summary, minus its first line: the "re-run" badge links to
-  # the dashboard and loads an image from it, which would publish the dashboard's
-  # hostname in every review comment of this public repository (the domain is kept
-  # out of the repo on purpose). Re-diff against kritika's
-  # internal/review/templates/summary.md.tmpl when upgrading it.
-  summaryTemplate: .kritika/summary.md.tmpl
 rules:
   # Renovate's pull requests are the ones that auto-merge on an approval, so the
   # review has to say what the upgrade breaks, not just read the diff.
