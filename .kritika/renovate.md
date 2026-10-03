@@ -32,6 +32,13 @@ Read the files in this repository that use the upgraded component: the HelmRelea
 values, Kustomizations, ConfigMaps, environment variables, and anything that depends on
 it. A breaking change in a feature this repository does not use is not a finding.
 
+Check for local patches too. Where this repository carries code that hooks into the
+upgraded component's internals, an upgrade can break it without any breaking change being
+announced. Today that is `kubernetes/apps/main/llm/litellm/app/patches/` (Python modules
+loaded into LiteLLM as callbacks): for a LiteLLM image bump, read those files and compare
+the functions and modules they import or wrap against what the release changed. Report a
+changed or removed one as **important**, naming the patch file.
+
 konflate renders the pull request's Flux manifests before and after and reports the
 result on the pull request: one comment per cluster from `bot-dupond[bot]`
 (`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` check
@@ -55,9 +62,13 @@ Severity decides whether the pull request is approved, so use it precisely:
 
 Raise nothing for changes that do not touch this repository.
 
-## 5. The summary
+## 5. The headline and summary
 
-Start the summary with a verdict: **Safe to merge** or **Not safe to merge**, with the
-package and its old and new version. Then name the sources you read (release notes,
-changelog, compare view), so a reader can tell what the verdict rests on. If no source
-could be found, say that instead of implying the upgrade was checked.
+The headline is the verdict, and must begin with exactly one of:
+
+- `Safe to merge:` followed by the package and its old and new version, or
+- `Not safe to merge:` followed by the same and the reason in a few words.
+
+Then name the sources you read (release notes, changelog, compare view), so a reader can
+tell what the verdict rests on. If no source could be found, say that instead of implying
+the upgrade was checked.
