@@ -1,0 +1,33 @@
+---
+# Not deployed here. The edge konflate instance runs on the main cluster
+# (kubernetes/apps/main/flux-system/konflate/ks.yaml, Kustomization "konflate-edge"):
+# konflate only reads Git, never the cluster it renders, so main can host it and
+# this single node is spared the ~400Mi.
+#
+# To run it on edge instead: uncomment this, add ./konflate/ks.yaml to
+# ../kustomization.yaml, and remove the konflate-edge Kustomization from main.
+#
+# apiVersion: kustomize.toolkit.fluxcd.io/v1
+# kind: Kustomization
+# metadata:
+#   name: &app konflate-edge
+#   namespace: flux-system
+# spec:
+#   targetNamespace: flux-system
+#   commonMetadata:
+#     labels:
+#       app.kubernetes.io/name: *app
+#   interval: 1h
+#   path: ./kubernetes/apps/main/flux-system/konflate/app
+#   postBuild:
+#     substitute:
+#       APP: *app
+#       KONFLATE_CLUSTER: edge
+#   prune: true
+#   retryInterval: 2m
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
+#     namespace: flux-system
+#   timeout: 5m
+#   wait: false

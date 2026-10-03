@@ -8,3 +8,4 @@ components:
 resources:
   - ./flux-operator/ks.yaml
   - ./flux-instance/ks.yaml
+  # - ./konflate/ks.yaml # runs on main instead, see the file
