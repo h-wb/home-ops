@@ -10,14 +10,18 @@ spec:
     name: konflate
   interval: 1h
   values:
-    # No secret: anonymous and read-only, which is enough for a public repo.
-    # PR comments / status checks need a GitHub App credential (secret.existingSecret
-    # + config.appClientId, config.prComments, config.statusChecks, config.publicUrl).
+    deploymentAnnotations:
+      reloader.stakater.com/auto: "true"
     config:
       repo: github://h-wb/home-ops
       # One instance renders one cluster; edge PRs are covered by the CI diff.
       clusterPath: ./kubernetes/clusters/main
       kubeVersion: "{{ .Capabilities.KubeVersion.Version }}"
+      statusChecks: true
+      prComments: true
+      publicUrl: "https://konflate.${SECRET_DOMAIN}"
+    secret:
+      existingSecret: konflate-secret
     httpRoute:
       enabled: true
       annotations:
