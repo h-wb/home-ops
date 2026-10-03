@@ -1,6 +1,7 @@
 ---
-# Key for karakeep's tagging/summaries. Bookmarks are public web content, so it may
-# use `local-pool` and reach ChatGPT when the MacBook is asleep. Like the paperless
+# Key for karakeep's tagging/summaries. Local models only (`local-pool`): bookmarks
+# and page screenshots say a lot about a person, so they never go to a cloud model;
+# tagging simply waits while the MacBook is asleep. Like the paperless
 # keys, the generated value is copied into the Bitwarden `karakeep` item and pulled
 # back down by karakeep's own ExternalSecret.
 apiVersion: litellm.home-operations.com/v1alpha1

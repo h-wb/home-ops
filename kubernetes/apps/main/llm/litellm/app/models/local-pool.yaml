@@ -1,10 +1,10 @@
 ---
-# `local-pool`: the MacBook first, ChatGPT when it is asleep or off the tunnel
-# (that rung lives in chatgpt.yaml so it is enabled together with the login).
-# Rungs are tried in `order:`; LiteLLM falls to the next one once a rung fails.
+# `local-pool`: local models only. It never leaves the house.
 #
-# Only for consumers whose data may leave the house. Paperless stays pinned to
-# `local` so personal documents never reach a cloud model.
+# It briefly carried ChatGPT as a second rung, so a sleeping MacBook silently sent
+# requests (bookmark text, tool results) to a cloud model. That is exactly what the
+# name promises not to do, so it was removed on 2026-10-03. Cloud models are only
+# reachable under their own explicit aliases (`chatgpt/*`), by keys that list them.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

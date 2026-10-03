@@ -52,24 +52,3 @@ spec:
     supportsVision: true
     supportsFunctionCalling: true
     supportsPromptCaching: true
----
-# local-pool rung 2, see local-pool.yaml.
-apiVersion: litellm.home-operations.com/v1alpha1
-kind: LiteLLMModel
-metadata:
-  name: local-pool-chatgpt
-spec:
-  modelName: local-pool
-  proxyRef: litellm
-  params:
-    model: chatgpt/gpt-6-luna
-    additional:
-      order: 2
-      additional_drop_params:
-        - temperature
-  info:
-    mode: responses
-    maxInputTokens: 272000
-    maxOutputTokens: 128000
-    supportsVision: true
-    supportsFunctionCalling: true

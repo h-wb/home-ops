@@ -1,6 +1,6 @@
 ---
-# kritika's reviews and repository index. Pinned to local-pool (MacBook, then
-# ChatGPT once enabled) and embed; the value is copied into the Bitwarden
+# kritika's reviews and repository index. Pinned to local-pool (local models only)
+# and embed; the value is copied into the Bitwarden
 # `kritika` item, since kritika runs in its own namespace.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey

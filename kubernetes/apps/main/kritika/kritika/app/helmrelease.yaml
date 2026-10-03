@@ -45,8 +45,9 @@ spec:
           clientId: Iv23-REPLACE-ME
           privateKey: { env: GITHUB_APP_PRIVATE_KEY }
           webhookSecret: { env: GITHUB_APP_WEBHOOK_SECRET }
-      # Everything goes through LiteLLM, so reviews ride the MacBook / ChatGPT
-      # subscription rather than a pay-per-token key.
+      # Everything goes through LiteLLM on local models (`local-pool`), not a
+      # pay-per-token key. A cloud model would be a deliberate change here: a new
+      # alias on kritika's virtual key, for public repositories only.
       providers:
         litellm:
           type: openai
@@ -73,7 +74,7 @@ spec:
         agent:
           commands: [gh, curl, fd, jq, rg, yq]
         limits:
-          # Protects the ChatGPT weekly quota once it backs local-pool.
+          # Keeps a burst of PRs from monopolising the MacBook.
           reviewsPerDay: 40
           concurrency: 2
         rules:

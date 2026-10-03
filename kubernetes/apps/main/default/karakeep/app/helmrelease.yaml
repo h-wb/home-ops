@@ -32,7 +32,7 @@ spec:
               CRAWLER_FULL_PAGE_SCREENSHOT: true
               CRAWLER_VIDEO_DOWNLOAD: true
               # AI tagging/summaries through LiteLLM rather than the OpenAI API:
-              # `local-pool` is the MacBook, with ChatGPT as rung 2 once enabled.
+              # `local-pool` is the MacBook only; bookmarks never go to a cloud model.
               OPENAI_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
               INFERENCE_TEXT_MODEL: local-pool
               INFERENCE_IMAGE_MODEL: local-pool
