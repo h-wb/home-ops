@@ -21,11 +21,19 @@ spec:
       prComments: true
       # No publicUrl: it would put the domain in every (public) PR comment.
       verifyImages: true
+      extraEnv:
+        - name: KONFLATE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: konflate-webhook-secret
+              key: KONFLATE_WEBHOOK_SECRET
     secret:
       existingSecret: konflate-secret
     httpRoute:
       enabled: true
       annotations:
+        gatus.home-operations.com/endpoint: |-
+          conditions: ["[STATUS] == 200"]
         gethomepage.dev/enabled: "true"
         gethomepage.dev/app: konflate
         gethomepage.dev/group: Infrastructure
@@ -33,7 +41,8 @@ spec:
         gethomepage.dev/icon: flux-cd.png
         gethomepage.dev/description: Rendered Flux PR diffs
       parentRefs:
-        - name: envoy-internal
+        # External so GitHub can deliver webhooks to /hooks; the UI is read-only.
+        - name: envoy-external
           namespace: network
       hostnames:
         - "konflate.${SECRET_DOMAIN}"
