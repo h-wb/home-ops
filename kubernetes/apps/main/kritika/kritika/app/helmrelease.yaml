@@ -74,7 +74,8 @@ spec:
       defaults:
         models:
           # No fallback on purpose: out of quota means the pull request waits.
-          review: litellm/chatgpt/gpt-6-luna
+          # Luna pinned to max reasoning effort (LiteLLM alias); see models/chatgpt.yaml.
+          review: litellm/chatgpt/gpt-6-luna-max
         feedback: standard
         # Renovate pushes in bursts (rebases); review the last head once.
         settle: 60s

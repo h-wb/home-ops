@@ -1,6 +1,7 @@
 ---
 # kritika's reviews.
-# - `chatgpt/gpt-6-luna`: the review model, on the Plus subscription. Reviews are
+# - `chatgpt/gpt-6-luna-max`: the review model (Luna at max reasoning effort), on
+#   the Plus subscription. Reviews are
 #   tool calls, hence `allow_cloud_tools`: this is the one key the cloud tool guard
 #   lets through (patches/homeops_cloud_tool_guard.py). The tools kritika's agent
 #   runs read the repository under review, not ToolHive. Only public repositories
@@ -20,5 +21,5 @@ spec:
   metadata:
     allow_cloud_tools: "true"
   models:
-    - chatgpt/gpt-6-luna
+    - chatgpt/gpt-6-luna-max
     - embed
