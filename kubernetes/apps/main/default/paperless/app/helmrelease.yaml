@@ -73,7 +73,7 @@ spec:
               PAPERLESS_AI_LLM_EMBEDDING_MODEL: embed
               # Matches the context LM Studio loads the model with.
               PAPERLESS_AI_LLM_CONTEXT_SIZE: "32768"
-              # A page through a local vision model takes tens of seconds; the 
+              # A page through a local vision model takes tens of seconds; the
               # default timeout is tuned for hosted APIs.
               PAPERLESS_AI_LLM_REQUEST_TIMEOUT: "300"
               # Redis

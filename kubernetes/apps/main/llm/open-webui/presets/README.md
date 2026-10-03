@@ -4,8 +4,8 @@ System prompts for Open WebUI's custom models (Workspace → Models). The models
 themselves live in Open WebUI's database; these files are the source of their
 prompt text, so edits here are pasted (or pushed through the API) into the preset.
 
-| File | Preset id | Base model | Tools |
-| --- | --- | --- | --- |
+| File         | Preset id | Base model        | Tools                                                                                      |
+| ------------ | --------- | ----------------- | ------------------------------------------------------------------------------------------ |
 | `homelab.md` | `homelab` | `qwen3.5-9b-chat` | `server:mcp:toolhive` (Metabase, Dawarich, kubectl, flux, GitHub, n8n), built-in tools off |
 
 Why a preset at all: an 8–9B model asked "what was my latest workout?" with only

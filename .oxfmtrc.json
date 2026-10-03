@@ -1,3 +1,9 @@
 {
-  "printWidth": 100
+  "printWidth": 100,
+  "ignorePatterns": [
+    "**/*.sops.*",
+    "**/resources/**",
+    "**/dashboard/*.json",
+    "kubernetes/apps/main/llm/open-webui/presets/homelab.md"
+  ]
 }

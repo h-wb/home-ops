@@ -122,7 +122,7 @@
       ],
       automerge: false,
     },
-  
+
     {
       description: "Auto-merge Grafana dashboards (after the major gate so it wins)",
       matchDatasources: ["custom.grafana-dashboards"],
@@ -227,7 +227,7 @@
         commitMessageTopic: "{{{groupName}}} group",
       },
     },
-  
+
     // Labeling rules
     {
       matchUpdateTypes: ["major"],
@@ -261,7 +261,7 @@
       matchDatasources: ["github-releases"],
       addLabels: ["renovate/github-release"],
     },
-  
+
     // Digest pinning rules
     {
       description: "Pin digests for mutable/rolling tags — these silently re-point at new bits, so pin + review every change",
@@ -274,6 +274,5 @@
       matchFileNames: ["**/*ocirepository.yaml"],
       pinDigests: false,
     },
-  
   ],
 }

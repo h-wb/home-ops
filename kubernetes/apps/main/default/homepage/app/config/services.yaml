@@ -5,9 +5,9 @@
         description: Cloudflared Tunnel Status
         widget:
           type: cloudflared
-          accountid: {{HOMEPAGE_VAR_CLOUDFLARED_ACCOUNTID}}
-          tunnelid: {{HOMEPAGE_VAR_CLOUDFLARED_TUNNELID}}
-          key: {{HOMEPAGE_VAR_CLOUDFLARED_API_TOKEN}}
+          accountid: { { HOMEPAGE_VAR_CLOUDFLARED_ACCOUNTID } }
+          tunnelid: { { HOMEPAGE_VAR_CLOUDFLARED_TUNNELID } }
+          key: { { HOMEPAGE_VAR_CLOUDFLARED_API_TOKEN } }
           fields: ["status"]
     - Healthchecks:
         href: https://healthchecks.io/
@@ -16,8 +16,8 @@
         widget:
           type: healthchecks
           url: https://healthchecks.io/
-          key: {{HOMEPAGE_VAR_HEALTHCHECK_TOKEN}}
-          uuid: {{HOMEPAGE_VAR_HEALTHCHECK_UUID}}
+          key: { { HOMEPAGE_VAR_HEALTHCHECK_TOKEN } }
+          uuid: { { HOMEPAGE_VAR_HEALTHCHECK_UUID } }
 
 - Calendar:
     - Agenda:

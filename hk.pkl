@@ -2,20 +2,54 @@ amends "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Config.
 import "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Builtins.pkl"
 
 local linters = new Mapping<String, Step> {
-    ["oxfmt"] = Builtins.oxfmt
+  // Formatting: YAML, JSON, Markdown and TOML all go through oxfmt (.oxfmtrc.json).
+  ["oxfmt"] = Builtins.oxfmt
+  ["pkl"] = Builtins.pkl_format
+
+  // GitHub Actions. Runner labels live in .github/actionlint.yaml; shellcheck is
+  // left to its own step so workflow `run:` snippets aren't held to script style.
+  ["actionlint"] = (Builtins.actionlint) {
+    check = "actionlint -shellcheck= {{ files }}"
+  }
+  ["zizmor"] = (Builtins.zizmor) {
+    check_diff = "zizmor --no-progress --offline {{ files }}"
+    fix = "zizmor --no-progress --offline --fix {{ files }}"
+  }
+  ["shellcheck"] = Builtins.shellcheck
+
+  // Safety nets for a public repo.
+  ["merge-conflict"] = Builtins.check_merge_conflict
+  ["private-key"] = Builtins.detect_private_key
+  ["large-files"] = Builtins.check_added_large_files
+  ["sops"] {
+    glob = "**/*.sops.*"
+    exclude = ".sops.yaml"
+    check =
+      "for f in {{ files }}; do grep -q '^sops:' \"$f\" || { echo \"$f is not encrypted\"; exit 1; }; done"
+  }
 }
 
 hooks {
-    ["pre-commit"] {
-        fix = true
-        stash = "git"
-        steps = linters
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps = linters
+  }
+  // Pushes go straight to main, so render both clusters before they reach Flux.
+  ["pre-push"] {
+    steps {
+      ["flate"] {
+        glob = "kubernetes/**"
+        check =
+          "flate test all --path kubernetes/clusters/main --no-progress && flate test all --path kubernetes/clusters/edge --no-progress"
+      }
     }
-    ["fix"] {
-        fix = true
-        steps = linters
-    }
-    ["check"] {
-        steps = linters
-    }
+  }
+  ["fix"] {
+    fix = true
+    steps = linters
+  }
+  ["check"] {
+    steps = linters
+  }
 }
