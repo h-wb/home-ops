@@ -3,21 +3,22 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: konflate
+  name: ${APP}
 spec:
   chartRef:
     kind: OCIRepository
-    name: konflate
+    name: ${APP}
   interval: 1h
   values:
     deploymentAnnotations:
       reloader.stakater.com/auto: "true"
     config:
       repo: github://h-wb/home-ops
-      # One instance renders one cluster; edge PRs are covered by the CI diff.
-      clusterPath: ./kubernetes/clusters/main
+      clusterPath: ./kubernetes/clusters/${KONFLATE_CLUSTER}
       kubeVersion: "{{ .Capabilities.KubeVersion.Version }}"
       statusChecks: true
+      # Also keeps each instance's PR comment separate (it doubles as the comment tag).
+      statusCheckName: "Konflate (${KONFLATE_CLUSTER})"
       prComments: true
       # No publicUrl: it would put the domain in every (public) PR comment.
       verifyImages: true
@@ -25,19 +26,19 @@ spec:
         - name: KONFLATE_WEBHOOK_SECRET
           valueFrom:
             secretKeyRef:
-              name: konflate-webhook-secret
+              name: ${APP}-webhook-secret
               key: KONFLATE_WEBHOOK_SECRET
     secret:
-      existingSecret: konflate-secret
+      existingSecret: ${APP}-secret
     httpRoute:
       enabled: true
       annotations:
         gatus.home-operations.com/endpoint: |-
           conditions: ["[STATUS] == 200"]
         gethomepage.dev/enabled: "true"
-        gethomepage.dev/app: konflate
+        gethomepage.dev/app: ${APP}
         gethomepage.dev/group: Infrastructure
-        gethomepage.dev/name: Konflate
+        gethomepage.dev/name: Konflate (${KONFLATE_CLUSTER})
         gethomepage.dev/icon: flux-cd.png
         gethomepage.dev/description: Rendered Flux PR diffs
       parentRefs:
@@ -45,7 +46,7 @@ spec:
         - name: envoy-external
           namespace: network
       hostnames:
-        - "konflate.${SECRET_DOMAIN}"
+        - "${APP}.${SECRET_DOMAIN}"
     monitoring:
       serviceMonitor:
         enabled: true

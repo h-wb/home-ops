@@ -1,5 +1,7 @@
 ---
 # yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# One konflate instance renders one cluster, so each cluster gets its own
+# instance from the same ./app, all running here on main.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -15,6 +17,33 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      KONFLATE_CLUSTER: main
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false
+---
+# yaml-language-server: $schema=https://kube-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app konflate-edge
+  namespace: flux-system
+spec:
+  targetNamespace: flux-system
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  interval: 1h
+  path: ./kubernetes/apps/main/flux-system/konflate/app
+  postBuild:
+    substitute:
+      APP: *app
+      KONFLATE_CLUSTER: edge
   prune: true
   retryInterval: 2m
   sourceRef:
