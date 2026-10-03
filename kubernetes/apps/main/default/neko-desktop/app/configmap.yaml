@@ -11,7 +11,7 @@ metadata:
     # Kustomization fails to apply. Nothing in this file needs substituting.
     kustomize.toolkit.fluxcd.io/substitute: disabled
 data:
-  # Bootstraps the desktop from ~/.dotfiles at every XFCE session start.
+  # First-boot entry point: gets ~/.dotfiles onto a fresh PVC, then hands over.
   #
   # This lives in the cluster rather than in the PVC because of a chicken-and-egg
   # problem: the dotfiles ship their own autostart entry, but on a fresh PVC
@@ -19,10 +19,11 @@ data:
   # exists, so the first session can clone the repo and provision itself with no
   # manual step. Once the dotfiles are applied they drop an entry of the SAME
   # filename into ~/.config/autostart, which per the XDG spec overrides this one
-  # — so exactly one bootstrap runs, not two.
+  # — so exactly one bootstrap runs, not two, and this script is not used again.
   #
-  # Everything real happens in the repo (home/bin/neko-bootstrap): apt packages,
-  # mise tools, dotfiles, XFCE settings, GUI apps. Keep this file dumb.
+  # Everything real happens in the repo's conf.d/neko/bin/neko-bootstrap: pulling
+  # the dotfiles, apt packages, mise tools, XFCE settings, GUI apps. Keep this
+  # file dumb.
   neko-provision: |
     #!/bin/sh
     set -u
@@ -34,22 +35,17 @@ data:
     export PATH="${HOME}/.local/bin:${PATH}"
     REPO_URL="${REPO_URL:-https://github.com/h-wb/dotfiles.git}"
 
-    # /usr is image state and resets on every pod roll, so git may be missing
-    # even though the repo itself is sitting on the PVC.
-    if ! command -v git >/dev/null 2>&1; then
-      sudo apt-get update -qq
-      sudo apt-get install -y -qq --no-install-recommends git
-    fi
-
     if [ ! -d "${HOME}/.dotfiles/.git" ]; then
+      # git is not in the image.
+      if ! command -v git >/dev/null 2>&1; then
+        sudo apt-get update -qq
+        sudo apt-get install -y -qq --no-install-recommends git
+      fi
       echo "[info] cloning ${REPO_URL}"
       git clone "$REPO_URL" "${HOME}/.dotfiles" || exit 1
-    else
-      # Fast-forward only: never clobber work in progress on the desktop.
-      git -C "${HOME}/.dotfiles" pull --ff-only || echo "[warn] pull skipped (local changes?)"
     fi
 
-    exec "${HOME}/.dotfiles/home/bin/neko-bootstrap"
+    exec "${HOME}/.dotfiles/conf.d/neko/bin/neko-bootstrap"
 
   # Runs neko-provision through sh, so the ConfigMap's mount mode does not have
   # to carry an executable bit.
