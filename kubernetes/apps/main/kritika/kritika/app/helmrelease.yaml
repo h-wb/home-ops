@@ -89,13 +89,38 @@ spec:
           reviewsPerDay: 40
           concurrency: 2
       repositories:
-        # Advisory for now: kritika comments and sets its status, but does not
-        # approve. Its first two reviews (2026-10-03) approved in 16 s without the
-        # repository's rules, because .kritika.yaml is read from each pull request's
-        # merge base and those branches predated it. Set `approve: true` here only
-        # once a review on a current branch shows the Renovate rules being applied;
-        # until then the Claude Code workflow stays the approval the ruleset needs.
-        h-wb/home-ops: {}
+        # kritika is the approval the main-require-review ruleset needs (it replaced
+        # the Claude Code "Renovate PR Review" workflow on 2026-10-03): a review with
+        # nothing blocking or important approves the pull request, a later one that
+        # finds something withdraws it. Majors and high-blast-radius packages still
+        # wait for a human, because Renovate does not auto-merge them.
+        h-wb/home-ops:
+          approve: true
+          rules:
+            # The gate's minimum, kept here rather than in the repository: files in
+            # the repository are read from each pull request's merge base, so a
+            # branch older than .kritika.yaml would otherwise be approved with no
+            # Renovate rules at all (that happened on kritika's first run). The
+            # longer checklist is .kritika/renovate.md.
+            - id: renovate-gate
+              whenExpr: pr.headRef.startsWith("renovate/")
+              rule: >-
+                This is a Renovate dependency update and your review decides whether
+                it auto-merges. Do not judge it from the diff alone. Fetch the
+                upstream release notes or changelog for every version between the old
+                and the new one (use gh; follow a wrapper image or chart to the
+                component it packages). Then read how this repository uses the
+                package: its HelmRelease values, OCIRepository, overrides, CRDs, and
+                any local code that hooks into it (for LiteLLM,
+                kubernetes/apps/main/llm/litellm/app/patches). Report as blocking a
+                breaking change, removal or required migration that affects something
+                this repository configures, and a failed Konflate check. Report as
+                important a deprecation of something used here, a changed default
+                that alters behaviour here, or a change to internals a local patch
+                depends on. If you could not find or read the release notes, report
+                that as important rather than approving unverified. Begin the
+                headline with "Safe to merge:" or "Not safe to merge:", and name the
+                sources you read.
       egress:
         # Where the agent's curl/gh may go for release notes, changelogs and charts.
         # github.com and api.github.com are allowed by the app itself.
