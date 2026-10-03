@@ -1,7 +1,15 @@
 ---
-# kritika's reviews and repository index. Pinned to local-pool (local models only)
-# and embed; the value is copied into the Bitwarden
-# `kritika` item, since kritika runs in its own namespace.
+# kritika's reviews and repository index.
+# - `qwen3.5-9b-chat`: the default review model, local. Any repository kritika is
+#   ever installed on is reviewed here unless its config entry says otherwise, so a
+#   private repository never reaches a cloud model by accident.
+# - `chatgpt/gpt-6-luna`: used only where kritika's config names it, which is the
+#   public h-wb/home-ops. Reviews are tool calls, hence `allow_cloud_tools`: this is
+#   the one key the cloud tool guard lets through (patches/homeops_cloud_tool_guard.py).
+#   The tools kritika's agent runs read the repository under review, not ToolHive.
+# - `embed`: the in-cluster embedder for the similar-code index.
+# The value is copied into the Bitwarden `kritika` item, since kritika runs in its
+# own namespace.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
@@ -11,6 +19,9 @@ spec:
   keyAlias: Kritika
   secretName: litellm-key-kritika
   secretKey: api-key
+  metadata:
+    allow_cloud_tools: "true"
   models:
-    - local-pool
+    - qwen3.5-9b-chat
+    - chatgpt/gpt-6-luna
     - embed
