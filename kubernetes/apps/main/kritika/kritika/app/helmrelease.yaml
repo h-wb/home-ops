@@ -45,15 +45,15 @@ spec:
           clientId: Iv23-REPLACE-ME
           privateKey: { env: GITHUB_APP_PRIVATE_KEY }
           webhookSecret: { env: GITHUB_APP_WEBHOOK_SECRET }
-      # Everything goes through LiteLLM on local models (`local-pool`), not a
-      # pay-per-token key. A cloud model would be a deliberate change here: a new
-      # alias on kritika's virtual key, for public repositories only.
+      # Everything goes through LiteLLM (no pay-per-token key). Two models:
+      # - the default is local, so a repository is never sent to a cloud model
+      #   just because the App got installed on it;
+      # - h-wb/home-ops, which is public, is reviewed by ChatGPT (see repositories).
       providers:
         litellm:
           type: openai
           baseUrl: http://litellm.llm.svc.cluster.local:4000/v1
           apiKey: { env: LITELLM_API_KEY }
-          # local-pool falls over to its next rung on a retry.
           retries: 2
       embedding:
         model: litellm/embed
@@ -66,24 +66,41 @@ spec:
         similarFloor: 0.7
       defaults:
         models:
-          review: litellm/local-pool
+          review: litellm/qwen3.5-9b-chat
         feedback: standard
+        # Renovate pushes in bursts (rebases); review the last head once.
         settle: 60s
         # Big generated diffs aren't worth the context; `@<bot> review` still forces one.
         maxChangedLines: 2000
         agent:
           commands: [gh, curl, fd, jq, rg, yq]
         limits:
-          # Keeps a burst of PRs from monopolising the MacBook.
+          # Every ChatGPT call costs subscription quota (karakeep shares it), and a
+          # rebase storm should not drain a week of it.
           reviewsPerDay: 40
           concurrency: 2
-        rules:
-          - id: renovate
-            rule: Say what the update breaks, from the release notes linked in the body.
-            whenExpr: pr.headRef.startsWith("renovate/")
+      repositories:
+        # Public repository: reviewed by ChatGPT on the Plus subscription. This
+        # replaces the Claude Code "Renovate PR Review" workflow as the approval
+        # the main-require-review ruleset needs: a review with nothing blocking or
+        # important approves the pull request, a later one that finds something
+        # withdraws it. The review rules live in the repository (.kritika.yaml).
+        # No fallback model on purpose: if ChatGPT is out of quota the pull request
+        # waits, rather than being approved by the small local model.
+        h-wb/home-ops:
+          models:
+            review: litellm/chatgpt/gpt-6-luna
+          approve: true
       egress:
-        # Release notes and raw files the agent fetches with curl/gh.
-        allowHosts: ["*.githubusercontent.com"]
+        # Where the agent's curl/gh may go for release notes, changelogs and charts.
+        # github.com and api.github.com are allowed by the app itself.
+        allowHosts:
+          - "*.githubusercontent.com"
+          - "*.github.io"
+          - artifacthub.io
+          - ghcr.io
+          - hub.docker.com
+          - quay.io
     runner:
       resources:
         requests: { cpu: 10m, memory: 128Mi }
