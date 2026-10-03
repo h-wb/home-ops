@@ -1,5 +1,7 @@
 ---
-# AnkiConnect, from the Anki that runs in the desktop (dotfiles: conf.d/neko).
+# AnkiConnect, from the Anki that runs in the desktop. Installing Anki, keeping
+# it running and configuring the add-on are all the dotfiles' job (conf.d/neko);
+# this Service is the only Anki-specific thing in the cluster config.
 #
 # A plain Service rather than a second one in the HelmRelease: app-template
 # suffixes Service names once there are two, which would rename the existing
