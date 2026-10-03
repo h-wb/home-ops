@@ -19,7 +19,8 @@ spec:
       kubeVersion: "{{ .Capabilities.KubeVersion.Version }}"
       statusChecks: true
       prComments: true
-      publicUrl: "https://konflate.${SECRET_DOMAIN}"
+      # No publicUrl: it would put the domain in every (public) PR comment.
+      verifyImages: true
     secret:
       existingSecret: konflate-secret
     httpRoute:
