@@ -9,9 +9,9 @@
 # - no tool calling: patches/homeops_cloud_tool_guard.py refuses it, so tool
 #   results (health, location, n8n, the cluster) cannot reach them.
 #
-# Streaming only: non-streaming requests fail upstream ("Unknown items in responses
-# API response", BerriAI/litellm#37039). Open WebUI streams; anything else would not
-# work until that is fixed.
+# Non-streaming requests fail upstream ("Unknown items in responses API response",
+# BerriAI/litellm#37039); patches/homeops_chatgpt_nonstream.py works around it for
+# karakeep. Open WebUI streams and does not need it.
 #
 # With an empty token dir the proxy runs a device-code login at startup and the pod
 # is not Ready until it completes: `kubectl -n llm logs -f deploy/litellm`, then

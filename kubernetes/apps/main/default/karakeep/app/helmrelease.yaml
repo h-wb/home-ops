@@ -31,13 +31,14 @@ spec:
               CRAWLER_FULL_PAGE_ARCHIVE: true
               CRAWLER_FULL_PAGE_SCREENSHOT: true
               CRAWLER_VIDEO_DOWNLOAD: true
-              # AI tagging/summaries through LiteLLM rather than the OpenAI API:
-              # `local-pool` is the MacBook only; bookmarks never go to a cloud model.
+              # AI tagging/summaries through LiteLLM on the ChatGPT Plus subscription
+              # (gpt-6-luna, the light tier): bookmarks are allowed to go to a cloud
+              # model. Embeddings use the in-cluster `embed`.
               OPENAI_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
-              INFERENCE_TEXT_MODEL: local-pool
-              INFERENCE_IMAGE_MODEL: local-pool
+              INFERENCE_TEXT_MODEL: chatgpt/gpt-6-luna
+              INFERENCE_IMAGE_MODEL: chatgpt/gpt-6-luna
               EMBEDDING_TEXT_MODEL: embed
-              # Default is 2048, which truncates most articles; the Mac model loads 32k.
+              # Default is 2048, which truncates most articles.
               INFERENCE_CONTEXT_LENGTH: 8192
               # OAuth (Kanidm OIDC). Client id/secret arrive via envFrom kanidm-karakeep-oidc.
               # NextAuth sends PKCE, so the kanidm client keeps PKCE required.

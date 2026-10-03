@@ -17,6 +17,7 @@ resources:
 configMapGenerator:
   - name: litellm-patches
     files:
+      - ./patches/homeops_chatgpt_nonstream.py
       - ./patches/homeops_cloud_tool_guard.py
     options:
       annotations:

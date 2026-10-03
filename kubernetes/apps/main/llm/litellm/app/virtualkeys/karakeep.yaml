@@ -1,9 +1,10 @@
 ---
-# Key for karakeep's tagging/summaries. Local models only (`local-pool`): bookmarks
-# and page screenshots say a lot about a person, so they never go to a cloud model;
-# tagging simply waits while the MacBook is asleep. Like the paperless
-# keys, the generated value is copied into the Bitwarden `karakeep` item and pulled
-# back down by karakeep's own ExternalSecret.
+# Key for karakeep's tagging/summaries. Deliberately on ChatGPT, and only ChatGPT:
+# the user decided bookmarks may go to a cloud model (2026-10-03), which also means
+# tagging no longer waits for the MacBook to be awake. It is the one consumer with a
+# cloud model on its key; everything else that holds personal data stays local.
+# Embeddings stay on the in-cluster `embed`. The generated value is copied into the
+# Bitwarden `karakeep` item and pulled back down by karakeep's own ExternalSecret.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
@@ -14,5 +15,5 @@ spec:
   secretName: litellm-key-karakeep
   secretKey: api-key
   models:
-    - local-pool
+    - chatgpt/gpt-6-luna
     - embed

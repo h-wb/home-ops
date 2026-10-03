@@ -90,6 +90,9 @@ spec:
     # location, n8n, the cluster) cannot reach a cloud model. See the module.
     callbacks:
       - homeops_cloud_tool_guard.guard_instance
+      # Makes chatgpt/* answer non-streaming requests (BerriAI/litellm#37039), which
+      # karakeep sends. Remove once the upstream fix ships.
+      - homeops_chatgpt_nonstream.patch_instance
     success_callback:
       - prometheus
     failure_callback:
