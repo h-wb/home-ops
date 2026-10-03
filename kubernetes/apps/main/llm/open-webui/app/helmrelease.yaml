@@ -27,8 +27,9 @@ spec:
               # persistence on its stored values win over these variables. Admin
               # panel changes therefore do not survive a restart; change them here.
               ENABLE_PERSISTENT_CONFIG: "False"
-              # Models: everything through LiteLLM (local, local-pool, embed and the
-              # ChatGPT aliases once enabled), on a scoped key from virtualkeys/.
+              # Models: everything through LiteLLM, on a scoped key from virtualkeys/.
+              # ChatGPT (chatgpt/*) is there for plain chat only: LiteLLM refuses any
+              # tool call on a non-local model, so ToolHive results stay local.
               ENABLE_OLLAMA_API: "False"
               ENABLE_OPENAI_API: "True"
               OPENAI_API_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
@@ -37,6 +38,12 @@ spec:
                   secretKeyRef:
                     name: litellm-key-open-webui
                     key: api-key
+              # Background tasks (chat titles, tags, search queries) default to the
+              # model being chatted with; pin them to the local 9B so a ChatGPT chat
+              # does not also send them, and so they work at all (they are
+              # non-streaming, which LiteLLM's chatgpt provider cannot do).
+              TASK_MODEL: qwen3.5-9b-chat
+              TASK_MODEL_EXTERNAL: qwen3.5-9b-chat
               # RAG / knowledge embeddings on the same in-cluster embed model.
               RAG_EMBEDDING_ENGINE: openai
               RAG_EMBEDDING_MODEL: embed

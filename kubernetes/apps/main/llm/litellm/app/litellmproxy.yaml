@@ -21,7 +21,7 @@ spec:
       value: Europe/Paris
     - name: CHATGPT_TOKEN_DIR
       value: /app/chatgpt_tokens
-    # Lets the proxy import the workaround modules under patches/ as callbacks.
+    # Lets the proxy import the callback modules under patches/.
     - name: PYTHONPATH
       value: /app/patches
     - name: LITELLM_LOG
@@ -86,10 +86,10 @@ spec:
     cooldown_time: 30
     enable_pre_call_checks: true
   litellmSettings:
-    # Imported for its side effect: makes chatgpt/* answer non-streaming requests
-    # (BerriAI/litellm#37039). Remove with patches/ once the upstream fix ships.
+    # Refuses tool calling on any non-local model, so tool results (health,
+    # location, n8n, the cluster) cannot reach a cloud model. See the module.
     callbacks:
-      - homeops_chatgpt_nonstream.patch_instance
+      - homeops_cloud_tool_guard.guard_instance
     success_callback:
       - prometheus
     failure_callback:

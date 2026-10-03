@@ -1,14 +1,21 @@
 ---
 # ChatGPT Plus through LiteLLM's `chatgpt/` provider: the Codex OAuth login, not the
 # metered API, so usage counts against the subscription's rolling + weekly quota.
-# The first request after a fresh token dir starts a device-code login; the URL and
-# code are printed in the litellm pod log. Tokens live on the shared
-# `litellm-chatgpt` PVC so both replicas use the same login.
+# Tokens live on the shared `litellm-chatgpt` PVC so both replicas use one login.
 #
-# The login happens at proxy startup and the pod is not Ready until it completes
-# (each code expires and the pod restarts with a new one), so enabling this file
-# stalls a rollout until someone runs through it: `kubectl -n llm logs -f
-# deploy/litellm`, then auth.openai.com/codex/device.
+# Cloud models, deliberately fenced:
+# - only under these explicit aliases, never as a rung of a local pool;
+# - a virtual key must list them to use them;
+# - no tool calling: patches/homeops_cloud_tool_guard.py refuses it, so tool
+#   results (health, location, n8n, the cluster) cannot reach them.
+#
+# Streaming only: non-streaming requests fail upstream ("Unknown items in responses
+# API response", BerriAI/litellm#37039). Open WebUI streams; anything else would not
+# work until that is fixed.
+#
+# With an empty token dir the proxy runs a device-code login at startup and the pod
+# is not Ready until it completes: `kubectl -n llm logs -f deploy/litellm`, then
+# auth.openai.com/codex/device.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

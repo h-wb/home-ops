@@ -12,12 +12,12 @@ resources:
   - ./grafanadashboard.yaml
   - ./prometheusrule.yaml
   - ./servicemonitor.yaml
-# The workaround module is mounted as-is; the fixed name keeps the LiteLLMProxy's
+# Proxy callback modules, mounted as-is; the fixed name keeps the LiteLLMProxy's
 # volume reference valid (kustomize does not rewrite names inside a custom resource).
 configMapGenerator:
   - name: litellm-patches
     files:
-      - ./patches/homeops_chatgpt_nonstream.py
+      - ./patches/homeops_cloud_tool_guard.py
     options:
       annotations:
         kustomize.toolkit.fluxcd.io/substitute: disabled
