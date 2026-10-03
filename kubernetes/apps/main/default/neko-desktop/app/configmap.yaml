@@ -63,6 +63,28 @@ data:
     Terminal=false
     StartupNotify=false
     X-XFCE-Autostart-Override=true
+
+  # Keeps Anki running, for AnkiConnect (see service.yaml). The image's own
+  # supervisord is the only service manager in this container — no systemd, so
+  # mise's [bootstrap.services] has nothing to drive — and it already runs XFCE
+  # from a file like this one. /etc is image state, hence a ConfigMap.
+  #
+  # Same split as neko-provision: the real launcher is the dotfiles'
+  # bin/anki-session. The `until` covers a fresh PVC, where that script does not
+  # exist until the first bootstrap has run; without it supervisord would give
+  # up after three failed spawns.
+  anki.conf: |
+    [program:anki]
+    environment=HOME="/home/%(ENV_USER)s",USER="%(ENV_USER)s",DISPLAY="%(ENV_DISPLAY)s"
+    command=/bin/sh -c 'until [ -x "$HOME/.local/bin/anki-session" ]; do sleep 10; done; exec "$HOME/.local/bin/anki-session"'
+    stopsignal=INT
+    autorestart=true
+    priority=900
+    user=%(ENV_USER)s
+    stdout_logfile=/var/log/neko/anki.log
+    stdout_logfile_maxbytes=10MB
+    stdout_logfile_backups=2
+    redirect_stderr=true
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: v1

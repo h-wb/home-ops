@@ -176,6 +176,9 @@ spec:
               - path: /etc/xdg/autostart/mise-bootstrap.desktop
                 readOnly: true
                 subPath: mise-bootstrap.desktop
+              - path: /etc/neko/supervisord/anki.conf
+                readOnly: true
+                subPath: anki.conf
       # Only /home/neko survives a restart. Anything apt installs lands in
       # /usr and is lost on the next roll.
       home:
