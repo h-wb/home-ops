@@ -1,15 +1,7 @@
 ---
-# AnkiConnect, from the Anki that runs in the desktop. Installing Anki, keeping
-# it running and configuring the add-on are all the dotfiles' job (conf.d/neko);
-# this Service is the only Anki-specific thing in the cluster config.
-#
-# A plain Service rather than a second one in the HelmRelease: app-template
-# suffixes Service names once there are two, which would rename the existing
-# LoadBalancer. ClusterIP on purpose, so the port never reaches the LAN.
-#
-# Every request needs the add-on's apiKey, which the dotfiles bootstrap sets
-# from Proton Pass; without it the add-on stays on 127.0.0.1 and nothing
-# answers here.
+# AnkiConnect, from the Anki the dotfiles run in the desktop (conf.d/anki).
+# Not in the HelmRelease: a second app-template Service would rename the
+# LoadBalancer. ClusterIP so it never reaches the LAN; requests need the apiKey.
 apiVersion: v1
 kind: Service
 metadata:
