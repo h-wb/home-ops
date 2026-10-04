@@ -65,6 +65,13 @@ spec:
       # the ToolHive gateway.
       ui:
         enabled: true
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: memini
+          gethomepage.dev/group: Tools
+          gethomepage.dev/name: Memini
+          gethomepage.dev/icon: mdi-brain
+          gethomepage.dev/description: Agent Memory
         hostnames:
           - memini.${SECRET_DOMAIN}
         parentRefs:
@@ -73,3 +80,6 @@ spec:
     serviceMonitor:
       main:
         enabled: true
+    # Rendered as ConfigMap memini-memini; grafanadashboard.yaml imports it.
+    grafanaDashboards:
+      enabled: true
