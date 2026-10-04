@@ -38,6 +38,8 @@ spec:
               SLSKD_DIR: /data/Downloads/soulseek/complete/
               SLSKD_MIGRATE_DOWNLOADS: "true"
               WEEKLY_EXPLORATION_SCHEDULE: 15 00 * * 2
+              # one dated playlist + folder per week instead of overwriting
+              WEEKLY_EXPLORATION_FLAGS: --replace-playlist=false
               WEEKLY_JAMS_SCHEDULE: 30 00 * * 1
               WEEKLY_JAMS_FLAGS: --playlist=weekly-jams --download-mode=skip
               DAILY_JAMS_SCHEDULE: 15 01 * * *

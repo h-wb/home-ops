@@ -92,7 +92,7 @@ spec:
             env:
               VPN_SERVICE_PROVIDER: protonvpn
               VPN_TYPE: wireguard
-              SERVER_COUNTRIES: Netherlands
+              SERVER_COUNTRIES: Switzerland
               VPN_PORT_FORWARDING: "on"
               VPN_PORT_FORWARDING_PROVIDER: protonvpn
               # slskd's value depends on being reachable (inbound uploads,
