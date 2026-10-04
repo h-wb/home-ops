@@ -28,6 +28,7 @@ spec:
               extra_params: >-
                 --o:ssl.enable=false
                 --o:ssl.termination=true
+                --o:net.frame_ancestors=https://nextcloud.${SECRET_DOMAIN}
                 --o:admin_console.enable=false
                 --o:mount_jail_tree=false
                 --o:logging.level=warning
