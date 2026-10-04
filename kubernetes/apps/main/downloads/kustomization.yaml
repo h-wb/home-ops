@@ -11,6 +11,7 @@ resources:
   # - ./byparr/ks.yaml
   - ./brrpolice/ks.yaml
   - ./deduparr/ks.yaml
+  - ./explo/ks.yaml
   - ./flaresolverr/ks.yaml
   - ./musicgrabber/ks.yaml
   - ./prowlarr/ks.yaml
@@ -23,6 +24,7 @@ resources:
   - ./radarr-uhd/ks.yaml
   - ./recyclarr/ks.yaml
   - ./slskd/ks.yaml
+  - ./soulsync/ks.yaml
   - ./sonarr-tv/ks.yaml
   - ./sonarr-anm/ks.yaml
   - ./overseerr/ks.yaml

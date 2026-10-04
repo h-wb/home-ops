@@ -1,0 +1,98 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app soulsync
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      soulsync:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/boulderbadgedad/soulsync
+              tag: 3.5.0@sha256:0b00d6e658d52817775260430d8a4d1ac9a0009cf0b147561fc0f7f47074c2ac
+            env:
+              TZ: Europe/Paris
+              PUID: "1000"
+              PGID: "1000"
+              UMASK: "002"
+              SOULSYNC_CONFIG_PATH: /app/config/config.json
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 8008
+                  periodSeconds: 30
+                  timeoutSeconds: 10
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 10
+                  failureThreshold: 30
+            resources:
+              requests:
+                cpu: 50m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+    defaultPodOptions:
+      securityContext:
+        # image entrypoint must start as root to apply PUID/PGID, then drops privileges
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: soulsync
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: SoulSync
+          gethomepage.dev/description: Music acquisition, watchlists & playlist sync
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        existingClaim: *app
+        globalMounts:
+          - path: /app/config
+            subPath: config
+          - path: /app/data
+            subPath: data
+      data:
+        # Same mount as slskd and Plex, so slskd's reported paths resolve and
+        # download -> library moves are renames instead of NFS copies.
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir

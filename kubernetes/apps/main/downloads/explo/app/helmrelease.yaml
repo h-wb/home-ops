@@ -1,0 +1,126 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app explo
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      explo:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        initContainers:
+          init-dirs:
+            image:
+              repository: mirror.gcr.io/library/busybox
+              tag: "1.38"
+            command:
+              - sh
+              - -c
+              - mkdir -p /data/Audio/Music/Explo
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+        containers:
+          app:
+            image:
+              repository: ghcr.io/lumepart/explo
+              tag: v1.2.0@sha256:680eac0592d013aac8768e2c3bae02345f74083f3a4585337420446764eb66fc
+            env:
+              TZ: Europe/Paris
+              PUID: "1000"
+              PGID: "1000"
+              WEB_UI: "true"
+              # on the PVC so the web UI can write it; keys set there win over env
+              WEB_ENV_PATH: /opt/explo/config/.env
+              EXPLO_SYSTEM: plex
+              SYSTEM_URL: http://plex.media.svc.cluster.local:32400
+              # Must name an existing Plex library: if it's missing, Explo
+              # creates one rooted at DOWNLOAD_DIR as Plex sees it.
+              LIBRARY_NAME: Music
+              DOWNLOAD_DIR: /data/Audio/Music/Explo/
+              DOWNLOAD_SERVICES: slskd,youtube
+              SLSKD_URL: http://slskd.downloads.svc.cluster.local
+              SLSKD_DIR: /data/Downloads/soulseek/complete/
+              SLSKD_MIGRATE_DOWNLOADS: "true"
+              WEEKLY_EXPLORATION_SCHEDULE: 15 00 * * 2
+              WEEKLY_JAMS_SCHEDULE: 30 00 * * 1
+              WEEKLY_JAMS_FLAGS: --playlist=weekly-jams --download-mode=skip
+              DAILY_JAMS_SCHEDULE: 15 01 * * *
+              DAILY_JAMS_FLAGS: --playlist=daily-jams --download-mode=skip
+            envFrom:
+              - secretRef:
+                  name: explo-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: &port 7288
+                  periodSeconds: 20
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 30
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+    defaultPodOptions:
+      securityContext:
+        # start.sh runs as root (cron + yt-dlp self-update), explo itself drops to PUID/PGID
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: explo
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: Explo
+          gethomepage.dev/description: ListenBrainz discovery playlists
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        existingClaim: *app
+        globalMounts:
+          - path: /opt/explo/config
+      data:
+        # same mount as slskd and Plex so paths line up across all three
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /data
