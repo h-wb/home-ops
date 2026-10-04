@@ -63,7 +63,7 @@ spec:
             ),
             'forwarded_for_headers' => array('HTTP_X_FORWARDED_FOR'),
             'overwrite.cli.url' => 'https://nextcloud.${SECRET_DOMAIN}',
-            'overwriteprotocol' => 'https',
+            'overwriteprotocol' => ($_SERVER['HTTP_HOST'] ?? '') === 'nextcloud:8080' ? 'http' : 'https',
             'default_phone_region' => 'FR',
             'maintenance_window_start' => 20,
             'check_data_directory_permissions' => false,
