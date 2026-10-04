@@ -1,0 +1,108 @@
+---
+# The gateway for cloud agents (Claude Code, Codex, a cloud model in Open WebUI):
+# the cluster and the repository, nothing personal. Same group as mcp-gateway, but
+# nothing is advertised unless it is listed here, so a server added to the group
+# later stays private until someone adds it on purpose.
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: VirtualMCPServer
+metadata:
+  name: mcp-ops
+spec:
+  groupRef:
+    name: mcp-tools
+  config:
+    aggregation:
+      conflictResolution: prefix
+      conflictResolutionConfig:
+        prefixFormat: "{workload}_"
+      defaultToolVisibility: deny
+      tools:
+        - workload: kubectl
+        - workload: flux
+        - workload: github
+  incomingAuth:
+    type: anonymous
+  outgoingAuth:
+    source: discovered
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: vmcp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+            limits:
+              memory: 1Gi
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp-ops
+spec:
+  hostnames:
+    - mcp-ops.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    - backendRefs:
+        - name: vmcp-mcp-ops
+          port: 4483
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: mcp-ops-api-key
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-ops
+  apiKeyAuth:
+    credentialRefs:
+      - group: ""
+        kind: Secret
+        name: mcp-ops-api-keys
+    extractFrom:
+      - headers:
+          - x-api-key
+    sanitize: true
+---
+# One key per client, generated in-cluster. Read one with:
+#   kubectl -n llm get secret mcp-ops-api-keys -o jsonpath='{.data.claude-code}' | base64 -d
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: &name mcp-ops-api-keys
+spec:
+  refreshPolicy: CreatedOnce
+  target:
+    name: *name
+    template:
+      engineVersion: v2
+      data:
+        claude-code: "{{ .claudecode }}"
+        codex: "{{ .codex }}"
+        open-webui: "{{ .openwebui }}"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: Password
+          name: mcp-ops-keys
+---
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: Password
+metadata:
+  name: mcp-ops-keys
+spec:
+  length: 48
+  digits: 10
+  symbols: 0
+  noUpper: false
+  allowRepeat: true
+  secretKeys:
+    - claudecode
+    - codex
+    - openwebui

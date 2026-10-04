@@ -6,5 +6,6 @@ resources:
   - ./externalsecret.yaml
   - ./httproute.yaml
   - ./mcpgroup.yaml
+  - ./ops-gateway.yaml
   - ./securitypolicy.yaml
   - ./virtualmcpserver.yaml
