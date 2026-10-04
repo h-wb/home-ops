@@ -10,7 +10,7 @@ spec:
       rules:
         - alert: MeminiAbsent
           expr: |-
-            absent(up{job="memini"} == 1)
+            absent(up{service="memini"} == 1)
           for: 15m
           annotations:
             summary: >-
@@ -19,7 +19,7 @@ spec:
             severity: warning
         - alert: MeminiCodeAbsent
           expr: |-
-            absent(up{job="memini-code"} == 1)
+            absent(up{service="memini-code"} == 1)
           for: 15m
           annotations:
             summary: >-
