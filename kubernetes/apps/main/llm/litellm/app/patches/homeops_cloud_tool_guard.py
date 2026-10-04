@@ -98,11 +98,26 @@ def _ops_name(name):
     return isinstance(name, str) and name.startswith(_OPS_PREFIXES)
 
 
+def _gateway_tool(name):
+    """find_tool/call_tool, with or without a client's server prefix.
+
+    Open WebUI names an MCP tool `<server id>_<tool>`, e.g. `toolhive-ops_call_tool`.
+    The prefix is the client's own label, so it is not trusted for anything.
+    """
+    if not isinstance(name, str):
+        return None
+    for tool in _GATEWAY_TOOLS:
+        if name == tool or name.endswith("_" + tool):
+            return tool
+    return None
+
+
 def _ops_call(name, arguments):
     """True when one tool call is find_tool, or runs a cluster/repository tool."""
-    if name == "find_tool" or _ops_name(name):
+    kind = _gateway_tool(name)
+    if kind == "find_tool" or _ops_name(name):
         return True
-    if name != "call_tool":
+    if kind != "call_tool":
         return False
     try:
         args = json.loads(arguments) if isinstance(arguments, str) else arguments
@@ -123,7 +138,7 @@ def _only_ops_tools(data):
         if not isinstance(tool, dict) or tool.get("type") != "function":
             return False
         name = (tool.get("function") or {}).get("name") or tool.get("name")
-        if name not in _GATEWAY_TOOLS and not _ops_name(name):
+        if not _gateway_tool(name) and not _ops_name(name):
             return False
     items = list(data.get("messages") or [])
     if isinstance(data.get("input"), list):
