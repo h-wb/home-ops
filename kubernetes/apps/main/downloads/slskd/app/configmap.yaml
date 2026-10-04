@@ -37,6 +37,7 @@ data:
     shares:
       directories:
         - /data/Downloads/soulseek/shared
+        - "[Music]/data/Audio/Music"
       filters:
         - \.ini$
         - Thumbs.db$
