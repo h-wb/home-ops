@@ -15,21 +15,6 @@ spec:
       explo:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          init-dirs:
-            image:
-              repository: mirror.gcr.io/library/busybox
-              tag: "1.38"
-            command:
-              - sh
-              - -c
-              - mkdir -p /data/Audio/Music/Explo
-            securityContext:
-              runAsUser: 1000
-              runAsGroup: 1000
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
@@ -44,10 +29,10 @@ spec:
               WEB_ENV_PATH: /opt/explo/config/.env
               EXPLO_SYSTEM: plex
               SYSTEM_URL: http://plex.media.svc.cluster.local:32400
-              # Must name an existing Plex library: if it's missing, Explo
-              # creates one rooted at DOWNLOAD_DIR as Plex sees it.
+              # Must name an existing Plex library that has DOWNLOAD_DIR as one of
+              # its folders: if the library is missing, Explo creates one itself.
               LIBRARY_NAME: Music
-              DOWNLOAD_DIR: /data/Audio/Music/Explo/
+              DOWNLOAD_DIR: /data/Audio/Discover/
               DOWNLOAD_SERVICES: slskd,youtube
               SLSKD_URL: http://slskd.downloads.svc.cluster.local
               SLSKD_DIR: /data/Downloads/soulseek/complete/
