@@ -17,6 +17,15 @@ spec:
               Memini is down or not scraped; agents cannot remember or recall
           labels:
             severity: warning
+        - alert: MeminiCodeAbsent
+          expr: |-
+            absent(up{job="memini-code"} == 1)
+          for: 15m
+          annotations:
+            summary: >-
+              Memini (code) is down or not scraped; the coding agents have no memory
+          labels:
+            severity: warning
         # The only backend is the in-cluster CPU embedder through LiteLLM.
         - alert: MeminiEmbedErrors
           expr: |-
