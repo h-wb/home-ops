@@ -1,0 +1,14 @@
+---
+# memini (agent memory) embeds what it stores. Local embedder only: memories are
+# personal data. Both live in llm, so memini reads the generated secret directly.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: memini
+spec:
+  proxyRef: litellm
+  keyAlias: Memini
+  secretName: litellm-key-memini
+  secretKey: api-key
+  models:
+    - embed

@@ -1,0 +1,22 @@
+---
+# memini's MCP endpoint (remember / recall and friends), reached in-cluster. The
+# key is the named `toolhive` key from memini-secret, bound to the `hugo` namespace.
+#
+# The gateway pod mounts this entry's header secret itself, so if the secret is
+# missing the whole gateway fails to start, not just this backend.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: memini
+spec:
+  remoteUrl: http://memini.llm.svc.cluster.local:8080/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: Authorization
+        valueSecretRef:
+          name: memini-secret
+          key: toolhive-authorization
+  groupRef:
+    name: mcp-tools
