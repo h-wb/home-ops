@@ -28,7 +28,7 @@ spec:
                   name: komf-secret
             resources:
               requests:
-                memory: 4282M
+                memory: 512Mi
                 cpu: 15m
               limits:
                 memory: 4282M
