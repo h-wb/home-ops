@@ -9,6 +9,7 @@ resources:
   # - ./actual/ks.yaml
   - ./airtrail/ks.yaml
   - ./chaski/ks.yaml
+  - ./collabora/ks.yaml
   - ./code-server/ks.yaml
   - ./immich/ks.yaml
   - ./homepage/ks.yaml

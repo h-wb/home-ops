@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app collabora
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      collabora:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: docker.io/collabora/code
+              tag: 26.04.4.2.1
+            env:
+              aliasgroup1: https://nextcloud.${SECRET_DOMAIN}:443
+              aliasgroup2: http://nextcloud:8080
+              server_name: "{{ .Release.Name }}.${SECRET_DOMAIN}:443"
+              DONT_GEN_SSL_CERT: "true"
+              extra_params: >-
+                --o:ssl.enable=false
+                --o:ssl.termination=true
+                --o:admin_console.enable=false
+                --o:mount_jail_tree=false
+                --o:logging.level=warning
+            securityContext:
+              capabilities:
+                add: ["MKNOD"]
+            resources:
+              requests:
+                cpu: 100m
+                memory: 512Mi
+              limits:
+                memory: 2Gi
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /hosting/capabilities
+                    port: &port 9980
+              readiness: *probe
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /hosting/capabilities
+                    port: *port
+                  failureThreshold: 30
+                  periodSeconds: 10
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: http
+            timeouts:
+              request: 0s
