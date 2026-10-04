@@ -23,7 +23,8 @@ spec:
             command:
               - /bin/sh
               - -c
-              - prefect server start
+              # 3.8.7 ships SQLAlchemy 2.1, which breaks the scheduler (PrefectHQ/prefect#23199); drop once fixed
+              - pip install -q 'sqlalchemy[asyncio]<2.1' && prefect server start
             env:
               TZ: Europe/Paris
               PREFECT_UI_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
