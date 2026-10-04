@@ -59,7 +59,10 @@ spec:
               TOOL_SERVER_CONNECTIONS: >-
                 [{"type": "mcp", "url": "http://vmcp-mcp-gateway.llm.svc.cluster.local:4483/mcp",
                 "path": "", "key": "", "auth_type": "none", "config": {"enable": true},
-                "info": {"id": "toolhive", "name": "ToolHive", "description": "kubectl, flux, GitHub, n8n and Metabase"}}]
+                "info": {"id": "toolhive", "name": "ToolHive", "description": "Everything, personal data included. Local models only."}},
+                {"type": "mcp", "url": "http://vmcp-mcp-ops.llm.svc.cluster.local:4483/mcp",
+                "path": "", "key": "", "auth_type": "none", "config": {"enable": true},
+                "info": {"id": "toolhive-ops", "name": "ToolHive Ops", "description": "kubectl, flux and GitHub only. The one cloud models may use."}}]
               ENABLE_WEBSOCKET_SUPPORT: "true"
               WEBSOCKET_MANAGER: "redis"
               WEBSOCKET_REDIS_URL: "redis://open-webui-dragonfly.llm.svc.cluster.local:6379"
