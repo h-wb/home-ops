@@ -20,7 +20,7 @@ spec:
         - workload: kubectl
         - workload: flux
         - workload: github
-        # Only workflows marked "Available in MCP" in n8n are reachable.
+        # Not read-only: can run, edit, archive and unpublish workflows.
         - workload: n8n
     # kubectl alone is 275 tools; clients get find_tool/call_tool instead.
     optimizer:
