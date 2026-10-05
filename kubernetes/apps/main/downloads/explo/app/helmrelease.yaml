@@ -37,6 +37,8 @@ spec:
               SLSKD_URL: http://slskd.downloads.svc.cluster.local
               SLSKD_DIR: /data/Downloads/soulseek/complete/
               SLSKD_MIGRATE_DOWNLOADS: "true"
+              # YouTube fallbacks otherwise arrive with no artwork
+              EMBED_COVER_ART: "true"
               WEEKLY_EXPLORATION_SCHEDULE: 15 00 * * 2
               # one dated playlist + folder per week instead of overwriting
               WEEKLY_EXPLORATION_FLAGS: --replace-playlist=false
