@@ -64,9 +64,9 @@ spec:
               LOCAL_AI_MODEL: chatgpt/gpt-6-luna
               SOURCE_LANGUAGES: '[{"name":"English","code":"en"}]'
               TARGET_LANGUAGES: '[{"name":"French","code":"fr"}]'
-            envFrom:
-              - secretRef:
-                  name: lingarr-secret
+              # No *_API_KEY here: 1.3.0 stores env-supplied keys in plaintext, reads
+              # them back as empty, and re-does so on every start. The LiteLLM, Radarr
+              # and Sonarr keys are set in the UI (stored encrypted in Postgres).
             probes:
               liveness: &probes
                 enabled: true
