@@ -6,8 +6,8 @@
 # Cloud models, deliberately fenced:
 # - only under these explicit aliases, never as a rung of a local pool;
 # - a virtual key must list them to use them;
-# - no tool calling: patches/homeops_cloud_tool_guard.py refuses it, so tool
-#   results (health, location, n8n, the cluster) cannot reach them.
+# - only the mcp-ops tools: patches/homeops_cloud_tool_guard.py refuses the rest,
+#   so tool results (health, location, memory) cannot reach them.
 #
 # Non-streaming requests fail upstream ("Unknown items in responses API response",
 # BerriAI/litellm#37039); patches/homeops_chatgpt_nonstream.py works around it for

@@ -1,6 +1,6 @@
 ---
 # The gateway for cloud agents (Claude Code, Codex, a cloud model in Open WebUI):
-# the cluster and the repository, nothing personal. Same group as mcp-gateway, but
+# the cluster, the repository and n8n, nothing else personal. Same group as mcp-gateway, but
 # nothing is advertised unless it is listed here, so a server added to the group
 # later stays private until someone adds it on purpose.
 apiVersion: toolhive.stacklok.dev/v1beta1
@@ -20,6 +20,8 @@ spec:
         - workload: kubectl
         - workload: flux
         - workload: github
+        # Only workflows marked "Available in MCP" in n8n are reachable.
+        - workload: n8n
     # kubectl alone is 275 tools; clients get find_tool/call_tool instead.
     optimizer:
       embeddingModel: embed
