@@ -1,0 +1,16 @@
+---
+# Key for Lingarr's subtitle translation. On ChatGPT by decision (2026-10-06):
+# movie/show subtitles are not personal data, and translation should not wait for
+# the MacBook. The generated value is copied into the Bitwarden `lingarr` item and
+# pulled back down by lingarr's own ExternalSecret.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: lingarr
+spec:
+  proxyRef: litellm
+  keyAlias: Lingarr
+  secretName: litellm-key-lingarr
+  secretKey: api-key
+  models:
+    - chatgpt/gpt-6-luna

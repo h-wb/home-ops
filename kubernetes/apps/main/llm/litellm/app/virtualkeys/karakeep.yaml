@@ -1,8 +1,8 @@
 ---
 # Key for karakeep's tagging/summaries. Deliberately on ChatGPT, and only ChatGPT:
 # the user decided bookmarks may go to a cloud model (2026-10-03), which also means
-# tagging no longer waits for the MacBook to be awake. It is the one consumer with a
-# cloud model on its key; everything else that holds personal data stays local.
+# tagging no longer waits for the MacBook to be awake. It is the one consumer holding
+# personal data with a cloud model on its key; the rest of them stay local.
 # Embeddings stay on the in-cluster `embed`. The generated value is copied into the
 # Bitwarden `karakeep` item and pulled back down by karakeep's own ExternalSecret.
 apiVersion: litellm.home-operations.com/v1alpha1

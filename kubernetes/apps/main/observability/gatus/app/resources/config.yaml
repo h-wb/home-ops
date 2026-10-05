@@ -69,6 +69,7 @@ endpoints:
   - { name: sonarr-tv,     group: *ag, url: "https://sonarr-tv.${SECRET_DOMAIN}/",     interval: *agi, client: *agc, conditions: *agcond }
   - { name: prowlarr,      group: *ag, url: "https://prowlarr.${SECRET_DOMAIN}/",      interval: *agi, client: *agc, conditions: *agcond }
   - { name: bazarr,        group: *ag, url: "https://bazarr.${SECRET_DOMAIN}/",        interval: *agi, client: *agc, conditions: *agcond }
+  - { name: lingarr,       group: *ag, url: "https://lingarr.${SECRET_DOMAIN}/",       interval: *agi, client: *agc, conditions: *agcond }
 
 metrics: true
 
