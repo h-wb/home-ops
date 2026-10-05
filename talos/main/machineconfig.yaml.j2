@@ -69,6 +69,8 @@ machine:
     disableManifestsDirectory: true
     extraConfig:
       serializeImagePulls: false
+      # per-node pod CIDR is a /24, so stay under 254
+      maxPods: 200
       imageGCHighThresholdPercent: 60
       imageGCLowThresholdPercent: 50
       imageMinimumGCAge: 2m
