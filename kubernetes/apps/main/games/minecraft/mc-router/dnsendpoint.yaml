@@ -11,5 +11,5 @@ spec:
       targets:
         - "ipv4.${SECRET_DOMAIN}"
       providerSpecific:
-        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+        - name: cloudflare/proxied
           value: "false"

@@ -65,7 +65,7 @@ kind: Gateway
 metadata:
   name: envoy-external
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname ${EXTERNAL_DOMAIN}.${SECRET_DOMAIN}
+    external-dns.kubernetes.io/target: &hostname ${EXTERNAL_DOMAIN}.${SECRET_DOMAIN}
     gatus.home-operations.com/endpoint: |-
       client:
         dns-resolver: tcp://1.1.1.1:53
@@ -101,7 +101,7 @@ kind: Gateway
 metadata:
   name: envoy-internal
   annotations:
-    external-dns.alpha.kubernetes.io/target: &hostname ${INTERNAL_DOMAIN}.${SECRET_DOMAIN}
+    external-dns.kubernetes.io/target: &hostname ${INTERNAL_DOMAIN}.${SECRET_DOMAIN}
     gatus.home-operations.com/endpoint: |-
       group: ${CLUSTER}-internal
       guarded: true
@@ -187,7 +187,7 @@ kind: HTTPRoute
 metadata:
   name: https-redirect
   annotations:
-    external-dns.alpha.kubernetes.io/controller: none
+    external-dns.kubernetes.io/controller: none
 spec:
   parentRefs:
     - name: envoy-external
