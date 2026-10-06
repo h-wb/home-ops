@@ -50,7 +50,8 @@ spec:
                 cpu: 10m
                 memory: 384Mi
               limits:
-                memory: 1Gi
+                # ffmpeg (audio sync) spikes past 750Mi on some files
+                memory: 4Gi
           subcleaner:
             image:
               repository: registry.k8s.io/git-sync/git-sync
