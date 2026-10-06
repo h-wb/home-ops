@@ -11,7 +11,6 @@ resources:
   # - ./byparr/ks.yaml
   - ./brrpolice/ks.yaml
   - ./deduparr/ks.yaml
-  - ./explo/ks.yaml
   - ./flaresolverr/ks.yaml
   - ./lingarr/ks.yaml
   - ./musicgrabber/ks.yaml
