@@ -1,0 +1,151 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app sento
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      sento:
+        labels:
+          nfsMount: "true"
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/h-wb/sento
+              tag: sha-cc1b90ce8efbf20f209d018300c0ca062922f86b
+            env:
+              TZ: Europe/Paris
+              SENTO_PORT: &port 8484
+              # /data is the same mount qbittorrent sees, so torrent imports
+              # hardlink and no path mapping is needed
+              SENTO_LIBRARY_PATH: /data/Literature/Manga/Sento
+              SENTO_DOWNLOADS_DIR: /data/Downloads/sento
+              # these three only seed first start; settings saved in the UI win
+              SENTO_EXTENSIONS_URL: http://localhost:8901
+              SENTO_QBITTORRENT_URL: http://qbittorrent.downloads.svc.cluster.local
+              SENTO_PROWLARR_URL: http://prowlarr.downloads.svc.cluster.local
+            envFrom:
+              - secretRef:
+                  name: sento-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /api/v1/system/health
+                    port: *port
+                  initialDelaySeconds: 0
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 1Gi
+          extensions:
+            image:
+              repository: ghcr.io/h-wb/sento-extensions
+              tag: sha-cc1b90ce8efbf20f209d018300c0ca062922f86b
+            env:
+              TZ: Europe/Paris
+              SENTO_EXTENSIONS_PORT: &extensionsPort 8901
+              SENTO_EXTENSIONS_FLARESOLVERR_URL: http://flaresolverr.downloads.svc.cluster.local:8191
+            probes:
+              liveness: &extensionsProbes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *extensionsPort
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *extensionsProbes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /health
+                    port: *extensionsPort
+                  periodSeconds: 5
+                  failureThreshold: 30
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 10m
+                memory: 256Mi
+              limits:
+                memory: 1500Mi
+    defaultPodOptions:
+      imagePullSecrets:
+        - name: sento-ghcr
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: sento
+          gethomepage.dev/group: Downloads
+          gethomepage.dev/name: Sento
+          gethomepage.dev/icon: mdi-book-open-page-variant
+          gethomepage.dev/description: Manga Library Manager
+        hostnames:
+          - "{{ .Release.Name }}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+    persistence:
+      config:
+        existingClaim: *app
+        advancedMounts:
+          sento:
+            app:
+              - path: /config
+      data:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        advancedMounts:
+          sento:
+            app:
+              - path: /data
+      # the sidecar is stateless: sento re-installs extensions onto a fresh one
+      extensions:
+        type: emptyDir
+        advancedMounts:
+          sento:
+            extensions:
+              - path: /data
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp

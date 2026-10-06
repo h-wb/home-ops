@@ -23,6 +23,7 @@ resources:
   - ./radarr/ks.yaml
   - ./radarr-uhd/ks.yaml
   - ./recyclarr/ks.yaml
+  - ./sento/ks.yaml
   - ./slskd/ks.yaml
   - ./soulsync/ks.yaml
   - ./sonarr-tv/ks.yaml
