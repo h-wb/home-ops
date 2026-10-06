@@ -40,8 +40,9 @@ spec:
               # YouTube fallbacks otherwise arrive with no artwork
               EMBED_COVER_ART: "true"
               WEEKLY_EXPLORATION_SCHEDULE: 15 00 * * 2
-              # one dated playlist + folder per week instead of overwriting
-              WEEKLY_EXPLORATION_FLAGS: --replace-playlist=false
+              # --playlist must be explicit: with WEB_UI on, a run without it starts a
+              # second web server and exits. replace=false gives dated playlists.
+              WEEKLY_EXPLORATION_FLAGS: --playlist=weekly-exploration --replace-playlist=false
               WEEKLY_JAMS_SCHEDULE: 30 00 * * 1
               WEEKLY_JAMS_FLAGS: --playlist=weekly-jams --download-mode=skip
               DAILY_JAMS_SCHEDULE: 15 01 * * *
