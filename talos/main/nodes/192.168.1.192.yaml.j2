@@ -17,3 +17,10 @@ machine:
 #  nodeLabels:
 #   topology.kubernetes.io/zone: m
   type: controlplane
+---
+apiVersion: v1alpha1
+kind: EthernetConfig
+name: enp86s0
+rings:
+  # default 256 overflows under bursts (rx_missed_errors)
+  rx: 4096
