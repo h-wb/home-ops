@@ -100,6 +100,9 @@ settings:
   tvdb_language: eng
   verify_ssl: true
   check_nightly: false
+  # v2.5.2 defaults this to 4; keep runs serialized.
+  threading:
+    workers: 1
 
 mdblist:
   apikey: <<MDBLIST_API_KEY>>
