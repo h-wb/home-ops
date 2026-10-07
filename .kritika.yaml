@@ -9,4 +9,4 @@ rules:
   # review has to say what the upgrade breaks, not just read the diff.
   - id: renovate-upgrade
     file: .kritika/renovate.md
-    whenExpr: pr.headRef.startsWith("renovate/")
+    when: [{ expr: pr.headRef.startsWith("renovate/") }]
