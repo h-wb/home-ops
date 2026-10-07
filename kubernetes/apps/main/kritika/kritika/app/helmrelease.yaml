@@ -71,23 +71,23 @@ spec:
         # A small general-purpose embedder scores most chunks of a repo of
         # similar files above the 0.5 default.
         similarFloor: 0.7
-      defaults:
-        models:
-          # No fallback on purpose: out of quota means the pull request waits.
-          # Luna pinned to max reasoning effort (LiteLLM alias); see models/chatgpt.yaml.
-          review: litellm/chatgpt/gpt-6-luna-max
-        feedback: standard
+      review:
+        # No fallback on purpose: out of quota means the pull request waits.
+        # Luna pinned to max reasoning effort (LiteLLM alias); see models/chatgpt.yaml.
+        model: litellm/chatgpt/gpt-6-luna-max
+      trigger:
         # Renovate pushes in bursts (rebases); review the last head once.
         settle: 60s
         # Big generated diffs aren't worth the context; `@<bot> review` still forces one.
-        maxChangedLines: 2000
-        agent:
-          commands: [gh, curl, fd, jq, rg, yq]
-        limits:
-          # Every ChatGPT call costs subscription quota (karakeep shares it), and a
-          # rebase storm should not drain a week of it.
-          reviewsPerDay: 40
-          concurrency: 2
+        exclude:
+          - { name: too-large, expr: pr.lines > 2000 }
+      agent:
+        commands: [gh, curl, fd, jq, rg, yq]
+      limits:
+        # Every ChatGPT call costs subscription quota (karakeep shares it), and a
+        # rebase storm should not drain a week of it.
+        reviewsPerDay: 40
+        concurrency: 2
       repositories:
         # kritika is the approval the main-require-review ruleset needs (it replaced
         # the Claude Code "Renovate PR Review" workflow on 2026-10-03): a review with
@@ -95,7 +95,7 @@ spec:
         # finds something withdraws it. Majors and high-blast-radius packages still
         # wait for a human, because Renovate does not auto-merge them.
         h-wb/home-ops:
-          approve: true
+          review: { approve: true }
           rules:
             # The gate's minimum, kept here rather than in the repository: files in
             # the repository are read from each pull request's merge base, so a
@@ -103,7 +103,7 @@ spec:
             # Renovate rules at all (that happened on kritika's first run). The
             # longer checklist is .kritika/renovate.md.
             - id: renovate-gate
-              whenExpr: pr.headRef.startsWith("renovate/")
+              when: [{ expr: pr.headRef.startsWith("renovate/") }]
               rule: >-
                 This is a Renovate dependency update and your review decides whether
                 it auto-merges. Do not judge it from the diff alone. Fetch the
@@ -124,7 +124,7 @@ spec:
       egress:
         # Where the agent's curl/gh may go for release notes, changelogs and charts.
         # github.com and api.github.com are allowed by the app itself.
-        allowHosts:
+        allow:
           - "*.githubusercontent.com"
           - "*.github.io"
           - artifacthub.io
