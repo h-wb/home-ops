@@ -20,7 +20,7 @@ secrets:
 
 services:
   doco-cd:
-    image: ghcr.io/kimdre/doco-cd:0.123.0
+    image: ghcr.io/kimdre/doco-cd:0.124.0
     container_name: doco-cd
     restart: unless-stopped
     environment:
@@ -47,7 +47,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/ssd-storage/docker/doco-cd/data:/data
     healthcheck:
-      test: ["CMD", "/doco-cd", "healthcheck"]
+      test: ["CMD", "/healthcheck"]
       start_period: 15s
       interval: 30s
       timeout: 5s
