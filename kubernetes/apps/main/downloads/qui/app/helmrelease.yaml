@@ -44,8 +44,9 @@ spec:
             resources:
               requests:
                 cpu: 10m
+                memory: 256Mi
               limits:
-                memory: 512Mi
+                memory: 1Gi
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
@@ -79,3 +80,10 @@ spec:
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
+      # same path as the qbittorrent instances: hardlink detection + orphan scan
+      downloads:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        globalMounts:
+          - path: /data
