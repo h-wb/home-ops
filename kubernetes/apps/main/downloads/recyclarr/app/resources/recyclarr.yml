@@ -115,11 +115,13 @@ sonarr:
       - trash_id: 4c48f506c1116a3a57ae33f12346bd15 # [French MULTi.VO] HD Bluray + WEB (1080p)
         name: FR-MULTi-VO-WEB-1080p
     custom_formats:
+      # x265 is only wanted from trusted groups: the hand-made Sonarr format "x265 Trusted Groups"
+      # (+1101, not managed here) offsets this for them, leaving a net +101 over x264.
       - trash_ids:
           - 47435ece6b99a0b477caf360e79ba0bb # x265 (HD)
         assign_scores_to:
           - name: FR-MULTi-VO-WEB-1080p
-            score: 101
+            score: -1000
       - trash_ids:
           - 9b64dff695c2115facf1b6ea59c9bd07 # x265 (no HDR/DV)
         assign_scores_to:
@@ -166,8 +168,23 @@ sonarr:
       - trash_id: 20e0fc959f1f1704bed501f23bdae76f # [Anime] Remux-1080p
         name: Anime-1080p
         # good enough is enough: stop at a WEB release with official subs (Web Tier 04 = 300).
-        # Bluray/Remux stay allowed so existing files are not treated as unwanted.
+        # Bluray encodes stay allowed but are not chased once a WEB release is in.
         upgrade:
           allowed: true
           until_quality: WEB 1080p
           until_score: 300
+        # guide list minus remux (6.5 GB/episode)
+        qualities:
+          - name: Bluray-1080p
+          - name: WEB 1080p
+            qualities: [WEBDL-1080p, WEBRip-1080p, HDTV-1080p]
+          - name: Bluray-720p
+          - name: WEB 720p
+            qualities: [WEBDL-720p, WEBRip-720p, HDTV-720p]
+          - name: Bluray-480p
+          - name: WEB 480p
+            qualities: [WEBDL-480p, WEBRip-480p]
+          - name: DVD
+          - name: SDTV
+          - name: Bluray-1080p Remux
+            enabled: false
