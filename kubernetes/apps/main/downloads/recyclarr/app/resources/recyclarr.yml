@@ -164,4 +164,10 @@ sonarr:
       type: anime
     quality_profiles:
       - trash_id: 20e0fc959f1f1704bed501f23bdae76f # [Anime] Remux-1080p
-        name: Anime-Remux-1080p
+        name: Anime-1080p
+        # good enough is enough: stop at a WEB release with official subs (Web Tier 04 = 300).
+        # Bluray/Remux stay allowed so existing files are not treated as unwanted.
+        upgrade:
+          allowed: true
+          until_quality: WEB 1080p
+          until_score: 300
