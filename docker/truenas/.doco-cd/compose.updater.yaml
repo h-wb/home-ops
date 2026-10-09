@@ -8,7 +8,7 @@ name: doco-cd-updater
 
 services:
   doco-cd-updater:
-    image: ghcr.io/kimdre/doco-cd:0.124.0
+    image: ghcr.io/kimdre/doco-cd:0.125.0
     container_name: doco-cd-updater
     restart: unless-stopped
     environment:
