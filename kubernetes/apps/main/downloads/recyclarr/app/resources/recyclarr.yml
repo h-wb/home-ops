@@ -1,7 +1,8 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
 # Profiles come from the TRaSH guide by trash_id; custom_formats below only override scores.
-# French audio scoring: prefer VFF/VF2, avoid VFQ, penalise releases without French.
+# French audio scoring: avoid VFQ, penalise releases without French.
+# VFF/VF2 stay at 0: C411 adds those tags to its titles, so a bonus made the same release look like an upgrade.
 radarr:
   radarr:
     base_url: http://radarr.downloads.svc.cluster.local
@@ -40,7 +41,7 @@ radarr:
           - 29b5f7b1a5f20f64228786c3ab1bdc7d # VF2
         assign_scores_to:
           - name: FR-MULTi-VO-HD
-            score: 101
+            score: 0
       - trash_ids:
           - b6ace47331a1d3b77942fc18156f6df6 # VFQ
         assign_scores_to:
@@ -95,7 +96,7 @@ radarr:
           - 29b5f7b1a5f20f64228786c3ab1bdc7d # VF2
         assign_scores_to:
           - name: FR-MULTi-VO-UHD
-            score: 101
+            score: 0
       - trash_ids:
           - b6ace47331a1d3b77942fc18156f6df6 # VFQ
         assign_scores_to:
@@ -148,7 +149,7 @@ sonarr:
           - 34789ec3caa819f087e23bbf9999daf7 # VF2
         assign_scores_to:
           - name: FR-MULTi-VO-WEB-1080p
-            score: 101
+            score: 0
       - trash_ids:
           - 7a7f4e4f58bd1058440236d033a90b67 # VFQ
         assign_scores_to:
