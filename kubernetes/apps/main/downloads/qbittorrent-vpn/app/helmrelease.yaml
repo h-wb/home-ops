@@ -66,6 +66,9 @@ spec:
               TZ: Europe/Paris
               UMASK: "022"
               QBT_WEBUI_PORT: &port 8080
+              # bind to the tunnel: with "any", qBittorrent can start before tun0 and never listen on it
+              QBT_BitTorrent__Session__Interface: tun0
+              QBT_BitTorrent__Session__InterfaceName: tun0
             probes:
               liveness:
                 enabled: true
