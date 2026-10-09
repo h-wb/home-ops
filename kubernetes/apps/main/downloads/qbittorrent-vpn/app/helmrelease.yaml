@@ -13,6 +13,8 @@ spec:
   values:
     controllers:
       qbittorrent-vpn:
+        annotations:
+          reloader.stakater.com/auto: "true"
         pod:
           securityContext:
             fsGroup: 1000
@@ -39,7 +41,7 @@ spec:
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{`{{PORTS}}`}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
             envFrom:
               - secretRef:
-                  name: qbittorrent-secret
+                  name: qbittorrent-vpn-secret
             resources:
               limits:
                 squat.ai/tun: 1
@@ -59,8 +61,9 @@ spec:
             nameOverride: qbittorrent-vpn
             image:
               repository: ghcr.io/home-operations/qbittorrent
-              tag: 5.2.4
+              tag: 5.2.4@sha256:9307627e03981d5473aa31175ea76ed56ea3752333ca49d601b6af45e281e7ba
             env:
+              TZ: Europe/Paris
               UMASK: "022"
               QBT_WEBUI_PORT: &port 8080
             probes:
@@ -75,8 +78,8 @@ spec:
                   periodSeconds: 5
             resources:
               requests:
-                cpu: 200m
-                memory: 2Gi
+                cpu: 50m
+                memory: 512Mi
               limits:
                 memory: 10Gi
             securityContext:
@@ -118,12 +121,6 @@ spec:
         advancedMounts:
           qbittorrent-vpn:
             app:
-              - path: /config
-      empty-config:
-        type: emptyDir
-        advancedMounts:
-          qbittorrent-vpn:
-            port-forward:
               - path: /config
       downloads:
         type: nfs

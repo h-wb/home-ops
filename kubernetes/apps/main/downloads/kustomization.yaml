@@ -17,7 +17,6 @@ resources:
   - ./prowlarr/ks.yaml
   - ./qbittorrent/ks.yaml
   - ./qbittorrent-vpn/ks.yaml
-  - ./qbittorrent-vpn-2/ks.yaml
   - ./questarr/ks.yaml
   - ./qui/ks.yaml
   - ./radarr/ks.yaml
