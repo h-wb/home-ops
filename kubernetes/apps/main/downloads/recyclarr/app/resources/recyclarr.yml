@@ -2,7 +2,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/recyclarr/recyclarr/master/schemas/config-schema.json
 # Profiles come from the TRaSH guide by trash_id; custom_formats below only override scores.
 # French audio scoring: avoid VFQ, penalise releases without French.
-# VFF/VF2 stay at 0: C411 adds those tags to its titles, so a bonus made the same release look like an upgrade.
+# VFF/VF2 are worth 1 point, below min_upgrade_format_score (2): a tiebreak when picking, never a reason to
+# re-grab. C411 adds those tags to its titles, so a real bonus made the same release look like an upgrade.
 radarr:
   radarr:
     base_url: http://radarr.downloads.svc.cluster.local
@@ -13,6 +14,7 @@ radarr:
     quality_profiles:
       - trash_id: 2572ce3ea4eef1c19d59e0e20ed1cea7 # [French MULTi.VO] HD Bluray + WEB
         name: FR-MULTi-VO-HD
+        min_upgrade_format_score: 2
     custom_formats:
       - trash_ids:
           - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
@@ -41,7 +43,7 @@ radarr:
           - 29b5f7b1a5f20f64228786c3ab1bdc7d # VF2
         assign_scores_to:
           - name: FR-MULTi-VO-HD
-            score: 0
+            score: 1
       - trash_ids:
           - b6ace47331a1d3b77942fc18156f6df6 # VFQ
         assign_scores_to:
@@ -65,6 +67,7 @@ radarr:
     quality_profiles:
       - trash_id: 92ead7022d13a7858d54e328e6a2f8f9 # [French MULTi.VO] UHD Bluray + WEB
         name: FR-MULTi-VO-UHD
+        min_upgrade_format_score: 2
     custom_formats:
       - trash_ids: # guide default score
           - 923b6abef9b17f937fab56cfcf89e1f1 # DV (w/o HDR fallback)
@@ -96,7 +99,7 @@ radarr:
           - 29b5f7b1a5f20f64228786c3ab1bdc7d # VF2
         assign_scores_to:
           - name: FR-MULTi-VO-UHD
-            score: 0
+            score: 1
       - trash_ids:
           - b6ace47331a1d3b77942fc18156f6df6 # VFQ
         assign_scores_to:
@@ -121,6 +124,7 @@ sonarr:
     quality_profiles:
       - trash_id: 4c48f506c1116a3a57ae33f12346bd15 # [French MULTi.VO] HD Bluray + WEB (1080p)
         name: FR-MULTi-VO-WEB-1080p
+        min_upgrade_format_score: 2
     custom_formats:
       # x265 is only wanted from trusted groups: the hand-made Sonarr format "x265 Trusted Groups"
       # (+1101, not managed here) offsets this for them, leaving a net +101 over x264.
@@ -149,7 +153,7 @@ sonarr:
           - 34789ec3caa819f087e23bbf9999daf7 # VF2
         assign_scores_to:
           - name: FR-MULTi-VO-WEB-1080p
-            score: 0
+            score: 1
       - trash_ids:
           - 7a7f4e4f58bd1058440236d033a90b67 # VFQ
         assign_scores_to:
