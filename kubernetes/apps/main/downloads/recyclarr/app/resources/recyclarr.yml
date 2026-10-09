@@ -24,6 +24,12 @@ radarr:
         assign_scores_to:
           - name: FR-MULTi-VO-HD
             score: -10000
+      # nameless releases are the smallest re-encodes: let any named group win, without rejecting them
+      - trash_ids:
+          - ae9b7c9ebde1f3bd336a8cbd1ec4c5e5 # No-RlsGroup
+        assign_scores_to:
+          - name: FR-MULTi-VO-HD
+            score: -200
       - trash_ids:
           - 533f782474f0819643c2ec0c1eeeb0ac # Language: Not French
         assign_scores_to:
