@@ -12,15 +12,7 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/zeroscaler
-    # kopiur/backup component dropped 2026-08-21: its PVC always sets
-    # dataSourceRef to a Restore, which is immutable once set and cannot be
-    # patched away per-app (components merge one level above where app/
-    # patches apply, and ks.yaml-level patches get clobbered by cluster-apps'
-    # global default patch). PVC repeatedly corrupted with SQLite disk I/O
-    # errors surviving pod/volume restarts, so SnapshotPolicy/SnapshotSchedule
-    # are inlined below (still backing up going forward) but the PVC is
-    # plain/local, wiped fresh instead of restored - banned-peer state is
-    # cheap to rebuild, not worth chasing further.
+    - ../../../../../components/kopiur/backup
   path: ./kubernetes/apps/main/downloads/brrpolice/app
   prune: true
   sourceRef:
