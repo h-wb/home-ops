@@ -11,11 +11,30 @@ radarr:
     delete_old_custom_formats: true
     quality_definition:
       type: movie
+      # MB per minute. The guide minimum for Bluray (50) rejects most French HDLight and x265 encodes.
+      # preferred breaks ties towards ~3 GB/hour without forbidding anything bigger.
+      qualities:
+        - name: Bluray-1080p
+          min: 12
+          preferred: 50
+        - name: WEBDL-1080p
+          min: 12
+          preferred: 50
+        - name: WEBRip-1080p
+          min: 12
+          preferred: 50
     quality_profiles:
       - trash_id: 2572ce3ea4eef1c19d59e0e20ed1cea7 # [French MULTi.VO] HD Bluray + WEB
         name: FR-MULTi-VO-HD
         min_upgrade_format_score: 2
+        # a tiered group with MULTi (1500 + 500) is the goal: stop there instead of chasing 10000
+        upgrade:
+          allowed: true
+          until_quality: Bluray|WEB 1080p
+          until_score: 2000
     custom_formats:
+      # hand-made in Radarr, not managed here: "x265 Trusted Groups" (+1500) and
+      # "No-RlsGroup (notag)" (-200, groups literally named notag/nogroup)
       - trash_ids:
           - dc98083864ea246d05a42df0d05f81cc # x265 (HD)
           - 839bea857ed2c0a8e084f3cbdbd65ecb # x265 (no HDR/DV)
@@ -68,6 +87,11 @@ radarr:
       - trash_id: 92ead7022d13a7858d54e328e6a2f8f9 # [French MULTi.VO] UHD Bluray + WEB
         name: FR-MULTi-VO-UHD
         min_upgrade_format_score: 2
+        # WEB tier + MULTi + HDR + DD+ (1700 + 500 + 500 + 1750)
+        upgrade:
+          allowed: true
+          until_quality: Bluray|WEB 2160p
+          until_score: 4450
     custom_formats:
       - trash_ids: # guide default score
           - 923b6abef9b17f937fab56cfcf89e1f1 # DV (w/o HDR fallback)
@@ -121,13 +145,26 @@ sonarr:
     delete_old_custom_formats: true
     quality_definition:
       type: series
+      # MB per minute: guide minimums reject the trusted x265 season packs
+      qualities:
+        - name: Bluray-1080p
+          min: 10
+        - name: WEBDL-1080p
+          min: 10
+        - name: WEBRip-1080p
+          min: 10
     quality_profiles:
       - trash_id: 4c48f506c1116a3a57ae33f12346bd15 # [French MULTi.VO] HD Bluray + WEB (1080p)
         name: FR-MULTi-VO-WEB-1080p
         min_upgrade_format_score: 2
+        # a trusted x265 with MULTi (2000 + 500) is the goal
+        upgrade:
+          allowed: true
+          until_quality: Bluray|WEB 1080p
+          until_score: 2500
     custom_formats:
       # x265 is only wanted from trusted groups: the hand-made Sonarr format "x265 Trusted Groups"
-      # (+1101, not managed here) offsets this for them, leaving a net +101 over x264.
+      # (+3000, not managed here) offsets this for them, a net +2000 that beats any x264 tier.
       - trash_ids:
           - 47435ece6b99a0b477caf360e79ba0bb # x265 (HD)
         assign_scores_to:
