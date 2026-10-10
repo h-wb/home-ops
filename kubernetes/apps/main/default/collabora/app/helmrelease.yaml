@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: docker.io/collabora/code
-              tag: 26.04.4.2.1
+              tag: 26.04.5.1.1
             env:
               aliasgroup1: https://nextcloud.${SECRET_DOMAIN}:443
               aliasgroup2: http://nextcloud:8080
