@@ -32,6 +32,7 @@ spec:
     resources:
       requests:
         cpu: 200m
+        memory: 3Gi
       limits:
         cpu: 2000m
         memory: 4Gi
@@ -51,7 +52,7 @@ spec:
         enabled: true
         existingClaim: *app
     serviceAnnotations:
-      mc-router.itzg.me/externalServerName: minecraft.${SECRET_DOMAIN}
+      mc-router.itzg.me/externalServerName: mc.${SECRET_DOMAIN}
     minecraftServer:
       autopauseTimeoutEst: 600
       autopauseTimeoutInit: 300
@@ -60,23 +61,21 @@ spec:
       enableWhitelist: true
       eula: true
       forceGamemode: true
-      jvmXxOpts: "-XX:MaxRAMPercentage=75"
       maxBuildHeight: 320
       maxTickTime: -1
       maxWorldSize: 29999984
-      memory: 8192M
+      memory: 3G
       mode: survival
       motd: "Chocoboco - Minecraft Server"
       ops: "Sahru"
       overrideIcon: true
-      paperChannel: experimental
       serverName: Chocoboco
       skipSudo: true
       spawnProtection: 0
       spigetResources:
         - 36618
       type: PAPER
-      version: "1.21.6"
+      version: "26.2"
       viewDistance: 12
       whitelist: "Sahru"
       modrinth:
@@ -95,10 +94,10 @@ spec:
         # Specifies whether to download Modrinth dependencies. The allowed values are: none, required, optional
         downloadDependencies: required
         # The version type is used to determine the newest version to use from each project. The allowed values are: release, beta, alpha
-        allowedVersionType: alpha
+        allowedVersionType: release
       rcon:
         enabled: true
-      serviceType: LoadBalancer
+      serviceType: ClusterIP
       extraPorts:
         - name: map
           containerPort: 8100

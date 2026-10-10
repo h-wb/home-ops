@@ -8,9 +8,8 @@ spec:
   hostnames:
     - "map.${SECRET_DOMAIN}"
   parentRefs:
-    - name: external
-      namespace: kube-system
-      sectionName: https
+    - name: envoy-external
+      namespace: network
   rules:
     - backendRefs:
         - name: minecraft-map
