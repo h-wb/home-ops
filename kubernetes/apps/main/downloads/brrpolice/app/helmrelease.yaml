@@ -3,7 +3,7 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app brrpolice
+  name: ${APP}
 spec:
   interval: 1h
   chartRef:
@@ -12,7 +12,7 @@ spec:
   dependsOn: []
   values:
     controllers:
-      brrpolice:
+      ${APP}:
         containers:
           app:
             image:
@@ -21,7 +21,7 @@ spec:
             env:
               BRRPOLICE_HTTP__PORT: &port 80
               BRRPOLICE_LOGGING__LEVEL: info
-              BRRPOLICE_QBITTORRENT__BASE_URL: http://qbittorrent.downloads.svc.cluster.local
+              BRRPOLICE_QBITTORRENT__BASE_URL: ${BRRPOLICE_QBITTORRENT_URL}
               TZ: Europe/Paris
             probes:
               liveness:
@@ -68,4 +68,4 @@ spec:
           - port: http
     persistence:
       data:
-        existingClaim: *app
+        existingClaim: ${APP}

@@ -1,5 +1,7 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# One brrpolice watches one qBittorrent, so each instance gets its own from
+# the same HelmRelease. ./vpn reuses it without the shared dashboard.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -29,3 +31,36 @@ spec:
       NAMESPACE: *namespace
       KOPIUR_SCHEDULE: "44 * * * *"
       KOPIUR_CAPACITY: 1Gi
+      BRRPOLICE_QBITTORRENT_URL: http://qbittorrent.downloads.svc.cluster.local
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app brrpolice-vpn
+  namespace: &namespace downloads
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/zeroscaler
+    - ../../../../../components/kopiur/backup
+  path: ./kubernetes/apps/main/downloads/brrpolice/vpn
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: false # no flux ks dependents
+  interval: 30m
+  retryInterval: 1m
+  timeout: 5m
+  postBuild:
+    substitute:
+      APP: *app
+      NAMESPACE: *namespace
+      KOPIUR_SCHEDULE: "47 * * * *"
+      KOPIUR_CAPACITY: 1Gi
+      BRRPOLICE_QBITTORRENT_URL: http://qbittorrent-vpn.downloads.svc.cluster.local:8080
