@@ -36,9 +36,10 @@ spec:
       limits:
         cpu: 2000m
         memory: 4Gi
-    securityContext:
+    podSecurityContext:
       runAsUser: 1000
-      fsGroup: 100
+      runAsGroup: 1000
+      fsGroup: 1000
     livenessProbe:
       initialDelaySeconds: 30
     readinessProbe:
