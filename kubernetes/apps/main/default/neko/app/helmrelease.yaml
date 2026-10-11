@@ -74,6 +74,11 @@ spec:
               NEKO_MEMBER_OAUTH_NAME: Kanidm
               NEKO_MEMBER_OAUTH_ISSUER_URL: https://idm.${SECRET_DOMAIN}/oauth2/openid/neko
               NEKO_MEMBER_OAUTH_CLIENT_ID: *app
+              # Non-admins (kanidm `guests`) are view-only.
+              NEKO_MEMBER_OAUTH_USER_PROFILE: >-
+                {"is_admin":false,"can_login":true,"can_connect":true,"can_watch":true,
+                "can_host":false,"can_share_media":false,"can_access_clipboard":false,
+                "sends_inactive_cursor":false,"can_see_inactive_cursors":false}
               NEKO_MEMBER_OAUTH_CLIENT_SECRET:
                 valueFrom:
                   secretKeyRef:
