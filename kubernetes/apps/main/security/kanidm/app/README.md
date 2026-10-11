@@ -7,8 +7,9 @@ home-ops conventions (Bitwarden Secrets Manager, Envoy Gateway, cert-manager, ce
 - **TLS:** Kanidm terminates its own TLS (mandatory — it won't serve plaintext). cert-manager
   `Certificate/idm` → secret `idm-tls` mounted at `/certs`. A `BackendTLSPolicy` makes Envoy
   **re-encrypt** to the HTTPS backend and validate the LE cert (`wellKnownCACertificates: System`).
-- **Storage:** `/data` on a `ceph-block` PVC (app-template VolumeClaimTemplate, 2Gi). Backups are
-  handled in-app (`[online_backup]` in `server.toml`), not Volsync.
+- **Storage:** `/data` on the `kanidm` `ceph-block` PVC from the kopiur backup component (2Gi,
+  hourly snapshots, restored automatically on a rebuild). In-app `[online_backup]` dumps land in
+  `/data/backups` and ride along in each snapshot.
 - **Provisioning:** `m00nwtchr/kanidm-provision` runs as a second controller — declarative groups
   and OAuth2 clients from ConfigMaps labelled `kanidm_config: "1"`, writing generated client
   secrets back into the target namespace. Shipped at `replicas: 0` until the token existed; now `1`.

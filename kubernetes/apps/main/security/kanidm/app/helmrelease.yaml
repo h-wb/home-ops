@@ -103,9 +103,7 @@ spec:
                   - ALL
     persistence:
       data:
-        accessMode: ReadWriteOnce
-        size: 2Gi
-        storageClass: ceph-block
+        existingClaim: kanidm
         advancedMounts:
           kanidm:
             app:
