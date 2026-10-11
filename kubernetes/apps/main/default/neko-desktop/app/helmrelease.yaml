@@ -67,6 +67,8 @@ spec:
               # Native OIDC (neko >= 3.1.6) against kanidm. The callback is
               # derived from the request host, so both hostnames work.
               NEKO_MEMBER_PROVIDER: oauth
+              # Off by default despite the docs; oauth login 503s without it.
+              NEKO_SESSION_COOKIE_ENABLED: "true"
               NEKO_MEMBER_OAUTH_ENABLED: "true"
               NEKO_MEMBER_OAUTH_AUTO_REDIRECT: "true"
               NEKO_MEMBER_OAUTH_NAME: Kanidm
