@@ -5,8 +5,6 @@ kind: HelmRelease
 metadata:
   name: &app neko
 spec:
-  # TEMP: held while /home/neko is copied over from the old neko-desktop PVC.
-  suspend: true
   interval: 30m
   chartRef:
     kind: OCIRepository
