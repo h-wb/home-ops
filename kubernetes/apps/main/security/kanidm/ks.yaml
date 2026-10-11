@@ -6,6 +6,8 @@ metadata:
   name: &app kanidm
 spec:
   targetNamespace: security
+  components:
+    - ../../../../../components/kopiur/backup
   dependsOn:
     - name: cert-manager
       namespace: cert-manager
@@ -15,6 +17,10 @@ spec:
     substitute:
       APP: *app
       SUBDOMAIN: idm
+      KOPIUR_CAPACITY: 2Gi
+      KOPIUR_SCHEDULE: "12 * * * *"
+      KOPIUR_PUID: "2000"
+      KOPIUR_PGID: "2000"
   prune: true
   sourceRef:
     kind: GitRepository
