@@ -3,8 +3,10 @@
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
-  name: &app neko-desktop
+  name: &app neko
 spec:
+  # TEMP: held while /home/neko is copied over from the old neko-desktop PVC.
+  suspend: true
   interval: 30m
   chartRef:
     kind: OCIRepository
@@ -20,7 +22,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       resourceClaims:
         - name: gpu
-          resourceClaimTemplateName: neko-desktop-gpu
+          resourceClaimTemplateName: neko-gpu
       # None + explicit config, because the sidecar has to come first. 10.43.0.10
       # is listed second so DNS still works if the sidecar is unhealthy: a refused
       # connection on 127.0.0.1 falls through to the next nameserver, where an
@@ -47,7 +49,7 @@ spec:
           - name: ndots
             value: "1"
     controllers:
-      neko-desktop:
+      neko:
         replicas: 1
         # A desktop holds unsaved state; never run two against one RWO volume.
         strategy: Recreate
@@ -72,12 +74,12 @@ spec:
               NEKO_MEMBER_OAUTH_ENABLED: "true"
               NEKO_MEMBER_OAUTH_AUTO_REDIRECT: "true"
               NEKO_MEMBER_OAUTH_NAME: Kanidm
-              NEKO_MEMBER_OAUTH_ISSUER_URL: https://idm.${SECRET_DOMAIN}/oauth2/openid/neko-desktop
+              NEKO_MEMBER_OAUTH_ISSUER_URL: https://idm.${SECRET_DOMAIN}/oauth2/openid/neko
               NEKO_MEMBER_OAUTH_CLIENT_ID: *app
               NEKO_MEMBER_OAUTH_CLIENT_SECRET:
                 valueFrom:
                   secretKeyRef:
-                    name: kanidm-neko-desktop-oidc
+                    name: kanidm-neko-oidc
                     key: client-secret
               # 5101 belongs to the firefox instance; this needs its own mux
               # port forwarded on the Freebox (TCP *and* UDP).
@@ -97,7 +99,7 @@ spec:
               NEKO_DESKTOP_FILE_CHOOSER_DIALOG: "true"
             envFrom:
               - secretRef:
-                  name: neko-desktop-secret
+                  name: neko-secret
             resources:
               claims:
                 - name: gpu
@@ -150,9 +152,9 @@ spec:
       app:
         annotations:
           gethomepage.dev/enabled: "true"
-          gethomepage.dev/app: neko-desktop
+          gethomepage.dev/app: neko
           gethomepage.dev/group: Tools
-          gethomepage.dev/name: Neko Desktop
+          gethomepage.dev/name: Neko
           gethomepage.dev/icon: xfce.png
           gethomepage.dev/description: Remote XFCE desktop
         hostnames:
@@ -171,19 +173,19 @@ spec:
       # session start. subPath mounts, because mounting a whole ConfigMap over
       # /etc/xdg/autostart would hide XFCE's own entries and break the session.
       dns:
-        name: neko-desktop-dns
+        name: neko-dns
         type: configMap
         advancedMounts:
-          neko-desktop:
+          neko:
             dns:
               - path: /etc/coredns/Corefile
                 readOnly: true
                 subPath: Corefile
       provision:
-        name: neko-desktop-provision
+        name: neko-provision
         type: configMap
         advancedMounts:
-          neko-desktop:
+          neko:
             app:
               - path: /usr/local/bin/neko-provision
                 readOnly: true

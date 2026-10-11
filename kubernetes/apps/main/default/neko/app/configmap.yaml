@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: neko-desktop-provision
+  name: neko-provision
   annotations:
     # This ConfigMap is a shell script, and ks.yaml runs Flux post-build
     # substitution over everything it renders — in strict mode, so every
@@ -55,7 +55,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: neko-desktop-dns
+  name: neko-dns
 data:
   # Per-domain DNS routing for this pod, which is what /etc/resolver/<domain>
   # gives a Mac. Kubernetes has no per-domain equivalent: dnsConfig is an ordered

@@ -5,13 +5,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: neko-desktop-ankiconnect
+  name: neko-ankiconnect
 spec:
   type: ClusterIP
   selector:
-    app.kubernetes.io/controller: neko-desktop
-    app.kubernetes.io/instance: neko-desktop
-    app.kubernetes.io/name: neko-desktop
+    app.kubernetes.io/controller: neko
+    app.kubernetes.io/instance: neko
+    app.kubernetes.io/name: neko
   ports:
     - name: http
       port: 8765

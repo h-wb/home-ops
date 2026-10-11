@@ -21,7 +21,7 @@ resources:
   # - ./strava-statistics/ks.yaml
   # - ./fusion/ks.yaml
   - ./ghostfolio/ks.yaml
-  - ./neko-desktop/ks.yaml
+  - ./neko/ks.yaml
   - ./nextcloud/ks.yaml
   - ./obsidian/ks.yaml
   - ./smart-life-webapp/ks.yaml
