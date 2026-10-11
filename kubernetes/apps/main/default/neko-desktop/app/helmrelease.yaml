@@ -64,6 +64,19 @@ spec:
               NEKO_LEGACY: "true"
               NEKO_DESKTOP_SCREEN: 1920x1080@60
               NEKO_SERVER_PROXY: "true"
+              # Native OIDC (neko >= 3.1.6) against kanidm. The callback is
+              # derived from the request host, so both hostnames work.
+              NEKO_MEMBER_PROVIDER: oauth
+              NEKO_MEMBER_OAUTH_ENABLED: "true"
+              NEKO_MEMBER_OAUTH_AUTO_REDIRECT: "true"
+              NEKO_MEMBER_OAUTH_NAME: Kanidm
+              NEKO_MEMBER_OAUTH_ISSUER_URL: https://idm.${SECRET_DOMAIN}/oauth2/openid/neko-desktop
+              NEKO_MEMBER_OAUTH_CLIENT_ID: *app
+              NEKO_MEMBER_OAUTH_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: kanidm-neko-desktop-oidc
+                    key: client-secret
               # 5101 belongs to the firefox instance; this needs its own mux
               # port forwarded on the Freebox (TCP *and* UDP).
               NEKO_WEBRTC_TCPMUX: &mux "5102"
