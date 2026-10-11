@@ -35,7 +35,7 @@ spec:
       OIDC_EXTRA_CALLBACKS: '["https://nkd.${SECRET_DOMAIN}/api/oauth/callback"]'
       # Not `users`: neko lets any authenticated user take control.
       OIDC_GROUP: admins
-      OIDC_SCOPE_MAPS: '{"neko-users":["openid","profile","email"]}'
+      OIDC_SCOPE_MAPS: '{"guests":["openid","profile","email"]}'
       # ssv, not array: neko only reads isAdmin as a bool or the string "true".
       OIDC_CLAIM_MAPS: '{"isAdmin":{"joinType":"ssv","valuesByGroup":{"admins":["true"]}}}'
   prune: true
