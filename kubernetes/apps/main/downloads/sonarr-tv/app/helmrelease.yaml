@@ -23,7 +23,10 @@ spec:
               # linuxserver until home-operations publishes a v5 build
               repository: ghcr.io/linuxserver/sonarr
               tag: develop-5.0.0.2569-ls193@sha256:2c1e9317f330e84a4c6e8c9295361b3a9ae425786295d8b3cfd12c7cbc008f53
+            # skip s6-overlay: its preinit can't own /run without root
+            command: ["/app/sonarr/bin/Sonarr", "-nobrowser", "-data=/config"]
             env:
+              TMPDIR: /tmp
               SONARR__APP__INSTANCENAME: Sonarr-TV
               SONARR__APP__THEME: dark
               SONARR__AUTH__METHOD: External
@@ -95,9 +98,6 @@ spec:
       config:
         existingClaim: *app
       tmp:
-        type: emptyDir
-      # s6-overlay needs a writable /run on a read-only rootfs
-      run:
         type: emptyDir
       data:
         type: nfs
