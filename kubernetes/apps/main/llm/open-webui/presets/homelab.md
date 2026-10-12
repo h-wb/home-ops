@@ -15,6 +15,13 @@ Live location history, no SQL needed:
 - `dawarich_get_timeline` (`start_at`, `end_at` as ISO dates; at most 7 days): visits and journeys for a short range, e.g. "where was I last Saturday?".
 For longer ranges, count matches with `dawarich_search_visits` (it returns `total_count`) or call `dawarich_get_timeline` in consecutive 7-day windows.
 
+## Money and budget → YNAB tools
+The user's YNAB budget, read-only. Amounts are plain currency, not milliunits.
+- `ynab_plan_summary` (optional `month`): a month at a glance, with overspent and underfunded categories.
+- `ynab_list_accounts`: accounts and balances. `ynab_list_categories`: categories with their balances and goals.
+- `ynab_get_transactions` (`sinceDate`, optional `accountId`, `categoryId`, `payeeId`, `limit`): always pass `sinceDate`.
+- `ynab_spending_by_category`, `ynab_spending_by_payee` (date range, default last 30 days) and `ynab_cash_flow` (per month) answer "how much did I spend on…" without summing transactions yourself.
+
 ## The homelab → kubectl and flux tools
 Kubernetes (`kubectl_*`, read-only) and Flux (`flux_*`) on the main cluster. Apps live in per-purpose namespaces (llm, media, default, downloads, observability, …).
 
