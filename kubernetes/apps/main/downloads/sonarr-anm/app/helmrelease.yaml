@@ -22,7 +22,7 @@ spec:
             image:
               # linuxserver until home-operations publishes a v5 build
               repository: ghcr.io/linuxserver/sonarr
-              tag: develop-5.0.0.2569-ls193@sha256:2c1e9317f330e84a4c6e8c9295361b3a9ae425786295d8b3cfd12c7cbc008f53
+              tag: develop-5.0.0.2608-ls194@sha256:bb6c1228d6ad274b678ce3f8123c510d7ba104fbae5d44bc7f2f924df6f1640c
             # skip s6-overlay: its preinit can't own /run without root
             command: ["/app/sonarr/bin/Sonarr", "-nobrowser", "-data=/config"]
             env:
