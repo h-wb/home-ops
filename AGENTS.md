@@ -106,7 +106,7 @@ postBuild:
 
 ## TrueNAS (doco-cd)
 
-- NAS containers (Plex, exporters, Garage) are GitOps-deployed from `docker/truenas/NN-name/docker-compose.yaml` by doco-cd (self-updating main + updater pair). No TrueNAS catalog apps; app data in `/mnt/ssd-storage/docker/<app>`.
+- NAS containers (Plex, exporters, Garage) are GitOps-deployed from `docker/truenas/NN-name/docker-compose.yaml` by doco-cd (single instance, `SELF_UPDATE_ENABLED`). No TrueNAS catalog apps; app data in `/mnt/ssd-storage/docker/<app>`.
 - Per-stack secrets: plain Bitwarden SM secret **IDs** in the stack's `.doco-cd.yaml` (`external_secrets`). doco-cd can't read fields from the JSON-per-app secrets.
 - Don't add `# renovate:` comments to compose files — the built-in docker-compose manager handles them and the generic regex would misparse `image:` lines.
 - Rebuild / Garage restore runbook: `docker/truenas/README.md`.

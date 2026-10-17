@@ -10,7 +10,9 @@ reconciliation:
   enabled: true
   interval: 3600
 ---
-name: doco-cd-updater
+# doco-cd deploys itself (SELF_UPDATE_ENABLED); name must match its compose project.
+name: doco-cd
 working_dir: ./docker/truenas/.doco-cd
 compose_files:
-  - compose.updater.yaml
+  - compose.main.yaml
+timeout: 120

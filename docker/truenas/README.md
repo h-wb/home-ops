@@ -6,20 +6,20 @@ Add a folder to deploy, delete it to remove. Per-stack secrets are Bitwarden
 Secrets Manager IDs in the stack's `.doco-cd.yaml` (plain values only — doco-cd
 can't read fields out of the JSON-per-app secrets).
 
-doco-cd runs as two instances that update each other from Git:
-`.doco-cd/compose.main.yaml` (deploys the stacks + the updater) and
-`.doco-cd/compose.updater.yaml` (deploys main via `.doco-cd.updater.yaml`).
+doco-cd (`.doco-cd/compose.main.yaml`) deploys the stacks and updates itself
+(`SELF_UPDATE_ENABLED`). It used to be a main + updater pair; on 2026-10-16 both
+recreated each other in the same poll and left two dead containers.
 
 ## Rebuild the NAS
 
 1. Apps → Settings: choose the `ssd-storage` pool (starts Docker).
 2. Create datasets `ssd-storage/docker/{doco-cd,plex,garage}`.
-3. Create `/mnt/ssd-storage/docker/doco-cd/{data,updater,secrets}` and, in
+3. Create `/mnt/ssd-storage/docker/doco-cd/{data,secrets}` and, in
    `secrets/`, `api_secret` + `webhook_secret` (`openssl rand -hex 32`) and
    `bws_token` (`fnox get BITWARDEN_KUBERNETES_TOKEN`). All `chmod 600`.
-4. From a checkout of this repo on the NAS, start the updater once:
-   `docker compose -f docker/truenas/.doco-cd/compose.updater.yaml up -d`.
-   It deploys main doco-cd, which deploys everything else.
+4. From a checkout of this repo on the NAS, start doco-cd once:
+   `docker compose -f docker/truenas/.doco-cd/compose.main.yaml up -d`.
+   It deploys everything else, itself included from then on.
 
 ## Garage
 

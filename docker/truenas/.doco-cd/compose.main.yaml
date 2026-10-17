@@ -1,13 +1,15 @@
 ---
-# Main doco-cd instance: deploys every stack in ./docker/truenas and the updater
-# (compose.updater.yaml). It is itself deployed by the updater through
-# ../.doco-cd.updater.yaml, so both instances are updated from Git.
+# doco-cd deploys every stack in ./docker/truenas and updates itself in place
+# (SELF_UPDATE_ENABLED; container_name + host ports force the applier strategy).
 #
 # Host prerequisites (not in Git):
 #   /mnt/ssd-storage/docker/doco-cd/data
 #   /mnt/ssd-storage/docker/doco-cd/secrets/api_secret
 #   /mnt/ssd-storage/docker/doco-cd/secrets/webhook_secret
 #   /mnt/ssd-storage/docker/doco-cd/secrets/bws_token  (external-secrets machine account)
+#
+# Bootstrap from scratch (on the NAS, from a checkout of this repo):
+#   docker compose -f docker/truenas/.doco-cd/compose.main.yaml up -d
 name: doco-cd
 
 secrets:
@@ -28,6 +30,7 @@ services:
       HTTP_PORT: 8880
       DEPLOY_CONFIG_BASE_DIR: ./docker/truenas/
       TZ: America/Los_Angeles
+      SELF_UPDATE_ENABLED: "true"
       POLL_CONFIG: |-
         - url: https://github.com/h-wb/home-ops.git
           reference: main
