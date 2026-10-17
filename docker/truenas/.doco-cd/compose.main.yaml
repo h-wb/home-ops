@@ -20,7 +20,7 @@ secrets:
 
 services:
   doco-cd:
-    image: ghcr.io/kimdre/doco-cd:0.128.0
+    image: ghcr.io/kimdre/doco-cd:0.129.0
     container_name: doco-cd
     restart: unless-stopped
     environment:
