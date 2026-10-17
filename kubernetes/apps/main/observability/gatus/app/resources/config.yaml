@@ -71,6 +71,14 @@ endpoints:
   - { name: bazarr,        group: *ag, url: "https://bazarr.${SECRET_DOMAIN}/",        interval: *agi, client: *agc, conditions: *agcond }
   - { name: lingarr,       group: *ag, url: "https://lingarr.${SECRET_DOMAIN}/",       interval: *agi, client: *agc, conditions: *agcond }
 
+# main can't reach the edge LAN; edge's gatus-heartbeat pushes these instead.
+external-endpoints:
+  - name: home-assistant
+    group: edge
+    token: ${GATUS_EDGE_TOKEN}
+    heartbeat:
+      interval: 5m
+
 metrics: true
 
 storage:

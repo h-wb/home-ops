@@ -1,0 +1,56 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: gatus-heartbeat
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  interval: 1h
+  dependsOn: []
+  values:
+    # main can't reach the edge LAN, so edge pushes to main's Gatus external endpoint.
+    # A dead or clock-stalled VM stops pushing and the Gatus heartbeat goes red.
+    controllers:
+      gatus-heartbeat:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: mirror.gcr.io/curlimages/curl
+              tag: 8.22.0@sha256:58adaa4e8dca9c988bae2aba4ab3434a0bb2da16bbe3f92dec39ec7785166777
+            env:
+              PUSH_URL: https://status.${SECRET_DOMAIN}/api/v1/endpoints/edge_home-assistant/external
+              CHECK_URL: http://home-assistant.home-automation.svc.cluster.local:8123/
+            envFrom:
+              - secretRef:
+                  name: gatus-heartbeat
+            command: ["/bin/sh", "-c"]
+            args:
+              - |
+                while true; do
+                  t=$(curl -fsS -m 10 -o /dev/null -w '%{time_total}s' "$CHECK_URL") \
+                    && q="success=true&duration=$t" \
+                    || q="success=false&error=home-assistant+unreachable"
+                  curl -fsS -m 10 -o /dev/null -X POST -H "Authorization: Bearer $GATUS_TOKEN" "$PUSH_URL?$q" \
+                    || echo "push failed ($q)"
+                  sleep 60
+                done
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 5m
+                memory: 8Mi
+              limits:
+                memory: 32Mi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
