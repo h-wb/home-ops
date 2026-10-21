@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: mirror.gcr.io/curlimages/curl
-              tag: 8.23.0@sha256:a134550be58ab783810e613ae96fd253c38f7bdd16d9bf9be350700c7a29ac06
+              tag: 8.23.0@sha256:11e64e28c5f58c8d93ee95fcf22ac055f48b0bc440e0ce7d8013bbb5ad6aa8ac
             env:
               PUSH_URL: https://status.${SECRET_DOMAIN}/api/v1/endpoints/edge_home-assistant/external
               CHECK_URL: http://home-assistant.home-automation.svc.cluster.local:8123/
