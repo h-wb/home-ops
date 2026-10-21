@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: prefecthq/prefect
-              tag: 3.8.8-python3.12@sha256:57e02b3f63d663e02b06d4127362ea48d92d4b361fbd96c8ba8f01e5702755f4
+              tag: 3.9.0-python3.12@sha256:5b665ed7b55836b1c50b0733dd7f2812db57f82a748b5fd1bf765842e5501dee
             command:
               - /bin/sh
               - -c
@@ -50,7 +50,7 @@ spec:
           app:
             image:
               repository: prefecthq/prefect
-              tag: 3.8.8-python3.12@sha256:57e02b3f63d663e02b06d4127362ea48d92d4b361fbd96c8ba8f01e5702755f4
+              tag: 3.9.0-python3.12@sha256:5b665ed7b55836b1c50b0733dd7f2812db57f82a748b5fd1bf765842e5501dee
             command:
               - /bin/sh
               - -c
