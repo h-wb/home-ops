@@ -59,9 +59,8 @@ spec:
               repository: ghcr.io/m1k1o/neko/intel-xfce
               tag: "3.2.0"
             env:
-              # Same as the firefox instance: the bundled web UI still calls
-              # the v2 /ws endpoint, which 404s without this.
-              NEKO_LEGACY: "true"
+              # The 3.2 client is v3-only; legacy just exposes the v2 API.
+              NEKO_LEGACY: "false"
               NEKO_DESKTOP_SCREEN: 1920x1080@60
               NEKO_SERVER_PROXY: "true"
               # Native OIDC (neko >= 3.1.6) against kanidm. The callback is
@@ -90,11 +89,15 @@ spec:
               NEKO_WEBRTC_UDPMUX: *mux
               NEKO_WEBRTC_ICELITE: "true"
               NEKO_SESSION_HEARTBEAT_INTERVAL: 30
-              # v2-named vars are the ones the legacy layer reads — the v3
-              # NEKO_CAPTURE_* equivalents are ignored in legacy mode.
-              NEKO_VIDEO_CODEC: h264
-              NEKO_MAX_FPS: 60
-              NEKO_VIDEO_BITRATE: 6000
+              # VAAPI h264 60fps/6Mbps; without a pipeline v3 falls back to
+              # software vp8 at 25fps.
+              NEKO_CAPTURE_VIDEO_CODEC: h264
+              NEKO_CAPTURE_VIDEO_IDS: main
+              NEKO_CAPTURE_VIDEO_PIPELINES: >-
+                {"main":{"fps":"60","show_pointer":false,
+                "gst_prefix":"! video/x-raw,format=NV12","gst_encoder":"vah264enc",
+                "gst_params":{"rate-control":"cbr","bitrate":"6000","key-int-max":"60","target-usage":"7"},
+                "gst_suffix":"! h264parse config-interval=-1 ! video/x-h264,stream-format=byte-stream,profile=constrained-baseline"}}
               # Lets the browser hand files to the desktop by dropping them on
               # the canvas, and routes GTK open/save dialogs through neko's own
               # upload/download rather than the container filesystem.
