@@ -117,6 +117,7 @@ postBuild:
 - The CNPG component's S3 creds (`postgresql-bucket` Bitwarden item) are shared across all apps.
 - SOPS-encrypted secrets in Git use the age key at `age.key`. `mise run encrypt` / `mise run decrypt` handle `*.sops.yaml`.
 - Bootstrap-time secrets (the Bitwarden machine token, Talos CAs) come from ProtonPass via `fnox` (`fnox.toml`), so they work with the cluster down.
+- Inside this repo, pass-cli/fnox run on a separate session (`PROTON_PASS_SESSION_DIR` in `.mise.toml`) logged in with the `home-ops` agent token, which can read only the `env-home-ops` vault. Token lives in the macOS Keychain (`pass-cli-home-ops`); expires 2027-10 → `pass-cli agent renew` outside the repo, then `mise run pass:login`.
 
 ## Conventions
 

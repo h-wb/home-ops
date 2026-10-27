@@ -16,6 +16,9 @@ MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
 TALOSCONFIG = "{{config_root}}/talos/{{env.CLUSTER}}/talosconfig"
 TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
+# fnox/pass-cli here use an agent session that only sees the env-home-ops vault.
+PROTON_PASS_SESSION_DIR = "{{env.HOME}}/.local/state/pass-cli/home-ops"
+PROTON_PASS_AGENT_REASON = "home-ops fnox"
 
 [plugins]
 krew = "https://github.com/soupglasses/mise-krew"
@@ -91,6 +94,15 @@ fnox --if-missing error exec -c fnox.toml -- minijinja-cli ${usage_input?} ${usa
 usage = '''
 arg "<input>" help="Template file to render"
 arg "[args]" help="Extra args passed to minijinja-cli" var=#true
+'''
+
+[tasks."pass:login"]
+description = "Log the repo's scoped Proton Pass session in (agent token from the macOS Keychain)"
+quiet = true
+run = '''
+mkdir -p "$PROTON_PASS_SESSION_DIR" && chmod 700 "$PROTON_PASS_SESSION_DIR"
+pass-cli info >/dev/null 2>&1 && { echo "already logged in"; exit 0; }
+PROTON_PASS_PERSONAL_ACCESS_TOKEN="$(security find-generic-password -s pass-cli-home-ops -a "$USER" -w)" pass-cli login
 '''
 
 [tasks.encrypt]
