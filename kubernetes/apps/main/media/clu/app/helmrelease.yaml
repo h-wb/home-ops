@@ -19,14 +19,13 @@ spec:
           app:
             image:
               repository: allaboutduncan/comic-utils-web
-              tag: latest@sha256:f548afe493e1b1bd660d27b1af8d483923584cf921377c4b862a52375306eb13
+              tag: latest@sha256:82d00fdb410c7d9df27aa7375617578c530bec9bf95f463d2307647a9a389346
             env:
               TZ: Europe/Paris
               PUID: "1000"
               PGID: "1000"
               UMASK: "022"
               FLASK_ENV: development
-              MONITOR: no
             resources:
               requests:
                 memory: 4282M
