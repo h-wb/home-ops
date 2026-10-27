@@ -24,6 +24,7 @@ spec:
               TZ: Europe/Paris
               PUID: 1000
               PGID: 1000
+              CODEX_NEWS__ENABLED: "false"
             envFrom:
               - secretRef:
                   name: codex-secret
