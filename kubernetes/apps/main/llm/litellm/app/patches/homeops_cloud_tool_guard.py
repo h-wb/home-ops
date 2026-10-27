@@ -1,9 +1,9 @@
 """Keeps private data away from cloud models: no tool calling on a non-local model.
 
 Tools are how a model reads the house: ToolHive exposes Metabase (health), Dawarich
-(location), memory, n8n, GitHub and the cluster. A cloud model may chat, and may
-use the cluster, repository and n8n tools (CLOUD_TOOL_PREFIXES, what the mcp-ops
-gateway serves). Any other tool definition, call or result is refused unless every
+(location), memory, n8n, Anki, GitHub and the cluster. A cloud model may chat, and
+may use the cluster, repository, n8n and Anki tools (CLOUD_TOOL_PREFIXES, what the
+mcp-ops gateway serves). Any other tool definition, call or result is refused unless every
 backend behind the requested alias is local.
 
 - Local means a private address: the MacBook over WireGuard or an in-cluster
@@ -39,7 +39,7 @@ _LOCAL_SUFFIXES = (".svc", ".svc.cluster.local", ".cluster.local", ".local", ".i
 _TOOL_KEYS = ("tools", "functions", "tool_choice", "function_call")
 _TOOL_ROLES = ("tool", "function")
 _OPS_PREFIXES = tuple(
-    p.strip() for p in os.environ.get("CLOUD_TOOL_PREFIXES", "kubectl_,flux_,github_,n8n_").split(",") if p.strip()
+    p.strip() for p in os.environ.get("CLOUD_TOOL_PREFIXES", "kubectl_,flux_,github_,n8n_,anki_").split(",") if p.strip()
 )
 _GATEWAY_TOOLS = ("find_tool", "call_tool")
 _TOOL_ITEM_TYPES = ("function_call", "function_call_output", "mcp_call", "mcp_list_tools", "tool_result", "tool_use")
@@ -194,7 +194,7 @@ class CloudToolGuard(CustomLogger):
             detail={
                 "error": (
                     f"These tools are not allowed on '{alias}': it is not a local model, and only "
-                    "cluster, repository and n8n tools (kubectl, flux, github, n8n) may be used with it. "
+                    "cluster, repository, n8n and Anki tools (kubectl, flux, github, n8n, anki) may be used with it. "
                     "Personal data (Metabase, Dawarich, memory) needs a local model; a "
                     "conversation that already used those tools cannot continue on a cloud model."
                 )

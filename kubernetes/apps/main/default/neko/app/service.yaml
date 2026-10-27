@@ -16,3 +16,21 @@ spec:
     - name: http
       port: 8765
       targetPort: 8765
+---
+# The AnkiMCP add-on in the same Anki, for ToolHive (llm/toolhive mcp-servers/anki).
+# The add-on only accepts this Service's name as Host (dotfiles conf.d/anki), so
+# rename both together. Requests need the bearer key.
+apiVersion: v1
+kind: Service
+metadata:
+  name: neko-ankimcp
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/controller: neko
+    app.kubernetes.io/instance: neko
+    app.kubernetes.io/name: neko
+  ports:
+    - name: http
+      port: 3141
+      targetPort: 3141

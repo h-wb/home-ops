@@ -1,6 +1,6 @@
 ---
 # The gateway for cloud agents (Claude Code, Codex, a cloud model in Open WebUI):
-# the cluster, the repository and n8n, nothing else personal. Same group as mcp-gateway, but
+# the cluster, the repository, n8n and Anki, nothing else personal. Same group as mcp-gateway, but
 # nothing is advertised unless it is listed here, so a server added to the group
 # later stays private until someone adds it on purpose.
 apiVersion: toolhive.stacklok.dev/v1beta1
@@ -22,6 +22,8 @@ spec:
         - workload: github
         # Not read-only: can run, edit, archive and unpublish workflows.
         - workload: n8n
+        # Flashcards. Not read-only: can add, edit and delete notes.
+        - workload: anki
     # kubectl alone is 275 tools; clients get find_tool/call_tool instead.
     optimizer:
       embeddingModel: embed

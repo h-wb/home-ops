@@ -1,0 +1,25 @@
+---
+# The AnkiMCP add-on (ankimcp/anki-mcp-server-addon) inside the Anki that the
+# dotfiles keep running in the neko desktop (conf.d/anki). Cards, decks, notes,
+# review stats. Not read-only: delete_notes is on by default (it only wants
+# confirmDeletion=true); change_note_type and model_field_remove need opting in.
+# Unreachable while neko is rolling or parked, like any remote entry.
+#
+# The gateway pod mounts this entry's header secret itself, so if the secret is
+# missing the whole gateway fails to start, not just this backend.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: anki
+spec:
+  remoteUrl: http://neko-ankimcp.default.svc.cluster.local:3141/
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: Authorization
+        valueSecretRef:
+          name: toolhive-anki
+          key: authorization
+  groupRef:
+    name: mcp-tools
