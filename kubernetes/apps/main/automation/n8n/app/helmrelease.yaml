@@ -35,6 +35,9 @@ spec:
               N8N_LOG_OUTPUT: console
               N8N_RESTRICT_FILE_ACCESS_TO: "/data;/documents;/vault"
               NODE_FUNCTION_ALLOW_BUILTIN: "fs,path"
+              # 3.0 lowered these defaults (60s, false); n8n-nodes-komga is unverified
+              N8N_RUNNERS_TASK_TIMEOUT: 300
+              N8N_UNVERIFIED_PACKAGES_ENABLED: true
               N8N_ENCRYPTION_KEY:
                 valueFrom:
                   secretKeyRef:
