@@ -27,6 +27,7 @@ spec:
               PUID: "1000"
               PGID: "1000"
               SQLITE_DB_PATH: /app/data/sqlite.db
+              TRUST_PROXY: "1"
             probes:
               liveness: &probes
                 enabled: true
