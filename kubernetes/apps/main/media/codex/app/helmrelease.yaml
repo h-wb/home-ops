@@ -19,11 +19,12 @@ spec:
           app:
             image:
               repository: ghcr.io/ashdevfr/codex
-              tag: 2.6.3
+              tag: 2.8.1
             env:
               TZ: Europe/Paris
               PUID: 1000
               PGID: 1000
+              CODEX_NEWS__ENABLED: "false"
             envFrom:
               - secretRef:
                   name: codex-secret
