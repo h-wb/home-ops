@@ -20,24 +20,27 @@ spec:
         existingSecret: kritika-db-app
       runner:
         existingSecret: kritika-db-runner
-    config:
-      webUrl: https://kritika.${SECRET_DOMAIN}
-      authAdminPassword:
-        valueFrom:
-          secretKeyRef: { name: kritika-secret, key: ADMIN_PASSWORD }
-      authOidcName: Kanidm
-      authOidcIssuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/kritika
-      # kanidm's client id is the client name.
-      authOidcClientId: kritika
-      authOidcClientSecret:
+    env:
+      OIDC_CLIENT_SECRET:
         valueFrom:
           secretKeyRef: { name: kanidm-kritika-oidc, key: client-secret }
-      authOidcRolesClaim: kritika_role
-      authOidcRoleMappingExpr: '"admin" in roles ? "admin" : ("member" in roles ? "member" : "")'
     envFrom:
       - secretRef:
           name: kritika-secret
-    configFile:
+    config:
+      webUrl: https://kritika.${SECRET_DOMAIN}
+      auth:
+        # Local admin: the way into a fresh instance and break-glass when kanidm is down.
+        admin:
+          password: { env: ADMIN_PASSWORD }
+        oidc:
+          name: Kanidm
+          issuer: https://idm.${SECRET_DOMAIN}/oauth2/openid/kritika
+          # kanidm's client id is the client name.
+          clientId: kritika
+          clientSecret: { env: OIDC_CLIENT_SECRET }
+          rolesClaim: kritika_role
+          roleMappingExpr: '"admin" in roles ? "admin" : ("member" in roles ? "member" : "")'
       apps:
         github:
           accounts: [h-wb]
@@ -71,58 +74,56 @@ spec:
         # A small general-purpose embedder scores most chunks of a repo of
         # similar files above the 0.5 default.
         similarFloor: 0.7
+        # 0.3 keeps every chunk over the floor, as before 0.0.77 added the margin.
+        similarMargin: 0.3
       review:
         # No fallback on purpose: out of quota means the pull request waits.
         # Luna pinned to max reasoning effort (LiteLLM alias); see models/chatgpt.yaml.
         model: litellm/chatgpt/gpt-6-luna-max
+        # kritika is the approval the main-require-review ruleset needs (it replaced
+        # the Claude Code "Renovate PR Review" workflow on 2026-10-03): a review with
+        # nothing blocking or important approves the pull request, a later one that
+        # finds something withdraws it. Majors and high-blast-radius packages still
+        # wait for a human, because Renovate does not auto-merge them. Set here, not
+        # in .kritika.yaml, so open pull requests based before it are approved too.
+        approve:
+          when:
+            - { name: home-ops, expr: pr.url.startsWith("https://github.com/h-wb/home-ops/") }
       trigger:
-        # Renovate pushes in bursts (rebases); review the last head once.
-        settle: 60s
         # Big generated diffs aren't worth the context; `@<bot> review` still forces one.
         exclude:
           - { name: too-large, expr: pr.lines > 2000 }
-      agent:
-        commands: [gh, curl, fd, jq, rg, yq]
       limits:
         # Every ChatGPT call costs subscription quota (karakeep shares it), and a
         # rebase storm should not drain a week of it.
         reviewsPerDay: 40
         concurrency: 2
-      repositories:
-        # kritika is the approval the main-require-review ruleset needs (it replaced
-        # the Claude Code "Renovate PR Review" workflow on 2026-10-03): a review with
-        # nothing blocking or important approves the pull request, a later one that
-        # finds something withdraws it. Majors and high-blast-radius packages still
-        # wait for a human, because Renovate does not auto-merge them.
-        h-wb/home-ops:
-          review: { approve: true }
-          rules:
-            # The gate's minimum, kept here rather than in the repository: files in
-            # the repository are read from each pull request's merge base, so a
-            # branch older than .kritika.yaml would otherwise be approved with no
-            # Renovate rules at all (that happened on kritika's first run). The
-            # longer checklist is .kritika/renovate.md.
-            - id: renovate-gate
-              when: [{ expr: pr.headRef.startsWith("renovate/") }]
-              rule: >-
-                This is a Renovate dependency update and your review decides whether
-                it auto-merges. Do not judge it from the diff alone. Fetch the
-                upstream release notes or changelog for every version between the old
-                and the new one (use gh; follow a wrapper image or chart to the
-                component it packages). Then read how this repository uses the
-                package: its HelmRelease values, OCIRepository, overrides, CRDs, and
-                any local code that hooks into it (for LiteLLM,
-                kubernetes/apps/main/llm/litellm/app/patches). Report as blocking a
-                breaking change, removal or required migration that affects something
-                this repository configures, and a failed Konflate check. Report as
-                important a deprecation of something used here, a changed default
-                that alters behaviour here, or a change to internals a local patch
-                depends on. If you could not find or read the release notes, report
-                that as important rather than approving unverified. Begin the
-                headline with "Safe to merge:" or "Not safe to merge:", and name the
-                sources you read.
+      rules:
+        # The gate's minimum, kept here rather than in the repository: files in
+        # the repository are read from each pull request's merge base, so a
+        # branch older than .kritika.yaml would otherwise be approved with no
+        # Renovate rules at all (that happened on kritika's first run). The
+        # longer checklist is .kritika/renovate.md.
+        - id: renovate-gate
+          when:
+            - expr: pr.url.startsWith("https://github.com/h-wb/home-ops/") && pr.headRef.startsWith("renovate/")
+          rule: >-
+            This is a Renovate dependency update and your review decides whether
+            it auto-merges. Do not judge it from the diff alone. Fetch the
+            upstream release notes or changelog for every version between the old
+            and the new one (use gh; follow a wrapper image or chart to the
+            component it packages). Then read how this repository uses the
+            package: its HelmRelease values, OCIRepository, overrides, CRDs, and
+            any local code that hooks into it (for LiteLLM,
+            kubernetes/apps/main/llm/litellm/app/patches). Report as blocking a
+            breaking change, removal or required migration that affects something
+            this repository configures, and a failed Konflate check. Report as
+            important a deprecation of something used here, a changed default
+            that alters behaviour here, or a change to internals a local patch
+            depends on. If you could not find or read the release notes, report
+            that as important rather than approving unverified.
       egress:
-        # Where the agent's curl/gh may go for release notes, changelogs and charts.
+        # Where the agent's curl/gh and the .kritika.yaml tools' downloads may go.
         # github.com and api.github.com are allowed by the app itself.
         allow:
           - "*.githubusercontent.com"
@@ -132,9 +133,11 @@ spec:
           - hub.docker.com
           - quay.io
     runner:
-      resources:
-        requests: { cpu: 10m, memory: 128Mi }
-        limits: { memory: 1Gi }
+      podTemplate:
+        spec:
+          resources:
+            requests: { cpu: 10m, memory: 128Mi }
+            limits: { memory: 1Gi }
     resources:
       requests:
         cpu: 25m
