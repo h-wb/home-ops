@@ -10,3 +10,15 @@ rules:
   - id: renovate-upgrade
     file: .kritika/renovate.md
     when: [{ expr: pr.headRef.startsWith("renovate/") }]
+# kritika stopped loading agent files on its own in 0.0.61.
+context:
+  - path: AGENTS.md
+    description: Repository layout, GitOps conventions and known pitfalls
+# Beside the runner image's curl, find, gh, grep and jq.
+tools:
+  # renovate: datasource=github-releases depName=sharkdp/fd
+  aqua:sharkdp/fd: v10.5.0
+  # renovate: datasource=github-releases depName=BurntSushi/ripgrep
+  aqua:BurntSushi/ripgrep: 15.2.0
+  # renovate: datasource=github-releases depName=mikefarah/yq
+  aqua:mikefarah/yq: v4.54.1

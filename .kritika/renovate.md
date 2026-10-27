@@ -37,7 +37,7 @@ upgraded component's internals, an upgrade can break it without any breaking cha
 announced. Today that is `kubernetes/apps/main/llm/litellm/app/patches/` (Python modules
 loaded into LiteLLM as callbacks): for a LiteLLM image bump, read those files and compare
 the functions and modules they import or wrap against what the release changed. Report a
-changed or removed one as **important**, naming the patch file.
+changed or removed one as **important (p1)**, naming the patch file.
 
 konflate renders the pull request's Flux manifests before and after and reports the
 result on the pull request: one comment per cluster from `bot-dupond[bot]`
@@ -49,26 +49,23 @@ image tag.
 
 ## 4. Findings and severity
 
-Severity decides whether the pull request is approved, so use it precisely:
+Severity decides whether the pull request is approved (any p0 or p1 withholds it), so use
+it precisely:
 
-- **blocking**: a breaking change, removal or required migration that affects something
+- **blocking (p0)**: a breaking change, removal or required migration that affects something
   this repository configures or relies on; or a failed Konflate check (render failure, or
   an image that does not exist in its registry), since the pull request cannot deploy.
   Name the file here that is affected and what has to change.
-- **important**: a deprecation of something this repository uses (fix it now rather than
+- **important (p1)**: a deprecation of something this repository uses (fix it now rather than
   ride the deprecated behaviour), or a default that changes behaviour here.
-- **nit**: a new feature worth adopting later, or a cleanup the upgrade makes possible.
+- **nit (p2)**: a new feature worth adopting later, or a cleanup the upgrade makes possible.
   Nits do not withhold the approval.
 
 Raise nothing for changes that do not touch this repository.
 
-## 5. The headline and summary
+## 5. The summary
 
-The headline is the verdict, and must begin with exactly one of:
-
-- `Safe to merge:` followed by the package and its old and new version, or
-- `Not safe to merge:` followed by the same and the reason in a few words.
-
-Then name the sources you read (release notes, changelog, compare view), so a reader can
-tell what the verdict rests on. If no source could be found, say that instead of implying
-the upgrade was checked.
+kritika's approval is the merge decision: it follows from the findings and their
+severity, so the headline and take carry no verdict. kritika lists the sources the
+review read; if no release notes or changelog could be found, report that as
+**important (p1)** rather than implying the upgrade was checked.
