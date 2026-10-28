@@ -36,7 +36,7 @@ spec:
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
           configmap.reloader.stakater.com/reload: paseo-provision,paseo-sshd
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-ssh
         initContainers:
           # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
           # CLIs, repos and agent configs all come from there (./config/provision.sh).
@@ -115,15 +115,28 @@ spec:
                 memory: 1Gi
               limits:
                 memory: 8Gi
-          # sshd-lite, for editors' Remote-SSH, plain `ssh` + tmux and mosh (./config/sshd.sh).
+          # sshd-lite (dotfiles paseo class, installed by `tools` before this starts), for
+          # editors' Remote-SSH, plain `ssh` + tmux and mosh. Sessions inherit this
+          # container's env. The host key is derived from KEYSEED, so it survives restarts.
           sshd:
             image: *image
-            command: ["/bin/sh", "/opt/paseo/sshd.sh"]
+            command: ["/home/paseo/.local/share/mise/shims/sshd-lite"]
+            args:
+              - --port=2222
+              - --keyseed-ec
+              - --workdir=/home/paseo
+              - --keepalive=30
+              - --sftp
+              - --tcp-forwarding
+              - --mosh
+              - /etc/paseo/authorized_keys
             env:
               <<: *appEnv
             envFrom:
               - *secret
               - *litellm
+              - secretRef:
+                  name: paseo-ssh
             securityContext: *securityContext
             resources:
               requests:
@@ -222,9 +235,6 @@ spec:
         advancedMounts:
           paseo:
             sshd:
-              - path: /opt/paseo/sshd.sh
-                subPath: sshd.sh
-                readOnly: true
               - path: /etc/paseo/authorized_keys
                 subPath: authorized_keys
                 readOnly: true
