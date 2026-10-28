@@ -115,10 +115,10 @@ spec:
                 memory: 1Gi
               limits:
                 memory: 8Gi
-          # For editors' Remote-SSH and plain `ssh` + tmux (./config/sshd.sh).
+          # sshd-lite, for editors' Remote-SSH, plain `ssh` + tmux and mosh (./config/sshd.sh).
           sshd:
             image: *image
-            command: ["/bin/bash", "/opt/paseo/sshd.sh"]
+            command: ["/bin/sh", "/opt/paseo/sshd.sh"]
             env:
               <<: *appEnv
             envFrom:
@@ -169,7 +169,11 @@ spec:
         ports:
           ssh:
             port: 22
-            targetPort: 2222
+            targetPort: &sshPort 2222
+          # sshd-lite tells mosh clients to use its own port number over UDP.
+          mosh:
+            port: *sshPort
+            protocol: UDP
     route:
       app:
         annotations:
@@ -212,8 +216,6 @@ spec:
                 readOnly: true
             app: *provision
             sshd: *provision
-      # authorized_keys by subPath: sshd's StrictModes rejects a whole-volume mount's
-      # 1777 root but accepts the root-owned parent a subPath mount gets.
       sshd-config:
         type: configMap
         name: paseo-sshd
@@ -226,12 +228,6 @@ spec:
               - path: /etc/paseo/authorized_keys
                 subPath: authorized_keys
                 readOnly: true
-      sshd:
-        type: emptyDir
-        advancedMounts:
-          paseo:
-            sshd:
-              - path: /opt/sshd
       tmp:
         type: emptyDir
         globalMounts:

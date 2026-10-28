@@ -13,7 +13,7 @@ spec:
     limits.memory: 8Gi
     persistentvolumeclaims: "4"
     requests.storage: 20Gi
-    services.loadbalancer: "0"
+    services.loadbalancers: "0"
     services.nodeports: "0"
 ---
 # Defaults so pods without resources are still admitted under the quota.
