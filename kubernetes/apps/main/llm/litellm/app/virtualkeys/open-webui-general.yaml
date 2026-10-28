@@ -1,0 +1,16 @@
+---
+# General chat: ops tools only, no personal ToolHive data. The history guard
+# rejects a private-tool conversation switched onto one of these models.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: open-webui-general
+spec:
+  proxyRef: litellm
+  keyAlias: Open WebUI General
+  secretName: litellm-key-open-webui-general
+  secretKey: api-key
+  models:
+    - chatgpt/gpt-6-astra
+    - chatgpt/gpt-6-luna
+    - chatgpt/gpt-6-luna-max

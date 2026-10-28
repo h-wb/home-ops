@@ -1,0 +1,51 @@
+---
+# Direct Mistral inference is trusted for personal tools; no restricted fallback.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: mistral-small
+spec:
+  modelName: mistral/mistral-small-latest
+  proxyRef: litellm
+  params:
+    model: mistral/mistral-small-latest
+    apiBase: https://api.mistral.ai/v1
+    apiKey: os.environ/MISTRAL_API_KEY
+  info:
+    mode: chat
+    supportsVision: true
+    supportsFunctionCalling: true
+---
+# Direct Mistral inference is trusted for personal tools; no restricted fallback.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: mistral-medium
+spec:
+  modelName: mistral/mistral-medium-latest
+  proxyRef: litellm
+  params:
+    model: mistral/mistral-medium-latest
+    apiBase: https://api.mistral.ai/v1
+    apiKey: os.environ/MISTRAL_API_KEY
+  info:
+    mode: chat
+    supportsVision: true
+    supportsFunctionCalling: true
+---
+# Direct Mistral inference is trusted for personal tools; no restricted fallback.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: mistral-large
+spec:
+  modelName: mistral/mistral-large-latest
+  proxyRef: litellm
+  params:
+    model: mistral/mistral-large-latest
+    apiBase: https://api.mistral.ai/v1
+    apiKey: os.environ/MISTRAL_API_KEY
+  info:
+    mode: chat
+    supportsVision: true
+    supportsFunctionCalling: true

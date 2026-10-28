@@ -15,6 +15,14 @@ spec:
     defaultPodOptions:
       automountServiceAccountToken: true
       enableServiceLinks: false
+      # The ToolHive MCP gateway route (llm/toolhive) is internal-only: no public
+      # record and CoreDNS forwards straight upstream, so pods can't resolve it.
+      # Point it at envoy-internal (same LAN IP the route's Gateway listens on)
+      # for the Vibe agents' home-mcp server. mcp.wlab.ovh has a valid public cert.
+      hostAliases:
+        - hostnames:
+            - mcp.${SECRET_DOMAIN}
+          ip: 192.168.1.202
       # The image's entrypoint only needs root to chown volumes, then drops to `paseo`
       # (1000); starting as 1000 with fsGroup does the same and skips that step.
       securityContext:
@@ -36,7 +44,7 @@ spec:
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
           configmap.reloader.stakater.com/reload: paseo-provision,paseo-sshd
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-ssh
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-mcp-gateway,paseo-ssh
         initContainers:
           # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
           # CLIs, repos and agent configs all come from there (./config/provision.sh).
@@ -91,6 +99,14 @@ spec:
                 secretRef:
                   name: paseo-litellm
                   optional: true
+              # x-api-key for https://mcp.${SECRET_DOMAIN} (Vibe home-mcp server). The
+              # daemon inherits it and its spawned agents read auth.api_key_env through
+              # VIBE_MCP_SERVERS (dotfiles providers.json). ToolHive generates this
+              # client key and publishes it to Bitwarden as mcp-gateway-paseo.
+              - &mcpKey
+                secretRef:
+                  name: paseo-mcp-gateway
+                  optional: true
             probes:
               startup:
                 enabled: true
@@ -142,6 +158,7 @@ spec:
             envFrom:
               - *secret
               - *litellm
+              - *mcpKey
               - secretRef:
                   name: paseo-ssh
             securityContext: *securityContext

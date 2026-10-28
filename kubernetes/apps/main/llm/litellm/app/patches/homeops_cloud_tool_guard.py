@@ -1,14 +1,14 @@
-"""Keeps private data away from cloud models: no tool calling on a non-local model.
+"""Keeps private tools on trusted backends: local inference and direct Mistral.
 
 Tools are how a model reads the house: ToolHive exposes Metabase (health), Dawarich
 (location), memory, n8n, Anki, GitHub and the cluster. A cloud model may chat, and
 may use the cluster, repository, n8n and Anki tools (CLOUD_TOOL_PREFIXES, what the
 mcp-ops gateway serves). Any other tool definition, call or result is refused unless every
-backend behind the requested alias is local.
+backend behind the requested alias is trusted.
 
 - Local means a private address: the MacBook over WireGuard or an in-cluster
   Service. Anything else, including an alias this hook cannot resolve, counts as
-  cloud (fail closed). No list of cloud model names to keep in step.
+  restricted (fail closed). Direct Mistral inference is explicitly trusted too.
 - Both gateways speak find_tool/call_tool, so the names alone prove nothing: every
   call in the conversation is checked for the tool it actually ran. A private
   tool's result can only arrive together with the call that produced it, and that
@@ -60,15 +60,33 @@ def _is_local_base(api_base):
         return host.endswith(_LOCAL_SUFFIXES)
 
 
-def _is_local_model(alias):
-    """True only when the alias resolves and all of its deployments are local."""
+def _is_trusted_deployment(deployment):
+    params = deployment.get("litellm_params") or {}
+    api_base = params.get("api_base")
+    model = params.get("model") or ""
+    # Classify the actual backend, never the client-facing alias. A Mistral
+    # provider with a custom endpoint must independently qualify as trusted.
+    if isinstance(model, str) and model.startswith("mistral/"):
+        if not api_base:
+            return True  # LiteLLM defaults to the official Mistral endpoint.
+        if isinstance(api_base, str):
+            parsed = urlparse(api_base)
+            if (parsed.scheme == "https" and parsed.hostname == "api.mistral.ai"
+                    and not parsed.username and not parsed.password
+                    and parsed.port in (None, 443)):
+                return True
+    return _is_local_base(api_base)
+
+
+def _is_trusted_model(alias):
+    """True only when the alias resolves and all of its deployments are trusted."""
     try:
         from litellm.proxy.proxy_server import llm_router
 
         deployments = llm_router.get_model_list(model_name=alias) if llm_router else None
         if not deployments:
             return False
-        return all(_is_local_base((d.get("litellm_params") or {}).get("api_base")) for d in deployments)
+        return all(_is_trusted_deployment(d) for d in deployments)
     except Exception:
         log.warning("cloud tool guard: could not classify %r, treating it as cloud", alias, exc_info=True)
         return False
@@ -180,7 +198,7 @@ class CloudToolGuard(CustomLogger):
         if not isinstance(data, dict) or not _carries_tools(data):
             return data
         alias = data.get("model")
-        if _is_local_model(alias):
+        if _is_trusted_model(alias):
             return data
         metadata = getattr(user_api_key_dict, "metadata", None) or {}
         if str(metadata.get("allow_cloud_tools", "")).lower() == "true":
@@ -193,14 +211,14 @@ class CloudToolGuard(CustomLogger):
             status_code=400,
             detail={
                 "error": (
-                    f"These tools are not allowed on '{alias}': it is not a local model, and only "
+                    f"These tools are not allowed on '{alias}': it is not a trusted model, and only "
                     "cluster, repository, n8n and Anki tools (kubectl, flux, github, n8n, anki) may be used with it. "
-                    "Personal data (Metabase, Dawarich, memory) needs a local model; a "
-                    "conversation that already used those tools cannot continue on a cloud model."
+                    "Personal data (Metabase, Dawarich, memory) needs local inference or Mistral; a "
+                    "conversation that already used those tools cannot continue on a restricted model."
                 )
             },
         )
 
 
 guard_instance = CloudToolGuard()
-log.info("cloud tool guard: loaded, non-local models get %s tools only", "/".join(_OPS_PREFIXES))
+log.info("cloud tool guard: loaded, untrusted models get %s tools only", "/".join(_OPS_PREFIXES))
