@@ -15,6 +15,14 @@ spec:
     defaultPodOptions:
       automountServiceAccountToken: true
       enableServiceLinks: false
+      # The ToolHive MCP gateway route (llm/toolhive) is internal-only: no public
+      # record and CoreDNS forwards straight upstream, so pods can't resolve it.
+      # Point it at envoy-internal (same LAN IP the route's Gateway listens on)
+      # for the Vibe agents' home-mcp server. mcp.wlab.ovh has a valid public cert.
+      hostAliases:
+        - hostnames:
+            - mcp.${SECRET_DOMAIN}
+          ip: 192.168.1.202
       # The image's entrypoint only needs root to chown volumes, then drops to `paseo`
       # (1000); starting as 1000 with fsGroup does the same and skips that step.
       securityContext:
@@ -36,7 +44,7 @@ spec:
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
           configmap.reloader.stakater.com/reload: paseo-provision,paseo-sshd
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-ssh
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-mcp-gateway,paseo-ssh
         initContainers:
           # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
           # CLIs, repos and agent configs all come from there (./config/provision.sh).
@@ -54,11 +62,15 @@ spec:
               # System dirs first: the daemon must keep the image's node, its native
               # modules are built against it. Everything else falls through to mise.
               PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
-            # GIT_EMAIL renders the dotfiles' git config.
+            # GIT_EMAIL renders the dotfiles' git config; MCP_GATEWAY_API_KEY lets
+            # the bootstrap's `vibe mcp add` (dotfiles) pin the home-mcp server.
             envFrom:
               - &secret
                 secretRef:
                   name: paseo-secret
+                  optional: true
+              - secretRef:
+                  name: paseo-mcp-gateway
                   optional: true
             securityContext: &securityContext
               allowPrivilegeEscalation: false
@@ -90,6 +102,12 @@ spec:
               - &litellm
                 secretRef:
                   name: paseo-litellm
+                  optional: true
+              # x-api-key for https://mcp.${SECRET_DOMAIN} (Vibe home-mcp server);
+              # same Bitwarden `toolhive` item as the gateway's other clients.
+              - &mcpKey
+                secretRef:
+                  name: paseo-mcp-gateway
                   optional: true
             probes:
               startup:
@@ -142,6 +160,7 @@ spec:
             envFrom:
               - *secret
               - *litellm
+              - *mcpKey
               - secretRef:
                   name: paseo-ssh
             securityContext: *securityContext
@@ -174,26 +193,6 @@ spec:
                 memory: 128Mi
               limits:
                 memory: 2Gi
-          # Plain-TCP forwarder to the ToolHive MCP gateway (llm/mcp-gateway), so
-          # Vibe agents can use it as `http://localhost:4483/mcp`: Vibe only accepts
-          # plaintext http on loopback, and the in-cluster VirtualMCPServer service
-          # has no TLS. Pod-local, like the browser sidecar's CDP port. Auth is
-          # anonymous here on purpose — the Envoy route's x-api-key (toolhive
-          # securitypolicy) does not apply to the ClusterIP service.
-          mcp-gateway:
-            image:
-              repository: docker.io/alpine/socat
-              tag: 1.8.1.3
-            args:
-              - TCP-LISTEN:4483,bind=127.0.0.1,fork,reuseaddr
-              - TCP:vmcp-mcp-gateway.llm.svc.cluster.local:4483
-            securityContext: *securityContext
-            resources:
-              requests:
-                cpu: 5m
-                memory: 16Mi
-              limits:
-                memory: 64Mi
     service:
       app:
         controller: *app
