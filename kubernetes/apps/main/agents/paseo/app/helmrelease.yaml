@@ -48,6 +48,9 @@ spec:
             env: &env
               HOME: /home/paseo
               TZ: Europe/Paris
+              # Terminals (Paseo web UI, VS Code) use this to pick the shell;
+              # without it they fall back to /bin/sh and skip ~/.bashrc.
+              SHELL: /bin/bash
               # System dirs first: the daemon must keep the image's node, its native
               # modules are built against it. Everything else falls through to mise.
               PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
