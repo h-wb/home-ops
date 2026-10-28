@@ -62,15 +62,11 @@ spec:
               # System dirs first: the daemon must keep the image's node, its native
               # modules are built against it. Everything else falls through to mise.
               PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
-            # GIT_EMAIL renders the dotfiles' git config; MCP_GATEWAY_API_KEY lets
-            # the bootstrap's `vibe mcp add` (dotfiles) pin the home-mcp server.
+            # GIT_EMAIL renders the dotfiles' git config.
             envFrom:
               - &secret
                 secretRef:
                   name: paseo-secret
-                  optional: true
-              - secretRef:
-                  name: paseo-mcp-gateway
                   optional: true
             securityContext: &securityContext
               allowPrivilegeEscalation: false
@@ -103,8 +99,10 @@ spec:
                 secretRef:
                   name: paseo-litellm
                   optional: true
-              # x-api-key for https://mcp.${SECRET_DOMAIN} (Vibe home-mcp server);
-              # same Bitwarden `toolhive` item as the gateway's other clients.
+              # x-api-key for https://mcp.${SECRET_DOMAIN} (Vibe home-mcp server). The
+              # daemon inherits it and its spawned agents read auth.api_key_env through
+              # VIBE_MCP_SERVERS (dotfiles providers.json); same Bitwarden `toolhive`
+              # item as the gateway's other clients.
               - &mcpKey
                 secretRef:
                   name: paseo-mcp-gateway
