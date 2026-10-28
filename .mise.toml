@@ -59,7 +59,7 @@ uv = "latest"
 "github:protonpass/pass-cli" = "latest"
 "github:jdx/fnox" = "latest"
 "cargo:kanidm_tools" = "latest"
-"npm:@karakeep/cli" = "latest"
+"npm:@karakeep/cli" = { version = "latest", allow_low_downloads = true }
 
 [hooks]
 postinstall = "hk install --mise"

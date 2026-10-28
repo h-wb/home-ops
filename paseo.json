@@ -1,0 +1,5 @@
+{
+  "worktree": {
+    "setup": "mise install || echo '[paseo.json] warning: mise install reported failures; some tools may be unavailable'"
+  }
+}
