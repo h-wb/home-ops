@@ -1,0 +1,46 @@
+---
+# Namespaced access for the workspace Kubernetes worker (pipelines decision 012):
+# it manages the flow-run Jobs in this namespace and watches their pods and logs.
+# The HelmRelease attaches this ServiceAccount to the workspace-worker controller
+# by name (serviceAccount.name); flow-run Jobs use the default ServiceAccount —
+# they only talk to the Prefect API, the warehouse, and NFS.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prefect-workspace-worker
+  labels:
+    app.kubernetes.io/name: prefect
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: prefect-workspace-worker
+  labels:
+    app.kubernetes.io/name: prefect
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "delete", "get", "list", "patch", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: prefect-workspace-worker
+  labels:
+    app.kubernetes.io/name: prefect
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: prefect-workspace-worker
+subjects:
+  - kind: ServiceAccount
+    name: prefect-workspace-worker
