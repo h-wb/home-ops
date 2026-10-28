@@ -21,13 +21,15 @@ spec:
           app:
             image:
               repository: ghcr.io/doezer/questarr
-              tag: dev@sha256:abe44a39067a7c02bbc2283c5e2d634ffc956babb81b743c1590cabf01c85e7b
+              tag: dev@sha256:a054fa5f90798f0aea45bc8f93f08f25a4660ae417f5933876a17e8c3cf68f17
             env:
               TZ: Europe/Paris
               PUID: "1000"
               PGID: "1000"
               SQLITE_DB_PATH: /app/data/sqlite.db
               TRUST_PROXY: "1"
+              # rules/local/cloud pipeline; may hold patch/DLC releases instead of auto-downloading
+              CLASSIFICATION_MODE: hybrid
             probes:
               liveness: &probes
                 enabled: true
