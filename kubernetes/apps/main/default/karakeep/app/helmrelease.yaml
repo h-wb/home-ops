@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/karakeep-app/karakeep
-              tag: 0.33.2@sha256:b069e4307dec06ea06d16989c6861c30a1ff208568be44ed5fb5d422cd3e950c
+              tag: 0.34.1@sha256:69ae5315c618b7c14c1af3e34c6e211acdb231793af424ecd1cab0b70691d987
             env:
               DATA_DIR: /data
               MEILI_ADDR: http://karakeep-meilisearch:7700
@@ -111,18 +111,15 @@ spec:
         containers:
           app:
             image:
-              repository: gcr.io/zenika-hub/alpine-chrome
-              tag: 124
-            command:
-              - chromium-browser
+              repository: ghcr.io/karakeep-app/karakeep-chrome
+              tag: 156.0.8078.47-r1@sha256:4ad61127638dd27bfe685222787c5780dd1d083d23a7658c39af657775814c44
+            # The entrypoint owns headless, sandbox and the 9222 forward; don't pass remote-debugging flags
             args:
-              - --headless
-              - --no-sandbox
               - --disable-gpu
               - --disable-dev-shm-usage
-              - --remote-debugging-address=0.0.0.0
-              - --remote-debugging-port=9222
               - --hide-scrollbars
+              - --disable-blink-features=AutomationControlled
+              - --window-size=1440,900
             securityContext:
               capabilities:
                 drop:
