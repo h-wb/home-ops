@@ -1,12 +1,23 @@
 ---
-# Open WebUI's chat, RAG embeddings and title/tag generation. No `models:` list:
-# it is the interactive front end, so it may pick any alias LiteLLM serves.
+# Private chat, RAG embeddings and background tasks. Keep the existing resource
+# and Secret names so the private connection and RAG retain their credentials.
+# Explicit grants: a newly added provider is unavailable until classified here
+# or on the general key. No general-provider fallback belongs in these aliases.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
   name: open-webui
 spec:
   proxyRef: litellm
-  keyAlias: Open WebUI
+  keyAlias: Open WebUI Private
   secretName: litellm-key-open-webui
   secretKey: api-key
+  models:
+    - local
+    - local-pool
+    - qwen3.5-9b
+    - qwen3.5-9b-chat
+    - mistral/mistral-small-latest
+    - mistral/mistral-medium-latest
+    - mistral/mistral-large-latest
+    - embed

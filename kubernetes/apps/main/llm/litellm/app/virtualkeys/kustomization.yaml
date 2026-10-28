@@ -8,6 +8,7 @@ resources:
   - ./lingarr.yaml
   - ./memini.yaml
   - ./open-webui.yaml
+  - ./open-webui-general.yaml
   - ./paperless-gpt.yaml
   - ./paperless.yaml
   - ./paseo.yaml

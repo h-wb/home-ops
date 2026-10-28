@@ -1,5 +1,8 @@
 # Open WebUI presets
 
+See [the stack access policy](../../README.md) for the private/general connection
+keys, model grants and shared Paseo boundary.
+
 System prompts for Open WebUI's custom models (Workspace → Models). The models
 themselves live in Open WebUI's database; these files are the source of their
 prompt text, so edits here are pasted (or pushed through the API) into the preset.
