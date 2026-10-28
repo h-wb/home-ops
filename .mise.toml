@@ -58,7 +58,9 @@ zizmor = "1.31.1"
 uv = "latest"
 "github:protonpass/pass-cli" = "latest"
 "github:jdx/fnox" = "latest"
-"cargo:kanidm_tools" = "latest"
+# kanidm admin tools: macOS only — the pods (paseo, neko) have no rust/cargo
+# and mise would fail installing them there.
+"cargo:kanidm_tools" = { version = "latest", os = "macos" }
 "npm:@karakeep/cli" = { version = "latest", allow_low_downloads = true }
 
 [hooks]
