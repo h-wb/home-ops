@@ -23,7 +23,17 @@ The memory section tells the model to pass `tier: "semantic"` on every
 expires after 72 hours. Without that line a stated preference was stored and then
 silently gone three days later.
 
-`ops` is the cloud preset. It only gets the `mcp-ops` gateway, and LiteLLM's cloud
-tool guard refuses anything else on a cloud model, so enabling the full ToolHive
+The full ToolHive gateway can also be used with `mistral/mistral-small-latest`,
+`mistral/mistral-medium-latest` or `mistral/mistral-large-latest`. Mistral is an
+explicitly trusted cloud provider for personal data. Local embeddings remain unchanged.
+
+`ops` is the restricted-provider preset. It only gets the `mcp-ops` gateway, and LiteLLM's cloud
+tool guard refuses anything else on an untrusted model, so enabling the full ToolHive
 server on it (or continuing a Homelab chat on it) fails with a 400 instead of
 sending personal data out.
+
+The Paseo agents currently share a pod, home directory and credentials. Vibe's
+full-gateway configuration and Claude/Codex's ops configuration are a soft
+boundary: they do not enforce isolation against direct network access. The
+LiteLLM guard applies only to requests routed through LiteLLM. Pasted text,
+attachments and shared credentials remain outside that guard.

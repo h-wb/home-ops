@@ -29,7 +29,7 @@ spec:
               ENABLE_PERSISTENT_CONFIG: "False"
               # Models: everything through LiteLLM, on a scoped key from virtualkeys/.
               # ChatGPT (chatgpt/*) is there for plain chat only: LiteLLM refuses any
-              # tool call on a non-local model, so ToolHive results stay local.
+              # private tool call on an untrusted model; local and Mistral are trusted.
               ENABLE_OLLAMA_API: "False"
               ENABLE_OPENAI_API: "True"
               OPENAI_API_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
@@ -59,10 +59,10 @@ spec:
               TOOL_SERVER_CONNECTIONS: >-
                 [{"type": "mcp", "url": "http://vmcp-mcp-gateway.llm.svc.cluster.local:4483/mcp",
                 "path": "", "key": "", "auth_type": "none", "config": {"enable": true},
-                "info": {"id": "toolhive", "name": "ToolHive", "description": "Everything, personal data included. Local models only."}},
+                "info": {"id": "toolhive", "name": "ToolHive", "description": "Everything, personal data included. Local models and Mistral only."}},
                 {"type": "mcp", "url": "http://vmcp-mcp-ops.llm.svc.cluster.local:4483/mcp",
                 "path": "", "key": "", "auth_type": "none", "config": {"enable": true},
-                "info": {"id": "toolhive-ops", "name": "ToolHive Ops", "description": "kubectl, flux and GitHub only. The one cloud models may use."}}]
+                "info": {"id": "toolhive-ops", "name": "ToolHive Ops", "description": "kubectl, flux, GitHub, n8n and Anki. For all providers."}}]
               ENABLE_WEBSOCKET_SUPPORT: "true"
               WEBSOCKET_MANAGER: "redis"
               WEBSOCKET_REDIS_URL: "redis://open-webui-dragonfly.llm.svc.cluster.local:6379"
