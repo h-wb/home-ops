@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: docker.io/g33kphr33k/musicgrabber
-              tag: 4.3.0@sha256:8145082baab0e2a2e3ad0a672bee0ef1ed91d84983b701344ce0a20ba476729f
+              tag: 4.4.3@sha256:ad641f514508cd24c2c7e92f5d91f05d60a4cf7767feee8b76ecbc7509284390
             env:
               TZ: Europe/Paris
               PUID: "1000"
