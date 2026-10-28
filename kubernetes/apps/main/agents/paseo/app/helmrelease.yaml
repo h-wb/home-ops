@@ -101,8 +101,8 @@ spec:
                   optional: true
               # x-api-key for https://mcp.${SECRET_DOMAIN} (Vibe home-mcp server). The
               # daemon inherits it and its spawned agents read auth.api_key_env through
-              # VIBE_MCP_SERVERS (dotfiles providers.json); same Bitwarden `toolhive`
-              # item as the gateway's other clients.
+              # VIBE_MCP_SERVERS (dotfiles providers.json). ToolHive generates this
+              # client key and publishes it to Bitwarden as mcp-gateway-paseo.
               - &mcpKey
                 secretRef:
                   name: paseo-mcp-gateway

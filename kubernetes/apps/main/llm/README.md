@@ -1,7 +1,10 @@
 # Models, tools and memory
 
 Model access is declared in LiteLLM virtual keys. Tool access is declared in
-ToolHive gateways and each client's MCP configuration. Keep these independent:
+ToolHive gateways and each client's MCP configuration. Open WebUI and Paseo
+use the same authenticated private and general Envoy routes, with separate
+client credentials. Paseo's private key is generated in `llm`, published to
+Bitwarden with a PushSecret and consumed by an ExternalSecret in `agents`. Keep these independent:
 adding a model does not need a new gateway, and adding a tool does not need a new
 model proxy. Paseo remains a single shared execution environment.
 
@@ -40,6 +43,12 @@ Vibe uses the full gateway. Claude Code and Codex use the ops gateway and the
 separate coding memory instance. Their subscription requests bypass LiteLLM.
 Provider MCP configuration is managed by the dotfiles bootstrap; gateway catalogs
 live under `toolhive/config/`.
+
+Gateway grants live in `toolhive/config/securitypolicy.yaml` (private) and
+`toolhive/config/ops-gateway.yaml` (general). Open WebUI has a generated private
+key in `mcp-gateway-open-webui` and a general key in `mcp-ops-api-keys`. Neither
+client needs a second MCP-policy implementation. Backend services still accept
+anonymous in-cluster connections; these route grants are not a network boundary.
 
 This is intentional configuration separation, not enforced isolation: agents
 share the pod's network, home and credentials, and can reach in-cluster services.
