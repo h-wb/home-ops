@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/n8n-io/n8n
-              tag: 2.42.3@sha256:240eaa2a3d491adac5817aa4c3f1c521bb18ec79f6e448517158d5220ee0f37b
+              tag: 3.0.0@sha256:d4f906d680d992205fee7c71028490c1d933ab77d024b6f8260ed99dd31b8066
             env:
               DB_SQLITE_VACUUM_ON_STARTUP: true
               EXECUTIONS_DATA_PRUNE: true
@@ -35,6 +35,9 @@ spec:
               N8N_LOG_OUTPUT: console
               N8N_RESTRICT_FILE_ACCESS_TO: "/data;/documents"
               NODE_FUNCTION_ALLOW_BUILTIN: "fs,path"
+              # 3.0 lowered these defaults (60s, false); n8n-nodes-komga is unverified
+              N8N_RUNNERS_TASK_TIMEOUT: 300
+              N8N_UNVERIFIED_PACKAGES_ENABLED: true
               N8N_ENCRYPTION_KEY:
                 valueFrom:
                   secretKeyRef:
