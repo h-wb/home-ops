@@ -34,3 +34,21 @@ spec:
     - name: http
       port: 3141
       targetPort: 3141
+---
+# The Local REST API plugin in the Obsidian the dotfiles run in the desktop
+# (conf.d/obsidian), for n8n's vault workflows. TLS with a self-signed cert;
+# requests need the plugin's key.
+apiVersion: v1
+kind: Service
+metadata:
+  name: neko-obsidian
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/controller: neko
+    app.kubernetes.io/instance: neko
+    app.kubernetes.io/name: neko
+  ports:
+    - name: https
+      port: 27124
+      targetPort: 27124
