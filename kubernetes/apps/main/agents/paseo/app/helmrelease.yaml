@@ -1,0 +1,246 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# Headless agent host, modelled on david-driscoll/home-operations (kubernetes/apps/agents/paseo).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app paseo
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: true
+      enableServiceLinks: false
+      # The image's entrypoint only needs root to chown volumes, then drops to `paseo`
+      # (1000); starting as 1000 with fsGroup does the same and skips that step.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    serviceAccount:
+      paseo: {}
+    controllers:
+      paseo:
+        # Agents run for hours and hold an RWO volume.
+        strategy: Recreate
+        serviceAccount:
+          identifier: paseo
+        annotations:
+          # Named lists, not `auto`: every roll kills the running agents.
+          configmap.reloader.stakater.com/reload: paseo-provision,paseo-sshd
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm
+        initContainers:
+          # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
+          # CLIs, repos and agent configs all come from there (./config/provision.sh).
+          tools:
+            image: &image
+              repository: ghcr.io/getpaseo/paseo
+              tag: 0.13.2
+            command: ["/bin/sh", "/etc/paseo/provision.sh"]
+            env: &env
+              HOME: /home/paseo
+              TZ: Europe/Paris
+              # System dirs first: the daemon must keep the image's node, its native
+              # modules are built against it. Everything else falls through to mise.
+              PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
+            # GIT_EMAIL renders the dotfiles' git config.
+            envFrom:
+              - &secret
+                secretRef:
+                  name: paseo-secret
+                  optional: true
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
+        containers:
+          app:
+            image: *image
+            env: &appEnv
+              <<: *env
+              PASEO_HOSTNAMES: "paseo.${SECRET_DOMAIN}"
+              # envoy-internal reaches the daemon from the pod network.
+              PASEO_TRUSTED_PROXIES: loopback,10.42.0.0/16
+              # Clients connect directly over LAN/WireGuard; no third-party relay.
+              PASEO_RELAY_ENABLED: "false"
+            envFrom:
+              - secretRef:
+                  name: paseo-password
+              - *secret
+              - &litellm
+                secretRef:
+                  name: paseo-litellm
+                  optional: true
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: &health
+                    path: /api/health
+                    port: &port 6767
+                  periodSeconds: 5
+                  failureThreshold: 60
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: *health
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: *health
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              limits:
+                memory: 8Gi
+          # For editors' Remote-SSH and plain `ssh` + tmux (./config/sshd.sh).
+          sshd:
+            image: *image
+            command: ["/bin/bash", "/opt/paseo/sshd.sh"]
+            env:
+              <<: *appEnv
+            envFrom:
+              - *secret
+              - *litellm
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 4Gi
+          # Headless Chromium for browser MCPs (chrome-devtools-mcp --browserUrl
+          # http://127.0.0.1:9222). Pod-local, so CDP is never exposed.
+          browser:
+            image:
+              repository: docker.io/chromedp/headless-shell
+              tag: 157.0.8103.15
+            command: ["/headless-shell/headless-shell"]
+            args:
+              - --no-sandbox
+              - --disable-gpu
+              - --no-first-run
+              - --remote-debugging-address=127.0.0.1
+              - --remote-debugging-port=9222
+              - --user-data-dir=/tmp/chromium
+            env:
+              HOME: /tmp
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 2Gi
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            primary: true
+            port: *port
+      ssh:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: 192.168.1.204
+        ports:
+          ssh:
+            port: 22
+            targetPort: 2222
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: paseo
+          gethomepage.dev/group: Tools
+          gethomepage.dev/name: Paseo
+          gethomepage.dev/icon: terminal.png
+          gethomepage.dev/description: Coding agents
+        hostnames:
+          - "paseo.${SECRET_DOMAIN}"
+        # Internal only and no OIDC: the native and CLI clients authenticate to the
+        # daemon with PASEO_PASSWORD and cannot follow a login redirect.
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      # Not in the browser sidecar: a page it loads should never reach agent logins.
+      home:
+        existingClaim: *app
+        advancedMounts:
+          paseo:
+            tools: &home
+              - path: /home/paseo
+            app: *home
+            sshd: *home
+      # /etc/paseo is also the marker dotfiles' miserc.toml detects the class by.
+      provision:
+        type: configMap
+        name: paseo-provision
+        advancedMounts:
+          paseo:
+            tools: &provision
+              - path: /etc/paseo/provision.sh
+                subPath: provision.sh
+                readOnly: true
+            app: *provision
+            sshd: *provision
+      # authorized_keys by subPath: sshd's StrictModes rejects a whole-volume mount's
+      # 1777 root but accepts the root-owned parent a subPath mount gets.
+      sshd-config:
+        type: configMap
+        name: paseo-sshd
+        advancedMounts:
+          paseo:
+            sshd:
+              - path: /opt/paseo/sshd.sh
+                subPath: sshd.sh
+                readOnly: true
+              - path: /etc/paseo/authorized_keys
+                subPath: authorized_keys
+                readOnly: true
+      sshd:
+        type: emptyDir
+        advancedMounts:
+          paseo:
+            sshd:
+              - path: /opt/sshd
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+      dshm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 1Gi
+        advancedMounts:
+          paseo:
+            browser:
+              - path: /dev/shm

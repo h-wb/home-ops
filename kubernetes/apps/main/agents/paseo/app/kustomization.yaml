@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ./rbac.yaml
+configMapGenerator:
+  # Substitution off: these are shell scripts, and Flux would eat their ${...}.
+  - name: paseo-provision
+    files:
+      - provision.sh=./config/provision.sh
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled
+  - name: paseo-sshd
+    files:
+      - sshd.sh=./config/sshd.sh
+      - authorized_keys=./config/authorized_keys
+    options:
+      disableNameSuffixHash: true
+      annotations:
+        kustomize.toolkit.fluxcd.io/substitute: disabled

@@ -1,0 +1,34 @@
+---
+# Paseo's agents (agents/paseo), through OpenCode. Local models only: Claude and Codex
+# use their own subscription logins, never this key.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: paseo
+spec:
+  proxyRef: litellm
+  keyAlias: Paseo
+  secretName: litellm-key-paseo
+  secretKey: api-key
+  models:
+    - qwen3.5-9b
+    - qwen3.5-9b-chat
+---
+# Into Bitwarden, where the agents namespace reads it back.
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/external-secrets.io/pushsecret_v1alpha1.json
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: &name litellm-key-paseo
+spec:
+  secretStoreRefs:
+    - name: bitwarden-secrets-manager
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: *name
+  data:
+    - match:
+        secretKey: api-key
+        remoteRef:
+          remoteKey: *name

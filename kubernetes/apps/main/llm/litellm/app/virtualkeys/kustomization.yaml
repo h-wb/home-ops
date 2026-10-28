@@ -10,4 +10,5 @@ resources:
   - ./open-webui.yaml
   - ./paperless-gpt.yaml
   - ./paperless.yaml
+  - ./paseo.yaml
   - ./toolhive.yaml

@@ -1,0 +1,55 @@
+---
+# Cluster access for the agents. The read and Flux-write ClusterRoles are the ones the
+# ToolHive kubectl/flux MCP servers use (llm/toolhive/mcp-servers): Secrets stay out,
+# and real changes still go through git.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: paseo-readonly
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mcp-readonly
+subjects:
+  - kind: ServiceAccount
+    name: paseo
+    namespace: agents
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: paseo-flux-write
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flux-mcp-write
+subjects:
+  - kind: ServiceAccount
+    name: paseo
+    namespace: agents
+---
+# Restarting a wedged pod is the one imperative fix agents may make outside git.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: paseo-pod-restart
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: paseo-pod-restart
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: paseo-pod-restart
+subjects:
+  - kind: ServiceAccount
+    name: paseo
+    namespace: agents

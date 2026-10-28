@@ -1,0 +1,50 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app paseo
+  namespace: &namespace agents
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    - ../../../../../components/kopiur/backup
+  dependsOn: []
+  interval: 30m
+  path: ./kubernetes/apps/main/agents/paseo/app
+  postBuild:
+    substitute:
+      APP: *app
+      # Home holds mise installs, agent logins and every git worktree.
+      KOPIUR_CAPACITY: 40Gi
+      KOPIUR_SCHEDULE: "38 4 * * *"
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 10m
+  wait: false
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# No targetNamespace: it would pull the scratch Namespace and its objects into `agents`.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: paseo-scratch
+  namespace: agents
+spec:
+  interval: 30m
+  path: ./kubernetes/apps/main/agents/paseo/scratch
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false

@@ -1,0 +1,10 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Where agents may create their own throwaway workloads (Jobs, test Deployments).
+# Nothing here is in git beyond the guardrails, so Flux never prunes their objects.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./namespace.yaml
+  - ./rbac.yaml
+  - ./quota.yaml

@@ -6,6 +6,11 @@ NAS_HOST = "TN1"
 # Bitwarden Secrets Manager project read by external-secrets / doco-cd
 BWS_PROJECT_ID = "99bcb77b-0b5a-4fa8-bc6b-b1ee001565a6"
 
+[tasks.bws]
+description = "Run bws with the CLI token from Proton Pass (e.g. mise run bws -- secret list)"
+quiet = true
+run = 'BWS_ACCESS_TOKEN="$(fnox get -c "$(git rev-parse --show-toplevel)/fnox.toml" BWS_ACCESS_TOKEN)" bws'
+
 [tasks."garage:bootstrap"]
 description = "Declare Garage layout, key and buckets on the NAS (idempotent)"
 quiet = true
@@ -33,7 +38,7 @@ fi
 # 2. Access key: import the one consumers already use (BWS postgresql-bucket),
 #    so CNPG and kopiur work unchanged against a fresh node.
 export BWS_ACCESS_TOKEN
-BWS_ACCESS_TOKEN=$(fnox get -c "$(git rev-parse --show-toplevel)/fnox.toml" BITWARDEN_KUBERNETES_TOKEN)
+BWS_ACCESS_TOKEN=$(fnox get -c "$(git rev-parse --show-toplevel)/fnox.toml" BWS_ACCESS_TOKEN)
 creds=$(bws secret list "${BWS_PROJECT_ID}" -o json | jq -er '.[] | select(.key == "postgresql-bucket") | .value')
 key_id=$(jq -er .AWS_ACCESS_KEY_ID <<<"${creds}")
 key_secret=$(jq -er .AWS_SECRET_ACCESS_KEY <<<"${creds}")

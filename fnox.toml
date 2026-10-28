@@ -4,6 +4,8 @@ vault = "env-home-ops"
 
 [secrets]
 BITWARDEN_KUBERNETES_TOKEN = { provider = "protonpass", value = "pass://env-home-ops/homeops-bootstrap/bitwarden-kubernetes-token" }
+# Same machine account, separate token for hand-run bws (revocable without touching the cluster).
+BWS_ACCESS_TOKEN = { provider = "protonpass", value = "pass://env-home-ops/bws-cli/access-token" }
 CLUSTER_SECRETS = { provider = "protonpass", value = "pass://env-home-ops/homeops-bootstrap/cluster-secrets" }
 AGE_KEY = { provider = "protonpass", value = "pass://env-home-ops/homeops-bootstrap/age-key" }
 SECRET_DOMAIN = { provider = "protonpass", value = "pass://env-home-ops/homeops-bootstrap/secret-domain" }
