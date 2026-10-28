@@ -75,10 +75,10 @@ spec:
             env: &appEnv
               <<: *env
               PASEO_HOSTNAMES: "paseo.${SECRET_DOMAIN}"
-              # Workspace services (paseo.json scripts) at <service>--<project>.${SECRET_DOMAIN}:
-              # one label, so the wildcard cert covers them; the `services` route below routes
-              # them and gives k8s-gateway the wildcard DNS answer.
-              PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "https://${SECRET_DOMAIN}"
+              # Workspace services (paseo.json scripts) at <service>--<project>.svc.${SECRET_DOMAIN}.
+              # Must not be a parent of PASEO_HOSTNAMES: every host under the base is treated
+              # as a service, so a bare ${SECRET_DOMAIN} 404s the daemon itself.
+              PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "https://svc.${SECRET_DOMAIN}"
               # envoy-internal reaches the daemon from the pod network.
               PASEO_TRUSTED_PROXIES: loopback,10.42.0.0/16
               # Clients connect directly over LAN/WireGuard; no third-party relay.
@@ -214,12 +214,11 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-      # Catch-all for workspace services: more specific hostnames on the gateway
-      # (and in k8s-gateway DNS) still win. Unknown names get Paseo's "service not
-      # running" page. Internal only, like the daemon.
+      # Workspace services; the gateway cert carries *.svc.${SECRET_DOMAIN}. Unknown names
+      # get Paseo's "service not running" page. Internal only, like the daemon.
       services:
         hostnames:
-          - "*.${SECRET_DOMAIN}"
+          - "*.svc.${SECRET_DOMAIN}"
         parentRefs:
           - name: envoy-internal
             namespace: network

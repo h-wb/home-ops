@@ -13,3 +13,5 @@ spec:
   dnsNames:
     - "${SECRET_DOMAIN}"
     - "*.${SECRET_DOMAIN}"
+    # Paseo workspace services (agents/paseo).
+    - "*.svc.${SECRET_DOMAIN}"
