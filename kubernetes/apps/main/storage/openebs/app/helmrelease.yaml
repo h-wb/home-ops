@@ -1,17 +1,15 @@
 ---
-# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/source.toolkit.fluxcd.io/ocirepository_v1.json
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/source.toolkit.fluxcd.io/helmrepository_v1.json
 apiVersion: source.toolkit.fluxcd.io/v1
-kind: OCIRepository
+kind: HelmRepository
 metadata:
   name: openebs
 spec:
-  interval: 5m
-  layerSelector:
-    mediaType: application/vnd.cncf.helm.chart.content.v1.tar+gzip
-    operation: copy
-  ref:
-    tag: 4.4.0
-  url: oci://ghcr.io/home-operations/charts-mirror/openebs
+  interval: 2h
+  # Upstream never published an OCI chart, so this is served from the classic
+  # Helm repo; the home-operations charts-mirror package was deprecated and
+  # pruned once the mirror dropped charts with no upstream OCI to graduate to.
+  url: https://openebs.github.io/openebs
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
@@ -20,9 +18,13 @@ metadata:
   name: openebs
 spec:
   interval: 1h
-  chartRef:
-    kind: OCIRepository
-    name: openebs
+  chart:
+    spec:
+      chart: openebs
+      sourceRef:
+        kind: HelmRepository
+        name: openebs
+      version: 4.4.0
   dependsOn: []
   install:
     disableHooks: true

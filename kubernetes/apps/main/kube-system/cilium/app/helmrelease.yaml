@@ -11,7 +11,9 @@ spec:
     operation: copy
   ref:
     tag: 1.18.6
-  url: oci://ghcr.io/home-operations/charts-mirror/cilium
+  # Upstream OCI chart; the home-operations charts-mirror package was deprecated
+  # and pruned once cilium started publishing OCI charts natively.
+  url: oci://quay.io/cilium/charts/cilium
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/helm.toolkit.fluxcd.io/helmrelease_v2.json
 apiVersion: helm.toolkit.fluxcd.io/v2
