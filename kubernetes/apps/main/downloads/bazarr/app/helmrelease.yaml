@@ -61,6 +61,8 @@ spec:
               GITSYNC_REF: master
               GITSYNC_PERIOD: 24h
               GITSYNC_ROOT: /add-ons
+              # git 2.47 in git-sync v4.8.0 rejects the root-owned emptyDir as dubious ownership
+              GITSYNC_GIT_CONFIG: safe.directory:*
             resources:
               requests:
                 cpu: 10m
