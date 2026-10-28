@@ -1,7 +1,7 @@
 ---
-# Metabase's built-in MCP endpoint. Interactive clients use its OAuth flow; the
-# gateway authenticates with a Metabase API key instead (Admin → Authentication →
-# API keys), so tools see what that key's group can see.
+# Metabase's built-in MCP endpoint. Since 0.65 it takes only OAuth access tokens, so
+# the gateway carries one minted once through the consent page (Metabase sets a 1y
+# TTL for this); tools see what the consenting user can see. Re-mint before expiry.
 #
 # The gateway pod mounts this entry's header secret itself, so if the secret is
 # missing the whole gateway fails to start, not just this backend.
@@ -10,14 +10,14 @@ kind: MCPServerEntry
 metadata:
   name: metabase
 spec:
-  remoteUrl: http://metabase.automation.svc.cluster.local:3000/api/mcp
+  remoteUrl: http://metabase.automation.svc.cluster.local:3000/api/metabase-mcp
   transport: streamable-http
   allowPrivateEndpoint: true
   headerForward:
     addHeadersFromSecret:
-      - headerName: X-API-Key
+      - headerName: Authorization
         valueSecretRef:
           name: toolhive-metabase
-          key: api-key
+          key: authorization
   groupRef:
     name: mcp-tools
