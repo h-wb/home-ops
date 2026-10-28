@@ -28,6 +28,11 @@ spec:
             - --port
             - "8000"
             - --read-only
+          # 2.0 is built for 10001 with WORKDIR /home/mcp; ToolHive's default 1000 can't
+          # read it and the server dies on stat('.env')
+          securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
           env:
             - name: MCP_K8S_PROVIDER
               value: in-cluster
