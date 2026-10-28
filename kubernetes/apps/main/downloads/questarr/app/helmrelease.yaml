@@ -28,6 +28,8 @@ spec:
               PGID: "1000"
               SQLITE_DB_PATH: /app/data/sqlite.db
               TRUST_PROXY: "1"
+              # rules/local/cloud pipeline; may hold patch/DLC releases instead of auto-downloading
+              CLASSIFICATION_MODE: hybrid
             probes:
               liveness: &probes
                 enabled: true
