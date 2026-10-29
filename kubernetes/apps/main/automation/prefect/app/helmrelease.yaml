@@ -84,7 +84,7 @@ spec:
           automountServiceAccountToken: true
         initContainers:
           # Creates the workspace-k8s pool, or updates its base job template —
-          # the worker refuses a pool that does not exist.
+          # --overwrite makes it idempotent against an existing pool.
           pool:
             image: &workspace-image
               repository: ghcr.io/h-wb/pipelines
@@ -96,6 +96,7 @@ spec:
               - workspace-k8s
               - --type
               - kubernetes
+              - --overwrite
               - --base-job-template
               - /template/workspace-job-template.json
             env:
