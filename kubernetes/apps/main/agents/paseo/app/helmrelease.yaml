@@ -177,7 +177,7 @@ spec:
           browser:
             image:
               repository: docker.io/chromedp/headless-shell
-              tag: 157.0.8103.15
+              tag: 157.0.8103.27
             command: ["/headless-shell/headless-shell"]
             args:
               - --no-sandbox
