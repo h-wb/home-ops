@@ -68,37 +68,37 @@ spec:
               limits:
                 cpu: 2000m
                 memory: 6Gi
-      # Workspace worker (pipelines decision 012): each workspace flow run is its
+      # Miroir worker (pipelines decision 012): each miroir flow run is its
       # own Job from the versioned pipelines image. The legacy deployments above
       # stay on local-pool until their connection is cut over.
       # NB: ghcr.io/h-wb/pipelines is built from the pipelines repo's main branch;
       # merge this only after that image exists (Renovate pins the digest).
-      workspace-worker:
+      miroir-worker:
         annotations:
           reloader.stakater.com/auto: "true"
-        # Created in workspace-rbac.yaml together with its Role; `name` (not the
+        # Created in miroir-rbac.yaml together with its Role; `name` (not the
         # chart's identifier mechanism) so the other controllers keep `default`.
         serviceAccount:
-          name: prefect-workspace-worker
+          name: prefect-miroir-worker
         pod:
           automountServiceAccountToken: true
         initContainers:
-          # Creates the workspace-k8s pool, or updates its base job template —
+          # Creates the miroir-k8s pool, or updates its base job template —
           # --overwrite makes it idempotent against an existing pool.
           pool:
-            image: &workspace-image
+            image: &miroir-image
               repository: ghcr.io/h-wb/pipelines
               tag: latest
             command:
               - prefect
               - work-pool
               - create
-              - workspace-k8s
+              - miroir-k8s
               - --type
               - kubernetes
               - --overwrite
               - --base-job-template
-              - /template/workspace-job-template.json
+              - /template/miroir-job-template.json
             env:
               TZ: Europe/Paris
               PREFECT_API_URL: "http://prefect.automation:4200/api"
@@ -113,13 +113,13 @@ spec:
                 memory: 256Mi
         containers:
           app:
-            image: *workspace-image
+            image: *miroir-image
             command:
               - prefect
               - worker
               - start
               - --pool
-              - workspace-k8s
+              - miroir-k8s
               - --type
               - kubernetes
             env:
@@ -196,14 +196,14 @@ spec:
           worker:
             app:
               - path: /root/.prefect/data
-      # The workspace-k8s pool's base job template (the Jobs themselves mount the
+      # The miroir-k8s pool's base job template (the Jobs themselves mount the
       # NFS export through the template, not through this HelmRelease).
-      workspace-job-template:
+      miroir-job-template:
         type: configMap
-        name: prefect-workspace-job-template
+        name: prefect-miroir-job-template
         advancedMounts:
-          workspace-worker:
+          miroir-worker:
             pool:
-              - path: /template/workspace-job-template.json
-                subPath: workspace-job-template.json
+              - path: /template/miroir-job-template.json
+                subPath: miroir-job-template.json
                 readOnly: true
