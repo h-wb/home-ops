@@ -19,7 +19,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/h-wb/pipelines
-              tag: sha-0faf64218acf449ba37861a2b0e6a84e65489c4a
+              tag: sha-90fefd6deca6cd1f4245c11440b0ea0cae778ac2
             # Absolute interpreter path: no PATH lookup for the console script
             # (mutable-tag stale caches once made runc miss it on one node).
             command:
@@ -55,7 +55,7 @@ spec:
               PREFECT_API_URL: "http://prefect.automation:4200/api"
               MIROIR_PREFECT_POOL: miroir-k8s
               MIROIR_PREFECT_CONFIG_PATH: /miroir/data/miroir/miroir.json
-              MIROIR_IMAGE: "ghcr.io/h-wb/pipelines:sha-0faf64218acf449ba37861a2b0e6a84e65489c4a"
+              MIROIR_IMAGE: "ghcr.io/h-wb/pipelines:sha-90fefd6deca6cd1f4245c11440b0ea0cae778ac2"
               MIROIR_PREFECT_JOB_VARIABLES: '{"namespace":"automation"}'
               MIROIR_ARTIFACT_DIR: /miroir/data/miroir/artifacts
             # MIROIR_SECRET_KEY (built-in connection secrets) and
