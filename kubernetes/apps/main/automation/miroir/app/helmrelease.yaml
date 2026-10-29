@@ -20,8 +20,12 @@ spec:
             image: &image
               repository: ghcr.io/h-wb/pipelines
               tag: sha-43cfcc1c9bcbe17ce57f0900e4f957302bb10967
+            # Absolute interpreter path: no PATH lookup for the console script
+            # (mutable-tag stale caches once made runc miss it on one node).
             command:
-              - pipelines-mirroir
+              - /app/.venv/bin/python
+              - -m
+              - src.cli
               - --config
               - /miroir/data/miroir/miroir.json
               - serve

@@ -90,6 +90,8 @@ spec:
               repository: ghcr.io/h-wb/pipelines
               tag: sha-43cfcc1c9bcbe17ce57f0900e4f957302bb10967
             command:
+              - /app/.venv/bin/python
+              - -m
               - prefect
               - work-pool
               - create
@@ -115,6 +117,8 @@ spec:
           app:
             image: *miroir-image
             command:
+              - /app/.venv/bin/python
+              - -m
               - prefect
               - worker
               - start
