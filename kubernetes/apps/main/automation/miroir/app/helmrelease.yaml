@@ -19,7 +19,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/h-wb/pipelines
-              tag: sha-78138ad82abf7a64ae2718e58de21f9c6c016e99
+              tag: sha-b1f8e8cd49203d9f058ea8c63efae5d1b0183428
             # Absolute interpreter path: no PATH lookup for the console script
             # (mutable-tag stale caches once made runc miss it on one node).
             command:
@@ -35,6 +35,8 @@ spec:
               - "8765"
             env:
               TZ: Europe/Paris
+              # Trust the ingress proxy's pod-network headers for HTTPS URLs/cookies.
+              FORWARDED_ALLOW_IPS: 10.42.0.0/16
               RUNTIME__DLTHUB_TELEMETRY: "false"
               # The metadata store: schema miroir_meta in postgres-miroir
               # (the Cluster from the cnpg/initdb component on this app).
