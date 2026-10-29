@@ -8,6 +8,7 @@ components:
 resources:
   - ./cobalt/ks.yaml
   - ./metabase/ks.yaml
+  - ./miroir/ks.yaml
   - ./prefect/ks.yaml
   - ./whisper/ks.yaml
   - ./n8n/ks.yaml
