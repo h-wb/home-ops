@@ -54,6 +54,15 @@ spec:
               fallthrough in-addr.arpa ip6.arpa
           - name: autopath
             parameters: "@kubernetes"
+          # Pods have no IPv6 route, but upstream DNS hands out AAAA records.
+          # Envoy's OIDC token exchange resolves the IdP endpoint, connects to
+          # the (dead) v6 address first and fails the whole flow - SSO broke on
+          # every envoy-oidc app the day the router started returning AAAA.
+          # Serve NODATA for AAAA cluster-wide instead of per-app workarounds
+          # (cf. multiscrobbler's ipv4first). Drop this if the cluster ever
+          # goes dual-stack.
+          - name: template
+            parameters: IN AAAA
           - name: forward
             parameters: . /etc/resolv.conf
           - name: cache
