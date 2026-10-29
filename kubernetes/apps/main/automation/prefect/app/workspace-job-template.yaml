@@ -4,11 +4,14 @@
 # The default prefect-kubernetes template extended with: the NFS data export mounted
 # at a fixed path (/workspace/data, where the workspace keeps its configuration and
 # artifacts, so storage paths recorded by the workspace resolve identically in every
-# Job), and the flow-run environment (warehouse coordinates in the clear,
-# installation secrets from the pipelines-secret ExternalSecret via secretKeyRef —
-# the Kubernetes worker keeps valueFrom entries and merges them with
-# per-deployment env). Applied by the workspace-worker init container on every
-# start: prefect work-pool create ... creates the pool or updates its template.
+# Job), and the flow-run environment. Warehouse credentials come from the
+# CNPG-generated postgres-metabase-app secret, like the other apps on
+# postgres-metabase; the workspace installation secrets (metadata URL, master key)
+# come from pipelines-secret — placed manually for now, later owned by the
+# `pipelines` ExternalSecret once its Bitwarden item exists. The Kubernetes worker
+# keeps valueFrom entries and merges them with per-deployment env. Applied by the
+# workspace-worker init container on every start: prefect work-pool create ...
+# creates the pool or updates its template.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -61,28 +64,52 @@ data:
                       },
                       {
                         "name": "DESTINATION__POSTGRES__CREDENTIALS__HOST",
-                        "value": "postgres-metabase-rw.automation.svc"
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "host"
+                          }
+                        }
                       },
                       {
                         "name": "DESTINATION__POSTGRES__CREDENTIALS__PORT",
-                        "value": "5432"
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "port"
+                          }
+                        }
                       },
                       {
                         "name": "DESTINATION__POSTGRES__CREDENTIALS__DATABASE",
-                        "value": "metabase"
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "dbname"
+                          }
+                        }
                       },
                       {
                         "name": "DESTINATION__POSTGRES__CREDENTIALS__USERNAME",
-                        "value": "metabase"
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "username"
+                          }
+                        }
                       },
                       {
                         "name": "DESTINATION__POSTGRES__CREDENTIALS__PASSWORD",
                         "valueFrom": {
                           "secretKeyRef": {
-                            "name": "pipelines-secret",
-                            "key": "DESTINATION__POSTGRES__CREDENTIALS__PASSWORD"
+                            "name": "postgres-metabase-app",
+                            "key": "password"
                           }
                         }
+                      },
+                      {
+                        "name": "GITHUB__AUTHOR_EMAILS",
+                        "value": "[\"placeholder@example.com\"]"
                       },
                       {
                         "name": "WORKSPACE_METADATA_URL",
@@ -99,15 +126,6 @@ data:
                           "secretKeyRef": {
                             "name": "pipelines-secret",
                             "key": "WORKSPACE_SECRET_KEY"
-                          }
-                        }
-                      },
-                      {
-                        "name": "GITHUB__AUTHOR_EMAILS",
-                        "valueFrom": {
-                          "secretKeyRef": {
-                            "name": "pipelines-secret",
-                            "key": "GITHUB__AUTHOR_EMAILS"
                           }
                         }
                       }
