@@ -69,3 +69,7 @@ spec:
     persistence:
       data:
         existingClaim: ${APP}
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
