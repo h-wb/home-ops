@@ -19,7 +19,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/h-wb/pipelines
-              tag: latest
+              tag: sha-43cfcc1c9bcbe17ce57f0900e4f957302bb10967
             command:
               - pipelines-mirroir
               - --config
@@ -51,7 +51,7 @@ spec:
               PREFECT_API_URL: "http://prefect.automation:4200/api"
               MIROIR_PREFECT_POOL: miroir-k8s
               MIROIR_PREFECT_CONFIG_PATH: /miroir/data/miroir/miroir.json
-              MIROIR_IMAGE: "ghcr.io/h-wb/pipelines:latest"
+              MIROIR_IMAGE: "ghcr.io/h-wb/pipelines:sha-43cfcc1c9bcbe17ce57f0900e4f957302bb10967"
               MIROIR_PREFECT_JOB_VARIABLES: '{"namespace":"automation"}'
               MIROIR_ARTIFACT_DIR: /miroir/data/miroir/artifacts
             # MIROIR_SECRET_KEY (built-in connection secrets) and
