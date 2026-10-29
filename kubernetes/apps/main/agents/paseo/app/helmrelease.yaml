@@ -39,6 +39,10 @@ spec:
       paseo:
         # Agents run for hours and hold an RWO volume.
         strategy: Recreate
+        # Mounts the tank NFS share (persistence.data below), like every other
+        # NFS-mounting app in the cluster.
+        labels:
+          nfsMount: "true"
         serviceAccount:
           identifier: paseo
         annotations:
@@ -274,6 +278,24 @@ spec:
               - path: /etc/paseo/authorized_keys
                 subPath: authorized_keys
                 readOnly: true
+      # The tank, the same NFS share qBittorrent downloads to (identical to the
+      # sento HelmRelease's data mount): agent-run Sento stacks read their
+      # imports at the /data paths qBittorrent reports, so no path mapping is
+      # needed. Their upstream config (qBittorrent/Prowlarr, sento-test
+      # category) is the sento repo's own — mise.prod.toml + fnox/Proton Pass
+      # (docs/exploratory-testing.md) — not this pod's env. Read-only: worktree
+      # libraries and download staging stay on the PVC, agents get no write
+      # access to the tank. Not in the browser sidecar.
+      data:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        advancedMounts:
+          paseo:
+            app: &data
+              - path: /data
+                readOnly: true
+            sshd: *data
       tmp:
         type: emptyDir
         globalMounts:
