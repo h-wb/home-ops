@@ -125,6 +125,10 @@ spec:
             env:
               TZ: Europe/Paris
               PREFECT_API_URL: "http://prefect.automation:4200/api"
+              # The observer watches Jobs/Pods for prefect.io/flow-run-id labels;
+              # scoped here so the namespaced Role below is enough (default is
+              # cluster-wide).
+              PREFECT_KUBERNETES_OBSERVER__NAMESPACES: automation
             envFrom:
               - secretRef:
                   name: prefect-secret
