@@ -19,7 +19,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/h-wb/pipelines
-              tag: sha-6a93b9afc22f39461f2baf2c2a4d266042ed67b7
+              tag: sha-78138ad82abf7a64ae2718e58de21f9c6c016e99
             # Absolute interpreter path: no PATH lookup for the console script
             # (mutable-tag stale caches once made runc miss it on one node).
             command:
@@ -48,15 +48,10 @@ spec:
                 valueFrom: { secretKeyRef: { name: postgres-miroir-app, key: username } }
               MIROIR_METADATA__PASSWORD:
                 valueFrom: { secretKeyRef: { name: postgres-miroir-app, key: password } }
-              # Serves the web UI/API; with the pool set, requested syncs are
-              # submitted as Prefect flow runs (miroir-k8s) instead of local
-              # subprocesses. Must mirror the repo's mise mirroir:deploy
-              # environment, or plan/apply would fight over drift.
+              # Execution settings (pool, flow-run image, namespace) live in
+              # miroir.json. Only the worker-visible config path is environmental.
               PREFECT_API_URL: "http://prefect.automation:4200/api"
-              MIROIR_PREFECT_POOL: miroir-k8s
               MIROIR_PREFECT_CONFIG_PATH: /miroir/data/miroir/miroir.json
-              MIROIR_IMAGE: "ghcr.io/h-wb/pipelines:sha-6a93b9afc22f39461f2baf2c2a4d266042ed67b7"
-              MIROIR_PREFECT_JOB_VARIABLES: '{"namespace":"automation"}'
               MIROIR_ARTIFACT_DIR: /miroir/data/miroir/artifacts
             # miroir-secret: MIROIR_SECRET_KEY (built-in connection secrets)
             # and MIROIR_API_TOKEN (the UI/API bearer), from Bitwarden via the
