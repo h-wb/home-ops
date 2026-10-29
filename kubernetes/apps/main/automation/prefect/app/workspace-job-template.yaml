@@ -4,14 +4,15 @@
 # The default prefect-kubernetes template extended with: the NFS data export mounted
 # at a fixed path (/workspace/data, where the workspace keeps its configuration and
 # artifacts, so storage paths recorded by the workspace resolve identically in every
-# Job), and the flow-run environment. Warehouse credentials come from the
-# CNPG-generated postgres-metabase-app secret, like the other apps on
-# postgres-metabase; the workspace installation secrets (metadata URL, master key)
-# come from pipelines-secret — placed manually for now, later owned by the
-# `pipelines` ExternalSecret once its Bitwarden item exists. The Kubernetes worker
-# keeps valueFrom entries and merges them with per-deployment env. Applied by the
-# workspace-worker init container on every start: prefect work-pool create ...
-# creates the pool or updates its template.
+# Job), and the flow-run environment. Warehouse and metadata-DB credentials come
+# straight from the CNPG-generated postgres-metabase-app secret via secretKeyRef
+# (the workspace composes its metadata URL from WORKSPACE_METADATA__* parts), like
+# the other apps on postgres-metabase — nothing duplicated in a secret store. The
+# only hand-placed value is the workspace master key in pipelines-secret (owned by
+# the `pipelines` ExternalSecret once its Bitwarden item exists). The Kubernetes
+# worker keeps valueFrom entries and merges them with per-deployment env. Applied
+# by the workspace-worker init container on every start: prefect work-pool create
+# ... creates the pool or updates its template.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -108,17 +109,53 @@ data:
                         }
                       },
                       {
-                        "name": "GITHUB__AUTHOR_EMAILS",
-                        "value": "[\"placeholder@example.com\"]"
-                      },
-                      {
-                        "name": "WORKSPACE_METADATA_URL",
+                        "name": "WORKSPACE_METADATA__HOST",
                         "valueFrom": {
                           "secretKeyRef": {
-                            "name": "pipelines-secret",
-                            "key": "WORKSPACE_METADATA_URL"
+                            "name": "postgres-metabase-app",
+                            "key": "host"
                           }
                         }
+                      },
+                      {
+                        "name": "WORKSPACE_METADATA__PORT",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "port"
+                          }
+                        }
+                      },
+                      {
+                        "name": "WORKSPACE_METADATA__DATABASE",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "dbname"
+                          }
+                        }
+                      },
+                      {
+                        "name": "WORKSPACE_METADATA__USERNAME",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "username"
+                          }
+                        }
+                      },
+                      {
+                        "name": "WORKSPACE_METADATA__PASSWORD",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "postgres-metabase-app",
+                            "key": "password"
+                          }
+                        }
+                      },
+                      {
+                        "name": "GITHUB__AUTHOR_EMAILS",
+                        "value": "[\"placeholder@example.com\"]"
                       },
                       {
                         "name": "WORKSPACE_SECRET_KEY",
