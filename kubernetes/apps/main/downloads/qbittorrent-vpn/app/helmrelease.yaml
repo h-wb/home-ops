@@ -36,8 +36,7 @@ spec:
               FIREWALL_OUTBOUND_SUBNETS: 10.42.0.0/16,10.43.0.0/16
               FIREWALL_VPN_INPUT_PORTS: ""
               BLOCK_IPV6: "on"
-              # the default malicious DNS blocklist is held in memory and has outgrown
-              # the 256Mi limit (OOMKilled crash loop) - it adds little behind a VPN tunnel
+              # the malicious DNS blocklist adds little behind a VPN tunnel
               BLOCK_MALICIOUS: "off"
               SERVER_COUNTRIES: Switzerland
               VPN_PORT_FORWARDING_UP_COMMAND: |
@@ -69,7 +68,9 @@ spec:
                 cpu: 10m
                 memory: 64Mi
               limits:
-                memory: 256Mi
+                # headroom for the DNS burst when qBittorrent reannounces every torrent
+                # after a gluetun restart changes the exit IP (256Mi OOM-looped)
+                memory: 1Gi
                 squat.ai/tun: 1
             restartPolicy: Always
             securityContext:
