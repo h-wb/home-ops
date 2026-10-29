@@ -36,6 +36,9 @@ spec:
               FIREWALL_OUTBOUND_SUBNETS: 10.42.0.0/16,10.43.0.0/16
               FIREWALL_VPN_INPUT_PORTS: ""
               BLOCK_IPV6: "on"
+              # the default malicious DNS blocklist is held in memory and has outgrown
+              # the 256Mi limit (OOMKilled crash loop) - it adds little behind a VPN tunnel
+              BLOCK_MALICIOUS: "off"
               SERVER_COUNTRIES: Switzerland
               VPN_PORT_FORWARDING_UP_COMMAND: |
                 /bin/sh -c 'wget -O- --retry-connrefused --post-data "json={\"listen_port\":{{`{{PORTS}}`}}}" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
