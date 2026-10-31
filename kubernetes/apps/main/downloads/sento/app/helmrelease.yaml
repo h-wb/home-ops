@@ -21,7 +21,7 @@ spec:
           app:
             image:
               repository: ghcr.io/h-wb/sento
-              tag: sha-d3135831b9499c2e686e3d6620290d8bd51cfaa4
+              tag: sha-111db852afdd99372c8353f1ca7ac51c30444dc2
             env:
               TZ: Europe/Paris
               SENTO_PORT: &port 8484
@@ -61,7 +61,7 @@ spec:
           extensions:
             image:
               repository: ghcr.io/h-wb/sento-extensions
-              tag: sha-d3135831b9499c2e686e3d6620290d8bd51cfaa4
+              tag: sha-67b6fa0d417f65da492afbf0ff0f964ce5cc4c0b
             env:
               TZ: Europe/Paris
               SENTO_EXTENSIONS_PORT: &extensionsPort 8901
