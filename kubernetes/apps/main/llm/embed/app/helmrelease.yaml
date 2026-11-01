@@ -18,7 +18,7 @@ spec:
           app:
             image:
               repository: ghcr.io/ggml-org/llama.cpp
-              tag: server@sha256:b32890309c1a33a534a01b0b461e953dc2c5a6bac20213abcf48e22847a19c85
+              tag: server@sha256:e67d88af487390098c76d7982b1761484339fa147b7e41d3c64ae1318759f78b
             env:
               TZ: Europe/Paris
               LLAMA_CACHE: /models
