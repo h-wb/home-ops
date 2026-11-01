@@ -55,7 +55,7 @@ spec:
           tools:
             image: &image
               repository: ghcr.io/getpaseo/paseo
-              tag: 0.13.2
+              tag: 0.14.0
             command: ["/bin/sh", "/etc/paseo/provision.sh"]
             env: &env
               HOME: /home/paseo
