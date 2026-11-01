@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Tailscale client: injects a kernel-mode tailscaled sidecar into an app's pod,
+# joining it to the tailnet so it can reach routes advertised by subnet routers
+# (the edge cluster's network/tailscale app advertises its LAN).
+#
+# Consumers need in their ks.yaml:
+#   components:
+#     - ../../../../../components/tailscale/client
+#   postBuild:
+#     substitute:
+#       APP: <app>       # controller name must match: the values below land at
+#                        # controllers.${APP}.containers.tailscale
+#       CLUSTER: ${CLUSTER}
+#
+# The sidecar's tailscale0 lives in the pod netns, so every container in the pod
+# (and every process they spawn) reaches the routed subnets directly. The app's
+# HelmRelease must not define its own spec.valuesFrom — the patch below sets it.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - ./configmap.yaml
+  - ./externalsecret.yaml
+  - ./pvc.yaml
+patches:
+  # Strategic merge on the app's (single) HelmRelease: fold the ConfigMap's
+  # values into spec.values via valuesFrom. Helm deep-merges, so the sidecar
+  # is appended to the app's own containers instead of replacing them.
+  - path: ./helmrelease-patch.yaml
+    target:
+      group: helm.toolkit.fluxcd.io
+      kind: HelmRelease

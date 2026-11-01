@@ -1,0 +1,62 @@
+---
+# The sidecar container and its mounts, as HelmRelease values. Merged into the
+# consuming HelmRelease by the valuesFrom patch; Flux postBuild substitutes the
+# ${APP}/${CLUSTER} tokens before Helm deep-merges it with the app's own values
+# (kustomize can't merge into spec.values.controllers.<name> — the controller
+# name is only known to Flux at reconcile time, hence the ConfigMap detour).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: &name ${APP}-tailscale
+data:
+  values.yaml: |-
+    controllers:
+      ${APP}:
+        containers:
+          tailscale:
+            image:
+              repository: mirror.gcr.io/tailscale/tailscale
+              tag: v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+            env:
+              TS_HOSTNAME: ${CLUSTER}-${APP}
+              TS_USERSPACE: "false"
+              TS_STATE_DIR: /var/lib/tailscale
+              # Keep the pod's resolv.conf Cilium/CoreDNS-managed.
+              TS_ACCEPT_DNS: "false"
+              # Install the subnet router's routes (e.g. the edge LAN) in the
+              # pod netns.
+              TS_EXTRA_ARGS: --accept-routes
+              # With the state PVC the node stays logged in; only re-auth if out.
+              TS_AUTH_ONCE: "true"
+            envFrom:
+              - secretRef:
+                  name: ${APP}-tailscale
+            securityContext:
+              # Root + NET_ADMIN: tailscaled creates tailscale0 and installs routes.
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              capabilities: { drop: [ALL], add: [NET_ADMIN, NET_RAW] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+    persistence:
+      tailscale-state:
+        existingClaim: ${APP}-tailscale
+        advancedMounts:
+          ${APP}:
+            tailscale:
+              - path: /var/lib/tailscale
+      # Kernel-mode tailscaled needs the host tun device; tailscale0 ends up in
+      # the pod netns, not on the node.
+      tun:
+        type: hostPath
+        hostPath: /dev/net/tun
+        advancedMounts:
+          ${APP}:
+            tailscale:
+              - path: /dev/net/tun

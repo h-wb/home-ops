@@ -12,12 +12,18 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/kopiur/backup
+    # Tailscale client sidecar: joins the pod to the tailnet so agents can
+    # reach the edge cluster LAN (192.168.18.0/24) through the edge cluster's
+    # network/tailscale subnet router. Requires the `tailscale` Bitwarden item.
+    - ../../../../../components/tailscale/client
   dependsOn: []
   interval: 30m
   path: ./kubernetes/apps/main/agents/paseo/app
   postBuild:
     substitute:
       APP: *app
+      # For the tailscale component's TS_HOSTNAME.
+      CLUSTER: ${CLUSTER}
       # Home holds mise installs, agent logins and every git worktree.
       KOPIUR_CAPACITY: 40Gi
       KOPIUR_SCHEDULE: "38 4 * * *"

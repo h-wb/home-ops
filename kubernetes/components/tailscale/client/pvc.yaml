@@ -1,0 +1,13 @@
+---
+# Tailscale node identity for the injected sidecar. Survives pod restarts, so
+# the auth key is only needed while the node is logged out.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${APP}-tailscale
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 512Mi
+  storageClassName: local-hostpath

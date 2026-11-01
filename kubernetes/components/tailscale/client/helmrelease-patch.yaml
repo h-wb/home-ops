@@ -1,0 +1,13 @@
+---
+# Fold the component's values (configmap.yaml) into the app's HelmRelease.
+# Strategic merge replaces spec.valuesFrom wholesale: consuming apps must not
+# define their own valuesFrom.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: not-used
+spec:
+  valuesFrom:
+    - kind: ConfigMap
+      name: ${APP}-tailscale
+      valuesKey: values.yaml

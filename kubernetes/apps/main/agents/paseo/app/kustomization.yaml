@@ -5,7 +5,6 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
-  - ./pvc.yaml
   - ./rbac.yaml
 configMapGenerator:
   # Substitution off: a shell script, and Flux would eat its ${...}.
