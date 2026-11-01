@@ -48,7 +48,7 @@ spec:
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
           configmap.reloader.stakater.com/reload: paseo-provision,paseo-sshd
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-mcp-gateway,paseo-ssh
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-mcp-gateway,paseo-ssh,paseo-tailscale
         initContainers:
           # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
           # CLIs, repos and agent configs all come from there (./config/provision.sh).
@@ -195,6 +195,41 @@ spec:
                 memory: 128Mi
               limits:
                 memory: 2Gi
+          # Tailscale client, kernel mode: tailscale0 lands in this pod's netns,
+          # so the daemon, sshd sessions and agents all reach the edge cluster
+          # LAN (192.168.18.0/24) directly. The edge cluster's network/tailscale
+          # app advertises that subnet; --accept-routes installs it here. Key
+          # from the `tailscale` Bitwarden item (paseo-tailscale secret).
+          tailscale:
+            image:
+              repository: mirror.gcr.io/tailscale/tailscale
+              tag: v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+            env:
+              TS_HOSTNAME: main-paseo
+              TS_USERSPACE: "false"
+              TS_STATE_DIR: /var/lib/tailscale
+              # Keep the pod's resolv.conf Cilium/CoreDNS-managed.
+              TS_ACCEPT_DNS: "false"
+              # Install the edge subnet router's routes in this netns.
+              TS_EXTRA_ARGS: --accept-routes
+              # With the state PVC the node stays logged in; only re-auth if out.
+              TS_AUTH_ONCE: "true"
+            envFrom:
+              - secretRef:
+                  name: paseo-tailscale
+            securityContext:
+              # Root + NET_ADMIN: tailscaled creates tailscale0 and installs routes.
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              capabilities: { drop: [ALL], add: [NET_ADMIN, NET_RAW] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
     service:
       app:
         controller: *app
@@ -308,3 +343,20 @@ spec:
           paseo:
             browser:
               - path: /dev/shm
+      # Tailscale state (pvc.yaml): node identity survives restarts, so the auth
+      # key is only needed while the node is logged out.
+      tailscale-state:
+        existingClaim: paseo-tailscale
+        advancedMounts:
+          paseo:
+            tailscale:
+              - path: /var/lib/tailscale
+      # Kernel-mode tailscaled needs the host tun device; it creates tailscale0
+      # in the pod netns, not on the node.
+      tun:
+        type: hostPath
+        hostPath: /dev/net/tun
+        advancedMounts:
+          paseo:
+            tailscale:
+              - path: /dev/net/tun

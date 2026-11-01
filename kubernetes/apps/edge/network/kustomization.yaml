@@ -13,3 +13,4 @@ resources:
   - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
   - ./multus/ks.yaml
+  - ./tailscale/ks.yaml

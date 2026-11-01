@@ -1,0 +1,79 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# Tailscale subnet router: joins the edge cluster to the tailnet and advertises
+# the whole edge LAN (192.168.18.0/24), so tailnet clients — mainly the paseo
+# sidecar on main — can reach edge nodes and services directly (Talos API,
+# envoy gateways, k8s-gateway DNS) without anything exposed to the internet.
+# Kernel-mode tailscaled creates tailscale0 inside the pod netns; LAN traffic
+# is SNATed to the pod IP by default (--snat-subnet-routes), so replies come
+# back through Cilium's egress masquerade to the node.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  interval: 1h
+  values:
+    controllers:
+      tailscale:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: mirror.gcr.io/tailscale/tailscale
+              tag: v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+            env:
+              TS_HOSTNAME: "${CLUSTER}"
+              # Subnet routes to advertise; approved in the Tailscale admin console.
+              TS_ROUTES: "${TAILSCALE_ROUTES}"
+              # Kernel mode: needs NET_ADMIN and /dev/net/tun (hostPath below).
+              TS_USERSPACE: "false"
+              TS_STATE_DIR: /var/lib/tailscale
+              # Keep the pod's resolv.conf Cilium/CoreDNS-managed.
+              TS_ACCEPT_DNS: "false"
+              # With the state PVC the node stays logged in; only re-auth if out.
+              TS_AUTH_ONCE: "true"
+            envFrom:
+              - secretRef:
+                  name: tailscale-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["/usr/bin/tailscale", "status"]
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              # Root + NET_ADMIN: tailscaled creates tailscale0 and installs routes.
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              capabilities: { drop: [ALL], add: [NET_ADMIN, NET_RAW] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+    persistence:
+      state:
+        existingClaim: tailscale
+        globalMounts:
+          - path: /var/lib/tailscale
+      tun:
+        type: hostPath
+        hostPath: /dev/net/tun
+        globalMounts:
+          - path: /dev/net/tun

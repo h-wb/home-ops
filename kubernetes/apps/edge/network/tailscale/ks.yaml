@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app tailscale
+  namespace: &namespace network
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: external-secrets
+      namespace: external-secrets
+  interval: 1h
+  path: ./kubernetes/apps/edge/network/tailscale/app
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false
+  postBuild:
+    substitute:
+      CLUSTER: ${CLUSTER}
+      # The edge LAN behind the subnet router. The route must be approved in the
+      # Tailscale admin console (or via an autoApprovers policy) before clients
+      # can use it.
+      TAILSCALE_ROUTES: "192.168.18.0/24"
