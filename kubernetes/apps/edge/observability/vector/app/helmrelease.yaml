@@ -43,6 +43,31 @@ spec:
                 compression: gzip
     controllers:
       vector:
+        initContainers:
+          # Same as the edge kube-prometheus-stack's: tailscaled's accepted
+          # routes land in table 52 behind an `ip rule` at priority 5270, and
+          # replies to the edge LAN (Talos kmsg delivery, kubelet probes) would
+          # otherwise be pulled into the tunnel and never return. A rule one
+          # step above keeps LAN-destined packets on the eth0 path.
+          lan-bypass:
+            image:
+              repository: mirror.gcr.io/library/busybox
+              tag: musl@sha256:80e38f9a1b39188b8bdb28879178edb322a4402b081a9aedda1924609decd6f6
+            command: ["/bin/ip"]
+            args:
+              - rule
+              - add
+              - priority
+              - "5269"
+              - to
+              - 192.168.18.0/24
+              - lookup
+              - main
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              allowPrivilegeEscalation: false
+              capabilities: { drop: [ALL], add: [NET_ADMIN] }
         containers:
           app:
             image:

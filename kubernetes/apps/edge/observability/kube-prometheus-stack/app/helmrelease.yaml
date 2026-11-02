@@ -146,6 +146,28 @@ spec:
         # components/tailscale/client Component (that injects into app-template
         # HelmReleases) — the Prometheus CR takes raw containers/volumes, with
         # the same env as the Component's ConfigMap.
+        initContainers:
+          # tailscaled accepts routes into table 52 with an `ip rule` at
+          # priority 5270, so replies to the edge LAN (kubelet probes!) would
+          # be pulled into the tunnel and never return. A rule one step above
+          # keeps LAN-destined packets on the eth0 path.
+          - name: lan-bypass
+            image: mirror.gcr.io/library/busybox:musl@sha256:80e38f9a1b39188b8bdb28879178edb322a4402b081a9aedda1924609decd6f6
+            command: ["/bin/ip"]
+            args:
+              - rule
+              - add
+              - priority
+              - "5269"
+              - to
+              - 192.168.18.0/24
+              - lookup
+              - main
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              allowPrivilegeEscalation: false
+              capabilities: { drop: [ALL], add: [NET_ADMIN] }
         containers:
           - name: tailscale
             image: mirror.gcr.io/tailscale/tailscale:v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c

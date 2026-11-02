@@ -16,6 +16,12 @@
 # The sidecar's tailscale0 lives in the pod netns, so every container in the pod
 # (and every process they spawn) reaches the routed subnets directly. The app's
 # HelmRelease must not define its own spec.valuesFrom — the patch below sets it.
+#
+# ⚠ Edge consumers: tailscaled pulls accepted routes into table 52 behind an
+# `ip rule` at priority 5270, which captures replies to the pod's own LAN —
+# kubelet probes and other inbound from the LAN time out. Edge apps need the
+# `lan-bypass` initContainer (see the edge kube-prometheus-stack or vector app)
+# adding a `to <LAN> lookup main` rule just above it.
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
 resources:
