@@ -117,12 +117,17 @@ spec:
         resources:
           requests:
             cpu: 50m
+            memory: 256Mi
           limits:
             memory: 512Mi
         image:
           registry: docker.io
           repository: prompp/prompp
-          tag: 2.53.2-0.2.5
+          # v0.7.10 fixes the remote-write timestamp units that inflated the
+          # shard calculation (deckhouse/prompp release v0.7.10).
+          tag: 0.7.10
+        # The operator needs the upstream API version, not Prom++'s tag.
+        version: v2.55.1
         securityContext:
           runAsNonRoot: true
           runAsUser: 64535
@@ -142,9 +147,6 @@ spec:
         # subnet router pod — one extra hop on the same node, not a loop.
         remoteWrite:
           - url: http://192.168.1.205:9090/api/v1/write
-            # The WAN queue needs 60-75 parallel shards at current latency.
-            queueConfig:
-              maxShards: 100
             # Main evaluates its own recording and alerting rules over these
             # samples. Sending edge's derived series too double-counts them
             # (e.g. namespace memory requests) in main's cluster-wide alerts.
