@@ -10,6 +10,10 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  components:
+    # Tailscale client sidecar: the edge group probes edge VIPs (HA, mosquitto)
+    # directly, over the edge cluster's network/tailscale subnet router.
+    - ../../../../../components/tailscale/client
   path: ./kubernetes/apps/main/observability/gatus/app
   prune: true
   sourceRef:
@@ -23,4 +27,6 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      # For the tailscale component's TS_HOSTNAME.
+      CLUSTER: ${CLUSTER}
       GATUS_SUBDOMAIN: status
