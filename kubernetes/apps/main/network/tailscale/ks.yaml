@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app tailscale
+  namespace: &namespace network
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: external-secrets
+      namespace: external-secrets
+  interval: 1h
+  path: ./kubernetes/apps/main/network/tailscale/app
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false
+  postBuild:
+    substitute:
+      CLUSTER: ${CLUSTER}
+      # Only the two VIPs the edge cluster's remote write and log shipping
+      # need — never the whole LAN: main pods accept routes too, and a
+      # 192.168.1.0/24 route would capture their own LAN traffic into the
+      # tailnet. Approve these in the Tailscale admin console.
+      TAILSCALE_ROUTES: "192.168.1.205/32,192.168.1.206/32"

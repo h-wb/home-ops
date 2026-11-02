@@ -137,6 +137,9 @@ spec:
         # Soft dependency on main: remote write queues buffer on disk and
         # retry, so edge telemetry keeps flowing after a tailnet outage.
         # Local rules + this cluster's own Alertmanager stay the safety net.
+        # NB: --accept-routes also installs the edge LAN route, so local-LAN
+        # scrape targets (node exporter, kubelet) hairpin through the edge
+        # subnet router pod — one extra hop on the same node, not a loop.
         remoteWrite:
           - url: http://192.168.1.205:9090/api/v1/write
         # Tailscale client for the remoteWrite leg. Not the reusable

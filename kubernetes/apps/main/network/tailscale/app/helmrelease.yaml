@@ -1,0 +1,80 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# Tailscale subnet router for the main cluster: advertises only the two
+# LoadBalancer VIPs the edge cluster needs — prometheus-lb (remote write) and
+# victoria-logs-lb (log shipping). Userspace mode, like the edge cluster's
+# router: Cilium only translates VIPs at the socket layer, so forwarded
+# packets must be re-dialled from real sockets. Not the whole LAN: main pods
+# accept routes too, and a 192.168.1.0/24 route would capture their own LAN
+# traffic into the tailnet.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: tailscale
+spec:
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  interval: 1h
+  values:
+    controllers:
+      tailscale:
+        replicas: 1
+        strategy: RollingUpdate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: mirror.gcr.io/tailscale/tailscale
+              tag: v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+            env:
+              TS_HOSTNAME: "${CLUSTER}"
+              # Subnet routes to advertise; approved in the Tailscale admin console.
+              TS_ROUTES: "${TAILSCALE_ROUTES}"
+              # Userspace re-dials from real sockets. Cilium only translates
+              # LoadBalancer VIPs at the socket layer, so kernel-forwarded
+              # packets to a VIP leave untranslated and time out.
+              TS_USERSPACE: "true"
+              TS_STATE_DIR: /var/lib/tailscale
+              # Keep the pod's resolv.conf Cilium/CoreDNS-managed.
+              TS_ACCEPT_DNS: "false"
+              # State lives on the PVC; the automounted SA token would otherwise
+              # put containerboot in Kubernetes mode, storing state in a
+              # `tailscale` Secret the network SA can't touch.
+              TS_KUBE_SECRET: ""
+              # With the state PVC the node stays logged in; only re-auth if out.
+              TS_AUTH_ONCE: "true"
+            envFrom:
+              - secretRef:
+                  name: tailscale-secret
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  exec:
+                    command: ["/usr/local/bin/tailscale", "status"]
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+                  failureThreshold: 3
+              readiness: *probes
+            securityContext:
+              # Root owns the existing state PVC; NET_RAW lets ping work through the route.
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              capabilities: { drop: [ALL], add: [NET_RAW] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 256Mi
+    persistence:
+      state:
+        existingClaim: tailscale
+        globalMounts:
+          - path: /var/lib/tailscale
