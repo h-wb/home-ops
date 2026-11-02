@@ -2,8 +2,12 @@
 import asyncio
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
+import tempfile
+import tomllib
 import types
 import unittest
 from unittest.mock import patch
@@ -83,6 +87,78 @@ class DataScopes(unittest.TestCase):
 
     def test_orphan_tool_result_denied(self):
         self.assertFalse(self.guard._only_general_tools({"messages": [{"role": "tool", "tool_call_id": "missing", "content": "secret"}]}))
+
+
+RENDERER = ROOT / "kubernetes/components/paseo/base/config/policy.py"
+
+
+class PolicyRenderer(unittest.TestCase):
+    """The pod-side consumer: renders the real policy.json into agent homes."""
+
+    def render(self, scope, policy_file, home, config=None):
+        if config is not None:
+            (home / ".paseo").mkdir(parents=True, exist_ok=True)
+            (home / ".paseo/config.json").write_text(json.dumps(config))
+        env = dict(os.environ, HOME=str(home), PASEO_HOME=str(home / ".paseo"),
+                   CODEX_HOME=str(home / ".codex"), PASEO_DATA_POLICY=str(policy_file),
+                   PASEO_DATA_SCOPE=scope)
+        return subprocess.run([sys.executable, str(RENDERER)], env=env,
+                              capture_output=True, text=True)
+
+    def test_scope_grants_match_policy_and_private_pins_metadata(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            policy_file = home / "policy.json"
+            # The real policy, with the deployment-time template var resolved.
+            policy_file.write_text((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text().replace("${SECRET_DOMAIN}", "example.com"))
+            config = {"version": 2, "daemon": {"port": 9999}, "agents": {"providers": {"custom-cloud": {"enabled": True}}}}
+            for scope in POLICY["scopes"]:
+                with self.subTest(scope=scope):
+                    self.assertEqual(0, self.render(scope, policy_file, home, config).returncode)
+            rendered = json.loads((home / ".paseo/config.json").read_text())
+            self.assertEqual(9999, rendered["daemon"]["port"])  # existing config preserved
+            providers = rendered["agents"]["providers"]
+            for name, settings in providers.items():
+                self.assertEqual(name in POLICY["scopes"]["private"]["providers"], settings["enabled"], name)
+            self.assertFalse(providers["claude"]["enabled"])
+            self.assertFalse(providers["custom-cloud"]["enabled"])
+            self.assertTrue(providers["mistral-vibe"]["enabled"])
+            self.assertEqual([{"provider": "mistral-vibe"}], rendered["agents"]["metadataGeneration"]["providers"])
+            servers = json.loads(providers["mistral-vibe"]["env"]["VIBE_MCP_SERVERS"])
+            self.assertEqual(["toolhive-private"], [s["name"] for s in servers])
+            self.assertIn("create_agent", providers["mistral-vibe"]["paseoTools"]["disabledTools"])
+
+    def test_general_scope_configures_native_clients(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            policy_file = home / "policy.json"
+            policy_file.write_text((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text().replace("${SECRET_DOMAIN}", "example.com"))
+            result = self.render("general", policy_file, home)
+            self.assertEqual(0, result.returncode)
+            claude = json.loads((home / ".claude.json").read_text())["mcpServers"]
+            self.assertIn("https://mcp-general.example.com/mcp", claude["toolhive-general"]["url"])
+            self.assertEqual("${MCP_API_KEY}", claude["toolhive-general"]["headers"]["x-api-key"])
+            codex = tomllib.loads((home / ".codex/config.toml").read_text())
+            self.assertIn("memini-general", codex["mcp_servers"])
+            # Re-running the renderer leaves the rendered file untouched.
+            before = (home / ".codex/config.toml").read_text()
+            self.assertEqual(0, self.render("general", policy_file, home).returncode)
+            self.assertEqual(before, (home / ".codex/config.toml").read_text())
+
+    def test_fail_closed_on_unknown_scope_and_missing_policy(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            policy_file = home / "policy.json"
+            policy_file.write_text((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text().replace("${SECRET_DOMAIN}", "example.com"))
+            self.assertNotEqual(0, self.render("typo", policy_file, home).returncode)
+            self.assertFalse((home / ".paseo/config.json").exists())
+            self.assertNotEqual(0, self.render("general", home / "absent.json", home).returncode)
+            self.assertFalse((home / ".paseo/config.json").exists())
+
+    def test_scope_grants_are_declared_eligible(self):
+        for scope, settings in POLICY["scopes"].items():
+            for provider in settings["providers"]:
+                self.assertIn(scope, POLICY["providers"][provider]["allowed_data_scopes"], provider)
 
 
 if __name__ == "__main__":

@@ -6,7 +6,8 @@ Direct Mistral and approved local inference may process both scopes. Claude and
 Codex are general only. Mistral running in general still gets general credentials.
 
 The shared eligibility policy is `kubernetes/components/agent-data-policy/policy.json`.
-Paseo and LiteLLM mount it; dotfiles consumes it without another provider list.
+Paseo and LiteLLM mount it; the paseo base renders its own config from it, so no
+consumer keeps another provider list.
 Tool catalogs remain ToolHive's responsibility; model aliases and explicit client
 grants remain LiteLLM's responsibility. Every deployment behind a private alias
 must qualify. New backends require explicit classification.

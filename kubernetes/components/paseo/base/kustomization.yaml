@@ -7,6 +7,7 @@ configMapGenerator:
   - name: ${APP}-provision
     files:
       - provision.sh=./config/provision.sh
+      - policy.py=./config/policy.py
     options:
       disableNameSuffixHash: true
   - name: ${APP}-sshd

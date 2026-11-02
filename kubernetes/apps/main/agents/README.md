@@ -18,8 +18,10 @@ retain in-cluster paths outside gateway authentication.
 
 `kubernetes/components/agent-data-policy/policy.json` declares backend eligibility,
 provider grants, endpoints and LiteLLM's general tool prefixes. Each consumer gets
-a read-only ConfigMap. Dotfiles configures providers and MCP from that policy and
-pins private metadata to Mistral without general-provider fallbacks.
+a read-only ConfigMap. The paseo base renders providers and MCP from that policy
+at pod start (`config/policy.py`, run by `provision.sh` after dotfiles'
+bootstrap) and pins private metadata to Mistral without general-provider
+fallbacks.
 
 Use `<service>-<scope>` for environments/endpoints and `<service>-<client>-<scope>`
 for client credentials. General includes operational secrets; it does not mean public.
@@ -33,9 +35,10 @@ SSH key changes and client re-pairing merely to standardize naming.
 ## Coordinated rollout
 
 These changes are a draft across home-ops, dotfiles and obsidian-workspace.
-Publish the dotfiles policy consumer before rolling either pod: provisioning
-pulls the published dotfiles checkout. Start new agent sessions after rollout;
-existing sessions keep their launch configuration.
+The policy and its renderer ship together in home-ops, so no cross-repo
+ordering applies to them; merge the three when their own prerequisites are met.
+Start new agent sessions after rollout; existing sessions keep their launch
+configuration.
 
 1. Create `env-paseo-general` and `env-paseo-private` Proton Pass vaults and separate
    scoped agents. General may retain approved operational vaults, but must not
@@ -75,10 +78,11 @@ private sync before removing the old vault and `.config/obsidian-headless`.
 Never delete the only copy of unsynced notes. Backups can retain historical
 private data and remain under operator administrative control.
 
-Checks: `python3 -m unittest discover -s tests -p test_data_scopes.py`; run
-`flate test all --path kubernetes/clusters/main --no-progress` and the same for
-`edge`. Dotfiles has `tests/test_paseo_policy.py` for rendering and failure behavior.
+Checks: `python3 -m unittest discover -s tests -p test_data_scopes.py` (policy
+invariants and the renderer); run `flate test all --path kubernetes/clusters/main
+--no-progress` and the same for `edge`.
 
-Rollback by reverting the configuration commits and publishing the earlier
-dotfiles revision before rolling pods. Preserve the private PVC if notes have
+Rollback by reverting the home-ops configuration commits (the policy, its
+renderer and the pod templates roll back together) and reverting the dotfiles
+revision before rolling pods. Preserve the private PVC if notes have
 synced into it; a pruning revert is not a data migration.

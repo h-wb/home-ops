@@ -267,6 +267,9 @@ spec:
               - path: /etc/paseo/provision.sh
                 subPath: provision.sh
                 readOnly: true
+              - path: /etc/paseo/policy.py
+                subPath: policy.py
+                readOnly: true
             app: *provision
             sshd: *provision
       sshd-config:
