@@ -8,11 +8,13 @@ BWS_PROJECT_ID = "99bcb77b-0b5a-4fa8-bc6b-b1ee001565a6"
 
 [tasks.bws]
 description = "Run bws with the CLI token from Proton Pass (e.g. mise run bws -- secret list)"
+depends = ["//:pass:login"]
 quiet = true
 run = 'BWS_ACCESS_TOKEN="$(fnox get -c "$(git rev-parse --show-toplevel)/fnox.toml" BWS_ACCESS_TOKEN)" bws'
 
 [tasks."garage:bootstrap"]
 description = "Declare Garage layout, key and buckets on the NAS (idempotent)"
+depends = ["//:pass:login"]
 quiet = true
 usage = '''
 flag "--zone <zone>" default="ca-west-1" help="Layout zone for the node"

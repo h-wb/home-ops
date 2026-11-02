@@ -69,7 +69,6 @@ spec:
               - &secret
                 secretRef:
                   name: ${APP}-secret
-                  optional: true
               - secretRef:
                   name: ${APP}-mcp
             securityContext: &securityContext

@@ -74,7 +74,22 @@ and memory. The private policy disables automatic agent creation/handoffs; keep
 private summaries in that environment and do not configure private as an
 automatic general-host delegation destination.
 
-Per-scope Pass sessions check a token fingerprint at bootstrap. Old broad sessions
+Dotfiles supplies the global `proton-login` mise task template. The pod's
+bootstrap and repository `pass:login` tasks share it; repositories only declare
+their session name. On macOS it reads `pass-cli-<session>` from Keychain; pods
+use `PROTON_PASS_TOKEN`. It checks fingerprints on login, refreshes expired
+sessions, and clears the named cache when credentials are missing or rejected.
+Secret-consuming tasks depend on login. The required pod credential Secret
+must exist before provisioning starts.
+
+The two stores have distinct roles: Bitwarden supplies workload credentials
+through External Secrets; Proton Pass supplies fnox repository credentials
+and operator bootstrap/recovery material. Proton's `env-home-ops` vault includes
+Bitwarden administration tokens, so access to it is administrative. Separate
+session directories do not restrict token grants. Give private only its approved
+private resources; review general's retained operational grants explicitly.
+
+Old broad sessions
 can still remain under `.local/state/pass-cli/paseo` and repository-specific
 session directories. After replacement tokens work, revoke the broad token and
 log out/remove its old sessions. If general has an Obsidian vault/login, validate
