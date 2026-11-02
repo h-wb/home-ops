@@ -5,7 +5,6 @@ metadata:
   name: paseo
   namespace: agents
 spec:
-  targetNamespace: agents
   commonMetadata:
     labels:
       app.kubernetes.io/name: paseo
@@ -13,8 +12,6 @@ spec:
     - ../../../../../components/kopiur/backup
     - ../../../../../components/tailscale/client
     - ../../../../../components/agent-data-policy
-  dependsOn: []
-  interval: 30m
   path: ./kubernetes/apps/main/agents/paseo-general/app
   postBuild:
     substitute:
@@ -27,14 +24,6 @@ spec:
       PASEO_HOSTNAMES: paseo-general.${SECRET_DOMAIN},paseo.${SECRET_DOMAIN}
       PASEO_SERVICE_DOMAIN: svc
       PASEO_SSH_IP: 192.168.1.204
-  prune: true
-  retryInterval: 1m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  timeout: 10m
-  wait: false
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization

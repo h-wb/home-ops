@@ -18,11 +18,13 @@ retain in-cluster paths outside gateway authentication.
 
 `kubernetes/components/agent-data-policy/policy.json` declares backend eligibility,
 provider grants, endpoints and LiteLLM's general tool prefixes. LiteLLM mounts
-it read-only. Each Paseo app overlay ships a static per-scope fragment
-(`paseo-<scope>/app/{scope.json,claude.json,codex.toml}`, ConfigMap mounted at
-`/etc/paseo/scope`); dotfiles' mise bootstrap merges it into the agent homes,
-which pins private metadata to Mistral and disables general-only providers.
-`tests/test_data_scopes.py` keeps the fragments and the policy in sync.
+it read-only. Each scope's agent config fragments live next to it in
+`components/agent-data-policy/scopes/<scope>/{scope.json,claude.json,codex.toml}`;
+each app references its scope's files in a `${APP}-scope` ConfigMap mounted at
+`/etc/paseo/scope`, and dotfiles' mise bootstrap merges them into the agent
+homes, which pins private metadata to Mistral and disables general-only
+providers. `tests/test_data_scopes.py` keeps the fragments and the policy in
+sync.
 
 Use `<service>-<scope>` for environments/endpoints and `<service>-<client>-<scope>`
 for client credentials. General includes operational secrets; it does not mean public.

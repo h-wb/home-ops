@@ -85,26 +85,27 @@ class DataScopes(unittest.TestCase):
         self.assertFalse(self.guard._only_general_tools({"messages": [{"role": "tool", "tool_call_id": "missing", "content": "secret"}]}))
 
 
-AGENTS_APPS = ROOT / "kubernetes/apps/main/agents"
+SCOPES_DIR = ROOT / "kubernetes/components/agent-data-policy/scopes"
 
 
 class ScopeFragments(unittest.TestCase):
-    """The per-app agent config fragments must match the shared policy.
+    """The per-scope agent config fragments must match the shared policy.
 
-    The pod base mounts each app's ${APP}-scope ConfigMap at /etc/paseo/scope;
-    dotfiles' mise bootstrap merges it into the agent homes. These tests keep
-    the fragments and policy.json from drifting apart.
+    They live next to policy.json in components/agent-data-policy/scopes; each
+    app's ${APP}-scope ConfigMap references them, the pod base mounts the
+    ConfigMap at /etc/paseo/scope, and dotfiles' mise bootstrap merges it into
+    the agent homes. These tests keep the fragments and policy.json together.
     """
 
-    def fragment(self, app, name):
-        text = (AGENTS_APPS / app / "app" / name).read_text().replace("${SECRET_DOMAIN}", "example.com")
+    def fragment(self, scope, name):
+        text = (SCOPES_DIR / scope / name).read_text().replace("${SECRET_DOMAIN}", "example.com")
         return text if name.endswith(".toml") else json.loads(text)
 
     def test_fragments_match_policy_scopes(self):
-        for app, scope in (("paseo-general", "general"), ("paseo-private", "private")):
-            with self.subTest(app=app):
+        for scope in POLICY["scopes"]:
+            with self.subTest(scope=scope):
                 settings = POLICY["scopes"][scope]
-                frag = self.fragment(app, "scope.json")
+                frag = self.fragment(scope, "scope.json")
                 providers = frag["agents"]["providers"]
                 # Every provider in the policy registry is pinned in the fragment.
                 self.assertEqual(set(POLICY["providers"]), set(providers))
@@ -126,14 +127,14 @@ class ScopeFragments(unittest.TestCase):
                     self.assertIn("create_agent", providers["mistral-vibe"]["paseoTools"]["disabledTools"])
 
     def test_native_client_fragments(self):
-        claude = self.fragment("paseo-general", "claude.json")["mcpServers"]
+        claude = self.fragment("general", "claude.json")["mcpServers"]
         self.assertEqual("https://mcp-general.example.com/mcp", claude["toolhive-general"]["url"])
         self.assertEqual("${MCP_API_KEY}", claude["toolhive-general"]["headers"]["x-api-key"])
         self.assertIn("memini-general", claude)
-        codex = self.fragment("paseo-general", "codex.toml")
+        codex = self.fragment("general", "codex.toml")
         self.assertIn("mcp_servers.toolhive-general", codex)
         self.assertIn('"x-api-key" = "MCP_API_KEY"', codex)
-        self.assertEqual({}, self.fragment("paseo-private", "claude.json"))
+        self.assertEqual({}, self.fragment("private", "claude.json"))
 
     def test_scope_grants_are_declared_eligible(self):
         for scope, settings in POLICY["scopes"].items():
