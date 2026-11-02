@@ -17,11 +17,12 @@ retain in-cluster paths outside gateway authentication.
 ## Policy and stable identities
 
 `kubernetes/components/agent-data-policy/policy.json` declares backend eligibility,
-provider grants, endpoints and LiteLLM's general tool prefixes. Each consumer gets
-a read-only ConfigMap. The paseo base renders providers and MCP from that policy
-at pod start (`config/policy.py`, run by `provision.sh` after dotfiles'
-bootstrap) and pins private metadata to Mistral without general-provider
-fallbacks.
+provider grants, endpoints and LiteLLM's general tool prefixes. LiteLLM mounts
+it read-only. Each Paseo app overlay ships a static per-scope fragment
+(`paseo-<scope>/app/{scope.json,claude.json,codex.toml}`, ConfigMap mounted at
+`/etc/paseo/scope`); dotfiles' mise bootstrap merges it into the agent homes,
+which pins private metadata to Mistral and disables general-only providers.
+`tests/test_data_scopes.py` keeps the fragments and the policy in sync.
 
 Use `<service>-<scope>` for environments/endpoints and `<service>-<client>-<scope>`
 for client credentials. General includes operational secrets; it does not mean public.
@@ -35,8 +36,9 @@ SSH key changes and client re-pairing merely to standardize naming.
 ## Coordinated rollout
 
 These changes are a draft across home-ops, dotfiles and obsidian-workspace.
-The policy and its renderer ship together in home-ops, so no cross-repo
-ordering applies to them; merge the three when their own prerequisites are met.
+The policy and the per-scope pod config fragments ship together in home-ops,
+so no cross-repo ordering applies to them; merge the three when their own
+prerequisites are met.
 Start new agent sessions after rollout; existing sessions keep their launch
 configuration.
 
@@ -79,10 +81,10 @@ Never delete the only copy of unsynced notes. Backups can retain historical
 private data and remain under operator administrative control.
 
 Checks: `python3 -m unittest discover -s tests -p test_data_scopes.py` (policy
-invariants and the renderer); run `flate test all --path kubernetes/clusters/main
---no-progress` and the same for `edge`.
+invariants and fragment/policy sync); run `flate test all --path
+kubernetes/clusters/main --no-progress` and the same for `edge`.
 
-Rollback by reverting the home-ops configuration commits (the policy, its
-renderer and the pod templates roll back together) and reverting the dotfiles
-revision before rolling pods. Preserve the private PVC if notes have
+Rollback by reverting the home-ops configuration commits (the policy, the
+scope fragments and the pod templates roll back together) and reverting the
+dotfiles revision before rolling pods. Preserve the private PVC if notes have
 synced into it; a pruning revert is not a data migration.

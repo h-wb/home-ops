@@ -5,6 +5,17 @@ resources:
   - rbac.yaml
   - github-secret.yaml
   - memory-secret.yaml
+# Per-scope agent config fragments; the base mounts this at /etc/paseo/scope
+# and dotfiles' bootstrap merges it into the agent homes. Keep in sync with
+# components/agent-data-policy/policy.json (tests/test_data_scopes.py checks).
+configMapGenerator:
+  - name: ${APP}-scope
+    files:
+      - scope.json
+      - claude.json
+      - codex.toml
+    options:
+      disableNameSuffixHash: true
 patches:
   - path: general-patch.yaml
     target:

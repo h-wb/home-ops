@@ -2,18 +2,14 @@
 import asyncio
 import importlib.util
 import json
-import os
 from pathlib import Path
-import subprocess
 import sys
-import tempfile
-import tomllib
 import types
 import unittest
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
-POLICY = json.loads((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text())
+POLICY = json.loads((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text().replace("${SECRET_DOMAIN}", "example.com"))
 
 
 def load_guard():
@@ -89,71 +85,55 @@ class DataScopes(unittest.TestCase):
         self.assertFalse(self.guard._only_general_tools({"messages": [{"role": "tool", "tool_call_id": "missing", "content": "secret"}]}))
 
 
-RENDERER = ROOT / "kubernetes/components/paseo/base/config/policy.py"
+AGENTS_APPS = ROOT / "kubernetes/apps/main/agents"
 
 
-class PolicyRenderer(unittest.TestCase):
-    """The pod-side consumer: renders the real policy.json into agent homes."""
+class ScopeFragments(unittest.TestCase):
+    """The per-app agent config fragments must match the shared policy.
 
-    def render(self, scope, policy_file, home, config=None):
-        if config is not None:
-            (home / ".paseo").mkdir(parents=True, exist_ok=True)
-            (home / ".paseo/config.json").write_text(json.dumps(config))
-        env = dict(os.environ, HOME=str(home), PASEO_HOME=str(home / ".paseo"),
-                   CODEX_HOME=str(home / ".codex"), PASEO_DATA_POLICY=str(policy_file),
-                   PASEO_DATA_SCOPE=scope)
-        return subprocess.run([sys.executable, str(RENDERER)], env=env,
-                              capture_output=True, text=True)
+    The pod base mounts each app's ${APP}-scope ConfigMap at /etc/paseo/scope;
+    dotfiles' mise bootstrap merges it into the agent homes. These tests keep
+    the fragments and policy.json from drifting apart.
+    """
 
-    def test_scope_grants_match_policy_and_private_pins_metadata(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            home = Path(tmp)
-            policy_file = home / "policy.json"
-            # The real policy, with the deployment-time template var resolved.
-            policy_file.write_text((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text().replace("${SECRET_DOMAIN}", "example.com"))
-            config = {"version": 2, "daemon": {"port": 9999}, "agents": {"providers": {"custom-cloud": {"enabled": True}}}}
-            for scope in POLICY["scopes"]:
-                with self.subTest(scope=scope):
-                    self.assertEqual(0, self.render(scope, policy_file, home, config).returncode)
-            rendered = json.loads((home / ".paseo/config.json").read_text())
-            self.assertEqual(9999, rendered["daemon"]["port"])  # existing config preserved
-            providers = rendered["agents"]["providers"]
-            for name, settings in providers.items():
-                self.assertEqual(name in POLICY["scopes"]["private"]["providers"], settings["enabled"], name)
-            self.assertFalse(providers["claude"]["enabled"])
-            self.assertFalse(providers["custom-cloud"]["enabled"])
-            self.assertTrue(providers["mistral-vibe"]["enabled"])
-            self.assertEqual([{"provider": "mistral-vibe"}], rendered["agents"]["metadataGeneration"]["providers"])
-            servers = json.loads(providers["mistral-vibe"]["env"]["VIBE_MCP_SERVERS"])
-            self.assertEqual(["toolhive-private"], [s["name"] for s in servers])
-            self.assertIn("create_agent", providers["mistral-vibe"]["paseoTools"]["disabledTools"])
+    def fragment(self, app, name):
+        text = (AGENTS_APPS / app / "app" / name).read_text().replace("${SECRET_DOMAIN}", "example.com")
+        return text if name.endswith(".toml") else json.loads(text)
 
-    def test_general_scope_configures_native_clients(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            home = Path(tmp)
-            policy_file = home / "policy.json"
-            policy_file.write_text((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text().replace("${SECRET_DOMAIN}", "example.com"))
-            result = self.render("general", policy_file, home)
-            self.assertEqual(0, result.returncode)
-            claude = json.loads((home / ".claude.json").read_text())["mcpServers"]
-            self.assertIn("https://mcp-general.example.com/mcp", claude["toolhive-general"]["url"])
-            self.assertEqual("${MCP_API_KEY}", claude["toolhive-general"]["headers"]["x-api-key"])
-            codex = tomllib.loads((home / ".codex/config.toml").read_text())
-            self.assertIn("memini-general", codex["mcp_servers"])
-            # Re-running the renderer leaves the rendered file untouched.
-            before = (home / ".codex/config.toml").read_text()
-            self.assertEqual(0, self.render("general", policy_file, home).returncode)
-            self.assertEqual(before, (home / ".codex/config.toml").read_text())
+    def test_fragments_match_policy_scopes(self):
+        for app, scope in (("paseo-general", "general"), ("paseo-private", "private")):
+            with self.subTest(app=app):
+                settings = POLICY["scopes"][scope]
+                frag = self.fragment(app, "scope.json")
+                providers = frag["agents"]["providers"]
+                # Every provider in the policy registry is pinned in the fragment.
+                self.assertEqual(set(POLICY["providers"]), set(providers))
+                for name, entry in providers.items():
+                    self.assertEqual(name in settings["providers"], entry["enabled"], name)
+                # Vibe's MCP servers come from the scope's endpoints.
+                servers = json.loads(providers["mistral-vibe"]["env"]["VIBE_MCP_SERVERS"])
+                names = [s["name"] for s in servers]
+                self.assertIn(f"toolhive-{scope}", names)
+                for s in servers:
+                    self.assertIn(s["url"], (settings["mcp_url"], settings["memory_url"]))
+                    self.assertNotIn("secret", json.dumps(s).lower())
+                if scope == "general":
+                    self.assertIn("memini-general", names)
+                    self.assertNotIn("metadataGeneration", frag["agents"])
+                else:
+                    self.assertEqual(["toolhive-private"], names)
+                    self.assertEqual([{"provider": "mistral-vibe"}], frag["agents"]["metadataGeneration"]["providers"])
+                    self.assertIn("create_agent", providers["mistral-vibe"]["paseoTools"]["disabledTools"])
 
-    def test_fail_closed_on_unknown_scope_and_missing_policy(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            home = Path(tmp)
-            policy_file = home / "policy.json"
-            policy_file.write_text((ROOT / "kubernetes/components/agent-data-policy/policy.json").read_text().replace("${SECRET_DOMAIN}", "example.com"))
-            self.assertNotEqual(0, self.render("typo", policy_file, home).returncode)
-            self.assertFalse((home / ".paseo/config.json").exists())
-            self.assertNotEqual(0, self.render("general", home / "absent.json", home).returncode)
-            self.assertFalse((home / ".paseo/config.json").exists())
+    def test_native_client_fragments(self):
+        claude = self.fragment("paseo-general", "claude.json")["mcpServers"]
+        self.assertEqual("https://mcp-general.example.com/mcp", claude["toolhive-general"]["url"])
+        self.assertEqual("${MCP_API_KEY}", claude["toolhive-general"]["headers"]["x-api-key"])
+        self.assertIn("memini-general", claude)
+        codex = self.fragment("paseo-general", "codex.toml")
+        self.assertIn("mcp_servers.toolhive-general", codex)
+        self.assertIn('"x-api-key" = "MCP_API_KEY"', codex)
+        self.assertEqual({}, self.fragment("paseo-private", "claude.json"))
 
     def test_scope_grants_are_declared_eligible(self):
         for scope, settings in POLICY["scopes"].items():

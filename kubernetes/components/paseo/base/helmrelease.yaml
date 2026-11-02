@@ -44,7 +44,7 @@ spec:
           identifier: ${APP}
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
-          configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-data-policy
+          configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-data-policy,${APP}-scope
           secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-litellm,${APP}-mcp,${APP}-ssh,${APP}-tailscale
         initContainers:
           # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
@@ -267,11 +267,25 @@ spec:
               - path: /etc/paseo/provision.sh
                 subPath: provision.sh
                 readOnly: true
-              - path: /etc/paseo/policy.py
-                subPath: policy.py
-                readOnly: true
             app: *provision
             sshd: *provision
+      # Per-scope agent config fragments (from the app overlay's ${APP}-scope
+      # ConfigMap). dotfiles' mise bootstrap merges them into the agent homes.
+      scope:
+        type: configMap
+        name: ${APP}-scope
+        advancedMounts:
+          ${APP}:
+            tools:
+              - path: /etc/paseo/scope/scope.json
+                subPath: scope.json
+                readOnly: true
+              - path: /etc/paseo/scope/claude.json
+                subPath: claude.json
+                readOnly: true
+              - path: /etc/paseo/scope/codex.toml
+                subPath: codex.toml
+                readOnly: true
       sshd-config:
         type: configMap
         name: ${APP}-sshd

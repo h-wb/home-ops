@@ -1,0 +1,9 @@
+# Merged into ~/.codex/config.toml by dotfiles' bootstrap (mise dotfiles merge).
+# Env references are resolved by codex itself; never render credentials here.
+[mcp_servers.toolhive-general]
+url = "https://mcp-general.${SECRET_DOMAIN}/mcp"
+env_http_headers = { "x-api-key" = "MCP_API_KEY" }
+
+[mcp_servers.memini-general]
+url = "http://memini-general.llm.svc.cluster.local:8080/mcp"
+bearer_token_env_var = "MEMINI_API_KEY"

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "toolhive-general": {
+      "type": "http",
+      "url": "https://mcp-general.${SECRET_DOMAIN}/mcp",
+      "headers": { "x-api-key": "${MCP_API_KEY}" }
+    },
+    "memini-general": {
+      "type": "http",
+      "url": "http://memini-general.llm.svc.cluster.local:8080/mcp",
+      "headers": { "Authorization": "Bearer ${MEMINI_API_KEY}" }
+    }
+  }
+}

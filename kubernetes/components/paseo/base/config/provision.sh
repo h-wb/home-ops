@@ -9,8 +9,4 @@ if [ -d "$HOME/.dotfiles/.git" ]; then
 else
 	git clone https://github.com/h-wb/dotfiles.git "$HOME/.dotfiles"
 fi
-# Bootstrap first (mise installs the python shim), then render this pod's
-# data-scope policy — the renderer ships with these manifests, next to the
-# policy ConfigMap it consumes. Unknown scope or missing policy fails the start.
-"$HOME/.dotfiles/conf.d/paseo/bin/paseo-bootstrap"
-"$HOME/.local/share/mise/shims/python3" /etc/paseo/policy.py
+exec "$HOME/.dotfiles/conf.d/paseo/bin/paseo-bootstrap"
