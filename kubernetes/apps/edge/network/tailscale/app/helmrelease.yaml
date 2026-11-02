@@ -4,9 +4,6 @@
 # the whole edge LAN (192.168.18.0/24), so tailnet clients — mainly the paseo
 # sidecar on main — can reach edge nodes and services directly (Talos API,
 # envoy gateways, k8s-gateway DNS) without anything exposed to the internet.
-# Kernel-mode tailscaled creates tailscale0 inside the pod netns; LAN traffic
-# is SNATed to the pod IP by default (--snat-subnet-routes), so replies come
-# back through Cilium's egress masquerade to the node.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -33,8 +30,10 @@ spec:
               TS_HOSTNAME: "${CLUSTER}"
               # Subnet routes to advertise; approved in the Tailscale admin console.
               TS_ROUTES: "${TAILSCALE_ROUTES}"
-              # Kernel mode: needs NET_ADMIN and /dev/net/tun (hostPath below).
-              TS_USERSPACE: "false"
+              # Userspace re-dials from real sockets. Cilium only translates
+              # LoadBalancer VIPs at the socket layer, so kernel-forwarded
+              # packets to a VIP leave untranslated and time out.
+              TS_USERSPACE: "true"
               TS_STATE_DIR: /var/lib/tailscale
               # Keep the pod's resolv.conf Cilium/CoreDNS-managed.
               TS_ACCEPT_DNS: "false"
@@ -44,9 +43,6 @@ spec:
               TS_KUBE_SECRET: ""
               # With the state PVC the node stays logged in; only re-auth if out.
               TS_AUTH_ONCE: "true"
-              # Talos has no iptables-legacy tables; without this, forwarding and
-              # SNAT rules for the subnet route are never installed.
-              TS_DEBUG_FIREWALL_MODE: nftables
             envFrom:
               - secretRef:
                   name: tailscale-secret
@@ -62,12 +58,12 @@ spec:
                   failureThreshold: 3
               readiness: *probes
             securityContext:
-              # Root + NET_ADMIN: tailscaled creates tailscale0 and installs routes.
+              # Root owns the existing state PVC; NET_RAW lets ping work through the route.
               runAsNonRoot: false
               runAsUser: 0
               runAsGroup: 0
               allowPrivilegeEscalation: false
-              capabilities: { drop: [ALL], add: [NET_ADMIN, NET_RAW] }
+              capabilities: { drop: [ALL], add: [NET_RAW] }
             resources:
               requests:
                 cpu: 10m
@@ -79,8 +75,3 @@ spec:
         existingClaim: tailscale
         globalMounts:
           - path: /var/lib/tailscale
-      tun:
-        type: hostPath
-        hostPath: /dev/net/tun
-        globalMounts:
-          - path: /dev/net/tun
