@@ -1,0 +1,32 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app vector
+  namespace: &namespace observability
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    # Tailscale client sidecar: ships this cluster's Talos logs to main's
+    # victoria-logs over the tailnet (soft dependency: the HTTP sink blocks
+    # and retries while the link is down, Talos kmsg log delivery queues).
+    - ../../../../../components/tailscale/client
+  dependsOn: []
+  interval: 1h
+  path: ./kubernetes/apps/edge/observability/vector/app
+  prune: true
+  retryInterval: 2m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false
+  postBuild:
+    substitute:
+      APP: *app
+      CLUSTER: ${CLUSTER}

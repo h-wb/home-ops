@@ -1,0 +1,21 @@
+---
+# LAN LoadBalancer for victoria-logs' ingestion port: the edge cluster's vector
+# ships Talos logs here (http://192.168.1.206:9428/insert/jsonline) over the
+# tailnet, as a soft dependency — vector buffers and retries while the link is
+# down. LAN + tailnet only; never exposed through envoy/Cloudflare.
+apiVersion: v1
+kind: Service
+metadata:
+  name: victoria-logs-lb
+  annotations:
+    lbipam.cilium.io/ips: 192.168.1.206
+spec:
+  type: LoadBalancer
+  selector:
+    app: server
+    app.kubernetes.io/instance: victoria-logs
+    app.kubernetes.io/name: victoria-logs-single
+  ports:
+    - name: http
+      port: 9428
+      targetPort: 9428

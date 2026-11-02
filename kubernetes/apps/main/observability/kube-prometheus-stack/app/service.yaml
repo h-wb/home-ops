@@ -1,0 +1,20 @@
+---
+# LAN LoadBalancer for the Prometheus web port: the edge cluster's Prometheus
+# remote-writes here (http://192.168.1.205:9090/api/v1/write) over the tailnet,
+# as a soft dependency — it buffers locally and retries while the link is down.
+# LAN + tailnet only; never exposed through envoy/Cloudflare.
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-lb
+  annotations:
+    lbipam.cilium.io/ips: 192.168.1.205
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: prometheus
+    operator.prometheus.io/name: kube-prometheus-stack
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090

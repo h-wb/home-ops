@@ -12,6 +12,9 @@ spec:
       app.kubernetes.io/name: *app
   components:
     - ../../../../../components/oidc/envoy
+    # Tailscale client sidecar: reaches the edge cluster's Alertmanager LB
+    # (192.168.18.79, exposed by the edge kube-prometheus-stack service.yaml).
+    - ../../../../../components/tailscale/client
   path: ./kubernetes/apps/main/observability/karma/app
   prune: true
   sourceRef:
@@ -25,6 +28,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      # For the tailscale component's TS_HOSTNAME.
+      CLUSTER: ${CLUSTER}
       APP_NAMESPACE: *namespace
       OIDC_DISPLAY_NAME: Karma
       OIDC_SHORT_USERNAME: "true"

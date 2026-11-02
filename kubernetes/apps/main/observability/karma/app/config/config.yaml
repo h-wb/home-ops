@@ -11,6 +11,17 @@ alertmanager:
           alertmanager:
             - alertname=Watchdog
             - prometheus=observability/kube-prometheus-stack
+    # Read-only view over the tailnet (this pod's tailscale sidecar accepts the
+    # edge subnet route); soft dependency — edge pages from its own Alertmanager
+    # regardless, this only loses the view while the link is down.
+    - name: edge
+      uri: http://192.168.18.79:9093
+      timeout: 10s
+      healthcheck:
+        visible: false
+        filters:
+          alertmanager:
+            - alertname=Watchdog
 filters:
   default:
     - "@state!=suppressed"

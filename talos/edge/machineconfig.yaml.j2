@@ -37,6 +37,13 @@ machine:
       model: QEMU HARDDISK
     image: factory.talos.dev/installer/74701f98035a9dfebb345d0e76622b514f91bc9e769c7e551cb4522abea22282:v1.14.2
     wipe: false
+  logging:
+    # Talos kmsg to the vector app (observability/vector), which ships it to
+    # main's victoria-logs over the tailnet. Soft dependency: vector blocks
+    # and retries while the link is down.
+    destinations:
+      - endpoint: "tcp://192.168.18.80:6050/"
+        format: "json_lines"
   kubelet:
     defaultRuntimeSeccompProfileEnabled: true
     disableManifestsDirectory: true
@@ -161,3 +168,8 @@ cluster:
   secretboxEncryptionSecret: {{ ENV['CLUSTER_SECRETBOXENCRYPTIONSECRET'] }}
   serviceAccount:
     key: {{ ENV['CLUSTER_SERVICEACCOUNT_KEY'] }}
+---
+apiVersion: v1alpha1
+kind: KmsgLogConfig
+name: remote-log
+url: tcp://192.168.18.80:6050/

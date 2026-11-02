@@ -7,3 +7,4 @@ components:
   - ../../../components/common
 resources:
   - ./kube-prometheus-stack/ks.yaml
+  - ./vector/ks.yaml

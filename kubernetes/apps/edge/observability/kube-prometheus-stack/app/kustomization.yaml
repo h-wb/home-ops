@@ -6,3 +6,5 @@ resources:
   - ./alertmanagerconfig.yaml
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./pvc.yaml
+  - ./service.yaml

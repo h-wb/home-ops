@@ -134,6 +134,58 @@ spec:
         scrapeConfigSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
         enableAdminAPI: true
+        # Soft dependency on main: remote write queues buffer on disk and
+        # retry, so edge telemetry keeps flowing after a tailnet outage.
+        # Local rules + this cluster's own Alertmanager stay the safety net.
+        remoteWrite:
+          - url: http://192.168.1.205:9090/api/v1/write
+        # Tailscale client for the remoteWrite leg. Not the reusable
+        # components/tailscale/client Component (that injects into app-template
+        # HelmReleases) — the Prometheus CR takes raw containers/volumes, with
+        # the same env as the Component's ConfigMap.
+        containers:
+          - name: tailscale
+            image: mirror.gcr.io/tailscale/tailscale:v1.104.4@sha256:ed6480b33c6eb67c9cbd203ed42b9fb57e361986725b6856def71b7a3d9e276c
+            env:
+              - name: TS_HOSTNAME
+                value: edge-prometheus
+              - name: TS_USERSPACE
+                value: "false"
+              - name: TS_STATE_DIR
+                value: /var/lib/tailscale
+              - name: TS_ACCEPT_DNS
+                value: "false"
+              - name: TS_EXTRA_ARGS
+                value: --accept-routes
+              - name: TS_AUTH_ONCE
+                value: "true"
+              # State lives on the PVC; containerboot must not try to store it
+              # in a `tailscale` Secret this SA can't touch.
+              - name: TS_KUBE_SECRET
+                value: ""
+            envFrom:
+              - secretRef:
+                  name: kube-prometheus-stack-tailscale
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: [ALL]
+                add: [NET_ADMIN, NET_RAW]
+            volumeMounts:
+              - name: tailscale-state
+                mountPath: /var/lib/tailscale
+              - name: tun
+                mountPath: /dev/net/tun
+        volumes:
+          - name: tailscale-state
+            persistentVolumeClaim:
+              claimName: kube-prometheus-stack-tailscale
+          - name: tun
+            hostPath:
+              path: /dev/net/tun
         walCompression: true
         enableFeatures:
           - memory-snapshot-on-shutdown
