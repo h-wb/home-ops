@@ -13,7 +13,10 @@ spec:
   values:
     controllers:
       karma:
-        replicas: 2
+        # Single replica: the tailscale sidecar's node identity is per-pod —
+        # two replicas would fight over the state PVC and kick each other off
+        # the tailnet.
+        replicas: 1
         strategy: RollingUpdate
         annotations:
           configmap.reloader.stakater.com/reload: karma-configmap

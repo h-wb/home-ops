@@ -1,6 +1,9 @@
 ---
 # Tailscale node identity for the injected sidecar. Survives pod restarts, so
-# the auth key is only needed while the node is logged out.
+# the auth key is only needed while the node is logged out. local-hostpath by
+# default; multi-node consumers (or clusters without local storage) override
+# TAILSCALE_STORAGE_CLASS in their ks.yaml. Single-controller apps only: the
+# identity is per-pod — replicas would fight over the PVC and kick each other.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -10,4 +13,4 @@ spec:
   resources:
     requests:
       storage: 512Mi
-  storageClassName: local-hostpath
+  storageClassName: ${TAILSCALE_STORAGE_CLASS:=local-hostpath}
