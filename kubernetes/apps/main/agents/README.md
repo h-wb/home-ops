@@ -44,18 +44,20 @@ prerequisites are met.
 Start new agent sessions after rollout; existing sessions keep their launch
 configuration.
 
-1. Create `env-paseo-general` and `env-paseo-private` Proton Pass vaults and separate
-   scoped agents. General may retain approved operational vaults, but must not
-   read the Obsidian item. Move that item to `env-paseo-private` with the fields
-   referenced by obsidian-workspace's fnox map.
+1. Create separate scoped Proton Pass agents with item-level viewer grants. Keep
+   the existing `Homelab/Obsidian` login and grant it only to private. Machine-only
+   external/workstation credentials live in `Automation`; approve each item for
+   its consumers rather than granting general the entire vault. Administrative
+   bootstrap/recovery credentials stay in `env-home-ops`. No dedicated Paseo
+   vaults or duplicate login items are needed.
 2. Create Bitwarden JSON items `paseo-general` and `paseo-private`. Both need
    `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`, `KEYSEED`;
    general also needs `GH_TOKEN`. Copy the existing general password and SSH
    KEYSEED unchanged. Generate independent private credentials. ExternalSecrets
    expose explicit fields, never the whole account item.
 3. Confirm `192.168.1.212` is available for private SSH. General keeps `.204`.
-4. Merge dotfiles and the Obsidian tooling changes. The tooling repository is
-   private (`h-wb/obsidian-workspace`); copy the checkout over SSH or use a
+4. Merge dotfiles first, then the Obsidian and pipelines tooling changes. The
+   Obsidian tooling repository is private (`h-wb/obsidian-workspace`); copy the checkout over SSH or use a
    repository-scoped read-only credential on private. Never copy the general
    GitHub token or publish the gitignored vault.
 5. Merge home-ops when ready for a general pod restart. Generated per-scope MCP
