@@ -38,6 +38,10 @@ spec:
               TS_STATE_DIR: /var/lib/tailscale
               # Keep the pod's resolv.conf Cilium/CoreDNS-managed.
               TS_ACCEPT_DNS: "false"
+              # State lives on the PVC; the automounted SA token would otherwise
+              # put containerboot in Kubernetes mode, storing state in a
+              # `tailscale` Secret the network SA can't touch.
+              TS_KUBE_SECRET: ""
               # With the state PVC the node stays logged in; only re-auth if out.
               TS_AUTH_ONCE: "true"
             envFrom:

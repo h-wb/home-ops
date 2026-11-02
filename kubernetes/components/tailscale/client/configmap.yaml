@@ -27,6 +27,11 @@ data:
               # pod netns.
               TS_EXTRA_ARGS: --accept-routes
               # With the state PVC the node stays logged in; only re-auth if out.
+              # State lives on the PVC, and the pod automounts a service-account
+              # token: containerboot would switch to Kubernetes mode (storing
+              # state in a `tailscale` Secret the app SA must not touch). Empty
+              # disables the K8s integration entirely.
+              TS_KUBE_SECRET: ""
               TS_AUTH_ONCE: "true"
             envFrom:
               - secretRef:
