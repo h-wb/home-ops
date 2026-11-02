@@ -44,6 +44,9 @@ spec:
               TS_KUBE_SECRET: ""
               # With the state PVC the node stays logged in; only re-auth if out.
               TS_AUTH_ONCE: "true"
+              # Talos has no iptables-legacy tables; without this, forwarding and
+              # SNAT rules for the subnet route are never installed.
+              TS_DEBUG_FIREWALL_MODE: nftables
             envFrom:
               - secretRef:
                   name: tailscale-secret
@@ -53,7 +56,7 @@ spec:
                 custom: true
                 spec:
                   exec:
-                    command: ["/usr/bin/tailscale", "status"]
+                    command: ["/usr/local/bin/tailscale", "status"]
                   periodSeconds: 30
                   timeoutSeconds: 5
                   failureThreshold: 3
