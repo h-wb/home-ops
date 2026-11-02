@@ -17,7 +17,9 @@ spec:
         # two replicas would fight over the state PVC and kick each other off
         # the tailnet.
         replicas: 1
-        strategy: RollingUpdate
+        # The local state PVC is pinned to one node. Stop the old pod before
+        # replacing it so topology spreading cannot block the new pod.
+        strategy: Recreate
         annotations:
           configmap.reloader.stakater.com/reload: karma-configmap
         containers:

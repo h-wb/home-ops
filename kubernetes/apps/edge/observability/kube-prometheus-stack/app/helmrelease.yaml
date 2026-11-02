@@ -142,6 +142,9 @@ spec:
         # subnet router pod — one extra hop on the same node, not a loop.
         remoteWrite:
           - url: http://192.168.1.205:9090/api/v1/write
+            # The WAN queue needs 60-75 parallel shards at current latency.
+            queueConfig:
+              maxShards: 100
             # Main evaluates its own recording and alerting rules over these
             # samples. Sending edge's derived series too double-counts them
             # (e.g. namespace memory requests) in main's cluster-wide alerts.
