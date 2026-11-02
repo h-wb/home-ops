@@ -1,17 +1,14 @@
----
-# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app open-webui
-  namespace: &namespace llm
+  name: open-webui
+  namespace: llm
 spec:
-  targetNamespace: *namespace
+  targetNamespace: llm
   commonMetadata:
     labels:
-      app.kubernetes.io/name: *app
+      app.kubernetes.io/name: open-webui
   components:
-    - ../../../../../components/dragonfly
     - ../../../../../components/cnpg/restore
     - ../../../../../components/kopiur/backup
     - ../../../../../components/oidc
@@ -23,10 +20,6 @@ spec:
     - name: toolhive-config
       namespace: llm
   healthCheckExprs:
-    - apiVersion: dragonflydb.io/v1alpha1
-      kind: Dragonfly
-      failed: status.phase != 'ready'
-      current: status.phase == 'ready'
     - apiVersion: postgresql.cnpg.io/v1
       kind: Cluster
       failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
@@ -35,10 +28,10 @@ spec:
   path: ./kubernetes/apps/main/llm/open-webui/app
   postBuild:
     substitute:
-      APP: *app
-      NAMESPACE: *namespace
-      APP_NAMESPACE: *namespace
-      KOPIUR_SCHEDULE: "29 * * * *"
+      APP: open-webui
+      NAMESPACE: llm
+      APP_NAMESPACE: llm
+      KOPIUR_SCHEDULE: 29 * * * *
       KOPIUR_CAPACITY: 5Gi
       OIDC_DISPLAY_NAME: Open WebUI
       SUBDOMAIN: chat

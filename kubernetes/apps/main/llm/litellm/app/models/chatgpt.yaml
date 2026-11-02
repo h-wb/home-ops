@@ -6,7 +6,7 @@
 # Cloud models, deliberately fenced:
 # - only under these explicit aliases, never as a rung of a local pool;
 # - a virtual key must list them to use them;
-# - only the mcp-ops tools: patches/homeops_cloud_tool_guard.py refuses the rest,
+# - only the mcp-general tools: patches/homeops_data_scope_guard.py refuses the rest,
 #   so tool results (health, location, memory) cannot reach them.
 #
 # Non-streaming requests fail upstream ("Unknown items in responses API response",

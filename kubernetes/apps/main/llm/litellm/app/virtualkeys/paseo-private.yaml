@@ -1,0 +1,33 @@
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: paseo-private
+spec:
+  proxyRef: litellm
+  keyAlias: Paseo Private
+  secretName: litellm-paseo-private
+  secretKey: api-key
+  models:
+    - qwen3.5-9b
+    - qwen3.5-9b-chat
+    - mistral/mistral-small-latest
+    - mistral/mistral-medium-latest
+    - mistral/mistral-large-latest
+---
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: litellm-paseo-private
+spec:
+  secretStoreRefs:
+    - name: bitwarden-secrets-manager
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: litellm-paseo-private
+  data:
+    - match:
+        secretKey: api-key
+        remoteRef:
+          remoteKey: litellm-paseo-private

@@ -1,6 +1,3 @@
----
-# Internal-only, but still keyed: the flux server can reconcile/suspend Flux
-# objects, so reachability alone is not enough.
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
@@ -17,10 +14,10 @@ spec:
         name: mcp-gateway-api-keys
       - group: ""
         kind: Secret
-        name: mcp-gateway-open-webui
+        name: mcp-gateway-paseo
       - group: ""
         kind: Secret
-        name: mcp-gateway-paseo
+        name: mcp-paseo-private
     extractFrom:
       - headers:
           - x-api-key

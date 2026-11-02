@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../../../components/paseo/base
+patches:
+  - target:
+      kind: HelmRelease
+    patch:
+      '[{"op": "replace", "path": "/spec/values/defaultPodOptions/automountServiceAccountToken",
+      "value": false}]'
+  - target:
+      kind: PersistentVolumeClaim
+    patch:
+      "- op: add\n  path: /metadata/annotations\n  value:\n    kustomize.toolkit.fluxcd.io/prune:\
+      \ disabled\n"

@@ -1,0 +1,120 @@
+---
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: VirtualMCPServer
+metadata:
+  name: mcp-ops
+spec:
+  groupRef:
+    name: mcp-tools
+  config:
+    aggregation:
+      conflictResolution: prefix
+      conflictResolutionConfig:
+        prefixFormat: "{workload}_"
+      defaultToolVisibility: deny
+      tools:
+        - workload: kubectl
+        - workload: flux
+        - workload: github
+        - workload: n8n
+        - workload: anki
+    optimizer:
+      embeddingModel: embed
+      embeddingProvider: openai
+      embeddingService: http://litellm.llm.svc.cluster.local:4000/v1
+      embeddingServiceTimeout: 60s
+      hybridSearchSemanticRatio: "0.3"
+  incomingAuth:
+    type: anonymous
+  outgoingAuth:
+    source: discovered
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: vmcp
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: litellm-key-toolhive
+                  key: api-key
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+            limits:
+              memory: 1Gi
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: mcp-ops
+spec:
+  hostnames:
+    - mcp-general.${SECRET_DOMAIN}
+    - mcp-ops.${SECRET_DOMAIN}
+  parentRefs:
+    - name: envoy-internal
+      namespace: network
+  rules:
+    - backendRefs:
+        - name: vmcp-mcp-ops
+          port: 4483
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: mcp-ops-api-key
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: mcp-ops
+  apiKeyAuth:
+    credentialRefs:
+      - group: ""
+        kind: Secret
+        name: mcp-ops-api-keys
+      - group: ""
+        kind: Secret
+        name: mcp-paseo-general
+    extractFrom:
+      - headers:
+          - x-api-key
+    sanitize: true
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mcp-ops-api-keys
+spec:
+  refreshPolicy: CreatedOnce
+  target:
+    name: mcp-ops-api-keys
+    template:
+      engineVersion: v2
+      data:
+        claude-code: "{{ .claudecode }}"
+        codex: "{{ .codex }}"
+        open-webui: "{{ .openwebui }}"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: Password
+          name: mcp-ops-keys
+---
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: Password
+metadata:
+  name: mcp-ops-keys
+spec:
+  length: 48
+  digits: 10
+  symbols: 0
+  noUpper: false
+  allowRepeat: true
+  secretKeys:
+    - claudecode
+    - codex
+    - openwebui

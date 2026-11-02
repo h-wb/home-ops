@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "scopes": {
+    "general": {
+      "providers": ["claude", "codex", "mistral-vibe", "opencode"],
+      "mcp_url": "https://mcp-general.${SECRET_DOMAIN}/mcp",
+      "memory_url": "http://memini-general.llm.svc.cluster.local:8080/mcp"
+    },
+    "private": {
+      "providers": ["mistral-vibe"],
+      "mcp_url": "https://mcp-private.${SECRET_DOMAIN}/mcp",
+      "memory_url": "http://memini-private.llm.svc.cluster.local:8080/mcp",
+      "metadata_provider": "mistral-vibe",
+      "disabled_paseo_tools": ["create_agent", "send_agent_prompt"]
+    }
+  },
+  "providers": {
+    "claude": {
+      "allowed_data_scopes": ["general"]
+    },
+    "codex": {
+      "allowed_data_scopes": ["general"]
+    },
+    "mistral-vibe": {
+      "allowed_data_scopes": ["general", "private"]
+    },
+    "opencode": {
+      "allowed_data_scopes": ["general"],
+      "note": "General only until its configured backend is explicitly constrained."
+    },
+    "copilot": {
+      "allowed_data_scopes": []
+    },
+    "pi": {
+      "allowed_data_scopes": []
+    },
+    "muse": {
+      "allowed_data_scopes": []
+    },
+    "antigravity": {
+      "allowed_data_scopes": []
+    },
+    "omp": {
+      "allowed_data_scopes": []
+    }
+  },
+  "private_backends": {
+    "local": {
+      "allowed_data_scopes": ["general", "private"],
+      "host_suffixes": [".svc", ".svc.cluster.local", ".cluster.local", ".local", ".internal"],
+      "allow_private_ips": true,
+      "allow_bare_service_names": true
+    },
+    "mistral": {
+      "allowed_data_scopes": ["general", "private"],
+      "model_prefix": "mistral/",
+      "https_host": "api.mistral.ai"
+    }
+  },
+  "general_tool_prefixes": ["kubectl_", "flux_", "github_", "n8n_", "anki_", "memini-general_"]
+}

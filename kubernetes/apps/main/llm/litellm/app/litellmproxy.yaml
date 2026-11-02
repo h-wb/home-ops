@@ -68,6 +68,9 @@ spec:
     - name: chatgpt-tokens
       persistentVolumeClaim:
         claimName: litellm-chatgpt
+    - name: data-policy
+      configMap:
+        name: litellm-data-policy
     - name: patches
       configMap:
         name: litellm-patches
@@ -76,6 +79,9 @@ spec:
       mountPath: /app/cache
     - name: chatgpt-tokens
       mountPath: /app/chatgpt_tokens
+    - name: data-policy
+      mountPath: /etc/agent-data-policy
+      readOnly: true
     - name: patches
       mountPath: /app/patches
       readOnly: true
@@ -89,7 +95,7 @@ spec:
     # Private tools require local inference or direct Mistral; other providers
     # are limited to mcp-ops tools, including conversation history.
     callbacks:
-      - homeops_cloud_tool_guard.guard_instance
+      - homeops_data_scope_guard.guard_instance
       # Makes chatgpt/* answer non-streaming requests (BerriAI/litellm#37039), which
       # karakeep sends. Remove once the upstream fix ships.
       - homeops_chatgpt_nonstream.patch_instance

@@ -6,4 +6,5 @@ namespace: agents
 components:
   - ../../../components/common
 resources:
-  - ./paseo/ks.yaml
+  - ./paseo-general/ks.yaml
+  - ./paseo-private/ks.yaml

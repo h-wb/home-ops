@@ -1,0 +1,68 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP}
+spec:
+  values:
+    controllers:
+      ${APP}:
+        labels:
+          nfsMount: "true"
+        initContainers:
+          tools:
+            envFrom:
+              - secretRef:
+                  name: ${APP}-secret
+              - secretRef:
+                  name: ${APP}-mcp
+              - secretRef:
+                  name: paseo-github
+              - secretRef:
+                  name: paseo-memory
+        containers:
+          app:
+            envFrom:
+              - secretRef:
+                  name: ${APP}-secret
+              - secretRef:
+                  name: ${APP}-litellm
+              - secretRef:
+                  name: ${APP}-mcp
+              - secretRef:
+                  name: paseo-github
+              - secretRef:
+                  name: ${APP}-password
+              - secretRef:
+                  name: paseo-memory
+          sshd:
+            envFrom:
+              - secretRef:
+                  name: ${APP}-secret
+              - secretRef:
+                  name: ${APP}-litellm
+              - secretRef:
+                  name: ${APP}-mcp
+              - secretRef:
+                  name: paseo-github
+              - secretRef:
+                  name: ${APP}-ssh
+              - secretRef:
+                  name: paseo-memory
+        annotations:
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-mcp,paseo-ssh,paseo-tailscale,paseo-github,paseo-memory
+    persistence:
+      data:
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/shared
+        advancedMounts:
+          ${APP}:
+            app: &id001
+              - path: /data
+                readOnly: true
+            sshd: *id001
+    route:
+      app:
+        hostnames:
+          - paseo-general.${SECRET_DOMAIN}
+          - paseo.${SECRET_DOMAIN}
