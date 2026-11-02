@@ -47,8 +47,10 @@ existing sessions keep their launch configuration.
    KEYSEED unchanged. Generate independent private credentials. ExternalSecrets
    expose explicit fields, never the whole account item.
 3. Confirm `192.168.1.212` is available for private SSH. General keeps `.204`.
-4. Publish/merge dotfiles and the Obsidian tooling changes. The Obsidian scaffold
-   currently has no remote: publish tooling only, never its gitignored vault.
+4. Merge dotfiles and the Obsidian tooling changes. The tooling repository is
+   private (`h-wb/obsidian-workspace`); copy the checkout over SSH or use a
+   repository-scoped read-only credential on private. Never copy the general
+   GitHub token or publish the gitignored vault.
 5. Merge home-ops when ready for a general pod restart. Generated per-scope MCP
    and LiteLLM keys are published to Bitwarden and consumed in `agents`; allow
    that initial reconciliation to finish. General Memini's existing `codex` key
