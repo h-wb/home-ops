@@ -54,4 +54,5 @@ Paseo is the interactive interface. Open WebUI's HelmRelease, app route, statele
 Dragonfly instance and LiteLLM grants are removed. `open-webui/ks.yaml` remains a
 **data retention** Kustomization: PostgreSQL, uploaded files, encryption key, OIDC
 identity and backups remain managed. Do not remove it until intentionally retiring
-the data. App manifests and presets are archived under `docs/archive/open-webui/`.
+the data. The former app manifests and presets are deleted; Git history retains
+their previous definitions.
