@@ -15,3 +15,5 @@ cluster-secrets.local.yaml
 cloudflare-tunnel*.json
 # Ansible
 .venv*
+__pycache__/
+*.py[cod]

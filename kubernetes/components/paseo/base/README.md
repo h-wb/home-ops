@@ -1,7 +1,7 @@
 # Paseo pod base (`components/paseo/base`)
 
 Shared by the `paseo-general` and `paseo-private` apps. A consumer of this
-component must provide:
+base must provide:
 
 | Provided by                 | What                                                                                                                                                                                                                                   |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -11,9 +11,15 @@ component must provide:
 
 The base itself ships only what is identical across scopes: the HelmRelease
 pod template, `${APP}-provision` / `${APP}-sshd` ConfigMaps (`config/`),
-ExternalSecrets, and the volume mounts. A missing `${APP}-scope` ConfigMap
-fails the kustomize build — that is deliberate (a pod must not come up
-unconfigured), so add the ConfigMap before adding the base to a new app.
+ExternalSecrets, and the volume mounts. Kubernetes blocks the pod from starting
+if the required `${APP}-scope` ConfigMap or one of its mounted keys is missing.
+Kustomize does not validate that reference, so provide the ConfigMap when
+adding the base to a new app.
+
+The scope fragments are mounted read-only in `tools`, `app` and `sshd` so that
+bootstrap and later dotfiles applies see the same inputs. Client environment
+references in fragments must survive Flux substitution: write `$${MCP_API_KEY}`
+in the source to deliver `${MCP_API_KEY}` to the client.
 
 Fail-closed at runtime: dotfiles' mise bootstrap errors when
 `/etc/paseo/scope` is absent, so a pod whose overlay is wrong refuses to

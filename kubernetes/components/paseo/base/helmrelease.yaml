@@ -276,7 +276,7 @@ spec:
         name: ${APP}-scope
         advancedMounts:
           ${APP}:
-            tools:
+            tools: &scope
               - path: /etc/paseo/scope/scope.json
                 subPath: scope.json
                 readOnly: true
@@ -286,6 +286,8 @@ spec:
               - path: /etc/paseo/scope/codex.toml
                 subPath: codex.toml
                 readOnly: true
+            app: *scope
+            sshd: *scope
       sshd-config:
         type: configMap
         name: ${APP}-sshd

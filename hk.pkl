@@ -1,4 +1,5 @@
 amends "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Config.pkl"
+
 import "package://github.com/jdx/hk/releases/download/v1.46.0/hk@1.46.0#/Builtins.pkl"
 
 local linters = new Mapping<String, Step> {
@@ -38,6 +39,10 @@ hooks {
   // Pushes go straight to main, so render both clusters before they reach Flux.
   ["pre-push"] {
     steps {
+      ["data-scopes"] {
+        glob = List("kubernetes/**", "tests/test_data_scopes.py")
+        check = "python3 -B -m unittest discover -s tests -p test_data_scopes.py"
+      }
       ["flate"] {
         glob = "kubernetes/**"
         check =

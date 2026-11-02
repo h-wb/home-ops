@@ -2,8 +2,11 @@
 import asyncio
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
+import tomllib
 import types
 import unittest
 from unittest.mock import patch
@@ -129,7 +132,7 @@ class ScopeFragments(unittest.TestCase):
     def test_native_client_fragments(self):
         claude = self.fragment("general", "claude.json")["mcpServers"]
         self.assertEqual("https://mcp-general.example.com/mcp", claude["toolhive-general"]["url"])
-        self.assertEqual("${MCP_API_KEY}", claude["toolhive-general"]["headers"]["x-api-key"])
+        self.assertEqual("$${MCP_API_KEY}", claude["toolhive-general"]["headers"]["x-api-key"])
         self.assertIn("memini-general", claude)
         codex = self.fragment("general", "codex.toml")
         self.assertIn("mcp_servers.toolhive-general", codex)
@@ -140,6 +143,79 @@ class ScopeFragments(unittest.TestCase):
         for scope, settings in POLICY["scopes"].items():
             for provider in settings["providers"]:
                 self.assertIn(scope, POLICY["providers"][provider]["allowed_data_scopes"], provider)
+
+
+class PaseoRendering(unittest.TestCase):
+    """Exercise Kustomize and Flux substitution using the repo's pinned tools."""
+
+    @staticmethod
+    def run_tool(*args, text=None, env=None):
+        result = subprocess.run(args, input=text, env=env, cwd=ROOT,
+                                capture_output=True, text=True, timeout=60)
+        if result.returncode:
+            raise AssertionError(f"{args[0]} failed: {result.stderr}")
+        return result.stdout
+
+    @classmethod
+    def documents(cls, text):
+        return json.loads(cls.run_tool("yq", "eval-all", "-o=json", "-I=0", "[.]", "-", text=text))
+
+    @classmethod
+    def substitute(cls, text, variables):
+        # Model controller substitution without borrowing credentials from the
+        # shell running the tests. Secrets belong in runtime env references.
+        env = {key: os.environ[key] for key in ("HOME", "PATH") if key in os.environ}
+        return cls.run_tool("flux", "envsubst", text=text, env={**env, **variables})
+
+    @classmethod
+    def setUpClass(cls):
+        parent = cls.run_tool("kustomize", "build", "kubernetes/apps/main/agents",
+                              "--load-restrictor=LoadRestrictionsNone")
+        variables = {"CLUSTER": "main", "SECRET_DOMAIN": "example.com"}
+        children = cls.documents(cls.substitute(parent, variables))
+        cls.rendered = {}
+        for child in children:
+            if child.get("kind") != "Kustomization" or child["metadata"]["name"] not in ("paseo", "paseo-private"):
+                continue
+            spec = child["spec"]
+            scope = spec["postBuild"]["substitute"]["PASEO_DATA_SCOPE"]
+            built = cls.run_tool("kustomize", "build", spec["path"],
+                                 "--load-restrictor=LoadRestrictionsNone")
+            cls.rendered[scope] = cls.documents(cls.substitute(
+                built, {**variables, **spec["postBuild"]["substitute"]}))
+
+    def resource(self, scope, kind, name):
+        return next(doc for doc in self.rendered[scope]
+                    if doc.get("kind") == kind and doc["metadata"]["name"] == name)
+
+    def test_runtime_auth_references_survive_flux_substitution(self):
+        data = self.resource("general", "ConfigMap", "paseo-scope")["data"]
+        claude = json.loads(data["claude.json"])["mcpServers"]
+        self.assertEqual("https://mcp-general.example.com/mcp", claude["toolhive-general"]["url"])
+        self.assertEqual({"x-api-key": "${MCP_API_KEY}"}, claude["toolhive-general"]["headers"])
+        self.assertEqual({"Authorization": "Bearer ${MEMINI_API_KEY}"}, claude["memini-general"]["headers"])
+        codex = tomllib.loads(data["codex.toml"])["mcp_servers"]
+        self.assertEqual({"x-api-key": "MCP_API_KEY"}, codex["toolhive-general"]["env_http_headers"])
+        self.assertEqual("MEMINI_API_KEY", codex["memini-general"]["bearer_token_env_var"])
+
+    def test_all_provisioning_containers_can_read_scope_fragments(self):
+        for scope, app in (("general", "paseo"), ("private", "paseo-private")):
+            with self.subTest(scope=scope):
+                data = self.resource(scope, "ConfigMap", f"{app}-scope")["data"]
+                self.assertEqual({"scope.json", "claude.json", "codex.toml"}, set(data))
+                values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
+                volume = values["persistence"]["scope"]
+                self.assertEqual(f"{app}-scope", volume["name"])
+                mounts = volume["advancedMounts"][app]
+                for container in ("tools", "app", "sshd"):
+                    with self.subTest(container=container):
+                        paths = {entry["path"]: entry for entry in mounts.get(container, [])}
+                        self.assertEqual({f"/etc/paseo/scope/{key}" for key in data}, set(paths))
+                        for key in data:
+                            entry = paths[f"/etc/paseo/scope/{key}"]
+                            self.assertEqual(key, entry["subPath"])
+                            self.assertTrue(entry["readOnly"])
+                self.assertNotIn("browser", mounts)
 
 
 if __name__ == "__main__":

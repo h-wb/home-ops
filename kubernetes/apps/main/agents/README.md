@@ -82,8 +82,9 @@ private sync before removing the old vault and `.config/obsidian-headless`.
 Never delete the only copy of unsynced notes. Backups can retain historical
 private data and remain under operator administrative control.
 
-Checks: `python3 -m unittest discover -s tests -p test_data_scopes.py` (policy
-invariants and fragment/policy sync); run `flate test all --path
+Checks: `python3 -B -m unittest discover -s tests -p test_data_scopes.py` (policy
+invariants, fragment/policy sync, rendered authentication references and scope
+mounts; requires the repo's Kustomize, Flux and yq tools); run `flate test all --path
 kubernetes/clusters/main --no-progress` and the same for `edge`.
 
 Rollback by reverting the home-ops configuration commits (the policy, the
