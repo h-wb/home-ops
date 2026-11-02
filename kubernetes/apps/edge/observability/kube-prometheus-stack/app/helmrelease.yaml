@@ -25,6 +25,12 @@ spec:
     name: kube-prometheus-stack
   dependsOn: []
   values:
+    defaultRules:
+      disabled:
+        # Prom++ estimates shards from WAL read speed, not delivery backlog.
+        # Its receive-timestamp metric is also absent. Use freshness below.
+        PrometheusRemoteWriteDesiredShards: true
+        PrometheusRemoteWriteBehind: true
     crds:
       enabled: true
       upgradeJob:
@@ -80,6 +86,23 @@ spec:
                 - "__meta_kubernetes_pod_node_name"
               targetLabel: kubernetes_node
     additionalPrometheusRulesMap:
+      prompp-remote-write-rules:
+        groups:
+          - name: prompp.remote-write
+            rules:
+              - alert: PrometheusRemoteWriteBehind
+                expr: |-
+                  time() - max_over_time(prometheus_remote_storage_queue_highest_sent_timestamp_seconds{job="kube-prometheus-stack-prometheus",namespace="observability"}[5m]) > 120
+                for: 15m
+                labels:
+                  severity: warning
+                annotations:
+                  summary: Prometheus remote write is behind.
+                  description: >-
+                    Prometheus {{ $labels.namespace }}/{{ $labels.pod }} has not
+                    sent fresh samples to {{ $labels.url }} for
+                    {{ $value | humanizeDuration }}.
+                  runbook_url: https://runbooks.prometheus-operator.dev/runbooks/prometheus/prometheusremotewritebehind
       dockerhub-rules:
         groups:
           - name: dockerhub
