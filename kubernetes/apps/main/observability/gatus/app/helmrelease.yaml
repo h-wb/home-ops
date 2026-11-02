@@ -28,6 +28,7 @@ spec:
             resources:
               requests:
                 cpu: 10m
+                memory: 32Mi
               limits:
                 memory: 64Mi
             restartPolicy: Always
@@ -63,6 +64,7 @@ spec:
             resources:
               requests:
                 cpu: 100m
+                memory: 128Mi
               limits:
                 memory: 256Mi
         statefulset:
@@ -72,8 +74,14 @@ spec:
               accessMode: ReadWriteOnce
               size: 5Gi
     defaultPodOptions:
-      hostUsers: false
+      # The kernel-mode Tailscale sidecar mounts /dev/net/tun, which cannot
+      # be idmapped into a pod user namespace.
+      hostUsers: true
       automountServiceAccountToken: true
+      securityContext:
+        # Keep the app and config-generating sidecar able to write the PVC
+        # after moving it out of the pod user namespace.
+        fsGroup: 1000
     service:
       app:
         ports:

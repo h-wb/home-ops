@@ -22,6 +22,12 @@ alertmanager:
         filters:
           alertmanager:
             - alertname=Watchdog
+history:
+  rewrite:
+    # Alert source links use the public hostname. Query the in-cluster API
+    # directly for history, avoiding public DNS and the OIDC login flow.
+    - source: "https?://prometheus[.]${SECRET_DOMAIN}"
+      uri: http://prometheus-operated.observability.svc.cluster.local:9090
 filters:
   default:
     - "@state!=suppressed"
