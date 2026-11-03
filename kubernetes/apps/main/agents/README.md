@@ -44,6 +44,12 @@ prerequisites are met.
 Start new agent sessions after rollout; existing sessions keep their launch
 configuration.
 
+The existing host must receive the required `/etc/paseo/scope` mounts before
+updating dotfiles. [PR 4758](https://github.com/h-wb/home-ops/pull/4758) staged
+these inputs using the current MCP endpoint and credentials; its pod rollout
+and mounted files were verified on 2026-11-03. This rollout replaces that
+transitional component with the per-scope fragments below.
+
 1. Create separate scoped Proton Pass agents with item-level viewer grants. Keep
    the existing `Homelab/Obsidian` login and grant it only to private. Machine-only
    external/workstation credentials live in `Automation`; approve each item for
