@@ -11,6 +11,8 @@ cluster-secrets.local.yaml
 *.key
 # mise
 .mise.local.toml
+# fnox machine-local overrides
+fnox.local.toml
 # cloudflare
 cloudflare-tunnel*.json
 # Ansible

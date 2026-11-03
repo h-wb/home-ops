@@ -48,7 +48,7 @@ configuration.
    the existing `Homelab/Obsidian` login and grant it only to private. Machine-only
    external/workstation credentials live in `Automation`; approve each item for
    its consumers rather than granting general the entire vault. Administrative
-   bootstrap/recovery credentials stay in `env-home-ops`. No dedicated Paseo
+   bootstrap/recovery credentials stay in `Infrastructure`. No dedicated Paseo
    vaults or duplicate login items are needed.
 2. Create Bitwarden JSON items `paseo-general` and `paseo-private`. Both need
    `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`, `KEYSEED`;
@@ -86,10 +86,20 @@ must exist before provisioning starts.
 
 The two stores have distinct roles: Bitwarden supplies workload credentials
 through External Secrets; Proton Pass supplies fnox repository credentials
-and operator bootstrap/recovery material. Proton's `env-home-ops` vault includes
-Bitwarden administration tokens, so access to it is administrative. Separate
+and operator bootstrap/recovery material. Proton's `Infrastructure` vault includes
+Bitwarden administration tokens, so vault-wide access is administrative.
+Item-level viewer grants can limit a consumer to its required credentials. Separate
 session directories do not restrict token grants. Give private only its approved
 private resources; review general's retained operational grants explicitly.
+
+The 2026-11-03 Proton organization moved the existing infrastructure/bootstrap
+items into `Infrastructure`, machine integrations into `Automation`, and the
+Paseo website login into `Homelab/Paseo`. The old `env-home-ops`, `env-dotfiles`
+and `env-dlt` vaults have no active items. Existing reader tokens must be granted
+their approved items in the new locations; session directories do not migrate
+grants. Use normal viewer agent tokens at runtime, never the short-lived
+administrative PAT used for the move. Only the account owner can delete the
+empty old vaults; their deletion is not required to resolve the new references.
 
 Old broad sessions
 can still remain under `.local/state/pass-cli/paseo` and repository-specific
