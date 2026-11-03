@@ -66,8 +66,11 @@ transitional component with the per-scope fragments below.
    references require vault access and will not resolve for an item-only token.
    The home-ops root and pipelines configs select the native `paseo-general`
    fnox profile from their mise environment on the scoped general host. Dotfiles
-   does the same for its host-owned Sento map. Other hosts keep the default
-   named-vault references, and an explicit `FNOX_PROFILE` remains authoritative.
+   does the same for its host-owned Sento map. Its managed pipelines checkout
+   explicitly selects `paseo-general-cluster`, combining the scoped reader with
+   the existing in-cluster Prefect endpoint. Other hosts keep their default
+   named-vault references. Direct fnox honors `FNOX_PROFILE`; mise grants use an
+   explicit nearest `[secrets.fnox].profile` when configured.
    Apply grants and update/verify consumer references before switching tokens.
 2. Create Bitwarden JSON items `paseo-general` and `paseo-private`. Both need
    `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`, `KEYSEED`;
