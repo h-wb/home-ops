@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: paseo
+spec:
+  values:
+    controllers:
+      paseo:
+        annotations:
+          configmap.reloader.stakater.com/reload: paseo-provision,paseo-sshd,paseo-scope
+    persistence:
+      scope:
+        type: configMap
+        name: paseo-scope
+        advancedMounts:
+          paseo:
+            tools:
+              - path: /etc/paseo/scope
+                readOnly: true
+            app:
+              - path: /etc/paseo/scope
+                readOnly: true
+            sshd:
+              - path: /etc/paseo/scope
+                readOnly: true

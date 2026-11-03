@@ -1,0 +1,14 @@
+{
+  "agents": {
+    "providers": {
+      "claude": {
+        "enabled": true
+      },
+      "mistral-vibe": {
+        "env": {
+          "VIBE_MCP_SERVERS": "[{\"name\": \"home-mcp\", \"transport\": \"streamable-http\", \"url\": \"https://mcp.wlab.ovh/mcp\", \"auth\": {\"type\": \"static\", \"api_key_env\": \"MCP_GATEWAY_API_KEY\", \"api_key_header\": \"x-api-key\", \"api_key_format\": \"{token}\"}, \"startup_timeout_sec\": 60, \"tool_timeout_sec\": 120}]"
+        }
+      }
+    }
+  }
+}
