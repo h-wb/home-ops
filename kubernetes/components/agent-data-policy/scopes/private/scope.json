@@ -4,6 +4,9 @@
       "claude": { "enabled": false },
       "codex": { "enabled": false },
       "mistral-vibe": {
+        "extends": "acp",
+        "label": "Mistral Vibe",
+        "command": ["vibe-acp"],
         "enabled": true,
         "env": {
           "VIBE_MCP_SERVERS": "[{\"name\":\"toolhive-private\",\"transport\":\"streamable-http\",\"url\":\"https://mcp-private.${SECRET_DOMAIN}/mcp\",\"auth\":{\"type\":\"static\",\"api_key_env\":\"MCP_API_KEY\",\"api_key_header\":\"x-api-key\",\"api_key_format\":\"{token}\"},\"startup_timeout_sec\":60,\"tool_timeout_sec\":120}]"

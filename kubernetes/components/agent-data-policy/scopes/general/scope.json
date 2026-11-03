@@ -4,6 +4,9 @@
       "claude": { "enabled": true },
       "codex": { "enabled": true },
       "mistral-vibe": {
+        "extends": "acp",
+        "label": "Mistral Vibe",
+        "command": ["vibe-acp"],
         "enabled": true,
         "env": {
           "VIBE_MCP_SERVERS": "[{\"name\":\"toolhive-general\",\"transport\":\"streamable-http\",\"url\":\"https://mcp-general.${SECRET_DOMAIN}/mcp\",\"auth\":{\"type\":\"static\",\"api_key_env\":\"MCP_API_KEY\",\"api_key_header\":\"x-api-key\",\"api_key_format\":\"{token}\"},\"startup_timeout_sec\":60,\"tool_timeout_sec\":120},{\"name\":\"memini-general\",\"transport\":\"streamable-http\",\"url\":\"http://memini-general.llm.svc.cluster.local:8080/mcp\",\"auth\":{\"type\":\"static\",\"api_key_env\":\"MEMINI_API_KEY\",\"api_key_header\":\"Authorization\",\"api_key_format\":\"Bearer {token}\"}}]"
