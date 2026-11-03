@@ -9,7 +9,7 @@ resources:
   - ./litellm-operator/ks.yaml
   - ./embed/ks.yaml
   - ./litellm/ks.yaml
-  - ./memini/ks.yaml
-  - ./memini-code/ks.yaml
+  - ./memini-private/ks.yaml
+  - ./memini-general/ks.yaml
   - ./toolhive/ks.yaml
   - ./open-webui/ks.yaml

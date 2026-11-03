@@ -9,7 +9,7 @@ kind: MCPServerEntry
 metadata:
   name: memini
 spec:
-  remoteUrl: http://memini.llm.svc.cluster.local:8080/mcp
+  remoteUrl: http://memini-private.llm.svc.cluster.local:8080/mcp
   transport: streamable-http
   allowPrivateEndpoint: true
   headerForward:

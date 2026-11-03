@@ -1,18 +1,18 @@
 ---
-# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
-  name: &app litellm
-  namespace: &namespace llm
+  name: litellm
+  namespace: llm
 spec:
-  targetNamespace: *namespace
+  targetNamespace: llm
   commonMetadata:
     labels:
-      app.kubernetes.io/name: *app
+      app.kubernetes.io/name: litellm
   components:
     - ../../../../../components/dragonfly
     - ../../../../../components/cnpg/initdb
+    - ../../../../../components/agent-data-policy
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
@@ -31,10 +31,8 @@ spec:
   path: ./kubernetes/apps/main/llm/litellm/app
   postBuild:
     substitute:
-      APP: *app
-      NAMESPACE: *namespace
-      # LM Studio on the MacBook, over its WireGuard tunnel (static peer address in
-      # wg0.home.conf). Every model CR that targets the Mac uses this.
+      APP: litellm
+      NAMESPACE: llm
       LMSTUDIO_URL: http://192.168.27.65:1234/v1
       CNPG_REPLICAS: "2"
       CNPG_SIZE: 2Gi

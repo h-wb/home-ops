@@ -1,73 +1,59 @@
 # Models, tools and memory
 
-Model access is declared in LiteLLM virtual keys. Tool access is declared in
-ToolHive gateways and each client's MCP configuration. Open WebUI and Paseo
-use the same authenticated private and general Envoy routes, with separate
-client credentials. Paseo's private key is generated in `llm`, published to
-Bitwarden with a PushSecret and consumed by an ExternalSecret in `agents`. Keep these independent:
-adding a model does not need a new gateway, and adding a tool does not need a new
-model proxy. Paseo remains a single shared execution environment.
+Use **general** and **private** as data scopes. General includes operational
+secrets and code; private includes personal notes, location, health and memory.
+Direct Mistral and approved local inference may process both scopes. Claude and
+Codex are general only. Mistral running in general still gets general credentials.
 
-| Path | Model grants | Tool gateway | Memory |
-| --- | --- | --- | --- |
-| Private | Local inference and direct Mistral | `mcp-gateway` (full catalog) | Personal `memini` |
-| General | Explicit other-provider models | `mcp-ops` (explicit workload allowlist) | Separate `memini-code` for coding agents |
+The shared eligibility policy is `kubernetes/components/agent-data-policy/policy.json`.
+LiteLLM mounts it; the Paseo app overlays ship matching per-scope config
+fragments (kept in sync by tests), so no consumer keeps another provider list.
+Tool catalogs remain ToolHive's responsibility; model aliases and explicit client
+grants remain LiteLLM's responsibility. Every deployment behind a private alias
+must qualify. New backends require explicit classification.
 
-“Private” describes permission to process personal data, not where inference
-runs: Mistral receives that data in its cloud. Embeddings remain local.
+| Scope   | Tool endpoint | Memory endpoint  | Paseo client keys                            |
+| ------- | ------------- | ---------------- | -------------------------------------------- |
+| General | `mcp-general` | `memini-general` | `mcp-paseo-general`, `litellm-paseo-general` |
+| Private | `mcp-private` | `memini-private` | `mcp-paseo-private`, `litellm-paseo-private` |
 
-## Open WebUI
+Gateway keys identify consumers, not the models they currently use. Direct
+Claude/Codex subscription calls bypass LiteLLM.
 
-Two native connections use the same LiteLLM URL and different credentials:
+## Preserved identities
 
-- Connection 0, tagged **Private**: `litellm/app/virtualkeys/open-webui.yaml`.
-  Its existing Secret name is retained for RAG and local background tasks.
-- Connection 1, tagged **General**: `litellm/app/virtualkeys/open-webui-general.yaml`.
+Memini app directories use the new names. The releases, PVCs, backup identities
+and generated credentials remain `memini-code` (general) and `memini` (private).
+Scoped Service aliases point at these existing instances and their UI hostnames
+are scoped. No memory database or client key is recreated for naming consistency.
+Memini keys do not restrict readable namespaces: keep the stores separate and use
+namespaces only to organize projects/agents within each. General Paseo initially
+reuses the existing general `codex` credential for all its agents.
 
-Both keys have explicit `models` lists. Unclassified new models are unavailable
-in Open WebUI until granted to a connection. Raw model IDs are preserved so
-existing Workspace presets and chats continue to resolve. The connection tags
-are navigation labels, not automatic tool permissions or conversation isolation.
-The `homelab` preset selects full ToolHive; `ops` selects the ops gateway.
+ToolHive retains its `mcp-ops` and `mcp-gateway` resource identities and legacy
+hostnames as aliases. New clients use scoped names. Existing CreatedOnce key sets
+are intentionally unchanged to prevent rotating every old client; a retired
+Open WebUI key remains inert in the old general key set.
 
-The small LiteLLM callback is retained as a history backstop. It inspects actual
-backends and tool calls, including ToolHive's nested `call_tool` arguments. If a
-private-tool conversation is switched to a general model, it refuses the request.
-Every backend behind an alias must qualify as trusted. Native model grants alone
-do not inspect conversation history. The callback does not inspect arbitrary
-personal text, attachments or pasted tool results.
+## Request and execution boundaries
 
-## Paseo
+`litellm/app/patches/homeops_data_scope_guard.py` checks tool definitions, nested
+ToolHive calls, results and history against the shared policy. It refuses private
+tool history on general-only backends. Pasted private text and attachments are
+outside its scope. The independently scoped public-repository review key retains
+an explicit `allow_tool_policy_override`; interactive Paseo keys never get it.
 
-Vibe uses the full gateway. Claude Code and Codex use the ops gateway and the
-separate coding memory instance. Their subscription requests bypass LiteLLM.
-Provider MCP configuration is managed by the dotfiles bootstrap; gateway catalogs
-live under `toolhive/config/`.
+See [Paseo environments](../agents/README.md) for the separate homes and rollout.
+General retains cluster administration as an accepted exception, and backend
+services have in-cluster paths outside gateway authentication. This separates
+normal workflows rather than enforcing isolation against a cluster administrator.
 
-Gateway grants live in `toolhive/config/securitypolicy.yaml` (private) and
-`toolhive/config/ops-gateway.yaml` (general). Open WebUI has a generated private
-key in `mcp-gateway-open-webui` and a general key in `mcp-ops-api-keys`. Neither
-client needs a second MCP-policy implementation. Backend services still accept
-anonymous in-cluster connections; these route grants are not a network boundary.
+## Open WebUI retirement
 
-This is intentional configuration separation, not enforced isolation: agents
-share the pod's network, home and credentials, and can reach in-cluster services.
-Separate pods, homes and credentials are required if that assumption changes.
-
-## Changing the policy
-
-- **Add a model:** declare a `LiteLLMModel`, then explicitly grant its alias to
-  the relevant virtual keys. Keep private aliases free of general-provider
-  fallbacks. A new trusted cloud provider also needs endpoint classification in
-  `litellm/app/patches/homeops_cloud_tool_guard.py`; an alias or UI tag alone
-  cannot establish trust.
-- **Add an ops tool:** add its workload to the deny-by-default catalog in
-  `toolhive/config/ops-gateway.yaml` and its actual tool prefix to the guard's
-  `CLOUD_TOOL_PREFIXES`. This is a deliberate grant to all general providers.
-- **Add a personal tool:** add it to the full catalog only. It stays absent from
-  the ops gateway and is rejected by the guard on general models by default.
-- **Add a client:** give it only the model grants and gateway configuration it
-  needs. Avoid catch-all keys for interactive chat.
-
-The existing Kritika `allow_cloud_tools` exception is limited to its separately
-scoped public-repository review key; Open WebUI keys have no such exception.
+Verify the current PostgreSQL and uploaded-file backups before rollout.
+Paseo is the interactive interface. Open WebUI's HelmRelease, app route, stateless
+Dragonfly instance and LiteLLM grants are removed. `open-webui/ks.yaml` remains a
+**data retention** Kustomization: PostgreSQL, uploaded files, encryption key, OIDC
+identity and backups remain managed. Do not remove it until intentionally retiring
+the data. The former app manifests and presets are deleted; Git history retains
+their previous definitions.

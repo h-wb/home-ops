@@ -1,0 +1,321 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# Headless agent host, modelled on david-driscoll/home-operations (kubernetes/apps/agents/paseo).
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app ${APP}
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    defaultPodOptions:
+      automountServiceAccountToken: true
+      enableServiceLinks: false
+      # The ToolHive MCP gateway route (llm/toolhive) is internal-only: no public
+      # record and CoreDNS forwards straight upstream, so pods can't resolve it.
+      # Point it at envoy-internal (same LAN IP the route's Gateway listens on)
+      # for the Vibe agents' scoped MCP server. The gateway has a valid public cert.
+      hostAliases:
+        - hostnames:
+            - mcp-general.${SECRET_DOMAIN}
+            - mcp-private.${SECRET_DOMAIN}
+          ip: 192.168.1.202
+      # The image's entrypoint only needs root to chown volumes, then drops to `paseo`
+      # (1000); starting as 1000 with fsGroup does the same and skips that step.
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    serviceAccount:
+      ${APP}: {}
+    controllers:
+      ${APP}:
+        # Agents run for hours and hold an RWO volume.
+        strategy: Recreate
+        serviceAccount:
+          identifier: ${APP}
+        annotations:
+          # Named lists, not `auto`: every roll kills the running agents.
+          configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-data-policy,${APP}-scope
+          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-litellm,${APP}-mcp,${APP}-ssh,${APP}-tailscale
+        initContainers:
+          # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
+          # CLIs, repos and agent configs all come from there (./config/provision.sh).
+          tools:
+            image: &image
+              repository: ghcr.io/getpaseo/paseo
+              tag: 0.13.2
+            command: ["/bin/sh", "/etc/paseo/provision.sh"]
+            env: &env
+              PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}
+              HOME: /home/paseo
+              TZ: Europe/Paris
+              # Terminals (Paseo web UI, VS Code) use this to pick the shell;
+              # without it they fall back to /bin/sh and skip ~/.bashrc.
+              SHELL: /bin/bash
+              # System dirs first: the daemon must keep the image's node, its native
+              # modules are built against it. Everything else falls through to mise.
+              PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
+            # GIT_EMAIL renders the dotfiles' git config.
+            envFrom:
+              - &secret
+                secretRef:
+                  name: ${APP}-secret
+              - secretRef:
+                  name: ${APP}-mcp
+            securityContext: &securityContext
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 100m
+                memory: 256Mi
+              limits:
+                memory: 2Gi
+        containers:
+          app:
+            image: *image
+            env: &appEnv
+              <<: *env
+              PASEO_HOSTNAMES: "${PASEO_HOSTNAMES}"
+              # Workspace services (paseo.json scripts) at <service>--<project>.svc.${SECRET_DOMAIN}.
+              # Must not be a parent of PASEO_HOSTNAMES: every host under the base is treated
+              # as a service, so a bare ${SECRET_DOMAIN} 404s the daemon itself.
+              PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "https://${PASEO_SERVICE_DOMAIN}.${SECRET_DOMAIN}"
+              # envoy-internal reaches the daemon from the pod network.
+              PASEO_TRUSTED_PROXIES: loopback,10.42.0.0/16
+              # Clients connect directly over LAN/WireGuard; no third-party relay.
+              PASEO_RELAY_ENABLED: "false"
+            envFrom:
+              - secretRef:
+                  name: ${APP}-password
+              - *secret
+              - &litellm
+                secretRef:
+                  name: ${APP}-litellm
+                  optional: true
+              # x-api-key for https://mcp-${PASEO_DATA_SCOPE}.${SECRET_DOMAIN} (Vibe home-mcp server). The
+              # daemon inherits it and its spawned agents read auth.api_key_env through
+              # VIBE_MCP_SERVERS (dotfiles providers.json). ToolHive generates this
+              # client key and publishes it to Bitwarden with a scoped client name.
+              - &mcpKey
+                secretRef:
+                  name: ${APP}-mcp
+                  optional: true
+            probes:
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: &health
+                    path: /api/health
+                    port: &port 6767
+                  periodSeconds: 5
+                  failureThreshold: 60
+              liveness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: *health
+                  periodSeconds: 30
+                  timeoutSeconds: 5
+              readiness:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet: *health
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 100m
+                memory: 1Gi
+              limits:
+                memory: 8Gi
+          # sshd-lite (dotfiles paseo class, installed by `tools` before this starts), for
+          # editors' Remote-SSH, plain `ssh` + tmux and mosh. Sessions inherit this
+          # container's env. The host key is derived from KEYSEED, so it survives restarts.
+          sshd:
+            image: *image
+            command: ["/home/paseo/.local/share/mise/shims/sshd-lite"]
+            args:
+              - --port=2222
+              - --keyseed-ec
+              - --workdir=/home/paseo
+              - --keepalive=30
+              - --sftp
+              - --tcp-forwarding
+              - --mosh
+              - /etc/paseo/authorized_keys
+            env:
+              <<: *appEnv
+            envFrom:
+              - *secret
+              - *litellm
+              - *mcpKey
+              - secretRef:
+                  name: ${APP}-ssh
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 10m
+                memory: 64Mi
+              limits:
+                memory: 4Gi
+          # Headless Chromium for browser MCPs (chrome-devtools-mcp --browserUrl
+          # http://127.0.0.1:9222). Pod-local, so CDP is never exposed.
+          browser:
+            image:
+              repository: docker.io/chromedp/headless-shell
+              tag: 157.0.8103.15
+            command: ["/headless-shell/headless-shell"]
+            args:
+              - --no-sandbox
+              - --disable-gpu
+              - --no-first-run
+              - --remote-debugging-address=127.0.0.1
+              - --remote-debugging-port=9222
+              - --user-data-dir=/tmp/chromium
+            env:
+              HOME: /tmp
+            securityContext: *securityContext
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 2Gi
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            primary: true
+            port: *port
+      ssh:
+        controller: *app
+        type: LoadBalancer
+        annotations:
+          lbipam.cilium.io/ips: ${PASEO_SSH_IP}
+        ports:
+          ssh:
+            port: 22
+            targetPort: &sshPort 2222
+          # sshd-lite tells mosh clients to use its own port number over UDP.
+          mosh:
+            port: *sshPort
+            protocol: UDP
+    route:
+      app:
+        annotations:
+          gethomepage.dev/enabled: "true"
+          gethomepage.dev/app: paseo-${PASEO_DATA_SCOPE}
+          gethomepage.dev/group: Tools
+          gethomepage.dev/name: Paseo (${PASEO_DATA_SCOPE})
+          gethomepage.dev/icon: terminal.png
+          gethomepage.dev/description: Coding agents
+        hostnames:
+          - "paseo-${PASEO_DATA_SCOPE}.${SECRET_DOMAIN}"
+        # Internal only and no OIDC: the native and CLI clients authenticate to the
+        # daemon with PASEO_PASSWORD and cannot follow a login redirect.
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+      # Workspace services; the gateway cert carries *.svc.${SECRET_DOMAIN}. Unknown names
+      # get Paseo's "service not running" page. Internal only, like the daemon.
+      services:
+        hostnames:
+          - "*.${PASEO_SERVICE_DOMAIN}.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-internal
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      # Not in the browser sidecar: a page it loads should never reach agent logins.
+      home:
+        existingClaim: *app
+        advancedMounts:
+          ${APP}:
+            tools: &home
+              - path: /home/paseo
+            app: *home
+            sshd: *home
+      # /etc/paseo is also the marker dotfiles' miserc.toml detects the class by.
+      provision:
+        type: configMap
+        name: ${APP}-provision
+        advancedMounts:
+          ${APP}:
+            tools: &provision
+              - path: /etc/paseo/provision.sh
+                subPath: provision.sh
+                readOnly: true
+            app: *provision
+            sshd: *provision
+      # Per-scope agent config fragments (from the app overlay's ${APP}-scope
+      # ConfigMap). dotfiles' mise bootstrap merges them into the agent homes.
+      scope:
+        type: configMap
+        name: ${APP}-scope
+        advancedMounts:
+          ${APP}:
+            tools: &scope
+              - path: /etc/paseo/scope/scope.json
+                subPath: scope.json
+                readOnly: true
+              - path: /etc/paseo/scope/claude.json
+                subPath: claude.json
+                readOnly: true
+              - path: /etc/paseo/scope/codex.toml
+                subPath: codex.toml
+                readOnly: true
+            app: *scope
+            sshd: *scope
+      sshd-config:
+        type: configMap
+        name: ${APP}-sshd
+        advancedMounts:
+          ${APP}:
+            sshd:
+              - path: /etc/paseo/authorized_keys
+                subPath: authorized_keys
+                readOnly: true
+      data-policy:
+        type: configMap
+        name: ${APP}-data-policy
+        advancedMounts:
+          ${APP}:
+            tools: &policy
+              - path: /etc/paseo/policy.json
+                subPath: policy.json
+                readOnly: true
+            app: *policy
+            sshd: *policy
+      tmp:
+        type: emptyDir
+        globalMounts:
+          - path: /tmp
+      dshm:
+        type: emptyDir
+        medium: Memory
+        sizeLimit: 1Gi
+        advancedMounts:
+          ${APP}:
+            browser:
+              - path: /dev/shm

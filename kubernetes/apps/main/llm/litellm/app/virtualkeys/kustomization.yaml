@@ -7,9 +7,8 @@ resources:
   - ./kritika.yaml
   - ./lingarr.yaml
   - ./memini.yaml
-  - ./open-webui.yaml
-  - ./open-webui-general.yaml
   - ./paperless-gpt.yaml
   - ./paperless.yaml
-  - ./paseo.yaml
+  - ./paseo-general.yaml
+  - ./paseo-private.yaml
   - ./toolhive.yaml

@@ -1,0 +1,16 @@
+apiVersion: external-secrets.io/v1alpha1
+kind: PushSecret
+metadata:
+  name: memini-paseo-general
+spec:
+  secretStoreRefs:
+    - name: bitwarden-secrets-manager
+      kind: ClusterSecretStore
+  selector:
+    secret:
+      name: memini-code-secret
+  data:
+    - match:
+        secretKey: codex
+        remoteRef:
+          remoteKey: memini-paseo-general

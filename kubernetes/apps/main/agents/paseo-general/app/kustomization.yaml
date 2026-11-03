@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../../../../components/paseo/base
+  - rbac.yaml
+  - github-secret.yaml
+  - memory-secret.yaml
+# Per-scope agent config fragments, owned by components/agent-data-policy;
+# the base mounts this at /etc/paseo/scope and dotfiles' bootstrap merges it
+# into the agent homes. tests/test_data_scopes.py keeps them in sync with
+# policy.json.
+configMapGenerator:
+  - name: ${APP}-scope
+    files:
+      - scope.json=../../../../../components/agent-data-policy/scopes/general/scope.json
+      - claude.json=../../../../../components/agent-data-policy/scopes/general/claude.json
+      - codex.toml=../../../../../components/agent-data-policy/scopes/general/codex.toml
+    options:
+      disableNameSuffixHash: true
+patches:
+  - path: general-patch.yaml
+    target:
+      kind: HelmRelease

@@ -1,7 +1,5 @@
----
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+# Preserve the encryption key alongside the database and uploaded files.
 resources:
   - ./externalsecret.yaml
-  - ./helmrelease.yaml

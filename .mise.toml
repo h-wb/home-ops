@@ -7,6 +7,9 @@ experimental = true
 config_roots = ["bootstrap", "docker/truenas", "kubernetes", "talos", "talos/*"]
 
 [env]
+# Select the item-scoped reader only on the scoped general host. Preserve an
+# explicitly selected fnox profile and the workstation's default references.
+FNOX_PROFILE = "{{ get_env(name='FNOX_PROFILE', default='paseo-general' if get_env(name='PASEO_DATA_SCOPE', default='') == 'general' else 'default') }}"
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
 CLUSTER = "{{ get_env(name=\"CLUSTER\", default=\"main\") }}"
 SHARED_APPS = "{{config_root}}/kubernetes/apps/main"
@@ -16,7 +19,7 @@ MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
 TALOSCONFIG = "{{config_root}}/talos/{{env.CLUSTER}}/talosconfig"
 TALOS_DIR = "{{config_root}}/talos/{{env.CLUSTER}}"
-# fnox/pass-cli here use an agent session that only sees the env-home-ops vault.
+# Separate session storage; token grants determine which vaults it can read.
 PROTON_PASS_SESSION_DIR = "{{env.HOME}}/.local/state/pass-cli/home-ops"
 PROTON_PASS_AGENT_REASON = "home-ops fnox"
 
@@ -88,6 +91,7 @@ arg "[args]" help="Additional key/value pairs" var=#true
 
 [tasks.template]
 description = "Render a minijinja template with fnox/ProtonPass secrets injected"
+depends = ["pass:login"]
 quiet = true
 dir = "{{config_root}}"
 run = '''
@@ -99,13 +103,9 @@ arg "[args]" help="Extra args passed to minijinja-cli" var=#true
 '''
 
 [tasks."pass:login"]
-description = "Log the repo's scoped Proton Pass session in (agent token from the macOS Keychain)"
-quiet = true
-run = '''
-mkdir -p "$PROTON_PASS_SESSION_DIR" && chmod 700 "$PROTON_PASS_SESSION_DIR"
-pass-cli info >/dev/null 2>&1 && { echo "already logged in"; exit 0; }
-PROTON_PASS_PERSONAL_ACCESS_TOKEN="$(security find-generic-password -s pass-cli-home-ops -a "$USER" -w)" pass-cli login
-'''
+extends = "proton-login"
+description = "Authenticate the home-ops Proton Pass session using dotfiles' global task"
+env.PROTON_PASS_LOGIN_SESSION = "home-ops"
 
 [tasks.encrypt]
 description = "Encrypt SOPS file(s) in place (skips already-encrypted)"
