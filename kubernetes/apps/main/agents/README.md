@@ -64,10 +64,18 @@ transitional component with the per-scope fragments below.
    get identifiers with `pass-cli personal-access-token access list-access
    --personal-access-token-name <agent> --output json`. Name-based vault
    references require vault access and will not resolve for an item-only token.
+   The home-ops root and pipelines configs select the native `paseo-general`
+   fnox profile from their mise environment on the scoped general host. Dotfiles
+   does the same for its host-owned Sento map. Other hosts keep the default
+   named-vault references, and an explicit `FNOX_PROFILE` remains authoritative.
    Apply grants and update/verify consumer references before switching tokens.
 2. Create Bitwarden JSON items `paseo-general` and `paseo-private`. Both need
    `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`, `KEYSEED`;
-   general also needs `GH_TOKEN`. Copy the existing general password and SSH
+   general also needs `GH_TOKEN`. The existing general BWS item has been renamed
+   to `paseo-general`; both scoped tokens and their exact item grants are verified.
+   The current host reads its temporary `PROTON_PASS_TOKEN_LEGACY` field, while
+   this rollout consumes the new `PROTON_PASS_TOKEN`. Remove the legacy field
+   only after the new reader and consumers work. Copy the existing general password and SSH
    KEYSEED unchanged. Generate independent private credentials. ExternalSecrets
    expose explicit fields, never the whole account item.
 3. Confirm `192.168.1.212` is available for private SSH. General keeps `.204`.
