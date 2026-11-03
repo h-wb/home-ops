@@ -114,6 +114,12 @@ class ScopeFragments(unittest.TestCase):
                 self.assertEqual(set(POLICY["providers"]), set(providers))
                 for name, entry in providers.items():
                     self.assertEqual(name in settings["providers"], entry["enabled"], name)
+                # Vibe is in the ACP catalog, not the built-in provider registry.
+                # Without a definition Paseo silently skips this enabled override.
+                vibe = providers["mistral-vibe"]
+                self.assertEqual("acp", vibe["extends"])
+                self.assertTrue(vibe["label"])
+                self.assertEqual(["vibe-acp"], vibe["command"])
                 # Vibe's MCP servers come from the scope's endpoints.
                 servers = json.loads(providers["mistral-vibe"]["env"]["VIBE_MCP_SERVERS"])
                 names = [s["name"] for s in servers]
