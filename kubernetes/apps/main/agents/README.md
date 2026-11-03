@@ -59,6 +59,12 @@ transitional component with the per-scope fragments below.
    External personal account logins, including Obsidian, stay in `Personal`;
    `Homelab` holds logins to self-hosted services. Repository references follow
    the canonical item location.
+   Item grants expose direct item shares rather than the containing vault. Use
+   `pass://<item-share-id>/<item-id>/<field>` in the consumer's fnox references;
+   get identifiers with `pass-cli personal-access-token access list-access
+   --personal-access-token-name <agent> --output json`. Name-based vault
+   references require vault access and will not resolve for an item-only token.
+   Apply grants and update/verify consumer references before switching tokens.
 2. Create Bitwarden JSON items `paseo-general` and `paseo-private`. Both need
    `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`, `KEYSEED`;
    general also needs `GH_TOKEN`. Copy the existing general password and SSH
