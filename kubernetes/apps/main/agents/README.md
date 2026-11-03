@@ -51,11 +51,14 @@ and mounted files were verified on 2026-11-03. This rollout replaces that
 transitional component with the per-scope fragments below.
 
 1. Create separate scoped Proton Pass agents with item-level viewer grants. Keep
-   the existing `Homelab/Obsidian` login and grant it only to private. Machine-only
+   the existing `Personal/Obsidian` login and grant it only to private. Machine-only
    external/workstation credentials live in `Automation`; approve each item for
    its consumers rather than granting general the entire vault. Administrative
    bootstrap/recovery credentials stay in `Infrastructure`. No dedicated Paseo
    vaults or duplicate login items are needed.
+   External personal account logins, including Obsidian, stay in `Personal`;
+   `Homelab` holds logins to self-hosted services. Repository references follow
+   the canonical item location.
 2. Create Bitwarden JSON items `paseo-general` and `paseo-private`. Both need
    `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`, `KEYSEED`;
    general also needs `GH_TOKEN`. Copy the existing general password and SSH
