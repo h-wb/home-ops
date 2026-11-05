@@ -1,0 +1,30 @@
+---
+# Paseo may exec into the CLI pod only. It gets no Secret API access in proto, but whoever
+# execs here can use (and read) the mounted OpenShell client key: that is gateway admin.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: paseo-proto-exec
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    resourceNames:
+      - openshell-cli-0
+    verbs:
+      - create
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: paseo-proto-exec
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: paseo-proto-exec
+subjects:
+  - kind: ServiceAccount
+    name: paseo
+    namespace: agents
