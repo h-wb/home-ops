@@ -23,6 +23,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+        fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
       initContainers:
@@ -55,10 +56,16 @@ spec:
       containers:
         - name: cli
           image: docker.io/alpine/k8s:1.37.1
+          # The CLI chmods its gateway directory, so the bundle cannot be mounted there directly.
           command:
             - /bin/sh
-            - -c
-            - exec sleep infinity
+            - -ec
+            - |
+              dir="$HOME/.config/openshell/gateways/proto/mtls"
+              mkdir -p "$dir"
+              cp /etc/openshell-client-tls/ca.crt /etc/openshell-client-tls/tls.crt /etc/openshell-client-tls/tls.key "$dir/"
+              chmod 600 "$dir"/*
+              exec sleep infinity
           env:
             - name: HOME
               value: /home/cli
@@ -77,9 +84,8 @@ spec:
               readOnly: true
             - name: home
               mountPath: /home/cli
-            # Where the CLI looks for the bundle of a gateway registered as `proto`.
             - name: client-tls
-              mountPath: /home/cli/.config/openshell/gateways/proto/mtls
+              mountPath: /etc/openshell-client-tls
               readOnly: true
             - name: tmp
               mountPath: /tmp
@@ -87,10 +93,12 @@ spec:
         - name: bin
           emptyDir: {}
         - name: home
-          emptyDir: {}
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
         - name: tmp
           emptyDir: {}
         - name: client-tls
           secret:
             secretName: openshell-client-tls
-            defaultMode: 0400
+            defaultMode: 0440
