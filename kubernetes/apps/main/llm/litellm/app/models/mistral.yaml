@@ -10,7 +10,11 @@ spec:
   params:
     model: mistral/mistral-small-latest
     apiBase: https://api.mistral.ai/v1
-    apiKey: os.environ/MISTRAL_API_KEY
+    # From the Secret, not os.environ: LiteLLM kept the env key it resolved at registration,
+    # so a rotated key never reached it.
+    apiKeyRef:
+      name: litellm-secret
+      key: MISTRAL_API_KEY
   info:
     mode: chat
     supportsVision: true
@@ -27,7 +31,11 @@ spec:
   params:
     model: mistral/mistral-medium-latest
     apiBase: https://api.mistral.ai/v1
-    apiKey: os.environ/MISTRAL_API_KEY
+    # From the Secret, not os.environ: LiteLLM kept the env key it resolved at registration,
+    # so a rotated key never reached it.
+    apiKeyRef:
+      name: litellm-secret
+      key: MISTRAL_API_KEY
   info:
     mode: chat
     supportsVision: true
@@ -44,7 +52,11 @@ spec:
   params:
     model: mistral/mistral-large-latest
     apiBase: https://api.mistral.ai/v1
-    apiKey: os.environ/MISTRAL_API_KEY
+    # From the Secret, not os.environ: LiteLLM kept the env key it resolved at registration,
+    # so a rotated key never reached it.
+    apiKeyRef:
+      name: litellm-secret
+      key: MISTRAL_API_KEY
   info:
     mode: chat
     supportsVision: true
