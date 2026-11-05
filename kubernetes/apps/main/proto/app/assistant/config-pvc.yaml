@@ -1,0 +1,18 @@
+---
+# Hermes managed config and the Memini plugin, one subdirectory per scope. Written only by the
+# apply Job; sandboxes mount their own subdirectory read-only at /etc/hermes. RWX so the Job
+# need not share a node with the sandboxes. The labels are OpenShell's attachment approval.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-config
+  labels:
+    openshell.ai/sandbox-attachable: "true"
+    openshell.ai/sandbox-attachable-workspace: default
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ceph-filesystem
+  resources:
+    requests:
+      storage: 1Gi

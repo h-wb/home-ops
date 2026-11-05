@@ -1,0 +1,20 @@
+# The private scope's prototype Memini. A separate profile per scope, so a sandbox can only be
+# granted the Memini endpoint of the provider it is attached to.
+id: proto-memini-private
+display_name: Memini private (proto)
+description: Prototype Memini for the private scope
+category: knowledge
+credentials:
+  - name: api_key
+    description: Memini key for hermes-private
+    env_vars: [MEMINI_API_KEY]
+    required: true
+    auth_style: bearer
+    header_name: authorization
+endpoints:
+  - host: memini-proto-private.proto.svc.cluster.local
+    port: 8080
+    protocol: rest
+    access: read-write
+    enforcement: enforce
+binaries: [/opt/hermes/tools/python-3.14.9+20261021-linux-x64/bin/python3.14]

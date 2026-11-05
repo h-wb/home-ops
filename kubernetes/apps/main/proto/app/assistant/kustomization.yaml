@@ -1,0 +1,25 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Option C template (obsidian-workspace docs/assistant/ASSISTANT-OPTIONS.md): per scope a LiteLLM
+# key, a synthetic Memini and a Hermes sandbox. hermes/<scope>.yaml is the scope's values file.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: proto
+resources:
+  - ./litellm-keys.yaml
+  - ./memini-ocirepository.yaml
+  - ./memini-general.yaml
+  - ./memini-private.yaml
+  - ./config-pvc.yaml
+  - ./apply-job.yaml
+configMapGenerator:
+  - name: openshell-apply
+    files:
+      - apply.sh=./openshell/apply.sh
+      - hermes-general.yaml=./hermes/general.yaml
+      - hermes-private.yaml=./hermes/private.yaml
+      - profile-litellm.yaml=./openshell/profile-litellm.yaml
+      - profile-memini-general.yaml=./openshell/profile-memini-general.yaml
+      - profile-memini-private.yaml=./openshell/profile-memini-private.yaml
+      - policy-general.yaml=./openshell/policy-general.yaml
+      - policy-private.yaml=./openshell/policy-private.yaml

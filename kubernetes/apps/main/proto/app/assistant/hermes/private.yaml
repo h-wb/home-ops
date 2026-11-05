@@ -1,0 +1,43 @@
+# Private scope: main assistant on Mistral. Writes are limited to tasks (ToolHive, a later step).
+# Mounted read-only at /etc/hermes (Hermes managed scope), so it wins over anything the agent
+# writes to $HERMES_HOME. The doubled dollar is Flux's escape; Hermes then expands the reference
+# from the sandbox env, where OpenShell has swapped real credentials for placeholders.
+model:
+  default: mistral/mistral-small-latest
+  provider: litellm
+providers:
+  litellm:
+    base_url: http://litellm.llm.svc.cluster.local:4000/v1
+    api_key: $${LITELLM_API_KEY}
+auxiliary:
+  compression:
+    provider: litellm
+    model: mistral/mistral-small-latest
+  session_search:
+    provider: litellm
+    model: mistral/mistral-small-latest
+  approval:
+    provider: litellm
+    model: mistral/mistral-small-latest
+memory:
+  provider: memini
+  memory_enabled: false
+  user_profile_enabled: false
+approvals:
+  mode: manual
+security:
+  redact_secrets: true
+agent:
+  disabled_toolsets:
+    - cronjob # routines come from versioned definitions, not the agent
+    - catalog
+    - connections
+    - kanban
+    # Email is untrusted input: no shell, code, file, browser or delegation tools.
+    - terminal
+    - code_execution
+    - file
+    - browser
+    - delegation
+    - computer_use
+    - skills
