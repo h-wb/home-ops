@@ -38,8 +38,8 @@ spec:
             - /bin/sh
             - -ec
             - |
-              curl -fsSLo /tmp/openshell.tgz "https://github.com/NVIDIA/OpenShell/releases/download/v${OPENSHELL_VERSION}/openshell-x86_64-unknown-linux-musl.tar.gz"
-              echo "${OPENSHELL_SHA256}  /tmp/openshell.tgz" | sha256sum -c -
+              curl -fsSLo /tmp/openshell.tgz "https://github.com/NVIDIA/OpenShell/releases/download/v$${OPENSHELL_VERSION}/openshell-x86_64-unknown-linux-musl.tar.gz"
+              echo "$${OPENSHELL_SHA256}  /tmp/openshell.tgz" | sha256sum -c -
               tar -xzf /tmp/openshell.tgz -C /opt/bin openshell
           securityContext: &securityContext
             allowPrivilegeEscalation: false
