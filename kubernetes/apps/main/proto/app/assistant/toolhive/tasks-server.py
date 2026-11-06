@@ -73,9 +73,12 @@ def create_task(title: str, notes: str = "", fingerprint: str = "") -> dict:
         return row(conn.execute("SELECT * FROM tasks WHERE id = ?", (cur.lastrowid,)).fetchone())
 
 
-def update_task(task_id: int, append_notes: str = "", status: str = "") -> dict | None:
+def update_task(task_id: int, append_notes: str = "", status: str = "") -> dict:
     """Append notes to a task and/or set its status (open or done)."""
     with db() as conn:
+        # An error, not an empty result: a model told "nothing" reported a change that never happened.
+        if not conn.execute("SELECT 1 FROM tasks WHERE id = ?", (task_id,)).fetchone():
+            raise ValueError(f"no task {task_id} on the {BOARD} board")
         if append_notes:
             conn.execute(
                 "UPDATE tasks SET notes = trim(notes || char(10) || ?), updated = ? WHERE id = ?",
