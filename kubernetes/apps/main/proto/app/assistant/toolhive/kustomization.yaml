@@ -6,6 +6,7 @@ resources:
   - ./mcpgroup.yaml
   - ./tasks-pvc.yaml
   - ./mcpservers.yaml
+  - ./jwks-mirror.yaml
   - ./oidc.yaml
   - ./authz.yaml
   - ./vmcp.yaml
