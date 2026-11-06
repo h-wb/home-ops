@@ -9,6 +9,9 @@ credentials:
     description: Memini key for hermes-general
     env_vars: [MEMINI_API_KEY]
     required: true
+    # Hermes pins a session to the key it started with; a new placeholder per provider
+    # revision would strand every open session after the apply Job's provider update.
+    stable_placeholder: true
     auth_style: bearer
     header_name: authorization
 endpoints:
