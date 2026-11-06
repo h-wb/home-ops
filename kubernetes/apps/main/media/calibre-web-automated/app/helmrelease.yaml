@@ -22,7 +22,7 @@ spec:
           app:
             image:
               repository: docker.io/crocodilestick/calibre-web-automated
-              tag: V3.1.2@sha256:b07135bbbcaf2fe93b40980a4948d59df81ec7a7dd9dafe32607678b7e3e9cac
+              tag: v4.0.8@sha256:5e00373854247750cc3e4479b492ae09293ff5e06ed10177f226634d97888679
             env:
               TZ: Europe/Paris
               PUID: 1000
