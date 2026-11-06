@@ -69,6 +69,21 @@ spec:
               value: /data/hermes
             - name: TZ
               value: Europe/Paris
+            # Fail fast: the NetworkPolicy silently drops internet traffic, so Hermes's update
+            # and model-catalog checks each waited out a TCP timeout (about 20 s per new
+            # session). A closed local port refuses at once; in-cluster names bypass it.
+            - name: HTTPS_PROXY
+              value: http://127.0.0.1:9
+            - name: HTTP_PROXY
+              value: http://127.0.0.1:9
+            - name: https_proxy
+              value: http://127.0.0.1:9
+            - name: http_proxy
+              value: http://127.0.0.1:9
+            - name: NO_PROXY
+              value: .svc.cluster.local,.svc,localhost,127.0.0.1
+            - name: no_proxy
+              value: .svc.cluster.local,.svc,localhost,127.0.0.1
           resources:
             requests:
               cpu: 50m
