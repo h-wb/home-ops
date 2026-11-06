@@ -2,7 +2,10 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-namespace: proto
 resources:
-  - ./ocirepository.yaml
-  - ./helmrelease.yaml
+  - ./pvc.yaml
+  - ./job.yaml
+configMapGenerator:
+  - name: hermes-plugin-sync
+    files:
+      - ./sync.sh

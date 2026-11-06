@@ -1,0 +1,18 @@
+---
+# Which tier may call which backend; anything not permitted is denied (403, audited), and
+# tools/list only shows what the caller may call. Any pod can mint a token for its own
+# ServiceAccount with this audience, so the policy, not the OIDC check, is the tier boundary.
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: MCPAuthzConfig
+metadata:
+  name: proto-tiers
+spec:
+  type: cedarv1
+  config:
+    policies:
+      # General: homelab tasks, read and write.
+      - permit(principal == Client::"system:serviceaccount:proto:hermes-general", action == Action::"call_tool", resource in Backend::"homelab-tasks");
+      # Private: its own tasks, and homelab tasks through the instance that cannot write.
+      - permit(principal == Client::"system:serviceaccount:proto:hermes-private", action == Action::"call_tool", resource in Backend::"personal-tasks");
+      - permit(principal == Client::"system:serviceaccount:proto:hermes-private", action == Action::"call_tool", resource in Backend::"homelab-tasks-ro");
+    entities_json: "[]"

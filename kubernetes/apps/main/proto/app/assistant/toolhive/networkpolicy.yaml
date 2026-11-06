@@ -1,0 +1,40 @@
+---
+# Only the Hermes tiers reach the endpoint (identity and policy then decide what they may do).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: proto-mcp
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: virtualmcpserver
+      app.kubernetes.io/instance: proto-mcp
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hermes
+      ports:
+        - port: 4483
+          protocol: TCP
+---
+# Task servers and their proxies answer only ToolHive: no direct calls around the policy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: proto-tool-backends
+spec:
+  podSelector:
+    matchExpressions:
+      - key: toolhive-name
+        operator: In
+        values: [homelab-tasks, homelab-tasks-ro, personal-tasks]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              toolhive: "true"

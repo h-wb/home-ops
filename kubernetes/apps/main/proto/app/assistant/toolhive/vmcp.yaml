@@ -1,0 +1,33 @@
+---
+# The one tool endpoint for both tiers: identities from oidc.yaml, policy from authz.yaml.
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: VirtualMCPServer
+metadata:
+  name: proto-mcp
+spec:
+  groupRef:
+    name: proto-tools
+  config:
+    aggregation:
+      conflictResolution: prefix
+      conflictResolutionConfig:
+        prefixFormat: "{workload}_"
+  incomingAuth:
+    type: oidc
+    oidcConfigRef:
+      name: proto-serviceaccounts
+      audience: proto-mcp
+    authzConfigRef:
+      name: proto-tiers
+  outgoingAuth:
+    source: discovered
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: vmcp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 512Mi
