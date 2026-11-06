@@ -1,0 +1,12 @@
+#!/bin/sh
+# Readiness = sync progress, not the process (after chrisns/obsidian-server, MIT): `ob sync
+# --continuous` stays up when its websocket wedges, and `ob sync-status` only prints config.
+# The sync loop logs "Fully synced" about every 30 s while connected; fail if it went quiet.
+set -eu
+for log in "$XDG_CONFIG_HOME"/obsidian-headless/sync/*/sync.log; do break; done
+[ -f "$log" ] || { echo "no sync.log yet"; exit 1; }
+ts=$(tail -c 200000 "$log" | grep -a 'Fully synced' | tail -1 | cut -c2-25)
+[ -n "$ts" ] || { echo "never reached Fully synced"; exit 1; }
+age=$(($(date -u +%s) - $(date -u -d "$ts" +%s)))
+echo "last full sync $age s ago (threshold $1 s)"
+[ "$age" -lt "$1" ]

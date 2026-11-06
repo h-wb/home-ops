@@ -30,7 +30,7 @@ spec:
     matchExpressions:
       - key: toolhive-name
         operator: In
-        values: [homelab-tasks, homelab-tasks-ro, personal-tasks]
+        values: [homelab-tasks, homelab-tasks-ro, personal-tasks, vault-ro, vault-inbox]
   policyTypes:
     - Ingress
   ingress:

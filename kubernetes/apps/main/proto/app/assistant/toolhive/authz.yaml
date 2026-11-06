@@ -15,4 +15,7 @@ spec:
       # Private: its own tasks, and homelab tasks through the instance that cannot write.
       - permit(principal == Client::"system:serviceaccount:proto:hermes-private", action == Action::"call_tool", resource in Backend::"personal-tasks");
       - permit(principal == Client::"system:serviceaccount:proto:hermes-private", action == Action::"call_tool", resource in Backend::"homelab-tasks-ro");
+      # Private only: the Obsidian vault, read-only, plus writes under inbox/.
+      - permit(principal == Client::"system:serviceaccount:proto:hermes-private", action == Action::"call_tool", resource in Backend::"vault-ro");
+      - permit(principal == Client::"system:serviceaccount:proto:hermes-private", action == Action::"call_tool", resource in Backend::"vault-inbox");
     entities_json: "[]"

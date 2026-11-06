@@ -1,0 +1,42 @@
+---
+# The vault pod holds the Obsidian account token: it may resolve names and reach Obsidian's
+# own servers (ob refuses any sync host outside *.obsidian.md), nothing else.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: obsidian-vault
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: obsidian-vault
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            k8s:io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: obsidian.md
+        - matchPattern: "*.obsidian.md"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+# Nothing connects to it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: obsidian-vault
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: obsidian-vault
+  policyTypes:
+    - Ingress

@@ -1,0 +1,15 @@
+---
+# vault/ (the notes), state/ (ob's SQLite state; WAL, so never NFS) and seekstone/ (the inbox
+# instance's audit log, outside the vault). Block storage: a real local filesystem, so inotify
+# and SQLite behave; Seekstone pods are pinned to the vault pod's node to share it.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: obsidian-vault
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ceph-block
+  resources:
+    requests:
+      storage: 5Gi

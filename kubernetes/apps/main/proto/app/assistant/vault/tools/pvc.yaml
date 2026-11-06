@@ -1,0 +1,13 @@
+---
+# obsidian-headless and Seekstone installs; written by the tools Job, mounted read-only.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: obsidian-tools
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ceph-filesystem
+  resources:
+    requests:
+      storage: 1Gi

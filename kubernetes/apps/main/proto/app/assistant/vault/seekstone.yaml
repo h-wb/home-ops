@@ -1,0 +1,149 @@
+# Seekstone over the synced vault, private tier only (toolhive/authz.yaml): a read-only
+# instance and an inbox-write instance, both on the vault volume.
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: vault-ro
+spec:
+  image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+  transport: stdio
+  proxyPort: 8080
+  env:
+    - name: SEEKSTONE_VAULT
+      value: /vault
+    - name: HOME
+      value: /tmp
+    - name: SEEKSTONE_CACHE_DIR
+      value: /tmp/seekstone
+    # The write tools are unregistered and refused, and the vault is mounted read-only too.
+    - name: SEEKSTONE_READ_ONLY
+      value: "1"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 768Mi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # The vault volume is block storage (one node): run beside the vault pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: obsidian-vault
+      containers:
+        - name: mcp
+          command:
+            - /tools/seekstone/node_modules/.bin/seekstone
+          volumeMounts:
+            - name: vault
+              mountPath: /vault
+              subPath: vault
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-vault
+        - name: tools
+          persistentVolumeClaim:
+            claimName: obsidian-tools
+            readOnly: true
+        - name: tmp
+          emptyDir: {}
+  groupRef:
+    name: proto-tools
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: vault-inbox
+spec:
+  image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+  transport: stdio
+  proxyPort: 8080
+  env:
+    - name: SEEKSTONE_VAULT
+      value: /vault
+    - name: HOME
+      value: /tmp
+    - name: SEEKSTONE_CACHE_DIR
+      value: /tmp/seekstone
+    # Writes only under inbox/. pull-only sync never uploads them: they stay on this volume
+    # until the vault pod moves to bidirectional mode.
+    - name: SEEKSTONE_WRITE_PATHS
+      value: inbox/**
+    # No undo journal: it would live in <vault>/.seekstone and could end up synced.
+    - name: SEEKSTONE_HISTORY
+      value: "0"
+    - name: SEEKSTONE_AUDIT_FILE
+      value: /audit/vault-inbox.jsonl
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 768Mi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # The vault volume is block storage (one node): run beside the vault pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: obsidian-vault
+      containers:
+        - name: mcp
+          command:
+            - /tools/seekstone/node_modules/.bin/seekstone
+          volumeMounts:
+            - name: vault
+              mountPath: /vault
+              subPath: vault
+              readOnly: false
+            - name: vault
+              mountPath: /audit
+              subPath: seekstone
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-vault
+        - name: tools
+          persistentVolumeClaim:
+            claimName: obsidian-tools
+            readOnly: true
+        - name: tmp
+          emptyDir: {}
+  groupRef:
+    name: proto-tools
