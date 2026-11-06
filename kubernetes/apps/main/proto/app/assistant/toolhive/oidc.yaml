@@ -1,13 +1,20 @@
 ---
 # Tier identity = the Hermes pod's ServiceAccount token (projected, audience proto-mcp). The
 # cluster issuer is the API VIP, not kubernetes.default.svc, so it is pinned along with the JWKS.
+# Inline rather than kubernetesServiceAccount: that type's JWKS token never reaches the vMCP
+# config, and Talos refuses anonymous JWKS reads.
 apiVersion: toolhive.stacklok.dev/v1beta1
 kind: MCPOIDCConfig
 metadata:
   name: proto-serviceaccounts
 spec:
-  type: kubernetesServiceAccount
-  kubernetesServiceAccount:
+  type: inline
+  inline:
     issuer: https://192.168.1.253:6443
     jwksUrl: https://kubernetes.default.svc/openid/v1/jwks
-    useClusterAuth: true
+    jwksAuthTokenPath: /var/run/secrets/kubernetes.io/serviceaccount/token
+    jwksAllowPrivateIP: true
+    caBundleRef:
+      configMapRef:
+        name: kube-root-ca.crt
+        key: ca.crt
