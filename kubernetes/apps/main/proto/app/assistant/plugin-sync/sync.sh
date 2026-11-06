@@ -16,5 +16,6 @@ echo "$MEMINI_PLUGIN_PATCHED_SHA256  /tmp/plugin.py" | sha256sum -c -
 mkdir -p /plugins/memini
 cp /tmp/plugin.py /plugins/memini/__init__.py
 cp /tmp/plugin.yaml /plugins/memini/plugin.yaml
-chmod -R a+rX,go-w /plugins/memini
+# The directory may predate this Job (kubelet creates subPath mount points), so set files only.
+chmod a+r,go-w /plugins/memini/__init__.py /plugins/memini/plugin.yaml
 echo "memini plugin $MEMINI_PLUGIN_REF written"
