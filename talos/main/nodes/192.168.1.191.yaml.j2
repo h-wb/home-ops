@@ -16,13 +16,6 @@ machine:
           ip: "192.168.1.253"
 #  nodeLabels:
 #   topology.kubernetes.io/zone: m
-  sysctls:
-    # Yama 2 -> 1 for the OpenShell prototype (kubernetes/apps/main/proto), which pins its
-    # sandboxes here. The supervisor reads its workload child's memory with all capabilities
-    # dropped, which Talos's default of 2 (CAP_SYS_PTRACE only) refuses. Scope 1 allows reading
-    # only one's own descendants (Ubuntu/Debian default); siblings and other containers stay
-    # blocked. Remove with the prototype. Sysctls apply live, without a reboot.
-    kernel.yama.ptrace_scope: "1"
   type: controlplane
 ---
 apiVersion: v1alpha1
