@@ -8,6 +8,13 @@ spec:
   groupRef:
     name: proto-tools
   config:
+    # Every call, allowed or denied, with caller and tool; no arguments or results, which can
+    # carry private data. Goes to the pod log (VictoriaLogs).
+    audit:
+      enabled: true
+      component: proto-mcp
+      includeRequestData: false
+      includeResponseData: false
     aggregation:
       conflictResolution: prefix
       conflictResolutionConfig:
