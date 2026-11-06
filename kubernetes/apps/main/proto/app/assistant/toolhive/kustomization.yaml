@@ -1,0 +1,16 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./mcpgroup.yaml
+  - ./tasks-pvc.yaml
+  - ./mcpservers.yaml
+  - ./oidc.yaml
+  - ./authz.yaml
+  - ./vmcp.yaml
+  - ./networkpolicy.yaml
+configMapGenerator:
+  - name: tasks-server
+    files:
+      - server.py=./tasks-server.py

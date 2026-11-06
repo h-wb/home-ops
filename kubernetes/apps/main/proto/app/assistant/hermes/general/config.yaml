@@ -33,3 +33,9 @@ agent:
     - catalog
     - connections
     - kanban
+mcp_servers:
+  # The ToolHive endpoint; what this tier may call is ToolHive's policy, not this list.
+  proto:
+    url: http://vmcp-proto-mcp.proto.svc.cluster.local:4483/mcp
+    headers:
+      Authorization: Bearer $${TOOLHIVE_TOKEN}

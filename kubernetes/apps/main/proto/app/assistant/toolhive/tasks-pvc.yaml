@@ -1,0 +1,13 @@
+---
+# Both task boards (one SQLite file each); the read-only instance mounts it read-only.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tasks-data
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ceph-filesystem
+  resources:
+    requests:
+      storage: 100Mi

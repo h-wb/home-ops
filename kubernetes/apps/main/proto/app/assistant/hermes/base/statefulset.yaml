@@ -18,6 +18,7 @@ spec:
       labels:
         app.kubernetes.io/name: hermes
     spec:
+      serviceAccountName: hermes
       automountServiceAccountToken: false
       enableServiceLinks: false
       # The pause container becomes PID 1 and reaps Hermes's exited children (no s6 init).
@@ -57,11 +58,13 @@ spec:
       containers:
         - name: hermes
           image: docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
-          # The image's s6 init needs root; the gateway itself does not.
+          # The image's s6 init needs root; the gateway itself does not. Hermes reads MCP
+          # header values from env only, so the ToolHive token is exported at start: it is
+          # valid 7 days and not refreshed while Hermes runs (prototype limitation).
           command:
-            - /opt/hermes/bin/hermes
-            - gateway
-            - run
+            - /bin/sh
+            - -c
+            - TOOLHIVE_TOKEN=$(cat /var/run/secrets/proto-mcp/token) && export TOOLHIVE_TOKEN && exec /opt/hermes/bin/hermes gateway run
           env:
             - name: HERMES_HOME
               value: /data/hermes
@@ -106,6 +109,9 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
+            - name: toolhive-token
+              mountPath: /var/run/secrets/proto-mcp
+              readOnly: true
       volumes:
         - name: config
           configMap:
@@ -116,6 +122,13 @@ spec:
             readOnly: true
         - name: tmp
           emptyDir: {}
+        - name: toolhive-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  audience: proto-mcp
+                  expirationSeconds: 604800
+                  path: token
   volumeClaimTemplates:
     - metadata:
         name: data

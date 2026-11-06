@@ -12,6 +12,7 @@ resources:
   - ./memini-general.yaml
   - ./memini-private.yaml
   - ./plugin-sync
+  - ./toolhive
   - ./hermes/general
   - ./hermes/private
   - ./rbac.yaml

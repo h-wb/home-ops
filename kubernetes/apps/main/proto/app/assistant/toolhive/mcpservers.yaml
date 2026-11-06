@@ -1,0 +1,177 @@
+---
+# Synthetic homelab task board.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: homelab-tasks
+spec:
+  image: docker.io/astral/uv:0.9.30-python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca
+  transport: streamable-http
+  proxyMode: streamable-http
+  proxyPort: 8080
+  mcpPort: 8000
+  env:
+    - name: TASKS_BOARD
+      value: homelab
+    - name: TASKS_READ_ONLY
+      value: "0"
+    - name: UV_CACHE_DIR
+      value: /tmp/uv-cache
+    - name: HOME
+      value: /tmp
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: mcp
+          command:
+            - uv
+            - run
+            - --no-project
+            - --with
+            - mcp==2.3.0
+            - python
+            - /app/server.py
+          volumeMounts:
+            - name: server
+              mountPath: /app
+              readOnly: true
+            - name: data
+              mountPath: /data
+              readOnly: false
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: server
+          configMap:
+            name: tasks-server
+        - name: data
+          persistentVolumeClaim:
+            claimName: tasks-data
+        - name: tmp
+          emptyDir: {}
+  groupRef:
+    name: proto-tools
+---
+# Synthetic homelab task board (read-only instance: its write tools do not exist).
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: homelab-tasks-ro
+spec:
+  image: docker.io/astral/uv:0.9.30-python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca
+  transport: streamable-http
+  proxyMode: streamable-http
+  proxyPort: 8080
+  mcpPort: 8000
+  env:
+    - name: TASKS_BOARD
+      value: homelab
+    - name: TASKS_READ_ONLY
+      value: "1"
+    - name: UV_CACHE_DIR
+      value: /tmp/uv-cache
+    - name: HOME
+      value: /tmp
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: mcp
+          command:
+            - uv
+            - run
+            - --no-project
+            - --with
+            - mcp==2.3.0
+            - python
+            - /app/server.py
+          volumeMounts:
+            - name: server
+              mountPath: /app
+              readOnly: true
+            - name: data
+              mountPath: /data
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: server
+          configMap:
+            name: tasks-server
+        - name: data
+          persistentVolumeClaim:
+            claimName: tasks-data
+        - name: tmp
+          emptyDir: {}
+  groupRef:
+    name: proto-tools
+---
+# Synthetic personal task board.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: personal-tasks
+spec:
+  image: docker.io/astral/uv:0.9.30-python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca
+  transport: streamable-http
+  proxyMode: streamable-http
+  proxyPort: 8080
+  mcpPort: 8000
+  env:
+    - name: TASKS_BOARD
+      value: personal
+    - name: TASKS_READ_ONLY
+      value: "0"
+    - name: UV_CACHE_DIR
+      value: /tmp/uv-cache
+    - name: HOME
+      value: /tmp
+  resources:
+    requests:
+      cpu: 10m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: mcp
+          command:
+            - uv
+            - run
+            - --no-project
+            - --with
+            - mcp==2.3.0
+            - python
+            - /app/server.py
+          volumeMounts:
+            - name: server
+              mountPath: /app
+              readOnly: true
+            - name: data
+              mountPath: /data
+              readOnly: false
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: server
+          configMap:
+            name: tasks-server
+        - name: data
+          persistentVolumeClaim:
+            claimName: tasks-data
+        - name: tmp
+          emptyDir: {}
+  groupRef:
+    name: proto-tools
