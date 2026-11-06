@@ -1,7 +1,7 @@
-# Private scope: main assistant on Mistral. Writes are limited to tasks (ToolHive, a later step).
+# General tier: any model (Claude included once it has a LiteLLM route); Mistral for now.
 # Mounted read-only at /etc/hermes (Hermes managed scope), so it wins over anything the agent
-# writes to $HERMES_HOME. The doubled dollar is Flux's escape; Hermes then expands the reference
-# from the sandbox env, where OpenShell has swapped real credentials for placeholders.
+# writes to $HERMES_HOME. The doubled dollar is Flux's escape; Hermes expands the reference from
+# the pod env (the tier's LiteLLM virtual key).
 model:
   default: mistral/mistral-small-latest
   provider: litellm
@@ -33,11 +33,3 @@ agent:
     - catalog
     - connections
     - kanban
-    # Email is untrusted input: no shell, code, file, browser or delegation tools.
-    - terminal
-    - code_execution
-    - file
-    - browser
-    - delegation
-    - computer_use
-    - skills

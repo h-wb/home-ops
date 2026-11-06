@@ -1,0 +1,92 @@
+---
+# One Hermes daemon per tier (overlays ../general, ../private). The pod is disposable compute:
+# its only credentials are the tier's LiteLLM key and Memini key, its egress is the tier's
+# NetworkPolicy, and everything it must not change is read-only (root filesystem, /etc/hermes
+# managed config, the Memini plugin). Paseo talks to it with `kubectl exec ... hermes acp`.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hermes
+spec:
+  replicas: 1
+  serviceName: hermes
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hermes
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hermes
+    spec:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: hermes
+          image: docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
+          # The image's s6 init needs root; the gateway itself does not.
+          command:
+            - /opt/hermes/bin/hermes
+            - gateway
+            - run
+          env:
+            - name: HERMES_HOME
+              value: /data
+            - name: HOME
+              value: /data
+            - name: TZ
+              value: Europe/Paris
+          resources:
+            requests:
+              cpu: 50m
+              memory: 512Mi
+            limits:
+              memory: 1536Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            # Hermes managed scope: wins over anything the agent writes to its config.yaml.
+            - name: config
+              mountPath: /etc/hermes
+              readOnly: true
+            # Memini is not a bundled provider, so it must sit under HERMES_HOME; mounted
+            # read-only, and the root-owned plugins/ parent stops the agent adding others.
+            - name: plugins
+              mountPath: /data/plugins/memini
+              subPath: memini
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: hermes-config
+        - name: plugins
+          persistentVolumeClaim:
+            claimName: hermes-plugins
+            readOnly: true
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: ceph-block
+        resources:
+          requests:
+            storage: 2Gi

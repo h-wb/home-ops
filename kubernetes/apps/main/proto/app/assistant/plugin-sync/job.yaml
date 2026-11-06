@@ -1,0 +1,68 @@
+---
+# Reruns when sync.sh or the pins change (hashed ConfigMap name, Flux force).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hermes-plugin-sync
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sync
+          image: docker.io/alpine/k8s:1.37.1
+          command:
+            - /bin/sh
+            - /scripts/sync.sh
+          env:
+            # eleboucher/memini-hermes "sync memini Hermes plugin v0.7.39"; the mirror is untagged.
+            - name: MEMINI_PLUGIN_REF
+              value: f81b1167713ab15028fd8e09eb832e2970b1b8fb
+            - name: MEMINI_PLUGIN_SHA256
+              value: a33ab53c4bdb54a3d62fcbf647b8909bd315865c361a1a188c31d4694cb65ee3
+            - name: MEMINI_PLUGIN_YAML_SHA256
+              value: 9df16985cbe9179fa03d0354d7f66de82c3a709b865dc6fa07a62564422a5f76
+            # After the capture fallback patch; passes check_selective_memory.py.
+            - name: MEMINI_PLUGIN_PATCHED_SHA256
+              value: 64a206d5c5cc5c0d9a51e2db63a0122479851ed5a5facab57b680d868d7aa8e4
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+            - name: plugins
+              mountPath: /plugins
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: scripts
+          configMap:
+            name: hermes-plugin-sync
+        - name: plugins
+          persistentVolumeClaim:
+            claimName: hermes-plugins
+        - name: tmp
+          emptyDir: {}

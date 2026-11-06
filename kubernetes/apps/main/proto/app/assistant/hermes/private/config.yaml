@@ -1,7 +1,7 @@
-# General scope: homelab specialist. Mistral until step 3 switches model.provider to the subscription plugin.
+# Private tier: approved models only (its LiteLLM key), pinned per session; no outbound tools.
 # Mounted read-only at /etc/hermes (Hermes managed scope), so it wins over anything the agent
-# writes to $HERMES_HOME. The doubled dollar is Flux's escape; Hermes then expands the reference
-# from the sandbox env, where OpenShell has swapped real credentials for placeholders.
+# writes to $HERMES_HOME. The doubled dollar is Flux's escape; Hermes expands the reference from
+# the pod env (the tier's LiteLLM virtual key).
 model:
   default: mistral/mistral-small-latest
   provider: litellm
@@ -33,3 +33,15 @@ agent:
     - catalog
     - connections
     - kanban
+    # Vault and budget data plus clipped web text: no outbound path (web, search) and no
+    # shell, code, file, browser or delegation tools.
+    - web
+    - search
+    - x_search
+    - terminal
+    - code_execution
+    - file
+    - browser
+    - delegation
+    - computer_use
+    - skills

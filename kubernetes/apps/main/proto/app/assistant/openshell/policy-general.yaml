@@ -1,9 +1,0 @@
-# Base policy; network rules come only from the attached providers' profiles.
-# Filesystem rules apply at sandbox start: the apply Job restarts the sandbox when they change.
-version: 1
-filesystem_policy:
-  include_workdir: true
-  read_only: [/bin, /usr, /lib, /proc, /dev/urandom, /etc, /var/log, /opt/hermes]
-  read_write: [/tmp, /dev/null]
-landlock:
-  compatibility: best_effort

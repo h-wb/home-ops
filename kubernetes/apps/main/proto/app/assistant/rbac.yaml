@@ -1,0 +1,32 @@
+---
+# The Paseo ACP bridge: `kubectl exec -i hermes-<tier>-0 -- hermes acp`. Exec only, only into the
+# two Hermes pods; whoever execs there can read that tier's keys, which is the tier's whole grant.
+# Prototype shortcut: general Paseo reaches both tiers; the design gives private its own Paseo.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: paseo-hermes-exec
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    resourceNames:
+      - hermes-general-0
+      - hermes-private-0
+    verbs:
+      - create
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: paseo-hermes-exec
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: paseo-hermes-exec
+subjects:
+  - kind: ServiceAccount
+    name: paseo
+    namespace: agents
