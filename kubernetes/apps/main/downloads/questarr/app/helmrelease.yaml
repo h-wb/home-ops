@@ -21,7 +21,9 @@ spec:
           app:
             image:
               repository: ghcr.io/doezer/questarr
-              tag: dev@sha256:a054fa5f90798f0aea45bc8f93f08f25a4660ae417f5933876a17e8c3cf68f17
+              # dev @ bbc66b3 (2026-11-02): first dev build with the RomM integration
+              # (Settings -> Import -> RomM card, /api/settings/romm)
+              tag: dev@sha256:64af1f1f8c06dc0efb9578eeb97d0612fdda38147544bb0fcfad260b6fb729b3
             env:
               TZ: Europe/Paris
               PUID: "1000"
