@@ -20,6 +20,8 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
+      # The pause container becomes PID 1 and reaps Hermes's exited children (no s6 init).
+      shareProcessNamespace: true
       securityContext:
         runAsNonRoot: true
         runAsUser: 10000
@@ -28,6 +30,30 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
           type: RuntimeDefault
+      initContainers:
+        # Hermes refuses ACP sessions unless HERMES_HOME belongs to its user, and kubelet would
+        # create the plugin mount's parents as root; make them as the Hermes user first.
+        - name: home
+          image: mirror.gcr.io/library/busybox:1.38
+          command:
+            - mkdir
+            - -p
+            - /data/hermes/plugins/memini
+          resources:
+            requests:
+              cpu: 5m
+              memory: 8Mi
+            limits:
+              memory: 32Mi
+          securityContext: &securityContext
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: data
+              mountPath: /data
       containers:
         - name: hermes
           image: docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
@@ -38,9 +64,9 @@ spec:
             - run
           env:
             - name: HERMES_HOME
-              value: /data
+              value: /data/hermes
             - name: HOME
-              value: /data
+              value: /data/hermes
             - name: TZ
               value: Europe/Paris
           resources:
@@ -49,12 +75,7 @@ spec:
               memory: 512Mi
             limits:
               memory: 1536Mi
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
+          securityContext: *securityContext
           volumeMounts:
             - name: data
               mountPath: /data
@@ -63,9 +84,9 @@ spec:
               mountPath: /etc/hermes
               readOnly: true
             # Memini is not a bundled provider, so it must sit under HERMES_HOME; mounted
-            # read-only, and the root-owned plugins/ parent stops the agent adding others.
+            # read-only, so the agent can neither edit nor replace it.
             - name: plugins
-              mountPath: /data/plugins/memini
+              mountPath: /data/hermes/plugins/memini
               subPath: memini
               readOnly: true
             - name: tmp
