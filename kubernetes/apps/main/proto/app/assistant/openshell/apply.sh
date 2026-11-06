@@ -73,6 +73,16 @@ cp /etc/hermes/memini-plugin/__init__.py /etc/hermes/memini-plugin/plugin.yaml "
 echo "$MEMINI_PLUGIN_SHA256  $HERMES_HOME/plugins/memini/__init__.py" | sha256sum -c - >/dev/null
 exec hermes gateway run'
 
+phase() { openshell sandbox get "$1" -o json | jq -r '.phase'; }
+wait_phase() {
+  tries=0
+  until [ "$(phase "$1")" = "$2" ]; do
+    tries=$((tries + 1))
+    [ "$tries" -le 90 ] || { log "sandbox $1 not $2 after 3m"; return 1; }
+    sleep 2
+  done
+}
+
 for scope in general private; do
   name="hermes-$scope"
   # Pinned to tal1s, the only node with Yama ptrace_scope 1 (talos/main/nodes/192.168.1.191.yaml.j2).
@@ -86,8 +96,11 @@ for scope in general private; do
   if [ "$(echo "$current" | jq -r '.labels["proto.template"] // ""')" = "$template_hash" ]; then
     # Same workload: refresh the policy and restart, so config and filesystem rules apply.
     openshell policy set "$name" --policy "/config/policy-$scope.yaml" --yes --wait >/dev/null
-    openshell sandbox stop "$name" >/dev/null
+    # Stop and start are asynchronous; starting before the stop settles is refused.
+    [ "$(phase "$name")" = Stopped ] || openshell sandbox stop "$name" >/dev/null
+    wait_phase "$name" Stopped
     openshell sandbox start "$name" >/dev/null
+    wait_phase "$name" Ready
     log "sandbox $name restarted"
     continue
   fi
