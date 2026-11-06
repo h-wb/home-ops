@@ -16,6 +16,8 @@ credentials:
 endpoints:
   - host: litellm.llm.svc.cluster.local
     port: 4000
+    # API paths only: keeps the key off the service's admin endpoints.
+    path: /v1/**
     protocol: rest
     access: read-write
     enforcement: enforce
