@@ -110,6 +110,8 @@ class ScopeFragments(unittest.TestCase):
                 settings = POLICY["scopes"][scope]
                 frag = self.fragment(scope, "scope.json")
                 providers = frag["agents"]["providers"]
+                # Pod rolls interrupt running agents; resume them on the next start.
+                self.assertIs(True, frag["agents"]["resumeOnStartup"])
                 # Every provider in the policy registry is pinned in the fragment.
                 self.assertEqual(set(POLICY["providers"]), set(providers))
                 for name, entry in providers.items():

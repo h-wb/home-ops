@@ -39,6 +39,10 @@ spec:
     controllers:
       ${APP}:
         # Agents run for hours and hold an RWO volume.
+        # Since 0.14 the daemon releases an agent's provider runtime after an idle hour
+        # and resumes the saved session on the next prompt; working agents are kept.
+        # Accepted default. Opt out per scope with `agents.idleRuntimeCleanup: false`
+        # in components/agent-data-policy/scopes/<scope>/scope.json.
         strategy: Recreate
         serviceAccount:
           identifier: ${APP}
@@ -52,7 +56,7 @@ spec:
           tools:
             image: &image
               repository: ghcr.io/getpaseo/paseo
-              tag: 0.13.2
+              tag: 0.15.3
             command: ["/bin/sh", "/etc/paseo/provision.sh"]
             env: &env
               PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}

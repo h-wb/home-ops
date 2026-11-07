@@ -1,5 +1,6 @@
 {
   "agents": {
+    "resumeOnStartup": true,
     "providers": {
       "claude": { "enabled": false },
       "codex": { "enabled": false },
