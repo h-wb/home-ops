@@ -27,7 +27,7 @@ spec:
               SENTO_PORT: &port 8484
               # /data is the same mount qbittorrent sees, so torrent imports
               # hardlink and no path mapping is needed
-              SENTO_LIBRARY_PATH: /data/Literature/Manga/Sento
+              SENTO_LIBRARY_PATH: /data/Literature/Manga
               SENTO_DOWNLOADS_DIR: /data/Downloads/sento
               # these three only seed first start; settings saved in the UI win
               SENTO_EXTENSIONS_URL: http://localhost:8901
