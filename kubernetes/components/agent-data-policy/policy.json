@@ -7,7 +7,7 @@
       "memory_url": "http://memini-general.llm.svc.cluster.local:8080/mcp"
     },
     "private": {
-      "providers": ["mistral-vibe"],
+      "providers": ["mistral-vibe", "hermes-private"],
       "mcp_url": "https://mcp-private.${SECRET_DOMAIN}/mcp",
       "memory_url": "http://memini-private.llm.svc.cluster.local:8080/mcp",
       "metadata_provider": "mistral-vibe",
@@ -42,6 +42,10 @@
     },
     "omp": {
       "allowed_data_scopes": []
+    },
+    "hermes-private": {
+      "allowed_data_scopes": ["private"],
+      "note": "Private Hermes in proto, over kubectl exec; its tools come from ToolHive by identity."
     }
   },
   "private_backends": {

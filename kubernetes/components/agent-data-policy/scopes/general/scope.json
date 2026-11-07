@@ -15,7 +15,8 @@
       "pi": { "enabled": false },
       "muse": { "enabled": false },
       "antigravity": { "enabled": false },
-      "omp": { "enabled": false }
+      "omp": { "enabled": false },
+      "hermes-private": { "enabled": false }
     }
   }
 }

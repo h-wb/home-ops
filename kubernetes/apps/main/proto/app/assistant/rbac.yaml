@@ -29,3 +29,41 @@ subjects:
   - kind: ServiceAccount
     name: paseo
     namespace: agents
+---
+# The private Paseo's Hermes (private) provider: `kubectl exec -i hermes-private-0 -- hermes acp`.
+# The only Kubernetes grant that ServiceAccount has (agents/paseo-private mounts no other token).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: paseo-private-hermes-exec
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    resourceNames:
+      - hermes-private-0
+    verbs:
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - pods/exec
+    resourceNames:
+      - hermes-private-0
+    verbs:
+      - create
+      - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: paseo-private-hermes-exec
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: paseo-private-hermes-exec
+subjects:
+  - kind: ServiceAccount
+    name: paseo-private
+    namespace: agents

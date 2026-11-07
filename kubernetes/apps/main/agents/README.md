@@ -4,10 +4,10 @@
 Their homes, credentials and runtime configuration are separate. Both use the
 `paseo` mise machine class; `PASEO_DATA_SCOPE` selects the data scope.
 
-| Environment | Providers                             | Data                                       | Operational access                                              |
-| ----------- | ------------------------------------- | ------------------------------------------ | --------------------------------------------------------------- |
-| General     | Claude, Codex, Mistral Vibe, OpenCode | Code, `memini-general`                     | Existing cluster permissions, scratch workloads, NFS, Tailscale |
-| Private     | Mistral Vibe                          | Obsidian, personal tools, `memini-private` | No mounted service-account token, NFS or Tailscale              |
+| Environment | Providers                             | Data                                       | Operational access                                                           |
+| ----------- | ------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| General     | Claude, Codex, Mistral Vibe, OpenCode | Code, `memini-general`                     | Existing cluster permissions, scratch workloads, NFS, Tailscale              |
+| Private     | Mistral Vibe, Hermes (proto)          | Obsidian, personal tools, `memini-private` | A token for `exec` into proto's `hermes-private-0` only; no NFS or Tailscale |
 
 Mistral in general gets general data and credentials. Claude/Codex retain cluster
 administration as requested. This separates normal workflows; it does not stop
