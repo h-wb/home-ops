@@ -1,5 +1,15 @@
 # Seekstone over the synced vault, private tier only (toolhive/authz.yaml): a read-only
-# instance and an inbox-write instance, both on the vault volume.
+# instance and an inbox-write instance, both on the vault volume. Each backend pod
+# installs Seekstone once in an init container, from the lockfiles pinned in git
+# (tools/seekstone/; Renovate bumps them), into an emptyDir — the same generic-image +
+# git-pinned-source pattern as the task boards' `uv run --with`, with a full lockfile
+# instead of a bare version, and no shared tools PVC or install Job to keep in step
+# (toolhive's netpol only gates ingress; the pod's own egress is the cluster default).
+# A lockfile bump takes effect on the next backend pod start: kubectl rollout restart
+# statefulset -n proto vault-ro vault-inbox.
+# The mcp container runs /tools/node_modules/.bin/seekstone; toolhive stamps that
+# container with its own hardened securityContext (uid 1000, read-only rootfs), so
+# npm's world-readable files (umask 022) work under either uid.
 ---
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServer
@@ -43,10 +53,39 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: obsidian-vault
+      initContainers:
+        # npm ci is ~1 s / 31 MB (better-sqlite3 has prebuilt binaries): cheap enough
+        # to run per backend pod start instead of prebaking a shared install.
+        - name: install-seekstone
+          image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+          command: [/bin/sh, -c]
+          args:
+            - >-
+              cp /src/package.json /src/package-lock.json /tools/ &&
+              cd /tools && npm ci --omit=dev --no-audit --no-fund
+          env:
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: src
+              mountPath: /src
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: mcp
           command:
-            - /tools/seekstone/node_modules/.bin/seekstone
+            - /tools/node_modules/.bin/seekstone
           volumeMounts:
             - name: vault
               mountPath: /vault
@@ -61,10 +100,14 @@ spec:
         - name: vault
           persistentVolumeClaim:
             claimName: obsidian-vault
+        # Pinned npm sources from the configMapGenerator in ../kustomization.yaml.
+        # The literal name matters: kustomize cannot rewrite references inside CRs,
+        # so the generator disables its hash suffix.
+        - name: src
+          configMap:
+            name: seekstone-src
         - name: tools
-          persistentVolumeClaim:
-            claimName: obsidian-tools
-            readOnly: true
+          emptyDir: {}
         - name: tmp
           emptyDir: {}
   groupRef:
@@ -118,10 +161,37 @@ spec:
               labelSelector:
                 matchLabels:
                   app.kubernetes.io/name: obsidian-vault
+      initContainers:
+        - name: install-seekstone
+          image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+          command: [/bin/sh, -c]
+          args:
+            - >-
+              cp /src/package.json /src/package-lock.json /tools/ &&
+              cd /tools && npm ci --omit=dev --no-audit --no-fund
+          env:
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: src
+              mountPath: /src
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+            - name: tmp
+              mountPath: /tmp
       containers:
         - name: mcp
           command:
-            - /tools/seekstone/node_modules/.bin/seekstone
+            - /tools/node_modules/.bin/seekstone
           volumeMounts:
             - name: vault
               mountPath: /vault
@@ -139,10 +209,11 @@ spec:
         - name: vault
           persistentVolumeClaim:
             claimName: obsidian-vault
+        - name: src
+          configMap:
+            name: seekstone-src
         - name: tools
-          persistentVolumeClaim:
-            claimName: obsidian-tools
-            readOnly: true
+          emptyDir: {}
         - name: tmp
           emptyDir: {}
   groupRef:
