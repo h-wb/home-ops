@@ -17,7 +17,7 @@ context:
 # Beside the runner image's curl, find, gh, grep and jq.
 tools:
   # renovate: datasource=github-releases depName=sharkdp/fd
-  aqua:sharkdp/fd: v10.5.1
+  aqua:sharkdp/fd: v10.5.2
   # renovate: datasource=github-releases depName=BurntSushi/ripgrep
   aqua:BurntSushi/ripgrep: 15.2.0
   # renovate: datasource=github-releases depName=mikefarah/yq
