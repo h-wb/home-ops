@@ -35,8 +35,8 @@
           "-c",
           "hermes",
           "--",
-          "/opt/hermes/bin/hermes",
-          "acp"
+          "/opt/hermes/.venv/bin/python",
+          "/opt/hermes-acp/shim.py"
         ],
         "paseoTools": { "enabled": false }
       }

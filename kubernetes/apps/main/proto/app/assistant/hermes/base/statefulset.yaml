@@ -112,6 +112,10 @@ spec:
             - name: toolhive-token
               mountPath: /var/run/secrets/proto-mcp
               readOnly: true
+            # Paseo's entry point: `python /opt/hermes-acp/shim.py` (maps Paseo's cwd).
+            - name: acp-shim
+              mountPath: /opt/hermes-acp
+              readOnly: true
       volumes:
         - name: config
           configMap:
@@ -122,6 +126,9 @@ spec:
             readOnly: true
         - name: tmp
           emptyDir: {}
+        - name: acp-shim
+          configMap:
+            name: hermes-acp-shim
         - name: toolhive-token
           projected:
             sources:

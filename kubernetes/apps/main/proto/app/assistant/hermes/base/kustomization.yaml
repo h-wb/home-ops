@@ -5,3 +5,7 @@ kind: Kustomization
 resources:
   - ./serviceaccount.yaml
   - ./statefulset.yaml
+configMapGenerator:
+  - name: hermes-acp-shim
+    files:
+      - shim.py=./acp-shim.py
