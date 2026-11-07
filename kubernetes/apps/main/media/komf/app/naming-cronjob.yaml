@@ -36,9 +36,8 @@ spec:
               env:
                 - name: KOMGA_BASE_URI
                   value: http://komga.media.svc.cluster.local:8080
-              envFrom:
-                - secretRef:
-                    name: komf-secret
+                - name: KOMGA_API_KEY_FILE
+                  value: /etc/komga-titles/api-key
               resources:
                 requests:
                   cpu: 10m
@@ -55,7 +54,16 @@ spec:
                 - name: scripts
                   mountPath: /scripts
                   readOnly: true
+                - name: api-key
+                  mountPath: /etc/komga-titles
+                  readOnly: true
           volumes:
             - name: scripts
               configMap:
                 name: komga-titles
+            - name: api-key
+              secret:
+                secretName: komf-secret
+                items:
+                  - key: KOMGA_API_KEY
+                    path: api-key
