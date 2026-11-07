@@ -164,3 +164,69 @@ kubectl get hr -A --no-headers | awk '$4 != "True" {print $1, $2}' | while read 
     flux -n "$ns" resume helmrelease "$name"
 done
 '''
+
+[tasks."obsidian:login"]
+description = "Log Obsidian Headless in to Obsidian Sync and store its token in the BWS item obsidian-headless"
+depends = ["//:pass:login"]
+quiet = true
+tools = { "aqua:bitwarden/sdk-sm" = "2.1.0" }
+run = '''
+#!/usr/bin/env bash
+# Interactive: you type the Obsidian password and 2FA code into ob itself. Nothing is printed
+# or kept: ob's state lives in a temp dir removed on exit, and bws output is discarded
+# because it echoes the stored value. The proto vault pod (apps/main/proto/app/assistant/vault)
+# reads OBSIDIAN_AUTH_TOKEN, OBSIDIAN_VAULT and OBSIDIAN_VAULT_PASSWORD from this item.
+set -euo pipefail
+root="$(git rev-parse --show-toplevel)"
+item=obsidian-headless
+
+# BWS first, so a terminal without the bws-cli grant fails before any login.
+BWS_ACCESS_TOKEN="$(fnox get -c "$root/fnox.toml" BWS_ACCESS_TOKEN)" || {
+    mise //:log error "No BWS token here (Proton Pass bws-cli item); use the general Paseo terminal"
+    exit 1
+}
+export BWS_ACCESS_TOKEN
+secrets="$(bws secret list)"
+project="$(jq -r '.[] | select(.key == "litellm") | .projectId' <<<"$secrets" | head -1)"
+existing="$(jq -r --arg k "$item" '.[] | select(.key == $k) | .id' <<<"$secrets" | head -1)"
+[ -n "$project" ] || { mise //:log error "Could not find the BWS project (via the litellm item)"; exit 1; }
+
+state="$(mktemp -d)"
+chmod 700 "$state"
+trap 'rm -rf "$state"' EXIT
+npm_cache="${npm_config_cache:-$HOME/.npm}"
+ob() {
+    # Linux keeps ob's login under XDG_CONFIG_HOME, macOS under HOME; point both at $state.
+    npm_config_cache="$npm_cache" HOME="$state" XDG_CONFIG_HOME="$state" \
+        npx -y obsidian-headless@0.0.14 "$@"
+}
+
+ob login
+token_file="$(find "$state" -name auth_token -type f | head -1)"
+[ -s "$token_file" ] || { mise //:log error "ob login did not leave a token"; exit 1; }
+
+ob sync-list-remote
+mapfile -t vaults < <(ob sync-list-remote --json | jq -r '(.vaults? // .) | .[]? | .name // empty')
+if [ "${#vaults[@]}" -gt 0 ]; then
+    vault="$(gum choose --header "Vault for the prototype (pull-only copy)" "${vaults[@]}")"
+else
+    vault="$(gum input --placeholder "Vault name or id, from the list above")"
+fi
+[ -n "$vault" ] || { mise //:log error "No vault chosen"; exit 1; }
+
+password=""
+if gum confirm "Is \"$vault\" end-to-end encrypted?" --default=No; then
+    password="$(gum input --password --placeholder "End-to-end encryption password")"
+fi
+
+value="$(jq -cn --rawfile token "$token_file" --arg vault "$vault" --arg password "$password" \
+    '{OBSIDIAN_AUTH_TOKEN: ($token | rtrimstr("\n")), OBSIDIAN_VAULT: $vault}
+     + (if $password == "" then {} else {OBSIDIAN_VAULT_PASSWORD: $password} end)')"
+if [ -n "$existing" ]; then
+    bws secret edit "$existing" --value "$value" >/dev/null
+else
+    bws secret create "$item" "$value" "$project" \
+        --note "Obsidian Headless login for the proto vault pod (mise run //kubernetes:obsidian:login)" >/dev/null
+fi
+mise //:log info "Stored BWS item" item "$item" vault "$vault" e2e "$([ -n "$password" ] && echo yes || echo no)"
+'''
