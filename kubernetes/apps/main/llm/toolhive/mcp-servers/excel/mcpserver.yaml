@@ -1,0 +1,58 @@
+---
+# haris-musa/excel-mcp-server over Nextcloud's Documents/Agents folder (NAS NFS share
+# Nextcloud mounts as external storage), so agents edit .xlsx files that also open in
+# Collabora. Close a sheet in Collabora before an agent edits it: Collabora saves its own copy.
+# Access is limited to /data (resolved paths, symlinks included); VBA writing stays off.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: excel
+spec:
+  # No published image: the uv image installs the pinned release at start (cached in /tmp).
+  image: docker.io/astral/uv:0.9.30-python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca
+  transport: stdio
+  proxyMode: streamable-http
+  proxyPort: 8080
+  env:
+    - name: EXCEL_FILES_PATH
+      value: /data
+    - name: UV_CACHE_DIR
+      value: /tmp/uv-cache
+    - name: HOME
+      value: /tmp
+  resources:
+    requests:
+      cpu: 25m
+      memory: 128Mi
+    limits:
+      memory: 1Gi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      # The share's files are 1000:1000 (the NAS maps clients to that user anyway).
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mcp
+          command:
+            - uvx
+            - excel-mcp-server==2.2.6
+            - stdio
+          volumeMounts:
+            - name: documents
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: documents
+          nfs:
+            server: ${NFS_ADDR}
+            path: /mnt/tank/hwe/Documents/Agents
+        - name: tmp
+          emptyDir: {}
+  groupRef:
+    name: mcp-tools

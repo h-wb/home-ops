@@ -18,6 +18,7 @@ spec:
         - workload: github
         - workload: n8n
         - workload: anki
+        - workload: excel
     optimizer:
       embeddingModel: embed
       embeddingProvider: openai
