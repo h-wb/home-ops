@@ -39,6 +39,10 @@ spec:
     controllers:
       ${APP}:
         # Agents run for hours and hold an RWO volume.
+        # Since 0.14 the daemon releases an agent's provider runtime after an idle hour
+        # and resumes the saved session on the next prompt; working agents are kept.
+        # Accepted default. Opt out per scope with `agents.idleRuntimeCleanup: false`
+        # in components/agent-data-policy/scopes/<scope>/scope.json.
         strategy: Recreate
         serviceAccount:
           identifier: ${APP}
