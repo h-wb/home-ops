@@ -1,5 +1,5 @@
 ---
-# The private Hermes may reach DNS, LiteLLM (its key picks the models), the private Memini and ToolHive; nothing
+# The private Hermes may reach DNS, LiteLLM (its key picks the models), the private Memini and the private ToolHive VMCP; nothing
 # else, and nothing may connect to it (Paseo uses the API server's exec, not the pod network).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -44,9 +44,14 @@ spec:
         - port: 8080
           protocol: TCP
     - to:
-        - podSelector:
+        # The private VMCP only: this is the tier boundary for in-cluster calls; the
+        # gateway itself is also netpol-gated (llm/toolhive/config) to Envoy and here.
+        - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/instance: proto-mcp
+              kubernetes.io/metadata.name: llm
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: mcp-gateway
       ports:
         - port: 4483
           protocol: TCP

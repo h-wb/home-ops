@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# Task boards for the assistant (tasks-server.py, a synthetic stand-in until a real
+# task system is chosen): the general tier gets homelab-tasks; the private tier gets
+# personal-tasks plus homelab-tasks-ro, the instance whose write tools do not exist.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./pvc.yaml
+  - ./mcpservers.yaml
+  - ./networkpolicy.yaml
+configMapGenerator:
+  # Referenced by literal name inside the MCPServer CRs (kustomize cannot rewrite
+  # references in arbitrary CRs), so the hash suffix stays off.
+  - name: tasks-server
+    options:
+      disableNameSuffixHash: true
+    files:
+      - server.py=./tasks-server.py

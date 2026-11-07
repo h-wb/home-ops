@@ -58,13 +58,14 @@ spec:
       containers:
         - name: hermes
           image: docker.io/nousresearch/hermes-agent:v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
-          # The image's s6 init needs root; the gateway itself does not. Hermes reads MCP
-          # header values from env only, so the ToolHive token is exported at start: it is
-          # valid 7 days and not refreshed while Hermes runs (prototype limitation).
+          # The image's s6 init needs root; the gateway itself does not. The tier's
+          # ToolHive endpoint is anonymous in-cluster (llm VMCP), so the pod needs no
+          # ServiceAccount token or other MCP credential: egress policy and the
+          # gateway's tool lists decide what it can reach and call.
           command:
             - /bin/sh
             - -c
-            - TOOLHIVE_TOKEN=$(cat /var/run/secrets/proto-mcp/token) && export TOOLHIVE_TOKEN && exec /opt/hermes/bin/hermes gateway run
+            - exec /opt/hermes/bin/hermes gateway run
           env:
             - name: HERMES_HOME
               value: /data/hermes
@@ -109,9 +110,6 @@ spec:
               readOnly: true
             - name: tmp
               mountPath: /tmp
-            - name: toolhive-token
-              mountPath: /var/run/secrets/proto-mcp
-              readOnly: true
             # Paseo's entry point: `python /opt/hermes-acp/shim.py` (maps Paseo's cwd).
             - name: acp-shim
               mountPath: /opt/hermes-acp
@@ -129,13 +127,6 @@ spec:
         - name: acp-shim
           configMap:
             name: hermes-acp-shim
-        - name: toolhive-token
-          projected:
-            sources:
-              - serviceAccountToken:
-                  audience: proto-mcp
-                  expirationSeconds: 604800
-                  path: token
   volumeClaimTemplates:
     - metadata:
         name: data

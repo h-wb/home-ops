@@ -1,5 +1,5 @@
 ---
-# The general Hermes may reach DNS, LiteLLM (its key picks the models), the general Memini and ToolHive; nothing
+# The general Hermes may reach DNS, LiteLLM (its key picks the models), the general Memini and the general ToolHive VMCP; nothing
 # else, and nothing may connect to it (Paseo uses the API server's exec, not the pod network).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -44,9 +44,14 @@ spec:
         - port: 8080
           protocol: TCP
     - to:
-        - podSelector:
+        # The general VMCP only: private-tier servers live behind vmcp-mcp-gateway,
+        # and this policy is what stops the general pod from reaching them.
+        - namespaceSelector:
             matchLabels:
-              app.kubernetes.io/instance: proto-mcp
+              kubernetes.io/metadata.name: llm
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: mcp-ops
       ports:
         - port: 4483
           protocol: TCP

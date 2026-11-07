@@ -1,0 +1,19 @@
+---
+# The task boards answer only ToolHive: no direct calls around the gateways.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tasks-backends
+spec:
+  podSelector:
+    matchExpressions:
+      - key: toolhive-name
+        operator: In
+        values: [homelab-tasks, homelab-tasks-ro, personal-tasks]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              toolhive: "true"

@@ -1,0 +1,24 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# The Obsidian vault, private tier (agents README): the Belphemur headless-sync image
+# keeps a pull-only copy in sync (helmrelease.yaml), and the two Seekstone servers
+# (read-only, and inbox-write) serve it through the mcp-tools group — private data,
+# so only mcp-gateway lists these workloads.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ./pvc.yaml
+  - ./externalsecret.yaml
+  - ./helmrelease.yaml
+  - ./networkpolicy.yaml
+  - ./seekstone.yaml
+configMapGenerator:
+  # Pinned npm sources for the Seekstone init containers. Referenced by literal name
+  # inside the MCPServer CRs (kustomize cannot rewrite references in arbitrary CRs),
+  # so the hash suffix stays off.
+  - name: seekstone-src
+    options:
+      disableNameSuffixHash: true
+    files:
+      - package.json=./seekstone/package.json
+      - package-lock.json=./seekstone/package-lock.json
