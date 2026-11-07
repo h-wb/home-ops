@@ -1,11 +1,10 @@
 ---
-# One-shot migration: merge Literature/Manga/Sento/{Volumes,Chapters} into
-# Literature/Manga/{Volumes,Chapters}. Runs while sento/komga/suwayomi are
-# scaled to zero. Remove this directory after the move is verified.
+# One-shot verification: list the merged library tree from a fresh NFS client.
+# Temporary; remove together with the migration kustomization.
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sento-library-move
+  name: sento-library-verify
   namespace: downloads
 spec:
   ttlSecondsAfterFinished: 3600
@@ -23,43 +22,27 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: move
+        - name: verify
           image: docker.io/library/python:3.13-alpine@sha256:1e1f6334529d1fb26a2ef619d7cffb30a7c7d7cc1cc7338ebee283a58d1aeaca
           command:
             - python3
             - -c
             - |
-              import os, shutil, sys
+              import os
               base = '/data/Literature/Manga'
-              pairs = [
-                  (f'{base}/Sento/Volumes', f'{base}/Volumes'),
-                  (f'{base}/Sento/Chapters', f'{base}/Chapters'),
-              ]
-              for src, _ in pairs:
-                  if not os.path.isdir(src):
-                      sys.exit(f'FAIL: missing source {src}')
-              for src, dst in pairs:
-                  os.makedirs(dst, exist_ok=True)
-                  names = sorted(os.listdir(src))
+              print('Manga root:', sorted(os.listdir(base)), flush=True)
+              for sub in ('Volumes', 'Chapters'):
+                  p = f'{base}/{sub}'
+                  names = sorted(os.listdir(p))
+                  print(f'{sub}: {len(names)} entries', flush=True)
                   for n in names:
-                      if os.path.lexists(os.path.join(dst, n)):
-                          sys.exit(f'FAIL: destination collision at {dst}/{n}')
-                  print(f'plan: move {len(names)} entries {src} -> {dst}', flush=True)
-                  for n in names:
-                      s, d = os.path.join(src, n), os.path.join(dst, n)
-                      try:
-                          os.rename(s, d)
-                      except OSError:
-                          shutil.move(s, d)
-                      print(f'moved {n}', flush=True)
-                  print(f'done {src}', flush=True)
-              for d in (f'{base}/Sento/Volumes', f'{base}/Sento/Chapters', f'{base}/Sento'):
-                  try:
-                      os.rmdir(d)
-                      print(f'removed empty {d}', flush=True)
-                  except OSError as e:
-                      print(f'keep {d}: {e}', flush=True)
-              print('MOVE COMPLETE', flush=True)
+                      print('  ', n, flush=True)
+              print('Sento exists:', os.path.exists(f'{base}/Sento'), flush=True)
+              for probe in ('Volumes/Dragon Quest', 'Volumes/Monster - Perfect Edition',
+                            'Volumes/Akira', 'Volumes/Akira [mangabaka-5317]',
+                            'Volumes/Dr. STONE [mangabaka-3762]/review'):
+                  print(f'probe {probe}:', os.path.exists(f'{base}/{probe}'), flush=True)
+              print('VERIFY COMPLETE', flush=True)
           volumeMounts:
             - name: data
               mountPath: /data
