@@ -19,6 +19,13 @@ spec:
     spec:
       automountServiceAccountToken: false
       enableServiceLinks: false
+      # CoreDNS autopath answers api.obsidian.md.proto.svc.cluster.local with Obsidian's IPs,
+      # so Cilium filed them under that name and the *.obsidian.md egress rule never matched.
+      # ndots 1 makes external names resolve as written first.
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
