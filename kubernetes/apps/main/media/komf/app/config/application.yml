@@ -2,7 +2,9 @@
 komga:
   eventListener:
     enabled: true # if disabled will not connect to komga and won't pick up newly added entries
-    metadataLibraryFilter: [] # listen to all events if empty
+    metadataLibraryFilter:
+      - 0S5ATJYMTCA8J # Sento volumes
+      - 0S5ATQ6RYC7SN # Sento chapters
     metadataSeriesExcludeFilter: []
     notificationsLibraryFilter: [] # Will send notifications if any notification source is enabled. If empty will send notifications for all libraries
   metadataUpdate:
@@ -10,16 +12,15 @@ komga:
       libraryType: "MANGA" # Can be "MANGA", "NOVEL", "COMIC" or "WEBTOON". Hint to help better match book numbers
       updateModes:
         - API
-        - COMIC_INFO
       aggregate: true # if enabled will search and aggregate metadata from all configured providers
       mergeTags: true # if true and aggregate is enabled will merge tags from all providers
       mergeGenres: true # if true and aggregate is enabled will merge genres from all providers
       bookCovers: true # update book thumbnails
       seriesCovers: true # update series thumbnails
       overrideExistingCovers: false # if false will upload but not select new cover if another cover already exists
-      overrideComicInfo: true # Replace existing ComicInfo file. If false, only append additional data
+      overrideComicInfo: false # Sento owns archive metadata; Komf only enriches the API.
       postProcessing:
-        seriesTitle: true # update series title
+        seriesTitle: false # komga-titles preserves edition labels from Sento folders.
         seriesTitleLanguage: "en" # series title update language. If empty chose first matching title
         fallbackToAltTitle: false # fallback to first alternative tile if series title is not found
         alternativeSeriesTitles: false # use other title types as alternative title option
@@ -27,7 +28,7 @@ komga:
           - "en"
           - "ja"
           - "ja-ro"
-        orderBooks: true # will order books using parsed volume or chapter number
+        orderBooks: false # Keep Sento's ComicInfo numbering, including repacked editions.
         scoreTagName: "score" # adds score tag of format "score: 8" only uses integer part of rating. Can be used in search using query: tag:"score: 8" in komga
         readingDirectionValue: # override reading direction for all series. should be one of these: LEFT_TO_RIGHT, RIGHT_TO_LEFT, VERTICAL, WEBTOON
         languageValue: # set default language for series. Must use BCP 47 format e.g. "en"
@@ -45,6 +46,12 @@ metadataProviders:
     mangaUpdates:
       priority: 10
       enabled: true
+      seriesMetadata:
+        totalBookCount: false # A local edition may be packed differently from the original.
+      bookMetadata:
+        title: false
+        number: false
+        numberSort: false
       mediaType: "MANGA" # filter used in matching. Can be NOVEL, MANGA or WEBTOON. MANGA type includes everything except novels
       authorRoles:
         - "WRITER"
@@ -64,6 +71,8 @@ metadataProviders:
     aniList:
       priority: 40
       enabled: true
+      seriesMetadata:
+        totalBookCount: false
       mediaType: "MANGA" # filter used in matching. Can be NOVEL, MANGA or WEBTOON. MANGA type includes everything except novels
       tagsScoreThreshold: 60 # tags with this score or higher will be included
       tagsSizeLimit: 15 # amount of tags that will be included
@@ -80,10 +89,22 @@ metadataProviders:
     bookWalker:
       priority: 80
       enabled: true
+      seriesMetadata:
+        totalBookCount: false
+      bookMetadata:
+        title: false
+        number: false
+        numberSort: false
       mediaType: "MANGA" # filter used in matching. Can be NOVEL, MANGA or WEBTOON.
     mangaDex:
       priority: 90
       enabled: true
+      seriesMetadata:
+        totalBookCount: false
+      bookMetadata:
+        title: false
+        number: false
+        numberSort: false
       coverLanguages:
         - "en"
         - "ja"
