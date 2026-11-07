@@ -1,18 +1,17 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# The Obsidian vault for the private tier: Obsidian Headless keeps a pull-only copy, and two
-# Seekstone instances serve it through ToolHive (read-only, and inbox-write).
+# The Obsidian vault for the private tier: the Belphemur headless-sync image keeps
+# a pull-only copy in sync, and two Seekstone instances serve it through ToolHive
+# (read-only, and inbox-write).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  # app-template OCIRepository, the way the other namespace trees get it via
+  # components/common; proto builds its own namespace, so take the repos only.
+  - ../../../../../../components/common/repos
   - ./tools
   - ./pvc.yaml
   - ./externalsecret.yaml
-  - ./deployment.yaml
+  - ./helmrelease.yaml
   - ./networkpolicy.yaml
   - ./seekstone.yaml
-configMapGenerator:
-  - name: obsidian-vault-scripts
-    files:
-      - ./sync.sh
-      - ./syncprobe

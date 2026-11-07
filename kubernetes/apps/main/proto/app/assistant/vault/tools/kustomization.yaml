@@ -9,7 +9,5 @@ configMapGenerator:
   - name: obsidian-tools
     files:
       - ./install.sh
-      - ob-package.json=./ob/package.json
-      - ob-package-lock.json=./ob/package-lock.json
       - seekstone-package.json=./seekstone/package.json
       - seekstone-package-lock.json=./seekstone/package-lock.json
