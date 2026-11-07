@@ -1,15 +1,13 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 # The Obsidian Sync side of the vault (see kustomization.yaml for the whole picture):
-# Belphemur's obsidian-headless-sync-docker image replaces the hand-rolled
-# node-slim + sync.sh Deployment. It is the same official `ob` CLI the script ran
-# (image tag 0.0.14 ships ob 0.0.14, the version the tools Job used to install),
-# with s6-overlay doing the setup: fix the uid/gid, ob login, ob sync-setup, then
-# `ob sync --continuous` under supervision. Two paths are kept from the old
-# Deployment so the existing volume keeps working with no re-setup and no
-# re-download: the vault at /data/vault and the CLI state at /data/state. The
-# image runs as uid/gid 1000 (PUID/PGID below), the uids the volume was written
-# with, and Seekstone's ToolHive servers (seekstone.yaml) keep sharing it.
+# Belphemur's obsidian-headless-sync-docker image keeps a pull-only copy of the
+# vault on the volume the Seekstone servers (seekstone.yaml) serve through
+# toolhive. It wraps the official `ob` CLI with s6 setup (fix uid/gid, ob login,
+# ob sync-setup, then `ob sync --continuous`). The vault sits at /data/vault and
+# the CLI state at /data/state, both on the claim below; the image runs as
+# uid/gid 1000 (PUID/PGID), the uid the Seekstone backends share the volume
+# with. Pull-only: this device downloads and never uploads or deletes.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -81,9 +79,10 @@ spec:
               PUID: "1000"
               PGID: "1000"
               # Where the volume is mounted and where the persisted ob state sits.
-              # The state on the PVC already records /data/vault as the local path
-              # of this vault (sync-list-local), so keeping the old paths makes the
-              # container resume the same sync ID and log instead of re-registering.
+              # The volume starts empty: sync-setup records these paths in the
+              # persisting CLI state, and the pull-only sync backfills the vault
+              # from the remote, so keeping the container paths stable across
+              # restarts is what avoids a re-setup and a new device entry.
               VAULT_PATH: /data/vault
               XDG_CONFIG_HOME: /data/state
               # Pull-only: this device downloads and never uploads or deletes, so
@@ -95,7 +94,7 @@ spec:
               # state, so a pull-only device can never publish local edits either.
               SYNC_MODE: pull-only
               EXCLUDED_FOLDERS: .seekstone
-              DEVICE_NAME: proto-headless
+              DEVICE_NAME: llm-headless
             probes:
               readiness:
                 enabled: true

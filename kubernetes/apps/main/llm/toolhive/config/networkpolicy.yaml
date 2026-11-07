@@ -1,0 +1,31 @@
+---
+# mcp-gateway aggregates private-tier data (the Obsidian vault, personal tasks), so its
+# in-cluster service is not the open door the documented in-cluster paths otherwise are
+# ("Backend services also retain in-cluster paths outside gateway authentication",
+# agents README): only Envoy (the API-key routes) and the private Hermes pod may reach
+# it. Everyone else goes through mcp-private.${SECRET_DOMAIN} with a credential.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-gateway
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: mcp-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: envoy-gateway
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: proto
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hermes
+              assistant.scope: private

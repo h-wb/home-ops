@@ -1,6 +1,7 @@
 ---
-# The vault pod holds the Obsidian account token: it may resolve names and reach Obsidian's
-# own servers (ob refuses any sync host outside *.obsidian.md), nothing else.
+# The sync pod holds the Obsidian account token: it may resolve names and reach Obsidian's
+# own servers (ob refuses any sync host outside *.obsidian.md), nothing else, and nothing
+# may connect to it: Seekstone reads the volume, never the pod.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -29,7 +30,6 @@ spec:
             - port: "443"
               protocol: TCP
 ---
-# Nothing connects to it.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -40,3 +40,22 @@ spec:
       app.kubernetes.io/name: obsidian-vault
   policyTypes:
     - Ingress
+---
+# The Seekstone backends answer only ToolHive: no direct calls around the gateways.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vault-backends
+spec:
+  podSelector:
+    matchExpressions:
+      - key: toolhive-name
+        operator: In
+        values: [vault-ro, vault-inbox]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              toolhive: "true"

@@ -19,6 +19,9 @@ spec:
         - workload: n8n
         - workload: anki
         - workload: excel
+        # Private tier data (vault, personal tasks) never appears in this list: general
+        # gets the shared board, private gets the whole catalogue via mcp-gateway.
+        - workload: homelab-tasks
     optimizer:
       embeddingModel: embed
       embeddingProvider: openai

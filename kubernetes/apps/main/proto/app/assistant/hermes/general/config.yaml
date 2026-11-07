@@ -34,8 +34,8 @@ agent:
     - connections
     - kanban
 mcp_servers:
-  # The ToolHive endpoint; what this tier may call is ToolHive's policy, not this list.
-  proto:
-    url: http://vmcp-proto-mcp.proto.svc.cluster.local:4483/mcp
-    headers:
-      Authorization: Bearer $${TOOLHIVE_TOKEN}
+  # The general VMCP (llm/toolhive/config), reached in-cluster: the same endpoint the
+  # general Paseo tier takes through Envoy. This pod's egress (networkpolicy.yaml)
+  # pins it to mcp-ops, whose tool list is what this tier may call, not this file.
+  tools:
+    url: http://vmcp-mcp-ops.llm.svc.cluster.local:4483/mcp

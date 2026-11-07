@@ -1,12 +1,17 @@
-# Seekstone over the synced vault, private tier only (toolhive/authz.yaml): a read-only
+# Seekstone over the synced vault, private tier only: a read-only
 # instance and an inbox-write instance, both on the vault volume. Each backend pod
 # installs Seekstone once in an init container, from the lockfiles pinned in git
-# (tools/seekstone/; Renovate bumps them), into an emptyDir — the same generic-image +
+# (seekstone/; Renovate bumps them), into an emptyDir — the same generic-image +
 # git-pinned-source pattern as the task boards' `uv run --with`, with a full lockfile
-# instead of a bare version, and no shared tools PVC or install Job to keep in step
-# (toolhive's netpol only gates ingress; the pod's own egress is the cluster default).
+# instead of a bare version, and no shared tools PVC or install Job to keep in step.
 # A lockfile bump takes effect on the next backend pod start: kubectl rollout restart
-# statefulset -n proto vault-ro vault-inbox.
+# statefulset -n llm vault-ro vault-inbox.
+# Privacy is the two gateways (llm/toolhive/config): mcp-gateway exposes this to the
+# private tier; mcp-ops does not list these workloads, so general never sees the
+# vault, and networkpolicy.yaml only lets ToolHive pods talk to the backends.
+# The mcp container runs /tools/node_modules/.bin/seekstone; toolhive stamps that
+# container with its own hardened securityContext (uid 1000, read-only rootfs), so
+# npm's world-readable files (umask 022) work under either uid.
 # The mcp container runs /tools/node_modules/.bin/seekstone; toolhive stamps that
 # container with its own hardened securityContext (uid 1000, read-only rootfs), so
 # npm's world-readable files (umask 022) work under either uid.
@@ -111,7 +116,7 @@ spec:
         - name: tmp
           emptyDir: {}
   groupRef:
-    name: proto-tools
+    name: mcp-tools
 ---
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServer
@@ -217,4 +222,4 @@ spec:
         - name: tmp
           emptyDir: {}
   groupRef:
-    name: proto-tools
+    name: mcp-tools

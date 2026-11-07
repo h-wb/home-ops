@@ -2,7 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 # Privilege-split assistant (claude.ai doc "Homelab AI Assistant — Privilege-Split Architecture"):
 # per tier a LiteLLM key, a synthetic Memini and a hardened Hermes pod; policy lives in the
-# gateways and NetworkPolicy, not in an agent sandbox. Synthetic data only.
+# gateways and NetworkPolicy, not in an agent sandbox. Synthetic data only. Tool servers live
+# in llm/toolhive (mcp-tasks, mcp-vault); Hermes reaches them per tier.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: proto
@@ -12,8 +13,6 @@ resources:
   - ./memini-general.yaml
   - ./memini-private.yaml
   - ./plugin-sync
-  - ./toolhive
-  - ./vault
   - ./hermes/general
   - ./hermes/private
   - ./rbac.yaml
