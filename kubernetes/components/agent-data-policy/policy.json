@@ -61,5 +61,13 @@
       "https_host": "api.mistral.ai"
     }
   },
-  "general_tool_prefixes": ["kubectl_", "flux_", "github_", "n8n_", "anki_", "memini-general_"]
+  "general_tool_prefixes": [
+    "kubectl_",
+    "flux_",
+    "github_",
+    "n8n_",
+    "anki_",
+    "excel_",
+    "memini-general_"
+  ]
 }
