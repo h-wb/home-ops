@@ -207,7 +207,7 @@ token_file="$(find "$state" -name auth_token -type f | head -1)"
 
 ob sync-list-remote
 mapfile -t vaults < <(ob sync-list-remote --json | jq -r '(.vaults? // .) | .[]? | .name // empty')
-if [ "${#vaults[@]}" -gt 0 ]; then
+if [ -n "${vaults[0]:-}" ]; then
     vault="$(gum choose --header "Vault for the prototype (pull-only copy)" "${vaults[@]}")"
 else
     vault="$(gum input --placeholder "Vault name or id, from the list above")"
