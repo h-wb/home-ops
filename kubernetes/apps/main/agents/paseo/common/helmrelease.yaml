@@ -52,6 +52,11 @@ spec:
             env: &env
               PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}
               HOME: /home/paseo
+              # The ~/.dotfiles emptyDir's mount point is root's: without this, git
+              # refuses the checkout, and an init retry fails on the existing clone.
+              GIT_CONFIG_COUNT: "1"
+              GIT_CONFIG_KEY_0: safe.directory
+              GIT_CONFIG_VALUE_0: /home/paseo/.dotfiles
               OPENCODE_CONFIG: /etc/paseo/config/opencode.json
               TZ: Europe/Paris
               SHELL: /bin/bash
