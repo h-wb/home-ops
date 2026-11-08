@@ -41,7 +41,7 @@ The ChatGPT subscription is also exposed as the wildcard deployments in
 supplies its own sign-in and LiteLLM forwards it, while a request without one
 (OpenCode's bare `gpt-6.1-sol`/`gpt-6.1-terra`) is served by the shared gateway
 login. `codex-*` carries Codex's own slugs, such as `codex-auto-review`. Both
-need LiteLLM >= 1.109.0 (proxy currently pinned to an rc of it). See
+need LiteLLM >= 1.109.0 (proxy pinned to the latest dev release). See
 [ChatGPT subscription](https://docs.litellm.ai/docs/tutorials/openai_codex_byok).
 
 ## Preserved identities
