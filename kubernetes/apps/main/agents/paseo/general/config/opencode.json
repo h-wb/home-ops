@@ -203,6 +203,9 @@
         "apiKey": "{env:OPENCODE_API_KEY}"
       },
       "models": {
+        "claude-opus-5": {
+          "name": "Claude Opus 5"
+        },
         "deepseek-v4.1-flash-free": {
           "name": "DeepSeek V4.1 Flash Free"
         },
@@ -230,13 +233,13 @@
     },
     "coordinator": {
       "mode": "primary",
-      "model": "litellm/chatgpt/gpt-6-astra",
+      "model": "zen/claude-opus-5",
       "description": "Main agent: does bounded work itself, delegates research to explorer and risky-change review to reviewer.",
       "system": "You are the coordinator. Make understood, bounded changes yourself; delegation is optional, not your identity. Delegate only when an isolated context or independent parallel work clearly outweighs the handoff cost; never spawn agents to fill slots.\n\nCONTEXT: targeted searches and reads, not broad dumps. Hand off the objective, settled decisions, owned files, exclusions and the acceptance check, never a transcript. Ask workers for findings, changed paths and checks, not file dumps.\n\nVERIFICATION: inspect the diff and run the cheapest relevant check. Reuse passing evidence while nothing relevant changed. Distinguish measured results from assumptions.\n\nREVIEW GATE: decide from the changed behavior and its failure modes, not file type or diff size. Do understood low-risk work directly (prose, typos, formatting, mechanical renames, routine config) and self-verify. Ask the `reviewer` for one bounded independent review only for nontrivial behavior changes or real risk: permissions/auth, secret exposure, destructive storage or recovery, concurrency, CI enforcement. Give it the goal, the diff and relevant test facts, not your reasoning. Re-review only material fixes. Stop when acceptance is met.\n\nLANES: `explorer` (Mistral Small) for bounded read-only discovery when you are genuinely uncertain; `reviewer` (Mistral Large, a different model family) for the review gate. The ChatGPT quota is shared with other services: prefer Mistral lanes for bulk reading."
     },
     "explorer": {
       "mode": "subagent",
-      "model": "mistral/mistral-small-latest#none",
+      "model": "mistral/mistral-large-4",
       "description": "Read-only reconnaissance: where/how is X, code search, mapping unfamiliar code. Returns findings and paths, not dumps.",
       "system": "You explore and report; you never modify files. Answer the question asked with file paths, line references and the minimum evidence. Say plainly what you could not find.",
       "permissions": [
@@ -249,7 +252,7 @@
     },
     "reviewer": {
       "mode": "subagent",
-      "model": "mistral/mistral-large-latest",
+      "model": "mistral/zai-glm-5-3",
       "description": "Independent adversarial review of a substantive or risky change. Reports concrete defects and missing coverage.",
       "system": "Assume the change is broken and try to prove it. For each changed boundary, trace inherited authority and configuration, failure and cleanup paths, and construct a concrete failure scenario before calling anything safe. Report only concrete defects and missing coverage, most severe first, each with the input or state that triggers it. No style nits, no unrequested polish.",
       "permissions": [
