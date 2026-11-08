@@ -1,0 +1,46 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-secret.json
+# Memini (general / coding) credentials. Literal SOPS values, no generators:
+# the ExternalSecret + Password generator setup this replaces re-rolled every
+# key on each spec edit (a template change invalidates the target's data-hash,
+# forcing a re-sync and fresh passwords) — which happened on 2026/11/08 and
+# left the workstation plugins sending 401 keys while the server only knew the
+# new ones. With one encrypted source of truth, keys change only when this file
+# does.
+#
+# - MEMINI_API_KEY: break-glass admin key; also the web UI sign-in.
+#     kubectl -n llm get secret memini-code-api-keys -o jsonpath='{.data.MEMINI_API_KEY}' | base64 -d
+# - claude-code / codex: workstation client keys (claude-code holds its copy
+#   manually; codex is re-pushed to the Bitwarden item memini-paseo-general by
+#   paseo-key.yaml for the paseo tier).
+# - hermes: the general Hermes pod's key (llm/hermes), also in api-keys.yaml.
+# - api-keys.yaml: mounted through MEMINI_API_KEYS_FILE and read once at boot,
+#   so a key edit rolls the pod via the reloader annotation.
+#
+# Edit via: mise run decrypt <this-file> ... mise run encrypt <this-file>.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: memini-code-api-keys
+type: Opaque
+data:
+  MEMINI_API_KEY: ENC[AES256_GCM,data:mi/vv1fJI4svz15OdPUy4JTyYTZxoINTStysekw2RiGXnxNr/4vZMqwz8DRfSJ2Zi3a/YYkgDJ48vHuag+Q6PA==,iv:Bal5oqcqV/t465R2nAkblO57V8VNgxJyNmHmzjf7n48=,tag:JP9s3IOloLWMZJy9Y7dZ+g==,type:str]
+  api-keys.yaml: ENC[AES256_GCM,data:HDxn6oKm2VzcaU4Q5lXTUMqLl4Wu3VUPAbcot02HHmfhvMUQjVXGgf19iNJuFUoFcBIPUKxw46kqA4FGHzpWB6D1UtGjyBhebUYps5QY9x0O9km86AqgiLg7ob2TbsFO32YrSUifE+jESYHCfZI9Kg0NpeMt7+JenXSv6B3M+HfnDVHqLcaUo5LGb4QGXRqdw3vHWj+QVjPgHT8V17pX3hWcDUltm2O783qdf1TlgfjaAjg3DxKwN3sL/5Kmt1UShBjSiObYesNv9TZNVWl0vizuP0y2slH33l/xyahzPxYX5eGiPdq8HMcqZeVbbrnD2tYUtcEe6OuVRfFcXGdgOXat2COrG2SP32XDTjHhaNfHNo+t/O8qhbGxkPO4yo3mzkCWVBbe5OjEafkPfr+KrwSxPAeVEEnpY4ueYyOI2Otbbs9x4BIlkRxDItNmu28m86J1GacUXv1G6w1Ge5V8q4IYiMT85iedrqOHDySdpHH2Jijl6vQZB/DAWjDrWMTt5Y4l4ZJNQJOmqJ5Vpdz9sGrQyzAdlMpp3pOojaFdAjODv4NHiFXk9GZz6jXa2RWwkH90pl7lypKdurTIzd4pL11oQYJ+Is+fG1C2q22UPoVFPW3E5Tip0LASeCCxSfmmeDE8XdFCeww=,iv:QhKmg9J50HOOuAuhLByf1/AXptu7TCrz7Tea3IVoYmY=,tag:VtzGyJzOlnwKpdtgX59DsQ==,type:str]
+  claude-code: ENC[AES256_GCM,data:o2wF9LkqjQldK9vkZjom3SEjnjccx/uoZXz3KQengjy1+ropQife8BiHDRGNakFv1FtYrEzzdTbt0dhXHDetdw==,iv:bKe2non1C0n+DVmH4U8dWdDO8TRUW8BU6J7C02mHHeA=,tag:eFi4iK5YdOCam/S2VzYM0A==,type:str]
+  codex: ENC[AES256_GCM,data:i6q71HyGZj6S0gQstabrQS9gu1MCrAIaE8+K3hnpyfsnEE2WXVfooStabRdEEUhXEK6AxfbNlJwgTdkYQUpbwA==,iv:IX1cKrx0DxFWGVyhI8hRaXTABdk/zQBD4L9B0XYuLhI=,tag:MIQCdq1ov6ivofcRUUxrrg==,type:str]
+  hermes: ENC[AES256_GCM,data:9aOAbAculSpHPnIIuJiysdorhBymxs/H0HcVU4omoMHVJBZhRfhFDuYnOTsY+4Jq1wd36i+W7EIMDdd/ENhGnw==,iv:aWnNJfxTqt3IwNI25nup038FGu0AFAPKmR16DF0jcGo=,tag:siyLIpTdhI/rHncsLeVf6Q==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBoMmwrak5YSVZWaVY3Wnlk
+        eHVvd05pbmMvcTA0V3l6REhtUkJOblJ4d0F3CngxTEpTWllqMWpaL3lKOWxOdWhI
+        NWhkYlovamxSR2xCb1BZNGNPb0pqdlEKLS0tIFNFQVdjMkhEZUkvbTF3MnFhNWFh
+        SFV1b0tNT0tueUlkQmdVWmJGajNUL1kKsU8JndKphh7gkvj0OfkY0/bEqxK2Jy69
+        SVohls+5pmMhkMDHKG6A6yMEBuPIz6vZIsrA0QotvotFYNNlYz/48Q==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1cu2z3syq630c8w6gz7k4qfgld2kk8ydgejl2q04le0fd7yc6gs0sq3ftwl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-11-08T00:57:46Z"
+  mac: ENC[AES256_GCM,data:63n0Z8kMKLTqBQ2IoGRLBj5j4LuneK+raFbk4WuYdAEEyFbfw8mhaRrkZxNk3WZnvCaa2A/3QSkgUfuMaSvoMGYGqOOBgjv570xtl9/w228ecRzjHFiyqqyo9nIdnHktuczsEzf5JgNWIvZHPS9hle2iW7Zz3May8sur/F2DTTI=,iv:zkaX0KLtLLvAe1SK1IVb9o45pInxP7ovSLwQP5q+XLE=,tag:kQB0GT0g37DhRyIDIbnzLw==,type:str]
+  mac_only_encrypted: true
+  version: 3.13.3

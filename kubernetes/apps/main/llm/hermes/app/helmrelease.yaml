@@ -72,7 +72,7 @@ spec:
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: memini-code-secret
+                    name: memini-code-api-keys
                     key: hermes
               MEMINI_BASE_URL: http://memini-general.llm.svc.cluster.local:8080
               MEMINI_NAMESPACE: hugo
@@ -171,7 +171,7 @@ spec:
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: memini-secret
+                    name: memini-api-keys
                     key: hermes
               MEMINI_BASE_URL: http://memini-private.llm.svc.cluster.local:8080
               MEMINI_NAMESPACE: hugo

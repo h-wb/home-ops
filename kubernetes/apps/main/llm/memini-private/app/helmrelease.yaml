@@ -27,7 +27,7 @@ spec:
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: memini-secret
+                    name: memini-api-keys
                     key: MEMINI_API_KEY
               # Embeddings on the in-cluster model through LiteLLM. Memories are
               # private data. Keep embeddings local and the optional distill/dedup
@@ -42,6 +42,13 @@ spec:
               MEMINI_EMBED_MAX_ITEM_CHARS: "5000"
               # The CPU embedder takes ~12 s for 8 full-size texts.
               MEMINI_EMBED_MAX_BATCH: "8"
+              # A query embed is one text (~1.5 s idle, more under load); the 2 s
+              # default of MEMINI_RECALL_EMBED_TIMEOUT silently degrades loaded
+              # recalls to keyword-only order. Only memini_recall_degraded_total
+              # (alerting) says so, so give the slow embedder room instead.
+              MEMINI_RECALL_EMBED_TIMEOUT: "10s"
+              # Write-time dedup embeds against the same embedder (default 5 s).
+              MEMINI_WRITE_EMBED_TIMEOUT: "15s"
               MEMINI_EMBED_API_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -58,7 +65,7 @@ spec:
         existingClaim: memini
       api-keys:
         enabled: true
-        name: memini-secret
+        name: memini-api-keys
     route:
       # The admin UI (it serves /v1 for itself), internal only. Sign in with
       # MEMINI_API_KEY. The API/MCP port gets no route: clients reach it through

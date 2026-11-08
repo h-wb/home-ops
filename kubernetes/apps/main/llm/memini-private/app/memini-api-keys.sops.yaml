@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/master-standalone-secret.json
+# Memini (private) credentials. Literal SOPS values, no generators: the
+# ExternalSecret + Password generator setup this replaces re-rolled every key
+# on each spec edit (a template change invalidates the target's data-hash,
+# forcing a re-sync and fresh passwords) — which happened on 2026/11/08 and
+# left the ToolHive gateway and workstation plugins sending 401 keys while the
+# server only knew the new ones. With one encrypted source of truth, keys change
+# only when this file does.
+#
+# - MEMINI_API_KEY: break-glass admin key; also the web UI sign-in.
+#     kubectl -n llm get secret memini-api-keys -o jsonpath='{.data.MEMINI_API_KEY}' | base64 -d
+# - toolhive-authorization: the exact Authorization header the ToolHive gateway
+#   sends (its entry mounts this secret); must stay "Bearer " + the toolhive key
+#   in api-keys.yaml.
+# - hermes: the private Hermes pod's key (llm/hermes), also in api-keys.yaml.
+# - api-keys.yaml: mounted through MEMINI_API_KEYS_FILE and read once at boot,
+#   so a key edit rolls the pod via the reloader annotation.
+#
+# Edit via: mise run decrypt <this-file> ... mise run encrypt <this-file>.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: memini-api-keys
+type: Opaque
+data:
+  MEMINI_API_KEY: ENC[AES256_GCM,data:sNjwnGjhX1elU2zbwjVdlgN9bZt2LLlRNbqz9J7GYEUheRNl7y/O0OhirwjNK/JgJfWDhTCXwQv+Iw0VGquL4w==,iv:ToSuKZAcS7alGUsVRjB3PVs6R3X/XzZGJyefczUow0o=,tag:2MLJeYTOQM7wom9pGxTHzw==,type:str]
+  api-keys.yaml: ENC[AES256_GCM,data:mgDxSsR0wdwLi2YS+LJLS2gA4Veat8r8CKryyjbLMks+deLznyCIO0YNfpDGylqhs4WoNRmb/xA+vOqzH58dXw1wG3rwEGAnXEsIeojMG0O81zZLpdKYEZ6tEnVUkVJRfPBnd9lftKw/LG6Xt8rOTyOvvk4ZIbAASZKOgDvyDTMaahC+lB94Net+HkNdfk0/dktK7QBnEfOmh0HR9a/nsMIP4gsGFCPRH6c9BA1K/n3oArf+jd86bQK2x/TZderq6NQ9q4YjjL3z4Ft3tTeqVOnmY5hQSO6YkSYrpfuSRHFC+HzifeOXu6ZAAMX7vFaGaTka6HkxWJTcmIay291QiMDq22CEvD6afwXNqL62BIauf1gpDO5wFmrlEdel06It8YvsY1A9ZBziKUEalcua4BIagFDirfeHk7yKQZOHqiYE98pSP/jegDeiUQw+gF9429rf1zQIo6YzbpJfhzu/MvbbBLpBZk2QfxNpktujU3v51VupTQmMpcfIyN+47tNM2X7i08xJAv6O8UIE,iv:aG1BDezp/yMkgYJ7GQHTXKf44IZ576UT8Z2ZDn2bB5s=,tag:4c/rDWjnvg1Xr6LV5BtcfA==,type:str]
+  hermes: ENC[AES256_GCM,data:DZpDXzDK331wsILWo4jD4YIjqmeugzSBO9/4R4U7oouwMrAeQjzN35jAKI1hcPyM0tu/RMrrJSKeJtsljbt53Q==,iv:kX9Fmmwz8akmStrm3H8UAlMYxFPGR2upyIMCE9SyBrk=,tag:6BIUBuzcKRfvWOGz1ZE70Q==,type:str]
+  toolhive-authorization: ENC[AES256_GCM,data:oV1aukzGOwbz9RdDwOQ0ejhTQ9LvopOn1+tmhXifY/Y2ya/J41wo+7+9/49H5sgyhR/VFqYCIHrWZQdPMZ44749iZQFHEVBnDUwvCA==,iv:cm/7adfi7/JNCOlf3h0g4+AlNgB7S2ceKd3ckkbyMYA=,tag:hqCqmF/W398thJxQ2SNOjw==,type:str]
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBsK0FyaWdDYUt6bDc1R0Nr
+        NjJnTFVVOHlkN1Uza2l3VmQzeHRyOVQxWFRNCndEZnJGSmd4TGFrcFdibUdZN0dZ
+        Qm5jbmF4RnJwb3pFQ1E3VWxyclprSUEKLS0tIHF6VHJoRVpEc05YUTM1a3dCcGlJ
+        TnlVN3IvcHlTUTYvb1RDd2EvTm5BZUEKgGEv0scZgEJ87cpwDAN/ju9ceo/gNYvv
+        5hAnB1B83nIqWrAb8HUeM64CTaxGiKmGfXbA/XJ1zz6svpdJiVW8kQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1cu2z3syq630c8w6gz7k4qfgld2kk8ydgejl2q04le0fd7yc6gs0sq3ftwl
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-11-08T00:57:46Z"
+  mac: ENC[AES256_GCM,data:fWAKIDeZS1Be8MncjQ4j8sGxWo0WYgC0RdID+RJ+JNg6A0iQfQE5kSHMPP789jNWFb3g+n3Q3LTy1n6uWapqjvJaEQlAuGw5rz9+7d5W9qQhy9eDwiM7DxZsXvsZGIqI/NtY5vKNDXjsqE0/v/WrbEKBZrW6sneZU1mu7uY/LGE=,iv:i4W5gwl/CX9k7yamQB3vN7lfLnwMbAQN3H1MXfJUtHs=,tag:PppcGrFGqxhs+C5/bSMjsw==,type:str]
+  mac_only_encrypted: true
+  version: 3.13.3

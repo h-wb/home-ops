@@ -30,7 +30,7 @@ spec:
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: memini-code-secret
+                    name: memini-code-api-keys
                     key: MEMINI_API_KEY
               # Same local embedder as memini; see its HelmRelease for the limits.
               MEMINI_EMBED_BASE_URL: http://litellm.llm.svc.cluster.local:4000/v1
@@ -38,6 +38,17 @@ spec:
               MEMINI_EMBED_DIMS: "768"
               MEMINI_EMBED_MAX_ITEM_CHARS: "5000"
               MEMINI_EMBED_MAX_BATCH: "8"
+              # Long coding memories (the "truncating over-long text" warnings)
+              # are stored whole but vector-searched only up to
+              # MEMINI_EMBED_MAX_ITEM_CHARS. Chunked embedding fixes that
+              # additively: chunks build in the background and the whole-memory
+              # vector keeps serving recall the whole time.
+              MEMINI_CHUNK_EMBED: "true"
+              # Same slow-embedder rationale as memini-private: the short
+              # recall/write dedup embed timeouts silently degrade recall to
+              # keyword-only order under load.
+              MEMINI_RECALL_EMBED_TIMEOUT: "10s"
+              MEMINI_WRITE_EMBED_TIMEOUT: "15s"
               MEMINI_EMBED_API_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -54,7 +65,7 @@ spec:
         existingClaim: memini-code
       api-keys:
         enabled: true
-        name: memini-code-secret
+        name: memini-code-api-keys
     route:
       main:
         enabled: true

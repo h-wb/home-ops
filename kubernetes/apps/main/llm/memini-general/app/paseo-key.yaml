@@ -8,7 +8,7 @@ spec:
       kind: ClusterSecretStore
   selector:
     secret:
-      name: memini-code-secret
+      name: memini-code-api-keys
   data:
     - match:
         secretKey: codex

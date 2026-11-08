@@ -31,8 +31,10 @@ namespaces only to organize projects/agents within each. General Paseo initially
 reuses the existing general `codex` credential for all its agents.
 
 ToolHive retains its `mcp-ops` and `mcp-gateway` resource identities and legacy
-hostnames as aliases. New clients use scoped names. Existing CreatedOnce key sets
-are intentionally unchanged to prevent rotating every old client; a retired
+hostnames as aliases. New clients use scoped names. Existing key values are
+intentionally unchanged — Memini's credentials moved from ExternalSecret
+generators (which re-roll every key on each spec edit) to the SOPS files in each
+Memini app directory, which rotate only on an explicit edit; a retired
 Open WebUI key remains inert in the old general key set.
 
 ## Request and execution boundaries
