@@ -20,11 +20,12 @@ spec:
             env:
               ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
               # Every agent key binds by name to its proper secret (jory-shape)
-              # instead of riding envFrom.
+              # instead of riding envFrom. The Claude header is composed by the
+              # paseo-claude ExternalSecret from the operator's litellm secret.
               ANTHROPIC_CUSTOM_HEADERS:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-agents
+                    name: paseo-claude
                     key: ANTHROPIC_CUSTOM_HEADERS
               GH_TOKEN:
                 valueFrom:
@@ -52,7 +53,7 @@ spec:
               ANTHROPIC_CUSTOM_HEADERS:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-agents
+                    name: paseo-claude
                     key: ANTHROPIC_CUSTOM_HEADERS
               GH_TOKEN:
                 valueFrom:
@@ -75,7 +76,7 @@ spec:
               - secretRef:
                   name: ${APP}-ssh
         annotations:
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-mcp,paseo-ssh,paseo-tailscale,litellm-paseo-general,paseo-agents
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-mcp,paseo-ssh,paseo-tailscale,litellm-paseo-general,paseo-agents,paseo-claude
     persistence:
       data:
         type: nfs

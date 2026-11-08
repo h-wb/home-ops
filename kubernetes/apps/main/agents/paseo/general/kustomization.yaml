@@ -4,6 +4,7 @@ resources:
   - ../common
   - networkpolicy.yaml
   - externalsecret.yaml
+  - rbac.yaml
   - virtualkey.yaml
 # Agent config for this scope, mounted at /etc/paseo/config (see common/config/provision.sh).
 configMapGenerator:

@@ -1,0 +1,25 @@
+---
+# Lets the external-secrets controller's ServiceAccount read the
+# operator-generated litellm-paseo-* Secrets in this namespace, for the
+# litellm-virtual-key SecretStore (see externalsecret.yaml).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-litellm-virtual-keys
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: read-litellm-virtual-keys
+subjects:
+  - kind: ServiceAccount
+    name: external-secrets
+    namespace: external-secrets
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: read-litellm-virtual-keys

@@ -106,10 +106,16 @@ class PaseoRendering(unittest.TestCase):
                 self.assertIn(secret, runtime["annotations"]["secret.reloader.stakater.com/reload"])
 
     def test_only_general_routes_claude_through_litellm(self):
-        secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]
-        self.assertEqual("x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}", secret["ANTHROPIC_CUSTOM_HEADERS"])
+        # The header lives in its own ExternalSecret (paseo-claude), composed
+        # from the operator's litellm-paseo-<scope> Secret — see
+        # test_claude_header_composed_from_the_operator_secret.
+        agents = self.resource("general", "ExternalSecret", "paseo-agents")
+        self.assertNotIn("ANTHROPIC_CUSTOM_HEADERS",
+                         agents["spec"]["target"]["template"]["data"])
         with self.assertRaises(StopIteration):
             self.resource("private", "ExternalSecret", "paseo-agents")
+        with self.assertRaises(StopIteration):
+            self.resource("private", "ExternalSecret", "paseo-claude")
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
             runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
             for name, container in {**runtime["containers"], **runtime["initContainers"]}.items():
@@ -174,6 +180,39 @@ class PaseoRendering(unittest.TestCase):
         self.assertEqual([], cloud(keys["private"]))
         for scope in ("general", "private"):
             self.assertEqual(f"litellm-paseo-{scope}", keys[scope]["secretName"])
+
+    def test_claude_header_composed_from_the_operator_secret(self):
+        # The x-litellm-api-key header must carry the live operator-generated
+        # virtual key, not a Bitwarden copy that goes stale on rotation (the
+        # 401 that broke Claude agents). ESO reads litellm-paseo-<scope> via a
+        # Kubernetes-provider SecretStore and composes the header itself.
+        store = self.resource("general", "SecretStore", "litellm-virtual-key")
+        kubernetes = store["spec"]["provider"]["kubernetes"]
+        self.assertEqual("agents", kubernetes["remoteNamespace"])
+        self.assertEqual("external-secrets",
+                         kubernetes["auth"]["serviceAccount"]["name"])
+        role = self.resource("general", "Role", "read-litellm-virtual-keys")
+        self.assertIn("secrets", role["rules"][0]["resources"])
+        binding = self.resource("general", "RoleBinding", "read-litellm-virtual-keys")
+        self.assertEqual("external-secrets", binding["subjects"][0]["name"])
+        self.assertEqual("external-secrets", binding["subjects"][0]["namespace"])
+        es = self.resource("general", "ExternalSecret", "paseo-claude")
+        self.assertEqual("litellm-virtual-key", es["spec"]["secretStoreRef"]["name"])
+        remote = es["spec"]["data"][0]["remoteRef"]
+        self.assertEqual("litellm-paseo-general", remote["key"])
+        self.assertEqual("api-key", remote["property"])
+        template = es["spec"]["target"]["template"]["data"]["ANTHROPIC_CUSTOM_HEADERS"]
+        self.assertIn("x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}", template)
+        # The Bitwarden-backed agents secret no longer carries the header.
+        agents = self.resource("general", "ExternalSecret", "paseo-agents")
+        self.assertNotIn("ANTHROPIC_CUSTOM_HEADERS",
+                         agents["spec"]["target"]["template"]["data"])
+        values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]
+        for container in ("app", "sshd"):
+            ref = values["controllers"]["paseo"]["containers"][container]["env"]["ANTHROPIC_CUSTOM_HEADERS"]["valueFrom"]["secretKeyRef"]
+            self.assertEqual(("paseo-claude", "ANTHROPIC_CUSTOM_HEADERS"), (ref["name"], ref["key"]))
+        self.assertIn("paseo-claude",
+                      values["controllers"]["paseo"]["annotations"]["secret.reloader.stakater.com/reload"])
 
     def test_private_retains_only_its_explicit_hermes_token_mount(self):
         values = self.resource("private", "HelmRelease", "paseo-private")["spec"]["values"]

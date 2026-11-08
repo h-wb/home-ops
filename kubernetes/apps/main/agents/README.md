@@ -81,12 +81,16 @@ complete credential boundary around general.
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
 credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`
 and `KEYSEED` (an old `MCP_API_KEY` field is unused: the pods reach ToolHive
-without a key). General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
-`LITELLM_API_KEY` — the last one only composes Claude Code's `x-litellm-api-key`
-header, the raw virtual key never passing through Bitwarden: the
-litellm-operator writes its Secret into the pods' own namespace from the
-`virtualkey.yaml` CR beside them, and the helmrelease binds it directly. The
-general pod's agent keys (GH, opencode, memini, the Claude header) come out of
+without a key). General additionally holds `GH_TOKEN` and `OPENCODE_API_KEY`.
+Claude Code's `x-litellm-api-key` header (`ANTHROPIC_CUSTOM_HEADERS`) is composed by
+the `paseo-claude` ExternalSecret from the operator-generated `litellm-paseo-<scope>`
+Secret, read through a Kubernetes-provider SecretStore — the raw virtual key never
+passes through Bitwarden: the litellm-operator writes that Secret into the pods'
+namespace from the `virtualkey.yaml` CR beside them, the ExternalSecret refreshes it
+into the header, and Reloader rolls the pod, so key rotation propagates on its own.
+`Authorization` keeps carrying the CLI's claude.ai OAuth token, which LiteLLM
+forwards upstream for `anthropic/*`. The general pod's agent keys (GH, opencode,
+memini) come out of
 the `paseo-agents` Secret, whose single ExternalSecret extracts the credential
 and `memini` items together — memini's client key lives once, in the
 `memini` item, read by the server and the pod alike. Proton Pass serves fnx
