@@ -60,7 +60,7 @@ class PaseoRendering(unittest.TestCase):
                 data = self.resource(scope, "ConfigMap", f"{app}-config")["data"]
                 self.assertEqual({"paseo.json", "claude.json", "opencode.json"}, set(data))
                 opencode = json.loads(data["opencode.json"])
-                litellm = opencode["provider"]["litellm"]["options"]
+                litellm = opencode["providers"]["litellm"]["settings"]
                 self.assertEqual("https://litellm.example.com/v1", litellm["baseURL"])
                 self.assertEqual("{env:LITELLM_API_KEY}", litellm["apiKey"])
                 values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
@@ -76,8 +76,10 @@ class PaseoRendering(unittest.TestCase):
         self.assertEqual({"x-api-key": "${MCP_API_KEY}"}, claude["mcpServers"]["toolhive-general"]["headers"])
 
     def test_only_general_routes_claude_through_litellm(self):
-        secret = self.resource("general", "ExternalSecret", "paseo-litellm")["spec"]["target"]["template"]["data"]
+        secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]
         self.assertEqual("x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}", secret["ANTHROPIC_CUSTOM_HEADERS"])
+        with self.assertRaises(StopIteration):
+            self.resource("private", "ExternalSecret", "paseo-agents")
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
             runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
             for name, container in {**runtime["containers"], **runtime["initContainers"]}.items():
@@ -86,6 +88,11 @@ class PaseoRendering(unittest.TestCase):
                 env = container.get("env", {})
                 self.assertNotIn("ANTHROPIC_API_KEY", env)
                 self.assertEqual(scope == "general", "ANTHROPIC_BASE_URL" in env, (scope, name))
+                # The virtual key binds the operator's Secret directly, in the
+                # pods' own namespace (the CR sits beside them).
+                litellm = env["LITELLM_API_KEY"]["valueFrom"]["secretKeyRef"]
+                self.assertEqual("api-key", litellm["key"])
+                self.assertEqual(f"litellm-paseo-{scope}", litellm["name"])
 
     def test_general_has_no_direct_kubernetes_credentials_or_grants(self):
         values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]
@@ -125,6 +132,19 @@ class PaseoRendering(unittest.TestCase):
         self.assertFalse(any(doc.get("kind") == "CiliumNetworkPolicy"
                              for doc in self.rendered["private"]))
 
+    def test_virtual_keys_live_beside_the_pods_with_scope_grants(self):
+        keys = {}
+        for scope in ("general", "private"):
+            for doc in self.rendered[scope]:
+                if doc.get("kind") == "LiteLLMVirtualKey":
+                    keys[scope] = doc["spec"]
+        cloud = lambda key: [m for m in key["models"] if m.startswith(("anthropic/", "chatgpt/", "gpt-", "codex-"))]
+        self.assertEqual("llm", keys["general"]["proxyNamespace"])
+        self.assertIn("anthropic/*", keys["general"]["models"])
+        self.assertEqual([], cloud(keys["private"]))
+        for scope in ("general", "private"):
+            self.assertEqual(f"litellm-paseo-{scope}", keys[scope]["secretName"])
+
     def test_private_retains_only_its_explicit_hermes_token_mount(self):
         values = self.resource("private", "HelmRelease", "paseo-private")["spec"]["values"]
         self.assertIs(False, values["defaultPodOptions"]["automountServiceAccountToken"])
@@ -147,10 +167,8 @@ class LiteLLMRendering(unittest.TestCase):
         # Subscription pass-through: the gateway must hold no Anthropic credential.
         self.assertEqual("anthropic/*", models["anthropic/*"]["params"]["model"])
         self.assertFalse({"apiKey", "apiKeyRef"} & set(models["anthropic/*"]["params"]))
-        keys = {doc["metadata"]["name"]: doc["spec"] for doc in self.docs if doc.get("kind") == "LiteLLMVirtualKey"}
-        cloud = lambda key: [m for m in key["models"] if m.startswith(("anthropic/", "chatgpt/"))]
-        self.assertIn("anthropic/*", keys["paseo-general"]["models"])
-        self.assertEqual([], cloud(keys["paseo-private"]))
+        # The paseo virtual keys (whose CRs sit beside the pods since the
+        # jory-shape move) are asserted in PaseoRendering below.
 
 
 if __name__ == "__main__":
