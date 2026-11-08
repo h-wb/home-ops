@@ -13,13 +13,14 @@ spec:
 ---
 # ChatGPT subscription, Codex side. A Codex client signs in with ChatGPT itself and
 # LiteLLM forwards that login for the request (it wins over the shared gateway login
-# on the litellm-chatgpt PVC, which serves requests that carry no client login, such
-# as OpenCode's). `gpt-*` routes the plain GPT models, `codex-*` Codex's own slugs
-# like codex-auto-review. Wildcards instead of per-model entries: the plan decides
-# which models answer. These deployments need LiteLLM >= v1.109.0 (proxy pinned to
-# the latest dev release), and a virtual key has to list the pattern; private's
-# never does.
-# Same backend as the chatgpt/ aliases in models/chatgpt.yaml, so quota is shared.
+# on the litellm-chatgpt PVC, which serves whatever request carries no client login).
+# `gpt-*` routes the plain GPT models, `codex-*` Codex's own slugs like
+# codex-auto-review. Wildcards instead of per-model entries: the plan decides which
+# models answer, at the cost of the guards the chatgpt/ aliases in models/chatgpt.yaml
+# declare (272k window, per-key fencing) — so keyed consumers stay on the aliases and
+# these deployments serve Codex-style clients keeping their own sign-in. They need
+# LiteLLM >= v1.109.0 (proxy pinned to the latest dev release), and a virtual key has
+# to list the pattern; private's never does. Same backend, so quota is shared.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

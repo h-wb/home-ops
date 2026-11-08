@@ -20,11 +20,11 @@
           "name": "GPT-6 Luna (ChatGPT)",
           "limit": { "context": 272000, "output": 128000 }
         },
-        "gpt-6.1-sol": {
+        "chatgpt/gpt-6.1-sol": {
           "name": "GPT-6.1 Sol (ChatGPT)",
           "limit": { "context": 272000, "output": 128000 }
         },
-        "gpt-6.1-terra": {
+        "chatgpt/gpt-6.1-terra": {
           "name": "GPT-6.1 Terra (ChatGPT)",
           "limit": { "context": 272000, "output": 128000 }
         },

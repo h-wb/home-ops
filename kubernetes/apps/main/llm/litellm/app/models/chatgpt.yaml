@@ -6,6 +6,9 @@
 # Cloud models, deliberately fenced:
 # - only under these explicit aliases, never as a rung of a local pool;
 # - a virtual key must list them to use them, and no private-scope key does.
+#   (The guard-less gpt-*/codex-* wildcards in models/subscriptions.yaml are the same
+#   subscription for Codex-style clients that keep their own sign-in; general's key
+#   is the only one with them, and no consumer pins interactive use on them.)
 #
 # Non-streaming requests fail upstream ("Unknown items in responses API response",
 # BerriAI/litellm#37039); patches/homeops_chatgpt_nonstream.py works around it for
@@ -47,6 +50,50 @@ spec:
   proxyRef: litellm
   params:
     model: chatgpt/gpt-6-luna
+    additional:
+      additional_drop_params:
+        - temperature
+  info:
+    mode: responses
+    maxInputTokens: 272000
+    maxOutputTokens: 128000
+    supportsVision: true
+    supportsFunctionCalling: true
+    supportsPromptCaching: true
+---
+# GPT-6.1 Sol: near-Astra quality on a far smaller quota draw, the default "heavy"
+# ChatGPT pick for interactive use. Same 272k cheap ceiling as the other tiers.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: chatgpt-gpt-6.1-sol
+spec:
+  modelName: chatgpt/gpt-6.1-sol
+  proxyRef: litellm
+  params:
+    model: chatgpt/gpt-6.1-sol
+    additional:
+      additional_drop_params:
+        - temperature
+  info:
+    mode: responses
+    maxInputTokens: 272000
+    maxOutputTokens: 128000
+    supportsVision: true
+    supportsFunctionCalling: true
+    supportsPromptCaching: true
+---
+# GPT-6.1 Terra: the fast, light tier (writing, visual understanding). Cheapest of
+# the current lineup per request; still quota-bound like everything chatgpt/*.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: chatgpt-gpt-6.1-terra
+spec:
+  modelName: chatgpt/gpt-6.1-terra
+  proxyRef: litellm
+  params:
+    model: chatgpt/gpt-6.1-terra
     additional:
       additional_drop_params:
         - temperature

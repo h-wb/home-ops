@@ -9,13 +9,15 @@ spec:
   secretName: litellm-paseo-general
   secretKey: api-key
   # Cloud models are granted to general only; paseo-private stays on local + Mistral.
-  # gpt-*/codex-* are the ChatGPT subscription deployments (models/subscriptions.yaml):
-  # gpt-* backs OpenCode's Sol/Terra picks and any Codex agent keeping its own sign-in,
-  # codex-* is what Codex calls for its approval checks.
+  # chatgpt/* are the fenced aliases OpenCode and friends call; gpt-*/codex-* are the
+  # subscription wildcards for a Codex agent keeping its own sign-in (and its
+  # approval-check slugs like codex-auto-review).
   models:
     - anthropic/*
     - chatgpt/gpt-6-astra
     - chatgpt/gpt-6-luna
+    - chatgpt/gpt-6.1-sol
+    - chatgpt/gpt-6.1-terra
     - gpt-*
     - codex-*
     - qwen3.5-9b
