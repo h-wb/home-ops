@@ -194,8 +194,7 @@ class PaseoRendering(unittest.TestCase):
                 # Shims must point into the PVC; Flux must leave $HOME/$PATH alone.
                 shell, flag, script, name = tools["command"]
                 self.assertEqual(["sh", "-c", "mise"], [shell, flag, name])
-                self.assertIn('stash push -q -u', script)
-                self.assertIn('checkout -q -f -B master origin/master', script)
+                self.assertIn('checkout -qf -B master origin/master && git -C "$d" clean -fdq', script)
                 self.assertIn('install -D /usr/local/bin/mise "$HOME/.local/bin/mise"', script)
                 self.assertIn('PATH="$HOME/.local/bin:$PATH" exec mise "$@"', script)
                 args = tools["args"]
