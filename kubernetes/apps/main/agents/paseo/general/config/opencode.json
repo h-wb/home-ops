@@ -194,31 +194,6 @@
           }
         }
       }
-    },
-    "zen": {
-      "name": "OpenCode Zen (curated)",
-      "package": "aisdk:@ai-sdk/openai-compatible",
-      "settings": {
-        "baseURL": "https://opencode.ai/inference/openai/v1",
-        "apiKey": "{env:OPENCODE_API_KEY}"
-      },
-      "models": {
-        "deepseek-v4.1-flash-free": {
-          "name": "DeepSeek V4.1 Flash Free"
-        },
-        "glm-5.3-flash-free": {
-          "name": "GLM-5.3-Flash Free"
-        },
-        "grok-code": {
-          "name": "Grok Code Fast 1"
-        },
-        "kimi-k2.5-free": {
-          "name": "Kimi K2.5 Free"
-        },
-        "mimo-v2-pro-free": {
-          "name": "MiMo V2 Pro Free"
-        }
-      }
     }
   },
   "agents": {
