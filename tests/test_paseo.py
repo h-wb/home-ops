@@ -189,24 +189,36 @@ class PaseoRendering(unittest.TestCase):
                                      and doc["metadata"]["name"] == f"{app}-provision"
                                      for doc in self.rendered[scope]))
                 values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
-                tools = values["controllers"][app]["initContainers"]["tools"]
-                self.assertEqual("ghcr.io/jdx/mise", tools["image"]["repository"])
-                # Shims must point into the PVC; Flux must leave $HOME/$PATH alone.
-                shell, flag, script, name = tools["command"]
-                self.assertEqual(["sh", "-c", "mise"], [shell, flag, name])
-                self.assertIn('install -D /usr/local/bin/mise "$HOME/.local/bin/mise"', script)
-                self.assertIn('PATH="$HOME/.local/bin:$PATH" exec mise "$@"', script)
+                runtime = values["controllers"][app]
+                tools = runtime["initContainers"]["tools"]
+                # No script: the app's own image, mise from an image volume.
+                self.assertEqual(runtime["containers"]["app"]["image"], tools["image"])
+                self.assertEqual(["mise"], tools["command"])
                 args = tools["args"]
                 self.assertEqual("bootstrap", args[0])
-                for flag in ("--from", "--from-dir", "--config-dir", "--update",
+                for flag in ("--from", "--from-dir", "--config-dir",
                              "--yes", "--force-dotfiles", "--skip-dirty", "--locked"):
                     self.assertIn(flag, args)
+                self.assertNotIn("--update", args)
                 self.assertIn("https://github.com/h-wb/dotfiles.git", args)
                 self.assertEqual("/home/paseo/.dotfiles", args[args.index("--from-dir") + 1])
                 self.assertEqual(".", args[args.index("--config-dir") + 1])
-                self.assertEqual("/home/paseo/.local/share/mise", tools["env"]["MISE_DATA_DIR"])
-                self.assertEqual("/home/paseo/.config/mise", tools["env"]["MISE_CONFIG_DIR"])
-                self.assertEqual("/home/paseo/.cache/mise", tools["env"]["MISE_CACHE_DIR"])
+                self.assertFalse(any(k.startswith("MISE_") for k in tools["env"]))
+                self.assertTrue(tools["env"]["PATH"].startswith("/opt/mise/usr/local/bin:"))
+                persistence = values["persistence"]
+                # A fresh clone every start, read-only for the agents.
+                dotfiles = persistence["home-dotfiles"]
+                self.assertEqual("emptyDir", dotfiles["type"])
+                self.assertEqual([{"path": "/home/paseo/.dotfiles"}], dotfiles["advancedMounts"][app]["tools"])
+                self.assertEqual([{"path": "/home/paseo/.dotfiles", "readOnly": True}],
+                                 dotfiles["advancedMounts"][app]["app"])
+                # Shims link to the mise binary, so it sits at one path in both.
+                mise = persistence["mise"]
+                self.assertEqual("image", mise["type"])
+                self.assertEqual("ghcr.io/jdx/mise", mise["image"]["repository"])
+                for container in ("tools", "app"):
+                    self.assertEqual([{"path": "/opt/mise", "readOnly": True}],
+                                     mise["advancedMounts"][app][container])
                 self.assertNotIn("provision", values["persistence"])
                 for container in ("tools", "app"):
                     mounts = values["persistence"]["config"]["advancedMounts"][app][container]

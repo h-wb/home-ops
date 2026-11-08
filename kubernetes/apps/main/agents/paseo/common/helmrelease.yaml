@@ -33,15 +33,10 @@ spec:
           reloader.stakater.com/auto: "true"
         initContainers:
           tools:
-            image:
-              repository: ghcr.io/jdx/mise
-              tag: 2026.11.2-debian
-            # Shims symlink to the mise that made them: run it from the PVC.
-            command:
-              - sh
-              - -c
-              - install -D /usr/local/bin/mise "$HOME/.local/bin/mise" && PATH="$HOME/.local/bin:$PATH" exec mise "$@"
-              - mise
+            image: &image
+              repository: ghcr.io/getpaseo/paseo
+              tag: 0.15.3
+            command: ["mise"]
             args:
               - bootstrap
               - --from
@@ -50,16 +45,11 @@ spec:
               - /home/paseo/.dotfiles
               - --config-dir
               - .
-              - --update
               - --yes
               - --force-dotfiles
               - --skip-dirty
               - --locked
-            # MISE_*: back to mise's defaults; the image moves them to /mise.
             env: &env
-              MISE_DATA_DIR: /home/paseo/.local/share/mise
-              MISE_CONFIG_DIR: /home/paseo/.config/mise
-              MISE_CACHE_DIR: /home/paseo/.cache/mise
               PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}
               HOME: /home/paseo
               OPENCODE_CONFIG: /etc/paseo/config/opencode.json
@@ -70,8 +60,8 @@ spec:
                   secretKeyRef:
                     name: litellm-paseo-${PASEO_DATA_SCOPE}
                     key: api-key
-              # System dirs first: the daemon needs the image's node.
-              PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
+              # mise from the image volume; system dirs next: the daemon needs the image's node.
+              PATH: /opt/mise/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
             envFrom:
               - &secret
                 secretRef:
@@ -87,9 +77,7 @@ spec:
                 memory: 2Gi
         containers:
           app:
-            image: &image
-              repository: ghcr.io/getpaseo/paseo
-              tag: 0.15.3
+            image: *image
             env: &appEnv
               <<: *env
               PASEO_HOSTNAMES: "${PASEO_HOSTNAMES}"
@@ -198,6 +186,28 @@ spec:
             tools: &home
               - path: /home/paseo
             app: *home
+      # Cloned fresh at every start; read-only for the agents.
+      home-dotfiles:
+        type: emptyDir
+        advancedMounts:
+          ${APP}:
+            tools:
+              - path: /home/paseo/.dotfiles
+            app:
+              - path: /home/paseo/.dotfiles
+                readOnly: true
+      # Same path in every container, so mise's shims (symlinks to it) resolve.
+      mise:
+        type: image
+        image:
+          repository: ghcr.io/jdx/mise
+          tag: 2026.11.2-debian
+        advancedMounts:
+          ${APP}:
+            tools: &mise
+              - path: /opt/mise
+                readOnly: true
+            app: *mise
       # dotfiles reads this path: /etc/paseo selects its class, paseo.json is merged.
       config:
         type: configMap
