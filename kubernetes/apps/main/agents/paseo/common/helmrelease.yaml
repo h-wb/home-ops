@@ -79,7 +79,8 @@ spec:
               - --force-dotfiles
               - --skip-dirty
               - --locked
-            env: &env # mise's defaults, which the jdx/mise image moves to /mise.
+            # MISE_*: mise's defaults, which the jdx/mise image moves to /mise.
+            env: &env
               MISE_DATA_DIR: /home/paseo/.local/share/mise
               MISE_CONFIG_DIR: /home/paseo/.config/mise
               MISE_CACHE_DIR: /home/paseo/.cache/mise
