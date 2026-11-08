@@ -1,0 +1,27 @@
+---
+# Search and request media through Overseerr (jhomen368/overseerr-mcp, as in
+# joryirving/home-ops' seerr-mcp). Requests go through Overseerr's own approval rules.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: overseerr
+spec:
+  image: ghcr.io/jhomen368/overseerr-mcp:2.3.1@sha256:54c84625f2040654799ef55fc9864dd8b0d7c725b4e7eb2ea9e2ce8d71f8df1e
+  transport: stdio
+  proxyMode: streamable-http
+  proxyPort: 8080
+  env:
+    - name: SEERR_URL
+      value: http://overseerr.downloads.svc.cluster.local
+  secrets:
+    - name: toolhive-overseerr
+      key: SEERR_API_KEY
+      targetEnvName: SEERR_API_KEY
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  groupRef:
+    name: mcp-tools

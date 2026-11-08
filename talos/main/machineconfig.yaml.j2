@@ -24,9 +24,11 @@ machine:
     kubernetesTalosAPIAccess:
       allowedKubernetesNamespaces:
         - actions-runner-system
+        - llm # ToolHive's talos MCP server (os:reader)
         - system-upgrade
       allowedRoles:
         - os:admin
+        - os:reader
       enabled: true
     {% endif %}
     rbac: true

@@ -1,0 +1,11 @@
+---
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: MCPServerEntry
+metadata:
+  name: homeassistant
+spec:
+  remoteUrl: http://mcp-homeassistant.llm.svc.cluster.local:8086/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  groupRef:
+    name: mcp-tools

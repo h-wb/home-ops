@@ -20,6 +20,8 @@ spec:
         - workload: kubesearch
         - workload: grafana
         - workload: arr
+        - workload: overseerr
+        - workload: talos
         - workload: anki
         - workload: excel
         # Private tier data (vault, personal tasks) never appears in this list: general

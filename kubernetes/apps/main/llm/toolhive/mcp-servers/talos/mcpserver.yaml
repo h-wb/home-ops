@@ -1,0 +1,39 @@
+---
+# Talos node inspection (eleboucher/talos-mcp, as in rust84/k8s-gitops): services,
+# logs, disks, resources. os:reader is read-only; machine secrets stay redacted.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: talos
+spec:
+  image: registry.erwanleboucher.dev/eleboucher/talos-mcp:0.0.2@sha256:ad1b388e20cbe171763ba0ff85ed32856f2573c9c40f5081a83c96b3b57f0d35
+  transport: streamable-http
+  proxyMode: streamable-http
+  proxyPort: 8080
+  mcpPort: 8080
+  env:
+    - name: TALOS_MCP_TRANSPORT
+      value: http
+    - name: TALOS_MCP_HTTP_ADDR
+      value: ":8080"
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: mcp
+          volumeMounts:
+            - name: talosconfig
+              mountPath: /var/run/secrets/talos.dev
+              readOnly: true
+      volumes:
+        - name: talosconfig
+          secret:
+            secretName: talos-mcp
+            defaultMode: 0400
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  groupRef:
+    name: mcp-tools
