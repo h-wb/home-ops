@@ -19,12 +19,12 @@ a separate pod. No private-scope key lists a cloud model.
 Agents use `https://litellm.${SECRET_DOMAIN}` (internal route; both Paseo pods
 carry an Envoy host alias for it).
 
-| Client      | Route                    | Provider credentials                                                                                             |
-| ----------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Claude Code | Root URL, `anthropic/*`  | Claude Code owns its subscription login; LiteLLM forwards it. `ANTHROPIC_CUSTOM_HEADERS` carries the LiteLLM key |
-| OpenCode    | `/v1`, explicit aliases  | LiteLLM owns upstream credentials (Mistral API key, the shared `chatgpt/*` login)                                |
-| Codex       | `/v1`, `gpt-*`/`codex-*` | Codex owns its subscription sign-in, LiteLLM forwards it; requests without one ride the shared `chatgpt/*` login |
-| Hermes      | In-cluster `/v1`         | Separate general/private keys, Mistral only                                                                      |
+| Client      | Route                    | Provider credentials                                                                                                                                        |
+| ----------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code | Root URL, `anthropic/*`  | Claude Code owns its subscription login; LiteLLM forwards it. `ANTHROPIC_CUSTOM_HEADERS` carries the LiteLLM key                                            |
+| OpenCode    | `/v1`, explicit aliases  | LiteLLM owns the shared `chatgpt/*` login and local/Qwen; Mistral goes direct via the pod's `MISTRAL_API_KEY`, native provider with thinking off by default |
+| Codex       | `/v1`, `gpt-*`/`codex-*` | Codex owns its subscription sign-in, LiteLLM forwards it; requests without one ride the shared `chatgpt/*` login                                            |
+| Hermes      | In-cluster `/v1`         | Separate general/private keys, Mistral only                                                                                                                 |
 
 Claude's URL and header are injected into general's containers. Keep
 `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `apiKeyHelper` unset. The gateway
