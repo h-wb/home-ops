@@ -10,17 +10,23 @@ spec:
           nfsMount: "true"
         initContainers:
           tools:
+            env:
+              ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: ${APP}-secret
               - secretRef:
                   name: ${APP}-mcp
               - secretRef:
+                  name: ${APP}-litellm
+              - secretRef:
                   name: paseo-github
               - secretRef:
                   name: paseo-memory
         containers:
           app:
+            env:
+              ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: ${APP}-secret
@@ -35,6 +41,8 @@ spec:
               - secretRef:
                   name: paseo-memory
           sshd:
+            env:
+              ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
             envFrom:
               - secretRef:
                   name: ${APP}-secret

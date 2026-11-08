@@ -29,6 +29,11 @@ moving these files does not rename persistent resources or client identities.
 | General     | Claude, Codex, Mistral Vibe, OpenCode | Code, `memini-general`                     | Kubernetes through ToolHive, NFS, Tailscale                                |
 | Private     | Mistral Vibe, Hermes (`llm/hermes`)   | Obsidian, personal tools, `memini-private` | A token for `exec` into llm's `hermes-private-0` only; no NFS or Tailscale |
 
+All enabled agents use LiteLLM for model inference; MCP/tool connections remain
+scoped separately. Claude and Codex keep their own subscription logins; Vibe uses
+the scope's gateway key and Mistral routes, including background models. See
+[Agent model gateway](../llm/README.md#agent-model-gateway) for auth and rollout.
+
 All general providers use ToolHive's Kubernetes and Flux servers for cluster
 operations. The general pod has no mounted service-account token or direct RBAC
 grants, including in `agents-scratch`. Private retains its explicit token for the

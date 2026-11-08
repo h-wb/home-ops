@@ -5,7 +5,9 @@ metadata:
   name: litellm
 spec:
   applyMode: file
-  image: ghcr.io/berriai/litellm-database:v1.108.2@sha256:979a1dd71759b956757015bfada0df79562e6b59420bb7a23ddf8dd4e3ee0122
+  # Client-owned Codex OAuth forwarding is not in 1.108.x. The documented
+  # 1.109.0 image is unpublished; this published dev release contains the feature.
+  image: ghcr.io/berriai/litellm-database:v1.110.0-dev.1@sha256:cd1010d8b5d266e701d837b69861912d0e686c49590404babbf8335ca730dda7
   replicas: 2
   service:
     port: 4000

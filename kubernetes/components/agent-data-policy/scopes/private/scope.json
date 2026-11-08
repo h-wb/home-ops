@@ -11,7 +11,12 @@
       "mistral-vibe": {
         "enabled": true,
         "env": {
-          "VIBE_MCP_SERVERS": "[{\"name\":\"toolhive-private\",\"transport\":\"streamable-http\",\"url\":\"https://mcp-private.${SECRET_DOMAIN}/mcp\",\"auth\":{\"type\":\"static\",\"api_key_env\":\"MCP_API_KEY\",\"api_key_header\":\"x-api-key\",\"api_key_format\":\"{token}\"},\"startup_timeout_sec\":60,\"tool_timeout_sec\":120}]"
+          "VIBE_MCP_SERVERS": "[{\"name\":\"toolhive-private\",\"transport\":\"streamable-http\",\"url\":\"https://mcp-private.${SECRET_DOMAIN}/mcp\",\"auth\":{\"type\":\"static\",\"api_key_env\":\"MCP_API_KEY\",\"api_key_header\":\"x-api-key\",\"api_key_format\":\"{token}\"},\"startup_timeout_sec\":60,\"tool_timeout_sec\":120}]",
+          "VIBE_PROVIDERS": "[{\"name\":\"litellm\",\"api_base\":\"https://litellm.${SECRET_DOMAIN}/v1\",\"api_key_env_var\":\"LITELLM_API_KEY\",\"api_style\":\"openai\",\"backend\":\"generic\"}]",
+          "VIBE_MODELS": "[{\"name\":\"mistral/mistral-medium-latest\",\"provider\":\"litellm\",\"alias\":\"litellm-mistral-medium\"},{\"name\":\"mistral/mistral-small-latest\",\"provider\":\"litellm\",\"alias\":\"litellm-mistral-small\"},{\"name\":\"mistral/mistral-large-latest\",\"provider\":\"litellm\",\"alias\":\"litellm-mistral-large\"}]",
+          "VIBE_ACTIVE_MODEL": "litellm-mistral-medium",
+          "VIBE_ALLOWED_MODELS": "[\"litellm-mistral-*\"]",
+          "VIBE_UTILITY_MODELS": "{\"title\":\"litellm-mistral-small\",\"smart_approve\":\"litellm-mistral-small\"}"
         },
         "paseoTools": {
           "disabledTools": ["create_agent", "send_agent_prompt"]

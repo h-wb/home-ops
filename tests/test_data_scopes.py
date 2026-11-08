@@ -87,6 +87,63 @@ class DataScopes(unittest.TestCase):
     def test_orphan_tool_result_denied(self):
         self.assertFalse(self.guard._only_general_tools({"messages": [{"role": "tool", "tool_call_id": "missing", "content": "secret"}]}))
 
+    def test_claude_native_tools_require_key_grant(self):
+        data = {"model": "anthropic/claude-test", "tools": [{"name": "Bash", "input_schema": {"type": "object"}}],
+                "messages": [
+                    {"role": "assistant", "content": [{"type": "tool_use", "id": "1", "name": "Bash", "input": {"command": "pwd"}}]},
+                    {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "1", "content": "/workspace"}]},
+                ]}
+        with patch.object(self.guard, "_allows_private_model", return_value=False):
+            for granted in (False, True):
+                with self.subTest(granted=granted):
+                    key = types.SimpleNamespace(metadata={"allow_general_agent_tools": str(granted).lower()})
+                    if granted:
+                        self.assertIs(data, asyncio.run(self.guard.guard_instance.async_pre_call_hook(key, None, data, None)))
+                    else:
+                        with self.assertRaises(Exception):
+                            asyncio.run(self.guard.guard_instance.async_pre_call_hook(key, None, data, None))
+            # Request metadata cannot grant the privilege.
+            data["metadata"] = {"allow_general_agent_tools": "true"}
+            with self.assertRaises(Exception):
+                asyncio.run(self.guard.guard_instance.async_pre_call_hook(types.SimpleNamespace(), None, data, None))
+
+    def test_codex_namespace_and_custom_tool_history(self):
+        data = {"tools": [{"type": "namespace", "name": "functions", "tools": [
+            {"type": "function", "name": "exec_command"}, {"type": "custom", "name": "apply_patch"},
+        ]}, {"type": "web_search"}], "input": [
+            {"type": "custom_tool_call", "name": "apply_patch", "call_id": "1", "input": "*** Begin Patch"},
+            {"type": "custom_tool_call_output", "call_id": "1", "output": "done"},
+        ]}
+        self.assertTrue(self.guard._only_general_tools(data, True))
+        self.assertFalse(self.guard._only_general_tools(data))
+        data["input"][1]["call_id"] = "unknown"
+        self.assertFalse(self.guard._only_general_tools(data, True))
+
+    def test_general_agent_grant_keeps_private_mcp_blocked_in_each_protocol(self):
+        for name in ("mcp__toolhive-general__call_tool", "mcp__toolhive_general__call_tool", "mcp__toolhive_general.call_tool"):
+            for nested, allowed in (("github_list_repos", True), ("memini_memory_recall", False), ("dawarich_locations", False)):
+                with self.subTest(name=name, nested=nested):
+                    args = {"tool_name": nested}
+                    histories = [
+                        {"messages": [{"role": "assistant", "tool_calls": [{"id": "1", "function": {"name": name, "arguments": json.dumps(args)}}]}]},
+                        {"input": [{"type": "function_call", "call_id": "1", "name": name, "arguments": json.dumps(args)}]},
+                        {"messages": [{"role": "assistant", "content": [{"type": "tool_use", "id": "1", "name": name, "input": args}]}]},
+                    ]
+                    for data in histories:
+                        self.assertEqual(allowed, self.guard._only_general_tools(data, True))
+
+    def test_scoped_memory_and_unknown_tools(self):
+        for name, allowed in (("mcp__memini_general__memory_recall", True),
+                              ("mcp__memini_general.memory_recall", True),
+                              ("mcp__chrome-devtools__take_snapshot", True),
+                              ("mcp__paseo__create_agent", True),
+                              ("mcp__memini-private__memory_recall", False),
+                              ("metabase_query", False), ("unknown_tool", False)):
+            data = {"tools": [{"type": "function", "name": name}]}
+            self.assertEqual(allowed, self.guard._only_general_tools(data, True), name)
+        for kind in ("tool_result", "custom_tool_call_output", "function_call_output", "mcp_call", "mcp_list_tools"):
+            self.assertFalse(self.guard._only_general_tools({"input": [{"type": kind}]}, True), kind)
+
 
 SCOPES_DIR = ROOT / "kubernetes/components/agent-data-policy/scopes"
 
@@ -146,6 +203,17 @@ class ScopeFragments(unittest.TestCase):
             for provider in settings["providers"]:
                 self.assertIn(scope, POLICY["providers"][provider]["allowed_data_scopes"], provider)
 
+    def test_vibe_models_and_background_calls_use_gateway(self):
+        for scope in POLICY["scopes"]:
+            env = self.fragment(scope, "scope.json")["agents"]["providers"]["mistral-vibe"]["env"]
+            provider, = json.loads(env["VIBE_PROVIDERS"])
+            self.assertEqual("https://litellm.example.com/v1", provider["api_base"])
+            self.assertEqual("LITELLM_API_KEY", provider["api_key_env_var"])
+            aliases = {model["alias"] for model in json.loads(env["VIBE_MODELS"])}
+            self.assertIn(env["VIBE_ACTIVE_MODEL"], aliases)
+            self.assertTrue(set(json.loads(env["VIBE_UTILITY_MODELS"]).values()) <= aliases)
+            self.assertEqual(["litellm-mistral-*"], json.loads(env["VIBE_ALLOWED_MODELS"]))
+
 
 class PaseoRendering(unittest.TestCase):
     """Exercise Kustomize and Flux substitution using the repo's pinned tools."""
@@ -199,6 +267,31 @@ class PaseoRendering(unittest.TestCase):
         codex = tomllib.loads(data["codex.toml"])["mcp_servers"]
         self.assertEqual({"x-api-key": "MCP_API_KEY"}, codex["toolhive-general"]["env_http_headers"])
         self.assertEqual("MEMINI_API_KEY", codex["memini-general"]["bearer_token_env_var"])
+
+    def test_subscription_credentials_and_routes(self):
+        data = self.resource("general", "ConfigMap", "paseo-scope")["data"]
+        codex = tomllib.loads(data["codex.toml"])
+        provider = codex["model_providers"][codex["model_provider"]]
+        self.assertEqual("https://litellm.example.com/v1", provider["base_url"])
+        self.assertTrue(provider["requires_openai_auth"])
+        self.assertFalse(provider["supports_websockets"])
+        self.assertEqual({"x-litellm-api-key": "LITELLM_API_KEY"}, provider["env_http_headers"])
+        self.assertNotIn("env_key", provider)
+        secret = self.resource("general", "ExternalSecret", "paseo-litellm")["spec"]["target"]["template"]["data"]
+        self.assertEqual("x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}", secret["ANTHROPIC_CUSTOM_HEADERS"])
+        for name, controller in (("general", "paseo"), ("private", "paseo-private")):
+            values = self.resource(name, "HelmRelease", controller)["spec"]["values"]
+            hosts = values["defaultPodOptions"]["hostAliases"][0]["hostnames"]
+            self.assertIn("litellm.example.com", hosts)
+            runtime = values["controllers"][controller]
+            containers = {**runtime["containers"], **runtime["initContainers"]}
+            for container in ("tools", "app", "sshd"):
+                if name == "general":
+                    self.assertEqual("https://litellm.example.com", containers[container]["env"]["ANTHROPIC_BASE_URL"])
+                    secrets = [entry["secretRef"]["name"] for entry in containers[container]["envFrom"]]
+                    self.assertIn("paseo-litellm", secrets)
+                else:
+                    self.assertNotIn("ANTHROPIC_BASE_URL", containers[container]["env"])
 
     def test_all_provisioning_containers_can_read_scope_fragments(self):
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
@@ -265,6 +358,29 @@ class PaseoRendering(unittest.TestCase):
         self.assertEqual({"app"}, set(token["advancedMounts"]["paseo-private"]))
         self.assertTrue(any("serviceAccountToken" in source
                             for source in token["volumeSpec"]["projected"]["sources"]))
+
+
+class LiteLLMRendering(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        built = PaseoRendering.run_tool("kustomize", "build", "kubernetes/apps/main/llm/litellm/app",
+                                       "--load-restrictor=LoadRestrictionsNone")
+        cls.docs = PaseoRendering.documents(built)
+
+    def test_subscription_routes_and_key_isolation(self):
+        models = {doc["spec"]["modelName"]: doc["spec"] for doc in self.docs if doc.get("kind") == "LiteLLMModel"}
+        for alias, upstream in (("anthropic/*", "anthropic/*"), ("gpt-*", "chatgpt/gpt-*"), ("codex-*", "chatgpt/codex-*")):
+            self.assertEqual(upstream, models[alias]["params"]["model"])
+            self.assertNotIn("apiKeyRef", models[alias]["params"])
+            self.assertNotIn("apiKey", models[alias]["params"])
+        keys = {doc["metadata"]["name"]: doc["spec"] for doc in self.docs if doc.get("kind") == "LiteLLMVirtualKey"}
+        self.assertEqual("true", keys["paseo-general"]["metadata"]["allow_general_agent_tools"])
+        for name in ("paseo-general", "paseo-private"):
+            key = keys[name]
+            self.assertNotIn("allow_tool_policy_override", key.get("metadata", {}))
+            for alias in ("anthropic/*", "gpt-*", "codex-*"):
+                self.assertEqual(name == "paseo-general", alias in key["models"])
+        self.assertNotIn("allow_general_agent_tools", keys["paseo-private"].get("metadata", {}))
 
 
 if __name__ == "__main__":

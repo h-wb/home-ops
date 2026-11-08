@@ -5,8 +5,9 @@ request may carry private tool calls or results. Gateway call_tool arguments are
 inspected too. General tool prefixes and endpoint eligibility come from the
 home-ops policy mounted at /etc/agent-data-policy/policy.json. Missing policy
 fails startup; unknown backends get general tools only. Pasted private text and
-attachments are outside this protocol guard. Direct subscription agents bypass
-LiteLLM and are separated by their execution environments instead.
+attachments are outside this protocol guard. The general execution environment's
+key additionally permits the native coding tools declared in the shared policy.
+MCP calls and history are still checked; this grant is not a policy override.
 
 The separately scoped public-repository reviewer key retains an explicit tool
 policy override. This is never granted to interactive Paseo keys.
@@ -30,8 +31,15 @@ _LOCAL_SUFFIXES = tuple(_LOCAL_RULE["host_suffixes"])
 _TOOL_KEYS = ("tools", "functions", "tool_choice", "function_call")
 _TOOL_ROLES = ("tool", "function")
 _GENERAL_PREFIXES = tuple(_POLICY["general_tool_prefixes"])
+_AGENT_TOOLS = _POLICY["general_agent_tools"]
+_AGENT_NAMES = frozenset(_AGENT_TOOLS["names"])
+_AGENT_MCP_PREFIXES = tuple(_AGENT_TOOLS["mcp_prefixes"])
+_AGENT_HOSTED_TYPES = frozenset(_AGENT_TOOLS["hosted_types"])
 _GATEWAY_TOOLS = ("find_tool", "call_tool")
-_TOOL_ITEM_TYPES = ("function_call", "function_call_output", "mcp_call", "mcp_list_tools", "tool_result", "tool_use")
+_CALL_TYPES = ("function_call", "custom_tool_call", "tool_use")
+_RESULT_TYPES = ("function_call_output", "custom_tool_call_output", "tool_result")
+_HOSTED_CALL_TYPES = frozenset(kind + "_call" for kind in _AGENT_HOSTED_TYPES)
+_TOOL_ITEM_TYPES = frozenset((*_CALL_TYPES, *_RESULT_TYPES, "mcp_call", "mcp_list_tools")) | _HOSTED_CALL_TYPES
 
 
 def _is_local_base(api_base):
@@ -103,8 +111,16 @@ def _carries_tools(data):
     return False
 
 
-def _general_name(name):
-    return isinstance(name, str) and name.startswith(_GENERAL_PREFIXES)
+def _general_name(name, allow_agent_tools=False):
+    if not isinstance(name, str):
+        return False
+    if name.startswith("functions."):
+        name = name.removeprefix("functions.")
+    if name.startswith("mcp__"):
+        name = name.replace(".", "__")
+    return name.startswith(_GENERAL_PREFIXES) or (
+        allow_agent_tools and (name in _AGENT_NAMES or name.startswith(_AGENT_MCP_PREFIXES))
+    )
 
 
 def _gateway_tool(name):
@@ -115,19 +131,21 @@ def _gateway_tool(name):
     """
     if not isinstance(name, str):
         return None
+    if name.startswith("mcp__"):
+        name = name.replace(".", "__")
     for tool in _GATEWAY_TOOLS:
         if name == tool or name.endswith("_" + tool):
             return tool
     return None
 
 
-def _general_call(name, arguments):
+def _general_call(name, arguments, allow_agent_tools=False):
     """True when one tool call is find_tool, or runs a cluster/repository tool."""
     kind = _gateway_tool(name)
-    if kind == "find_tool" or _general_name(name):
+    if kind == "find_tool":
         return True
     if kind != "call_tool":
-        return False
+        return _general_name(name, allow_agent_tools)
     try:
         args = json.loads(arguments) if isinstance(arguments, str) else arguments
         return _general_name((args or {}).get("tool_name"))
@@ -135,53 +153,85 @@ def _general_call(name, arguments):
         return False
 
 
-def _only_general_tools(data):
-    """True when everything tool-related in the request is a cluster/repository tool.
+def _general_definition(tool, allow_agent_tools):
+    if not isinstance(tool, dict):
+        return False
+    kind = tool.get("type")
+    if kind == "namespace":
+        # Codex groups native and MCP tools into namespaces. Qualify MCP names
+        # so a private server's memory_recall cannot look like a general tool.
+        namespace = tool.get("name") or ""
+        children = tool.get("tools") or []
+        if namespace.startswith("mcp__"):
+            children = [{**child, "name": namespace + "__" + child.get("name", "")} for child in children]
+        return bool(children) and all(_general_definition(child, allow_agent_tools) for child in children)
+    if allow_agent_tools and kind in _AGENT_HOSTED_TYPES:
+        return True
+    # Anthropic definitions have input_schema and no type. OpenAI supports
+    # nested Chat functions, flat Responses functions and native custom tools.
+    if kind not in (None, "function", "custom") or (kind is None and "input_schema" not in tool):
+        return False
+    if kind == "custom" and not allow_agent_tools:
+        return False
+    name = (tool.get("function") or {}).get("name") or tool.get("name")
+    return bool(_gateway_tool(name)) or _general_name(name, allow_agent_tools)
 
-    Anything this does not recognise (legacy functions, hosted or MCP tool types,
-    content-part tool blocks, a result with no visible call) counts as not allowed.
+
+def _only_general_tools(data, allow_agent_tools=False):
+    """Check Chat, Responses and Anthropic tools and their complete visible history.
+
+    Unknown definitions, hosted MCP connections and orphan results fail closed.
+    Native coding tools require an authenticated key grant, never request metadata.
     """
     if data.get("functions") or data.get("function_call"):
         return False
     for tool in data.get("tools") or []:
-        if not isinstance(tool, dict) or tool.get("type") != "function":
+        if not _general_definition(tool, allow_agent_tools):
             return False
-        name = (tool.get("function") or {}).get("name") or tool.get("name")
-        if not _gateway_tool(name) and not _general_name(name):
+    choice = data.get("tool_choice")
+    if isinstance(choice, dict):
+        name = (choice.get("function") or {}).get("name") or choice.get("name")
+        if name and not (_gateway_tool(name) or _general_name(name, allow_agent_tools)):
             return False
     items = list(data.get("messages") or [])
     if isinstance(data.get("input"), list):
         items += data["input"]
     checked = set()
+    results = []
     for item in items:
         if not isinstance(item, dict):
             continue
         for call in item.get("tool_calls") or []:
             fn = (call or {}).get("function") or {}
-            if not _general_call(fn.get("name"), fn.get("arguments")):
+            if not _general_call(fn.get("name"), fn.get("arguments"), allow_agent_tools):
                 return False
-            checked.add(call.get("id"))
-        if item.get("type") == "function_call":
-            if not _general_call(item.get("name"), item.get("arguments")):
-                return False
-            checked.add(item.get("call_id"))
-        elif item.get("type") in _TOOL_ITEM_TYPES and item.get("type") != "function_call_output":
-            return False
+            if call.get("id"):
+                checked.add(call["id"])
         content = item.get("content")
-        if isinstance(content, list) and any(
-            isinstance(part, dict) and part.get("type") in _TOOL_ITEM_TYPES for part in content
-        ):
-            return False
-    for item in items:
-        if not isinstance(item, dict):
-            continue
+        parts = [item] + (content if isinstance(content, list) else [])
+        for part in parts:
+            if not isinstance(part, dict):
+                continue
+            kind = part.get("type")
+            if kind in _CALL_TYPES:
+                args = part.get("input") if kind in ("tool_use", "custom_tool_call") else part.get("arguments")
+                if not _general_call(part.get("name"), args, allow_agent_tools):
+                    return False
+                call_id = part.get("call_id") or part.get("id")
+                if call_id:
+                    checked.add(call_id)
+            elif kind in _RESULT_TYPES:
+                results.append(part.get("tool_use_id") if kind == "tool_result" else part.get("call_id"))
+            elif kind in _HOSTED_CALL_TYPES:
+                if not allow_agent_tools:
+                    return False
+            elif kind in _TOOL_ITEM_TYPES:
+                return False
         if item.get("role") == "function":
             return False
-        if item.get("role") == "tool" and item.get("tool_call_id") not in checked:
-            return False
-        if item.get("type") == "function_call_output" and item.get("call_id") not in checked:
-            return False
-    return True
+        if item.get("role") == "tool":
+            results.append(item.get("tool_call_id"))
+    return all(result in checked for result in results)
 
 
 class DataScopeGuard(CustomLogger):
@@ -194,7 +244,8 @@ class DataScopeGuard(CustomLogger):
         metadata = getattr(user_api_key_dict, "metadata", None) or {}
         if str(metadata.get("allow_tool_policy_override", "")).lower() == "true":
             return data
-        if _only_general_tools(data):
+        allow_agent_tools = str(metadata.get("allow_general_agent_tools", "")).lower() == "true"
+        if _only_general_tools(data, allow_agent_tools):
             return data
         key_alias = getattr(user_api_key_dict, "key_alias", None)
         log.warning("data scope guard: refused tools on %r for key %r", alias, key_alias)
@@ -203,8 +254,8 @@ class DataScopeGuard(CustomLogger):
             detail={
                 "error": (
                     f"These tools are not allowed on '{alias}': its backend is not approved for private data, and only "
-                    "cluster, repository, n8n and Anki tools (kubectl, flux, github, n8n, anki) may be used with it. "
-                    "Personal data (Metabase, Dawarich, memory) needs local inference or Mistral; a "
+                    "general tools and explicitly granted native agent tools may be used with it. "
+                    "Private tools and memory need local inference or Mistral; a "
                     "conversation that already used those tools cannot continue on a general-only backend."
                 )
             },

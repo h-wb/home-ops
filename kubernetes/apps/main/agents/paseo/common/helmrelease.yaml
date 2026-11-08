@@ -25,6 +25,7 @@ spec:
         - hostnames:
             - mcp-general.${SECRET_DOMAIN}
             - mcp-private.${SECRET_DOMAIN}
+            - litellm.${SECRET_DOMAIN}
           ip: 192.168.1.202
       # The image's entrypoint only needs root to chown volumes, then drops to `paseo`
       # (1000); starting as 1000 with fsGroup does the same and skips that step.

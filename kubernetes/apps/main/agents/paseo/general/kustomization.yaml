@@ -21,3 +21,15 @@ patches:
   - path: helmrelease.yaml
     target:
       kind: HelmRelease
+  - patch: |-
+      apiVersion: external-secrets.io/v1
+      kind: ExternalSecret
+      metadata:
+        name: ${APP}-litellm
+      spec:
+        target:
+          template:
+            engineVersion: v2
+            data:
+              LITELLM_API_KEY: "{{ .LITELLM_API_KEY }}"
+              ANTHROPIC_CUSTOM_HEADERS: "x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}"
