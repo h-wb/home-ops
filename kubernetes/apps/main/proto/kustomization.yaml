@@ -1,9 +1,0 @@
----
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# Personal-assistant prototype (h-wb/obsidian-workspace docs/assistant). Synthetic data only.
-# Delete this directory to tear it down: the `proto` Kustomization prunes everything it made,
-# including the cluster-scoped Agent Sandbox CRD and controller.
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - ./ks.yaml

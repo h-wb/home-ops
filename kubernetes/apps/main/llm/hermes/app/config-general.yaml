@@ -1,7 +1,9 @@
-# General tier: any model (Claude included once it has a LiteLLM route); Mistral for now.
-# Mounted read-only at /etc/hermes (Hermes managed scope), so it wins over anything the agent
-# writes to $HERMES_HOME. The doubled dollar is Flux's escape; Hermes expands the reference from
-# the pod env (the tier's LiteLLM virtual key).
+# General tier: any model on its LiteLLM key; Mistral for now. Its tools ride the
+# mcp-ops gateway (the same list the general Paseo tier sees), its memories the
+# general Memini instance. Mounted read-only at /etc/hermes (Hermes managed scope),
+# so it wins over anything the agent writes to $HERMES_HOME. The doubled dollar is
+# Flux's escape; Hermes expands the reference from the pod env (the tier's LiteLLM
+# virtual key).
 model:
   default: mistral/mistral-small-latest
   provider: litellm

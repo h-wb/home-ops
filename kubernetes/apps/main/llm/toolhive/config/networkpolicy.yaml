@@ -22,10 +22,7 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: envoy-gateway
-        - namespaceSelector:
+        - podSelector:
             matchLabels:
-              kubernetes.io/metadata.name: proto
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: hermes
+              app.kubernetes.io/name: hermes-private
               assistant.scope: private

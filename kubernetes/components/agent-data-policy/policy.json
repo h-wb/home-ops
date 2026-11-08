@@ -45,7 +45,7 @@
     },
     "hermes-private": {
       "allowed_data_scopes": ["private"],
-      "note": "Private Hermes in proto, over kubectl exec; its tools come from ToolHive by identity."
+      "note": "Private Hermes in llm/hermes, over kubectl exec; its tools come from ToolHive through egress-netpinned gateways."
     }
   },
   "private_backends": {
