@@ -25,4 +25,5 @@ fs.writeFileSync(dst, JSON.stringify(merge(read(dst), read(src)), null, 2) + "\n
 ' "$1" "$2"
 }
 merge "$HOME/.paseo/config.json" /etc/paseo/config/paseo.json
-merge "$HOME/.claude.json" /etc/paseo/config/claude.json
+# The image sets CLAUDE_CONFIG_DIR=~/.claude; Claude then reads its .claude.json there.
+merge "${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json" /etc/paseo/config/claude.json
