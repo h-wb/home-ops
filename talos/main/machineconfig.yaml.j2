@@ -41,6 +41,13 @@ machine:
           discard_unpacked_layers = false
         [plugins."io.containerd.cri.v1.runtime"]
           device_ownership_from_security_context = true
+    - op: create
+      path: /etc/nfs.conf
+      permissions: 0o644
+      content: |
+        [nfsrahead]
+        nfs4=16384
+        default=128
     - op: overwrite
       path: /etc/nfsmount.conf
       permissions: 0o644
@@ -55,7 +62,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    image: factory.talos.dev/installer/3e5aa92360951b1bd0bf766770e57fb151433fba33156a58f9d4223cdc46641f:v1.14.2
+    image: factory.talos.dev/installer/db8d3cdcb1f738704e1b5f5f2f39c7f36773fed358a41b7073fca2eb1a406bad:v1.14.2
     wipe: false
   kernel:
     modules:
