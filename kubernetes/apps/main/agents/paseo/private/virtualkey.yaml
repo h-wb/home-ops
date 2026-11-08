@@ -1,0 +1,23 @@
+---
+# The paseo-private LiteLLM virtual key, jory-shape: the CR lives beside the
+# pods, and the cluster-scoped litellm-operator generates the key and writes
+# the litellm-paseo-private Secret into this namespace, binding
+# cross-namespace to the proxy in llm. The helmrelease references that Secret
+# directly — no ExternalSecret, no Bitwarden copy.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: paseo-private
+spec:
+  proxyRef: litellm
+  proxyNamespace: llm
+  keyAlias: Paseo Private
+  secretName: litellm-paseo-private
+  secretKey: api-key
+  # Private stays fenced: local + Mistral only, no cloud models.
+  models:
+    - qwen3.5-9b
+    - qwen3.5-9b-chat
+    - mistral/mistral-small-latest
+    - mistral/mistral-medium-latest
+    - mistral/mistral-large-latest

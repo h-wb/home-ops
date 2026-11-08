@@ -4,6 +4,7 @@ resources:
   - ../common
   - networkpolicy.yaml
   - externalsecret.yaml
+  - virtualkey.yaml
 # Agent config for this scope, mounted at /etc/paseo/config (see common/config/provision.sh).
 configMapGenerator:
   - name: ${APP}-config
@@ -17,16 +18,3 @@ patches:
   - path: helmrelease.yaml
     target:
       kind: HelmRelease
-  # Claude Code's LiteLLM key rides the main credential extract like everything
-  # else; the header form is what provision.sh and the LiteLLM docs expect.
-  - patch: |-
-      apiVersion: external-secrets.io/v1
-      kind: ExternalSecret
-      metadata:
-        name: ${APP}
-      spec:
-        target:
-          template:
-            engineVersion: v2
-            data:
-              ANTHROPIC_CUSTOM_HEADERS: "x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}"

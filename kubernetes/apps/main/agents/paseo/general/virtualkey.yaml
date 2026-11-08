@@ -1,14 +1,18 @@
 ---
+# The paseo-general LiteLLM virtual key, jory-shape: the CR lives beside the
+# pods, and the cluster-scoped litellm-operator (verified ClusterRoleBinding)
+# generates the key and writes the litellm-paseo-general Secret into this
+# namespace, binding cross-namespace to the proxy in llm. The helmrelease
+# references that Secret directly — no ExternalSecret, no Bitwarden copy, and
+# a rotated key reaches the pod with the operator's own sync.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
   name: paseo-general
 spec:
   proxyRef: litellm
+  proxyNamespace: llm
   keyAlias: Paseo General
-  # The pods consume this key as the LITELLM_API_KEY field of their paseo
-  # credential item (paste the value there once; update it if the key ever
-  # rotates, since no PushSecret carries it anymore).
   secretName: litellm-paseo-general
   secretKey: api-key
   # Cloud models are granted to general only; paseo-private stays on local + Mistral.

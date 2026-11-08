@@ -15,9 +15,10 @@ a separate pod. No private-scope key lists a cloud model.
 | Private | `mcp-private` | `memini-private` | `mcp-paseo-private`, `litellm-paseo-private` |
 
 The "Paseo client keys" are the cluster-side identities the values come from
-(litellm-operator virtual keys, ToolHive's CreatedOnce VMCP keys); the pods
-themselves consume them as the `LITELLM_API_KEY` / `MCP_API_KEY` fields of
-their per-scope Bitwarden `paseo-*` credential item.
+(litellm-operator virtual keys, ToolHive's CreatedOnce VMCP keys). The litellm
+key is consumed directly: its CR lives beside the pods, so the operator writes
+the Secret into the agents namespace and the helmrelease binds it by name; the
+VMCP key rides the `MCP_API_KEY` field of the pods' Bitwarden credential item.
 
 ## Agent model gateway
 

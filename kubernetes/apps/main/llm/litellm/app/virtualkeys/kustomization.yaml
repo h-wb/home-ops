@@ -9,6 +9,4 @@ resources:
   - ./memini.yaml
   - ./paperless-gpt.yaml
   - ./paperless.yaml
-  - ./paseo-general.yaml
-  - ./paseo-private.yaml
   - ./toolhive.yaml
