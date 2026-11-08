@@ -36,11 +36,20 @@ spec:
             image:
               repository: ghcr.io/jdx/mise
               tag: 2026.11.2-debian
+            # ~/.dotfiles is the pod's: stash local edits and reset to master, or
+            # --update can't fast-forward. Other branches and worktrees are kept.
             # Shims symlink to the mise that made them: run it from the PVC.
             command:
               - sh
               - -c
-              - install -D /usr/local/bin/mise "$HOME/.local/bin/mise" && PATH="$HOME/.local/bin:$PATH" exec mise "$@"
+              - |
+                d="$HOME/.dotfiles"
+                if [ -d "$d/.git" ]; then
+                  git -C "$d" fetch -q origin || true
+                  git -C "$d" -c user.name=tools -c user.email=tools@localhost stash push -q -u -m "tools init container"
+                  git -C "$d" checkout -q -f -B master origin/master
+                fi
+                install -D /usr/local/bin/mise "$HOME/.local/bin/mise" && PATH="$HOME/.local/bin:$PATH" exec mise "$@"
               - mise
             args:
               - bootstrap
