@@ -1,0 +1,26 @@
+---
+# Searches kubesearch.dev: how other home-ops repos configure a given chart or app.
+# Public data only, no credentials.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: kubesearch
+spec:
+  image: ghcr.io/rust84/kubesearch-mcp-server:latest@sha256:9bc552aa6305f44fe7ef52b331b91662fa28bd83f677ce42b2f3170c2da476a4
+  transport: stdio
+  proxyMode: streamable-http
+  proxyPort: 8080
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: mcp
+          securityContext:
+            readOnlyRootFilesystem: false
+  groupRef:
+    name: mcp-tools

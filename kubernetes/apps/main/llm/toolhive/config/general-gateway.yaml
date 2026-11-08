@@ -17,6 +17,9 @@ spec:
         - workload: flux
         - workload: github
         - workload: n8n
+        - workload: kubesearch
+        - workload: grafana
+        - workload: arr
         - workload: anki
         - workload: excel
         # Private tier data (vault, personal tasks) never appears in this list: general

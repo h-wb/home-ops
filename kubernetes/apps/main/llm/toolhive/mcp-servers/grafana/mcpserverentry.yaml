@@ -1,0 +1,13 @@
+---
+# mcp-grafana runs next to Grafana (observability/grafana/mcp), where the operator
+# writes its service-account token.
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: MCPServerEntry
+metadata:
+  name: grafana
+spec:
+  remoteUrl: http://mcp-grafana.observability.svc.cluster.local:8000/sse
+  transport: sse
+  allowPrivateEndpoint: true
+  groupRef:
+    name: mcp-tools
