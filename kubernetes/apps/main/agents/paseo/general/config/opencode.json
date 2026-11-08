@@ -284,6 +284,11 @@
       "action": "provider.use",
       "resource": "opencode",
       "effect": "deny"
+    },
+    {
+      "action": "provider.use",
+      "resource": "opencode-go",
+      "effect": "deny"
     }
   ]
 }
