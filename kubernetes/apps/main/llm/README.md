@@ -5,20 +5,33 @@ secrets and code; private includes personal notes, location, health and memory.
 Cloud models (Claude, ChatGPT) are general only; direct Mistral and local
 inference serve both.
 
-Scopes are enforced by per-client credentials: each LiteLLM virtual key lists the
-models it may use, ToolHive and Memini keys are per scope, and each Paseo scope is
-a separate pod. No private-scope key lists a cloud model.
+Scopes are enforced per client: each LiteLLM virtual key lists the models it may
+use, each Memini has its own client keys, ToolHive has one gateway per scope, and
+each Paseo scope is a separate pod. No private-scope key lists a cloud model.
 
-| Scope   | Tool endpoint | Memory endpoint  | Paseo client keys                            |
-| ------- | ------------- | ---------------- | -------------------------------------------- |
-| General | `mcp-general` | `memini-general` | `mcp-paseo-general`, `litellm-paseo-general` |
-| Private | `mcp-private` | `memini-private` | `mcp-paseo-private`, `litellm-paseo-private` |
+| Scope   | Tool endpoint (in-cluster)         | Memory endpoint  | Paseo client key        |
+| ------- | ---------------------------------- | ---------------- | ----------------------- |
+| General | `mcp-general` (`vmcp-mcp-ops`)     | `memini-general` | `litellm-paseo-general` |
+| Private | `mcp-private` (`vmcp-mcp-gateway`) | `memini-private` | `litellm-paseo-private` |
 
-The "Paseo client keys" are the cluster-side identities the values come from
-(litellm-operator virtual keys, ToolHive's CreatedOnce VMCP keys). The litellm
-key is consumed directly: its CR lives beside the pods, so the operator writes
-the Secret into the agents namespace and the helmrelease binds it by name; the
-VMCP key rides the `MCP_API_KEY` field of the pods' Bitwarden credential item.
+ToolHive's gateways take callers anonymously, so who reaches each one is the
+boundary. In-cluster clients (Hermes, Paseo, Open WebUI) call the service with no
+key, and `toolhive/config/networkpolicy.yaml` admits only that scope's pods.
+Clients outside the cluster go through Envoy (`mcp-<scope>.${SECRET_DOMAIN}`),
+which checks `x-api-key` against that gateway's own list.
+
+Client keys are per holder (what you'd revoke if it leaked), shared by every
+agent on it, and named `<SCOPE>_<HOLDER>` in Bitwarden:
+
+| Item       | Fields                                                                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toolhive` | `GENERAL_WORKSTATION`, `PRIVATE_WORKSTATION` (Envoy client `workstation`), `REDIS_PASSWORD` (the gateways' session store)                            |
+| `memini`   | `GENERAL_ADMIN`, `GENERAL_WORKSTATION`, `GENERAL_PASEO`, `GENERAL_HERMES`, `PRIVATE_ADMIN`, `PRIVATE_HERMES`, `PRIVATE_WORKSTATION`, `PRIVATE_PASEO` |
+
+The workstation keys reach the workstations through Proton Pass
+(`Automation/toolhive`, `Automation/memini`, fields `general`/`private`). The
+litellm key is consumed directly: its CR lives beside the pods, so the operator
+writes the Secret into the agents namespace and the helmrelease binds it by name.
 
 ## Agent model gateway
 

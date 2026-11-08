@@ -58,8 +58,11 @@ class PaseoRendering(unittest.TestCase):
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
             with self.subTest(scope=scope):
                 data = self.resource(scope, "ConfigMap", f"{app}-config")["data"]
-                self.assertEqual({"paseo.json", "claude.json", "opencode.json"}, set(data))
+                # MCP servers are dotfiles' (conf.d/ai), rendered at pod start.
+                self.assertEqual({"paseo.json", "opencode.json"}, set(data))
                 opencode = json.loads(data["opencode.json"])
+                self.assertNotIn("mcp", opencode)
+                self.assertNotIn("plugins", opencode)
                 litellm = opencode["providers"]["litellm"]["settings"]
                 self.assertEqual("https://litellm.example.com/v1", litellm["baseURL"])
                 self.assertEqual("{env:LITELLM_API_KEY}", litellm["apiKey"])
@@ -72,8 +75,35 @@ class PaseoRendering(unittest.TestCase):
                     self.assertEqual("/etc/paseo/config/opencode.json",
                                      containers[container]["env"]["OPENCODE_CONFIG"])
                 self.assertNotIn("browser", mounts)
-        claude = json.loads(self.resource("general", "ConfigMap", "paseo-config")["data"]["claude.json"])
-        self.assertEqual({"x-api-key": "${MCP_API_KEY}"}, claude["mcpServers"]["toolhive-general"]["headers"])
+
+    def test_pods_reach_toolhive_in_cluster_without_a_key(self):
+        # llm/toolhive's NetworkPolicy admits each scope's pod to its gateway;
+        # a key in the pod could be used from anywhere on the LAN.
+        for scope, app in (("general", "paseo"), ("private", "paseo-private")):
+            with self.subTest(scope=scope):
+                values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
+                runtime = values["controllers"][app]
+                for name, container in {**runtime["containers"], **runtime["initContainers"]}.items():
+                    self.assertNotIn("MCP_API_KEY", container.get("env", {}), name)
+                secret = self.resource(scope, "ExternalSecret", app)["spec"]["target"]["template"]["data"]
+                self.assertNotIn("MCP_API_KEY", secret)
+                aliases = [h for a in values["defaultPodOptions"]["hostAliases"] for h in a["hostnames"]]
+                self.assertEqual(["litellm.example.com"], aliases)
+
+    def test_each_pod_holds_its_own_scopes_memini_key(self):
+        # Bitwarden `memini` fields are <SCOPE>_<HOLDER>; this holder is `paseo`.
+        for scope, app, secret in (("general", "paseo", "paseo-agents"),
+                                   ("private", "paseo-private", "paseo-private-agents")):
+            with self.subTest(scope=scope):
+                spec = self.resource(scope, "ExternalSecret", secret)["spec"]
+                self.assertEqual("{{ .%s_PASEO }}" % scope.upper(),
+                                 spec["target"]["template"]["data"]["MEMINI_API_KEY"])
+                self.assertIn({"extract": {"key": "memini"}}, spec["dataFrom"])
+                runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
+                for name in ("app", "sshd"):
+                    ref = runtime["containers"][name]["env"]["MEMINI_API_KEY"]["valueFrom"]["secretKeyRef"]
+                    self.assertEqual(secret, ref["name"], name)
+                self.assertIn(secret, runtime["annotations"]["secret.reloader.stakater.com/reload"])
 
     def test_only_general_routes_claude_through_litellm(self):
         secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]

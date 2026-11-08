@@ -17,14 +17,13 @@ spec:
       # exec token into the app container; general uses ToolHive exclusively.
       automountServiceAccountToken: false
       enableServiceLinks: false
-      # The ToolHive and LiteLLM routes are internal-only: no public record and
-      # CoreDNS forwards straight upstream, so pods can't resolve them. Point them
-      # at envoy-internal (same LAN IP the routes' Gateway listens on). The gateway
-      # has a valid public cert.
+      # The LiteLLM route is internal-only: no public record and CoreDNS forwards
+      # straight upstream, so pods can't resolve it. Point it at envoy-internal
+      # (same LAN IP the route's Gateway listens on), which has a valid public
+      # cert. ToolHive needs no alias: the pods call its in-cluster services,
+      # admitted per scope by llm/toolhive's NetworkPolicy, with no key.
       hostAliases:
         - hostnames:
-            - mcp-general.${SECRET_DOMAIN}
-            - mcp-private.${SECRET_DOMAIN}
             - litellm.${SECRET_DOMAIN}
           ip: 192.168.1.202
       # The image's entrypoint only needs root to chown volumes, then drops to `paseo`
@@ -71,18 +70,12 @@ spec:
               SHELL: /bin/bash
               # The LiteLLM virtual key, straight from the secret the
               # litellm-operator writes into this namespace (virtualkey.yaml in
-              # each overlay) — no ExternalSecret in between. Same pattern for
-              # the ToolHive VMCP client key, via its own Secret.
+              # each overlay) — no ExternalSecret in between.
               LITELLM_API_KEY:
                 valueFrom:
                   secretKeyRef:
                     name: litellm-paseo-${PASEO_DATA_SCOPE}
                     key: api-key
-              MCP_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: ${APP}-secret
-                    key: MCP_API_KEY
               # System dirs first: the daemon must keep the image's node, its native
               # modules are built against it. Everything else falls through to mise.
               PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims

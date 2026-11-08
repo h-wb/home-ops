@@ -63,11 +63,19 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  # toolhive-config-dragonfly: the gateways' session storage.
+  components:
+    - ../../../../../components/dragonfly
   dependsOn:
     - name: toolhive
       namespace: llm
     - name: litellm
       namespace: llm
+  healthCheckExprs:
+    - apiVersion: dragonflydb.io/v1alpha1
+      kind: Dragonfly
+      failed: status.phase != 'ready'
+      current: status.phase == 'ready'
   interval: 30m
   path: ./kubernetes/apps/main/llm/toolhive/config
   postBuild:
@@ -244,36 +252,6 @@ spec:
       namespace: default
   interval: 30m
   path: ./kubernetes/apps/main/llm/toolhive/mcp-servers/dawarich
-  postBuild:
-    substitute:
-      APP: *app
-  prune: true
-  retryInterval: 1m
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-    namespace: flux-system
-  timeout: 5m
-  wait: false
----
-# yaml-language-server: $schema=https://kubernetes-schemas.pages.dev/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-metadata:
-  name: &app mcp-memini
-  namespace: &namespace llm
-spec:
-  targetNamespace: *namespace
-  commonMetadata:
-    labels:
-      app.kubernetes.io/name: *app
-  dependsOn:
-    - name: toolhive-config
-      namespace: llm
-    - name: memini
-      namespace: llm
-  interval: 30m
-  path: ./kubernetes/apps/main/llm/toolhive/mcp-servers/memini
   postBuild:
     substitute:
       APP: *app

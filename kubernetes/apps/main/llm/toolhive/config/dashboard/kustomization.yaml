@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+# toolhive.json: stacklok/toolhive v0.63.0
+# examples/otel/grafana-dashboards/toolhive-mcp-grafana-dashboard-otel-scrape.json,
+# with its hardcoded `"uid": "prometheus"` datasource turned into the
+# ${DS_PROMETHEUS} input (grafanadashboard.yaml maps it): this Grafana's
+# datasource has a generated UID.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+configMapGenerator:
+  - name: toolhive-dashboard
+    files:
+      - toolhive.json
+generatorOptions:
+  disableNameSuffixHash: true
+  annotations:
+    # Dashboards are full of ${...} template variables flux's envsubst would try
+    # to resolve.
+    kustomize.toolkit.fluxcd.io/substitute: disabled

@@ -37,6 +37,20 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
+  # Prometheus metrics on the diagnostics port (9464), off the MCP port: the MCP
+  # port is anonymous, so metrics get their own port and NetworkPolicy rule.
+  telemetryConfigRef:
+    name: prometheus
+  # Sessions in the toolhive-config Dragonfly (components/dragonfly), so they
+  # survive a gateway restart. One instance for both gateways, a prefix each,
+  # behind a password because every pod in llm may reach its port.
+  sessionStorage:
+    provider: redis
+    address: toolhive-config-dragonfly.llm.svc.cluster.local:6379
+    keyPrefix: "toolhive:mcp-ops:"
+    passwordRef:
+      name: toolhive-config-redis
+      key: password
   podTemplateSpec:
     spec:
       containers:
@@ -84,9 +98,6 @@ spec:
       - group: ""
         kind: Secret
         name: mcp-ops-api-keys
-      - group: ""
-        kind: Secret
-        name: mcp-paseo-general
     extractFrom:
       - headers:
           - x-api-key
@@ -97,33 +108,19 @@ kind: ExternalSecret
 metadata:
   name: mcp-ops-api-keys
 spec:
-  refreshPolicy: CreatedOnce
+  secretStoreRef:
+    name: bitwarden-secrets-manager
+    kind: ClusterSecretStore
+  refreshInterval: 15m
   target:
     name: mcp-ops-api-keys
     template:
       engineVersion: v2
+      # Clients outside the cluster only, <SCOPE>_<HOLDER> in Bitwarden `toolhive`; pods
+      # come in-cluster, admitted by networkpolicy.yaml. A missing field fails the
+      # template (missingkey=error), so the Secret keeps its last good keys.
       data:
-        claude-code: "{{ .claudecode }}"
-        codex: "{{ .codex }}"
-        open-webui: "{{ .openwebui }}"
+        workstation: "{{ .GENERAL_WORKSTATION }}"
   dataFrom:
-    - sourceRef:
-        generatorRef:
-          apiVersion: generators.external-secrets.io/v1alpha1
-          kind: Password
-          name: mcp-ops-keys
----
-apiVersion: generators.external-secrets.io/v1alpha1
-kind: Password
-metadata:
-  name: mcp-ops-keys
-spec:
-  length: 48
-  digits: 10
-  symbols: 0
-  noUpper: false
-  allowRepeat: true
-  secretKeys:
-    - claudecode
-    - codex
-    - openwebui
+    - extract:
+        key: toolhive

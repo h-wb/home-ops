@@ -9,7 +9,7 @@ paseo/
 ├── ks.yaml          # general, private and scratch Flux Kustomizations
 ├── common/          # shared HelmRelease, ExternalSecrets, provision.sh, authorized_keys
 ├── general/
-│   ├── config/      # paseo.json, claude.json, opencode.json for this scope
+│   ├── config/      # paseo.json, opencode.json for this scope
 │   └── ...          # GitHub/memory credentials, NFS and the API egress policy
 ├── private/
 │   ├── config/
@@ -28,27 +28,35 @@ settings; `common/helmrelease.yaml` for shared pod settings; the overlay's
 
 ## Agent config
 
-Each overlay's `config/` is the only place agent config lives. It becomes the
-`${APP}-config` ConfigMap, mounted read-only at `/etc/paseo/config`:
+The agents' MCP servers (ToolHive, Memini, the Chromium sidecar) are defined in
+dotfiles (`conf.d/ai/`), the same definitions every workstation uses, and
+rendered by the pod-start bootstrap for this pod's `PASEO_DATA_SCOPE`. Each
+overlay's `config/` holds the rest. It becomes the `${APP}-config` ConfigMap,
+mounted read-only at `/etc/paseo/config`:
 
-- `opencode.json`: read in place (`OPENCODE_CONFIG`).
-- `paseo.json` and `claude.json`: deep-merged by `common/config/provision.sh` into
-  `~/.paseo/config.json` and `~/.claude.json` on every pod start, since agents
-  keep their own state in those files. Our keys win; everything else is kept.
+- `opencode.json`: models and providers, read in place (`OPENCODE_CONFIG`).
+  OpenCode layers it over dotfiles' `~/.config/opencode/opencode.json` and
+  merges both, so the MCP servers stay out of it.
+- `paseo.json`: deep-merged by `common/config/provision.sh` into
+  `~/.paseo/config.json` on every pod start, since Paseo keeps its own state
+  there. Our keys win; everything else is kept.
 
 The files hold no secrets. Credentials come from ExternalSecrets as environment
-variables and are referenced by name: `{env:LITELLM_API_KEY}` for OpenCode,
-`$${MCP_API_KEY}` for Claude (Flux substitution turns `$$` into `$`). Config
+variables and are referenced by name (`{env:LITELLM_API_KEY}` for OpenCode). The
+ToolHive gateways need none: the pods call them in-cluster and
+`llm/toolhive/config/networkpolicy.yaml` admits only this scope's pod. Config
 changes roll the pod (Reloader); start new agent sessions to pick them up.
 
 ## Scope separation
 
 Separation is enforced by what each pod can reach, not by request inspection:
 
-- Each pod has its own LiteLLM, ToolHive and Memini keys. Only `paseo-general`'s
+- Each pod has its own LiteLLM and Memini keys, and only its own scope's ToolHive
+  gateway admits it (NetworkPolicy, no key). Only `paseo-general`'s
   LiteLLM key is granted cloud models (`anthropic/*`, `chatgpt/*`); private's key
   has local and Mistral models only.
-- General has no private ToolHive or Memini credentials; private has no GitHub token.
+- General cannot reach the private gateway and has no private Memini credentials;
+  private has no GitHub token.
 - Pasted text is not covered: don't paste private data into general.
 
 ## General cluster access through ToolHive
@@ -71,9 +79,9 @@ complete credential boundary around general.
 ## Credentials and identities
 
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
-credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`,
-`KEYSEED` and the `MCP_API_KEY` field (ToolHive's CreatedOnce VMCP key, pasted
-once). General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
+credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`
+and `KEYSEED` (an old `MCP_API_KEY` field is unused: the pods reach ToolHive
+without a key). General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
 `LITELLM_API_KEY` — the last one only composes Claude Code's `x-litellm-api-key`
 header, the raw virtual key never passing through Bitwarden: the
 litellm-operator writes its Secret into the pods' own namespace from the

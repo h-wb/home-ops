@@ -1,9 +1,13 @@
 ---
-# mcp-gateway aggregates private-tier data (the Obsidian vault, personal tasks), so its
-# in-cluster service is not the open door the documented in-cluster paths otherwise are
-# ("Backend services also retain in-cluster paths outside gateway authentication",
-# agents README): only Envoy (the API-key routes) and the private Hermes pod may reach
-# it. Everyone else goes through mcp-private.${SECRET_DOMAIN} with a credential.
+# Both gateways take callers anonymously, so who may reach each one's MCP port is
+# the scope boundary in-cluster. Clients outside the cluster come through Envoy
+# (envoy-internal), which checks their x-api-key against that gateway's own key
+# list (securitypolicy.yaml, general-gateway.yaml). In-cluster clients have no
+# key: these policies name them, one scope each. Prometheus may only reach the
+# diagnostics port (9464), never the MCP port.
+#
+# mcp-gateway (mcp-private) aggregates private-tier data (the Obsidian vault,
+# personal tasks): only Envoy and the private-scope pods.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -26,3 +30,70 @@ spec:
             matchLabels:
               app.kubernetes.io/name: hermes-private
               assistant.scope: private
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agents
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: paseo-private
+      ports:
+        - port: 4483
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 9464
+          protocol: TCP
+---
+# mcp-ops (mcp-general): the curated, non-private tools. Envoy and the
+# general-scope pods; Open WebUI too, which runs in this namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-ops
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: mcp-ops
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: envoy-gateway
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hermes-general
+              assistant.scope: general
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: open-webui
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: agents
+          podSelector:
+            matchLabels:
+              # The general Paseo keeps its historical `paseo` name.
+              app.kubernetes.io/name: paseo
+      ports:
+        - port: 4483
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 9464
+          protocol: TCP
