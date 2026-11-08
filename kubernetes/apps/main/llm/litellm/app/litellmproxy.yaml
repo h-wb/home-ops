@@ -5,7 +5,10 @@ metadata:
   name: litellm
 spec:
   applyMode: file
-  image: ghcr.io/berriai/litellm-database:v1.108.2@sha256:979a1dd71759b956757015bfada0df79562e6b59420bb7a23ddf8dd4e3ee0122
+  # v1.109.0 adds the ChatGPT/Codex subscription deployments in models/subscriptions.yaml
+  # (forwarding a Codex client's own login, chatgpt/codex-* routing). Only rc/dev builds
+  # carry that version so far; renovate moves this pin to the stable tag once it ships.
+  image: ghcr.io/berriai/litellm-database:v1.109.0-rc.1@sha256:28648c6e6f9fb46da44fa194fc1c8dde96758832f1c6f789c5b8be17016bec40
   replicas: 2
   service:
     port: 4000

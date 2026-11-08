@@ -2,54 +2,7 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "litellm/mistral/mistral-medium-latest",
   "small_model": "litellm/mistral/mistral-small-latest",
-  "permission": "allow",
-  "compaction": {
-    "auto": true,
-    "keep": {
-      "tokens": 20000
-    },
-    "buffer": 16384
-  },
-  "tool_output": {
-    "max_lines": 800,
-    "max_bytes": 16384
-  },
-  "plugins": [
-    {
-      "package": "@eleboucher/opencode-memini-v2@0.7.39",
-      "options": {
-        "base_url": "http://memini-general.llm.svc.cluster.local:8080",
-        "auto_update": false
-      }
-    }
-  ],
   "enabled_providers": ["litellm"],
-  "agent": {
-    "coordinator": {
-      "mode": "primary",
-      "model": "litellm/chatgpt/gpt-6-astra",
-      "description": "Main agent: does bounded work itself, delegates research to explorer and risky-change review to reviewer.",
-      "prompt": "You are the coordinator. Make understood, bounded changes yourself; delegation is optional, not your identity. Delegate only when an isolated context or independent parallel work clearly outweighs the handoff cost; never spawn agents to fill slots.\n\nCONTEXT: targeted searches and reads, not broad dumps. Hand off the objective, settled decisions, owned files, exclusions and the acceptance check, never a transcript. Ask workers for findings, changed paths and checks, not file dumps.\n\nVERIFICATION: inspect the diff and run the cheapest relevant check. Reuse passing evidence while nothing relevant changed. Distinguish measured results from assumptions.\n\nREVIEW GATE: decide from the changed behavior and its failure modes, not file type or diff size. Do understood low-risk work directly (prose, typos, formatting, mechanical renames, routine config) and self-verify. Ask the `reviewer` for one bounded independent review only for nontrivial behavior changes or real risk: permissions/auth, secret exposure, destructive storage or recovery, concurrency, CI enforcement. Give it the goal, the diff and relevant test facts, not your reasoning. Re-review only material fixes. Stop when acceptance is met.\n\nLANES: `explorer` (Mistral Small) for bounded read-only discovery when you are genuinely uncertain; `reviewer` (Mistral Large, a different model family) for the review gate. The ChatGPT quota is shared with other services: prefer Mistral lanes for bulk reading."
-    },
-    "explorer": {
-      "mode": "subagent",
-      "model": "litellm/mistral/mistral-small-latest",
-      "description": "Read-only reconnaissance: where/how is X, code search, mapping unfamiliar code. Returns findings and paths, not dumps.",
-      "permission": {
-        "edit": "deny"
-      },
-      "prompt": "You explore and report; you never modify files. Answer the question asked with file paths, line references and the minimum evidence. Say plainly what you could not find."
-    },
-    "reviewer": {
-      "mode": "subagent",
-      "model": "litellm/mistral/mistral-large-latest",
-      "description": "Independent adversarial review of a substantive or risky change. Reports concrete defects and missing coverage.",
-      "permission": {
-        "edit": "deny"
-      },
-      "prompt": "Assume the change is broken and try to prove it. For each changed boundary, trace inherited authority and configuration, failure and cleanup paths, and construct a concrete failure scenario before calling anything safe. Report only concrete defects and missing coverage, most severe first, each with the input or state that triggers it. No style nits, no unrequested polish."
-    }
-  },
   "provider": {
     "litellm": {
       "npm": "@ai-sdk/openai-compatible",
@@ -61,40 +14,30 @@
       "models": {
         "chatgpt/gpt-6-astra": {
           "name": "GPT-6 Astra (ChatGPT)",
-          "limit": {
-            "context": 272000,
-            "output": 128000
-          }
+          "limit": { "context": 272000, "output": 128000 }
         },
         "chatgpt/gpt-6-luna": {
           "name": "GPT-6 Luna (ChatGPT)",
-          "limit": {
-            "context": 272000,
-            "output": 128000
-          }
+          "limit": { "context": 272000, "output": 128000 }
         },
-        "mistral/mistral-large-latest": {
-          "name": "Mistral Large"
+        "gpt-6.1-sol": {
+          "name": "GPT-6.1 Sol (ChatGPT)",
+          "limit": { "context": 272000, "output": 128000 }
         },
-        "mistral/mistral-medium-latest": {
-          "name": "Mistral Medium"
+        "gpt-6.1-terra": {
+          "name": "GPT-6.1 Terra (ChatGPT)",
+          "limit": { "context": 272000, "output": 128000 }
         },
-        "mistral/mistral-small-latest": {
-          "name": "Mistral Small"
-        },
+        "mistral/mistral-large-latest": { "name": "Mistral Large" },
+        "mistral/mistral-medium-latest": { "name": "Mistral Medium" },
+        "mistral/mistral-small-latest": { "name": "Mistral Small" },
         "qwen3.5-9b": {
           "name": "Qwen3.5 9B (MacBook)",
-          "limit": {
-            "context": 32768,
-            "output": 8192
-          }
+          "limit": { "context": 32768, "output": 8192 }
         },
         "qwen3.5-9b-chat": {
           "name": "Qwen3.5 9B no-think (MacBook)",
-          "limit": {
-            "context": 32768,
-            "output": 8192
-          }
+          "limit": { "context": 32768, "output": 8192 }
         }
       }
     }
@@ -103,16 +46,12 @@
     "toolhive-general": {
       "type": "remote",
       "url": "https://mcp-general.${SECRET_DOMAIN}/mcp",
-      "headers": {
-        "x-api-key": "{env:MCP_API_KEY}"
-      }
+      "headers": { "x-api-key": "{env:MCP_API_KEY}" }
     },
     "memini-general": {
       "type": "remote",
       "url": "http://memini-general.llm.svc.cluster.local:8080/mcp",
-      "headers": {
-        "Authorization": "Bearer {env:MEMINI_API_KEY}"
-      }
+      "headers": { "Authorization": "Bearer {env:MEMINI_API_KEY}" }
     },
     "chrome-devtools": {
       "type": "local",

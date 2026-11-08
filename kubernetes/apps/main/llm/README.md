@@ -19,11 +19,12 @@ a separate pod. No private-scope key lists a cloud model.
 Agents use `https://litellm.${SECRET_DOMAIN}` (internal route; both Paseo pods
 carry an Envoy host alias for it).
 
-| Client      | Route                   | Provider credentials                                                                                             |
-| ----------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Claude Code | Root URL, `anthropic/*` | Claude Code owns its subscription login; LiteLLM forwards it. `ANTHROPIC_CUSTOM_HEADERS` carries the LiteLLM key |
-| OpenCode    | `/v1`, explicit aliases | LiteLLM owns upstream credentials (Mistral API key, the shared `chatgpt/*` login)                                |
-| Hermes      | In-cluster `/v1`        | Separate general/private keys, Mistral only                                                                      |
+| Client      | Route                    | Provider credentials                                                                                                                                       |
+| ----------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code | Root URL, `anthropic/*`  | Claude Code owns its subscription login; LiteLLM forwards it. `ANTHROPIC_CUSTOM_HEADERS` carries the LiteLLM key                                           |
+| OpenCode    | `/v1`, explicit aliases  | LiteLLM owns upstream credentials (Mistral API key, the shared `chatgpt/*` login)                                                                          |
+| Codex       | `/v1`, `gpt-*`/`codex-*` | Codex owns its subscription sign-in, LiteLLM forwards it; requests without one ride the shared `chatgpt/*` login (as OpenCode's bare `gpt-6.1-*` picks do) |
+| Hermes      | In-cluster `/v1`         | Separate general/private keys, Mistral only                                                                                                                |
 
 Claude's URL and header are injected into general's containers. Keep
 `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `apiKeyHelper` unset. The gateway
@@ -34,6 +35,14 @@ bill. See [Claude subscriptions](https://docs.litellm.ai/docs/tutorials/claude_c
 
 OpenCode's ChatGPT models are the proxy-owned `chatgpt/*` aliases, sharing one
 login and quota with karakeep, lingarr and kritika.
+
+The ChatGPT subscription is also exposed as the wildcard deployments in
+`litellm/app/models/subscriptions.yaml` (`gpt-*`, `codex-*`): a Codex client
+supplies its own sign-in and LiteLLM forwards it, while a request without one
+(OpenCode's bare `gpt-6.1-sol`/`gpt-6.1-terra`) is served by the shared gateway
+login. `codex-*` carries Codex's own slugs, such as `codex-auto-review`. Both
+need LiteLLM >= 1.109.0 (proxy currently pinned to an rc of it). See
+[ChatGPT subscription](https://docs.litellm.ai/docs/tutorials/openai_codex_byok).
 
 ## Preserved identities
 
