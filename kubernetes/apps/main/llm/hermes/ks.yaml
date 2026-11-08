@@ -1,0 +1,37 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# The tier-split Hermes assistant (agents README): one hardened pod per tier, its
+# tools through llm/toolhive's gateways, its memories in its tier's Memini, its
+# models through its tier's LiteLLM key. Paseo reaches it with kubectl exec only.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app hermes
+  namespace: &namespace llm
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: litellm
+      namespace: llm
+    - name: memini-code
+      namespace: llm
+    - name: memini
+      namespace: llm
+    - name: toolhive-config
+      namespace: llm
+  interval: 30m
+  path: ./kubernetes/apps/main/llm/hermes/app
+  postBuild:
+    substitute:
+      APP: *app
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+  wait: false

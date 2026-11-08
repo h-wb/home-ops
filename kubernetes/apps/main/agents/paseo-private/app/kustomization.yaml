@@ -21,8 +21,8 @@ patches:
       '[{"op": "replace", "path": "/spec/values/defaultPodOptions/automountServiceAccountToken",
       "value": false}]'
   # No automatic token (above), but one projected token where kubectl looks: the Hermes (private)
-  # provider runs `kubectl exec` into proto's hermes-private-0, and that Role
-  # (apps/main/proto/app/assistant/rbac.yaml) is all this ServiceAccount is granted.
+  # provider runs `kubectl exec` into llm's hermes-private-0, and that Role
+  # (apps/main/llm/hermes/app/rbac.yaml) is all this ServiceAccount is granted.
   - target:
       kind: HelmRelease
     patch: |-

@@ -4,10 +4,10 @@
 Their homes, credentials and runtime configuration are separate. Both use the
 `paseo` mise machine class; `PASEO_DATA_SCOPE` selects the data scope.
 
-| Environment | Providers                             | Data                                       | Operational access                                                           |
-| ----------- | ------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
-| General     | Claude, Codex, Mistral Vibe, OpenCode | Code, `memini-general`                     | Existing cluster permissions, scratch workloads, NFS, Tailscale              |
-| Private     | Mistral Vibe, Hermes (proto)          | Obsidian, personal tools, `memini-private` | A token for `exec` into proto's `hermes-private-0` only; no NFS or Tailscale |
+| Environment | Providers                             | Data                                       | Operational access                                                         |
+| ----------- | ------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| General     | Claude, Codex, Mistral Vibe, OpenCode | Code, `memini-general`                     | Existing cluster permissions, scratch workloads, NFS, Tailscale            |
+| Private     | Mistral Vibe, Hermes (`llm/hermes`)   | Obsidian, personal tools, `memini-private` | A token for `exec` into llm's `hermes-private-0` only; no NFS or Tailscale |
 
 Mistral in general gets general data and credentials. Claude/Codex retain cluster
 administration as requested. This separates normal workflows; it does not stop
@@ -62,7 +62,7 @@ transitional component with the per-scope fragments below.
    Item grants expose direct item shares rather than the containing vault. Use
    `pass://<item-share-id>/<item-id>/<field>` in the consumer's fnox references;
    get identifiers with `pass-cli personal-access-token access list-access
-   --personal-access-token-name <agent> --output json`. Name-based vault
+--personal-access-token-name <agent> --output json`. Name-based vault
    references require vault access and will not resolve for an item-only token.
    The home-ops root and pipelines configs select the native `paseo-general`
    fnox profile from their mise environment on the scoped general host. Dotfiles

@@ -174,7 +174,7 @@ run = '''
 #!/usr/bin/env bash
 # Interactive: you type the Obsidian password and 2FA code into ob itself. Nothing is printed
 # or kept: ob's state lives in a temp dir removed on exit, and bws output is discarded
-# because it echoes the stored value. The proto vault pod (apps/main/proto/app/assistant/vault)
+# because it echoes the stored value. The vault sync pod (apps/main/llm/toolhive/mcp-servers/vault)
 # reads OBSIDIAN_AUTH_TOKEN, OBSIDIAN_VAULT and OBSIDIAN_VAULT_PASSWORD from this item.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
@@ -226,7 +226,7 @@ if [ -n "$existing" ]; then
     bws secret edit "$existing" --value "$value" >/dev/null
 else
     bws secret create "$item" "$value" "$project" \
-        --note "Obsidian Headless login for the proto vault pod (mise run //kubernetes:obsidian:login)" >/dev/null
+        --note "Obsidian Headless login for the vault sync pod (mise run //kubernetes:obsidian:login)" >/dev/null
 fi
 mise //:log info "Stored BWS item" item "$item" vault "$vault" e2e "$([ -n "$password" ] && echo yes || echo no)"
 '''
