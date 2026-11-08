@@ -8,17 +8,9 @@ spec:
       ${APP}:
         annotations:
           # Replaces common's list, so it repeats it.
-          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-ssh,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE},paseo-private-agents
+          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE},paseo-private-agents
         containers:
           app:
-            env:
-              # memini-private's `paseo` client (Bitwarden `memini`, PRIVATE_PASEO).
-              MEMINI_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: paseo-private-agents
-                    key: MEMINI_API_KEY
-          sshd:
             env:
               # memini-private's `paseo` client (Bitwarden `memini`, PRIVATE_PASEO).
               MEMINI_API_KEY:

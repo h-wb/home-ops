@@ -70,7 +70,7 @@ class PaseoRendering(unittest.TestCase):
                 mounts = values["persistence"]["config"]["advancedMounts"][app]
                 runtime = values["controllers"][app]
                 containers = {**runtime["containers"], **runtime["initContainers"]}
-                for container in ("tools", "app", "sshd"):
+                for container in ("tools", "app"):
                     self.assertEqual([{"path": "/etc/paseo/config", "readOnly": True}], mounts[container])
                     self.assertEqual("/etc/paseo/config/opencode.json",
                                      containers[container]["env"]["OPENCODE_CONFIG"])
@@ -100,9 +100,8 @@ class PaseoRendering(unittest.TestCase):
                                  spec["target"]["template"]["data"]["MEMINI_API_KEY"])
                 self.assertIn({"extract": {"key": "memini"}}, spec["dataFrom"])
                 runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
-                for name in ("app", "sshd"):
-                    ref = runtime["containers"][name]["env"]["MEMINI_API_KEY"]["valueFrom"]["secretKeyRef"]
-                    self.assertEqual(secret, ref["name"], name)
+                ref = runtime["containers"]["app"]["env"]["MEMINI_API_KEY"]["valueFrom"]["secretKeyRef"]
+                self.assertEqual(secret, ref["name"])
                 self.assertIn(secret, runtime["annotations"]["secret.reloader.stakater.com/reload"])
 
     def test_only_general_routes_claude_through_litellm(self):
@@ -195,7 +194,7 @@ class PaseoRendering(unittest.TestCase):
                 tools = values["controllers"][app]["initContainers"]["tools"]
                 self.assertEqual("ghcr.io/jdx/mise", tools["image"]["repository"])
                 # Shims link to the mise that wrote them, so it must run from the
-                # PVC (the app and sshd images have no /usr/local/bin/mise), and
+                # PVC (the app image has no /usr/local/bin/mise), and
                 # Flux must leave the shell's $HOME/$PATH alone.
                 shell, flag, script, name = tools["command"]
                 self.assertEqual(["sh", "-c", "mise"], [shell, flag, name])
@@ -215,7 +214,7 @@ class PaseoRendering(unittest.TestCase):
                 self.assertEqual("/home/paseo/.cache/mise", tools["env"]["MISE_CACHE_DIR"])
                 # /etc/paseo/config is dotfiles' class marker and overlay source.
                 self.assertNotIn("provision", values["persistence"])
-                for container in ("tools", "app", "sshd"):
+                for container in ("tools", "app"):
                     mounts = values["persistence"]["config"]["advancedMounts"][app][container]
                     self.assertEqual([{"path": "/etc/paseo/config", "readOnly": True}], mounts)
                 # Private holds no general GitHub credential.

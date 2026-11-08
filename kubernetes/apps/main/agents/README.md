@@ -7,7 +7,7 @@ class for CLIs, repos and shell only.
 ```text
 paseo/
 ├── ks.yaml          # general, private and scratch Flux Kustomizations
-├── common/          # shared HelmRelease, ExternalSecrets, authorized_keys
+├── common/          # shared HelmRelease and ExternalSecrets
 ├── general/
 │   ├── config/      # paseo.json, opencode.json for this scope
 │   └── ...          # GitHub/memory credentials, NFS and the API egress policy
@@ -17,7 +17,7 @@ paseo/
 └── scratch/         # retained namespace and quotas, no agent RBAC grants
 ```
 
-Edit `ks.yaml` for names, scope, credential item, hostnames, SSH IP and backup
+Edit `ks.yaml` for names, scope, credential item, hostnames and backup
 settings; `common/helmrelease.yaml` for shared pod settings; the overlay's
 `helmrelease.yaml` for environment-specific values.
 
@@ -84,9 +84,9 @@ complete credential boundary around general.
 ## Credentials and identities
 
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
-credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`
-and `KEYSEED` (an old `MCP_API_KEY` field is unused: the pods reach ToolHive
-without a key). General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
+credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN` and
+`PASEO_PASSWORD`. Old `KEYSEED` (the removed sshd) and `MCP_API_KEY` (the pods
+reach ToolHive without a key) fields are unused. General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
 `LITELLM_API_KEY` — the last one only composes Claude Code's `x-litellm-api-key`
 header, the raw virtual key never passing through Bitwarden: the
 litellm-operator writes its Secret into the pods' own namespace from the

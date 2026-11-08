@@ -50,8 +50,8 @@ spec:
           identifier: ${APP}
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
-          configmap.reloader.stakater.com/reload: ${APP}-sshd,${APP}-config
-          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-ssh,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
+          configmap.reloader.stakater.com/reload: ${APP}-config
+          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
         initContainers:
           # Provisions the host from dotfiles (class `paseo`): clone or fast-forward
           # ~/.dotfiles, link ~/.config/mise to it, apply its bootstrap.
@@ -59,8 +59,10 @@ spec:
             image:
               repository: ghcr.io/jdx/mise
               tag: 2026.11.2-debian
-            # Run mise from the PVC: shims link to the mise that created them, and
-            # the other containers only see $HOME.
+            # Copy mise onto the PVC and run that copy. Shims are symlinks to the
+            # mise that created them, and only /home/paseo is shared with the app
+            # container: shims pointing at this image's /usr/local/bin/mise would
+            # be dangling there.
             command:
               - sh
               - -c
@@ -167,34 +169,6 @@ spec:
                 memory: 1Gi
               limits:
                 memory: 8Gi
-          # sshd-lite (dotfiles paseo class, installed by `tools` before this starts), for
-          # editors' Remote-SSH, plain `ssh` + tmux and mosh. Sessions inherit this
-          # container's env. The host key is derived from KEYSEED, so it survives restarts.
-          sshd:
-            image: *image
-            command: ["/home/paseo/.local/share/mise/shims/sshd-lite"]
-            args:
-              - --port=2222
-              - --keyseed-ec
-              - --workdir=/home/paseo
-              - --keepalive=30
-              - --sftp
-              - --tcp-forwarding
-              - --mosh
-              - /etc/paseo/authorized_keys
-            env:
-              <<: *appEnv
-            envFrom:
-              - *secret
-              - secretRef:
-                  name: ${APP}-ssh
-            securityContext: *securityContext
-            resources:
-              requests:
-                cpu: 10m
-                memory: 64Mi
-              limits:
-                memory: 4Gi
           # Headless Chromium for browser MCPs (chrome-devtools-mcp --browserUrl
           # http://127.0.0.1:9222). Pod-local, so CDP is never exposed.
           browser:
@@ -225,19 +199,6 @@ spec:
           http:
             primary: true
             port: *port
-      ssh:
-        controller: *app
-        type: LoadBalancer
-        annotations:
-          lbipam.cilium.io/ips: ${PASEO_SSH_IP}
-        ports:
-          ssh:
-            port: 22
-            targetPort: &sshPort 2222
-          # sshd-lite tells mosh clients to use its own port number over UDP.
-          mosh:
-            port: *sshPort
-            protocol: UDP
     route:
       app:
         annotations:
@@ -279,7 +240,6 @@ spec:
             tools: &home
               - path: /home/paseo
             app: *home
-            sshd: *home
       # This scope's agent config (<scope>/config). Its path is the contract with
       # dotfiles: /etc/paseo selects the `paseo` class, and paseo.json is merged
       # into ~/.paseo/config.json.
@@ -292,16 +252,6 @@ spec:
               - path: /etc/paseo/config
                 readOnly: true
             app: *config
-            sshd: *config
-      sshd-config:
-        type: configMap
-        name: ${APP}-sshd
-        advancedMounts:
-          ${APP}:
-            sshd:
-              - path: /etc/paseo/authorized_keys
-                subPath: authorized_keys
-                readOnly: true
       tmp:
         type: emptyDir
         globalMounts:

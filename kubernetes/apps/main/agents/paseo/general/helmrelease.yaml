@@ -46,36 +46,8 @@ spec:
                   name: ${APP}-secret
               - secretRef:
                   name: ${APP}-password
-          sshd:
-            env:
-              ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
-              ANTHROPIC_CUSTOM_HEADERS:
-                valueFrom:
-                  secretKeyRef:
-                    name: paseo-agents
-                    key: ANTHROPIC_CUSTOM_HEADERS
-              GH_TOKEN:
-                valueFrom:
-                  secretKeyRef:
-                    name: paseo-agents
-                    key: GH_TOKEN
-              MEMINI_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: paseo-agents
-                    key: MEMINI_API_KEY
-              OPENCODE_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: paseo-agents
-                    key: OPENCODE_API_KEY
-            envFrom:
-              - secretRef:
-                  name: ${APP}-secret
-              - secretRef:
-                  name: ${APP}-ssh
         annotations:
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-mcp,paseo-ssh,paseo-tailscale,litellm-paseo-general,paseo-agents
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-mcp,paseo-tailscale,litellm-paseo-general,paseo-agents
     persistence:
       data:
         type: nfs
@@ -83,10 +55,9 @@ spec:
         path: /mnt/tank/shared
         advancedMounts:
           ${APP}:
-            app: &id001
+            app:
               - path: /data
                 readOnly: true
-            sshd: *id001
     route:
       app:
         hostnames:
