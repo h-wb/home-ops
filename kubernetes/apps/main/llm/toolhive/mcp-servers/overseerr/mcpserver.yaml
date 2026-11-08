@@ -7,9 +7,11 @@ metadata:
   name: overseerr
 spec:
   image: ghcr.io/jhomen368/overseerr-mcp:2.3.1@sha256:54c84625f2040654799ef55fc9864dd8b0d7c725b4e7eb2ea9e2ce8d71f8df1e
-  transport: stdio
+  # The image serves Streamable HTTP on 8085 (/mcp), not stdio.
+  transport: streamable-http
   proxyMode: streamable-http
   proxyPort: 8080
+  mcpPort: 8085
   env:
     - name: SEERR_URL
       value: http://overseerr.downloads.svc.cluster.local
