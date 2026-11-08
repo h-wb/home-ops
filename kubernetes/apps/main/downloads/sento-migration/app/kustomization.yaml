@@ -1,0 +1,5 @@
+---
+# yaml-language-server: $schema=https://json.schemastore.org/kustomization
+namespace: downloads
+resources:
+  - ./job.yaml
