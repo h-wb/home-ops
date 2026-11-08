@@ -2,22 +2,11 @@
   "$schema": "https://opencode.ai/config.json",
   "model": "mistral/mistral-medium-latest",
   "small_model": "mistral/mistral-small-latest",
-  "enabled_providers": ["litellm", "mistral"],
-  "agents": {
-    "build": {
-      "model": "mistral/mistral-medium-latest",
-      "variant": "none"
-    },
-    "plan": {
-      "model": "mistral/mistral-medium-latest",
-      "variant": "none"
-    }
-  },
-  "provider": {
+  "providers": {
     "litellm": {
-      "npm": "@ai-sdk/openai-compatible",
       "name": "LiteLLM",
-      "options": {
+      "package": "aisdk:@ai-sdk/openai-compatible",
+      "settings": {
         "baseURL": "https://litellm.${SECRET_DOMAIN}/v1",
         "apiKey": "{env:LITELLM_API_KEY}"
       },
@@ -49,36 +38,55 @@
       }
     },
     "mistral": {
-      "options": {
-        "apiKey": "{env:MISTRAL_API_KEY}"
-      },
-      "whitelist": ["mistral-large-latest", "mistral-medium-latest", "mistral-small-latest"],
+      "env": ["MISTRAL_API_KEY"],
       "models": {
+        "mistral-large-latest": {
+          "name": "Mistral Large 3"
+        },
+        "mistral-large-4": {
+          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+        },
         "mistral-medium-latest": {
           "name": "Mistral Medium 3.5",
-          "reasoning": { "supported": true, "toggle": true }
+          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
         },
         "mistral-small-latest": {
           "name": "Mistral Small 4",
-          "reasoning": { "supported": true, "toggle": true }
+          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+        },
+        "zai-glm-5-3": {
+          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+        },
+        "zai-glm-5-3-flash": {
+          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
         }
       }
     }
   },
+  "agents": {
+    "build": {
+      "model": "mistral/mistral-medium-latest#none"
+    },
+    "plan": {
+      "model": "mistral/mistral-medium-latest#none"
+    }
+  },
   "mcp": {
-    "toolhive-general": {
-      "type": "remote",
-      "url": "https://mcp-general.${SECRET_DOMAIN}/mcp",
-      "headers": { "x-api-key": "{env:MCP_API_KEY}" }
-    },
-    "memini-general": {
-      "type": "remote",
-      "url": "http://memini-general.llm.svc.cluster.local:8080/mcp",
-      "headers": { "Authorization": "Bearer {env:MEMINI_API_KEY}" }
-    },
-    "chrome-devtools": {
-      "type": "local",
-      "command": ["chrome-devtools-mcp", "--browserUrl", "http://127.0.0.1:9222"]
+    "servers": {
+      "toolhive-general": {
+        "type": "remote",
+        "url": "https://mcp-general.${SECRET_DOMAIN}/mcp",
+        "headers": { "x-api-key": "{env:MCP_API_KEY}" }
+      },
+      "memini-general": {
+        "type": "remote",
+        "url": "http://memini-general.llm.svc.cluster.local:8080/mcp",
+        "headers": { "Authorization": "Bearer {env:MEMINI_API_KEY}" }
+      },
+      "chrome-devtools": {
+        "type": "local",
+        "command": ["chrome-devtools-mcp", "--browserUrl", "http://127.0.0.1:9222"]
+      }
     }
   }
 }
