@@ -44,7 +44,8 @@ spec:
     dashboards:
       enabled: true
     cgroup:
-      automount:
+      # autoMount must be camelCase: the lowercase key is silently ignored by Helm
+      autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
     # cluster:
