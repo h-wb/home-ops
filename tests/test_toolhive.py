@@ -86,6 +86,18 @@ class ToolHiveScopes(unittest.TestCase):
         self.assertEqual("$1:9464", endpoint["relabelings"][0]["replacement"])
 
 
+class MeminiStaysOutOfToolHive(unittest.TestCase):
+    def test_no_gateway_carries_memini(self):
+        # Clients connect to their scope's memini directly (like jory's): the
+        # gateways' optimizer would hide memory tools behind find_tool, and memini
+        # would see ToolHive instead of the client.
+        ks = (ROOT / "kubernetes/apps/main/llm/toolhive/ks.yaml").read_text()
+        self.assertNotIn("mcp-servers/memini", ks)
+        self.assertFalse((ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/memini").exists())
+        keys = (ROOT / "kubernetes/apps/main/llm/memini-private/app/externalsecret.yaml").read_text()
+        self.assertNotIn("PRIVATE_TOOLHIVE", keys)
+
+
 class HermesScopeLabels(unittest.TestCase):
     def test_scope_labels_are_on_the_pods(self):
         # The NetworkPolicies select pods; a controller label never reaches them.
