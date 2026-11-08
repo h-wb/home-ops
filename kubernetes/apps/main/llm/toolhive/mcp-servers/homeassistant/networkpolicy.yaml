@@ -1,0 +1,22 @@
+---
+# ha-mcp has no authentication of its own: anything that reaches it controls the
+# house. Only the private gateway (mcp-gateway) may connect; clients go through
+# mcp-private with a credential.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-homeassistant
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: mcp-homeassistant
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: mcp-gateway
+      ports:
+        - port: 8086
+          protocol: TCP
