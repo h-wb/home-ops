@@ -211,5 +211,3 @@ spec:
       # Binds to the statefulset's claim template above.
       data:
         existingClaim: data
-        globalMounts:
-          - path: /data

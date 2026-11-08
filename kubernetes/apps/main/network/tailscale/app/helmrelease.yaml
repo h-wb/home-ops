@@ -58,7 +58,6 @@ spec:
                     command: ["/usr/local/bin/tailscale", "status"]
                   periodSeconds: 30
                   timeoutSeconds: 5
-                  failureThreshold: 3
               readiness: *probes
             securityContext:
               # Root owns the existing state PVC; NET_RAW lets ping work through the route.

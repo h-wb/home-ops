@@ -29,10 +29,6 @@ spec:
                   httpGet:
                     path: /
                     port: &port 8080
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
               readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
@@ -75,5 +71,3 @@ spec:
       tmp:
         type: emptyDir
         medium: Memory
-        globalMounts:
-          - path: /tmp

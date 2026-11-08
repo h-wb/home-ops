@@ -34,7 +34,6 @@ spec:
     name: flux-system
     namespace: flux-system
   targetNamespace: network
-  wait: false
   postBuild:
     substitute:
       SECRET_DOMAIN: ${SECRET_DOMAIN}

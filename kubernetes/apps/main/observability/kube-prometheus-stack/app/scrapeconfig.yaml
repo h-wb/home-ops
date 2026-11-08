@@ -9,7 +9,6 @@ spec:
     - targets:
         - 192.168.1.48:9100
         - 192.168.1.161:9100
-  metricsPath: /metrics
   relabelings:
     - action: replace
       targetLabel: job
@@ -24,7 +23,6 @@ spec:
   staticConfigs:
     - targets:
         - 192.168.1.161:9633
-  metricsPath: /metrics
   relabelings:
     - action: replace
       targetLabel: job
@@ -39,7 +37,6 @@ spec:
   staticConfigs:
     - targets:
         - 192.168.1.161:9120
-  metricsPath: /metrics
   relabelings:
     - action: replace
       targetLabel: job
@@ -78,7 +75,6 @@ spec:
   staticConfigs:
     - targets:
         - garage.storage.svc.cluster.local:3903
-  metricsPath: /metrics
   relabelings:
     - action: replace
       targetLabel: job

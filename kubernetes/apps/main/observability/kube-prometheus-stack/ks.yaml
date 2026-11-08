@@ -16,7 +16,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false # no flux ks dependents
   interval: 30m
   retryInterval: 1m
   timeout: 5m
@@ -48,7 +47,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   interval: 30m
   retryInterval: 1m
   timeout: 5m
@@ -84,7 +82,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   interval: 30m
   retryInterval: 1m
   timeout: 5m

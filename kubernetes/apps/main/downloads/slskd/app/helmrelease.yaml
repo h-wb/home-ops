@@ -54,9 +54,6 @@ spec:
                   httpGet:
                     path: /health
                     port: *port
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
               readiness: *probes
               startup:
                 enabled: true
@@ -65,8 +62,6 @@ spec:
                   httpGet:
                     path: /health
                     port: *port
-                  periodSeconds: 10
-                  timeoutSeconds: 1
                   failureThreshold: 30
             securityContext:
               allowPrivilegeEscalation: false
@@ -123,7 +118,6 @@ spec:
                   initialDelaySeconds: 30
                   periodSeconds: 30
                   timeoutSeconds: 10
-                  failureThreshold: 3
               startup:
                 enabled: true
                 custom: true
@@ -132,7 +126,6 @@ spec:
                     command:
                       - /gluetun-entrypoint
                       - healthcheck
-                  periodSeconds: 10
                   timeoutSeconds: 10
                   failureThreshold: 12
             securityContext:
@@ -196,9 +189,5 @@ spec:
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/shared
-        globalMounts:
-          - path: /data
       tmp:
         type: emptyDir
-        globalMounts:
-          - path: /tmp

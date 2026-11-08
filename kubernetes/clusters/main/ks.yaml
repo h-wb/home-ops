@@ -16,7 +16,6 @@ spec:
     kind: GitRepository
     name: flux-system
     namespace: flux-system
-  wait: false
   # Level 1 substitution: runs when cluster-apps processes child ks.yaml FILES.
   # Use this to resolve variables that appear as VALUES inside child ks.yaml
   # postBuild.substitute blocks (e.g. CLOUDFLARED_TUNNEL_ID: ${MAIN_CLOUDFLARE_TUNNEL_ID}).

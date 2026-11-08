@@ -43,7 +43,6 @@ spec:
         ports:
           metrics:
             enabled: true
-            protocol: TCP
             port: 9199
         annotations:
           external-dns.alpha.kubernetes.io/hostname: exporters.${SECRET_DOMAIN}

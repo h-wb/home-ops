@@ -36,10 +36,6 @@ spec:
                   httpGet:
                     path: /health
                     port: &port 6767
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
               readiness: *probes
             securityContext: &securityContext
               allowPrivilegeEscalation: false
@@ -114,8 +110,6 @@ spec:
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/shared
-        globalMounts:
-          - path: /data
       log:
         type: emptyDir
         globalMounts:

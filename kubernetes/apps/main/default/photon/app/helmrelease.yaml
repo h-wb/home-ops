@@ -53,7 +53,6 @@ spec:
                   # restarting the whole download from scratch in an infinite
                   # loop. 8h gives real headroom.
                   failureThreshold: 2880 # ~8h grace for first planet index load
-                  periodSeconds: 10
             securityContext:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true

@@ -36,7 +36,6 @@ spec:
                     port: &port 8008
                   periodSeconds: 30
                   timeoutSeconds: 10
-                  failureThreshold: 3
               readiness: *probes
               startup:
                 enabled: true
@@ -45,7 +44,6 @@ spec:
                   httpGet:
                     path: /
                     port: *port
-                  periodSeconds: 10
                   timeoutSeconds: 10
                   failureThreshold: 30
             resources:
@@ -92,7 +90,5 @@ spec:
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/shared
-        globalMounts:
-          - path: /data
       tmp:
         type: emptyDir

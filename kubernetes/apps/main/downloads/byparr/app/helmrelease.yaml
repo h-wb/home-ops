@@ -44,7 +44,6 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  initialDelaySeconds: 0
                   timeoutSeconds: 15
                   periodSeconds: 60
                   httpGet:
@@ -54,7 +53,6 @@ spec:
                 enabled: true
                 custom: true
                 spec:
-                  initialDelaySeconds: 0
                   timeoutSeconds: 15
                   periodSeconds: 60
                   httpGet:
