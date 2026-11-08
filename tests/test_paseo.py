@@ -205,6 +205,11 @@ class PaseoRendering(unittest.TestCase):
                 self.assertEqual(".", args[args.index("--config-dir") + 1])
                 self.assertFalse(any(k.startswith("MISE_") for k in tools["env"]))
                 self.assertTrue(tools["env"]["PATH"].startswith("/opt/mise/usr/local/bin:"))
+                # git must trust the root-owned emptyDir before dotfiles renders anything.
+                self.assertEqual({"GIT_CONFIG_COUNT": "1", "GIT_CONFIG_KEY_0": "safe.directory",
+                                  "GIT_CONFIG_VALUE_0": "/home/paseo/.dotfiles"},
+                                 {k: tools["env"][k] for k in ("GIT_CONFIG_COUNT", "GIT_CONFIG_KEY_0", "GIT_CONFIG_VALUE_0")})
+                self.assertEqual("safe.directory", runtime["containers"]["app"]["env"]["GIT_CONFIG_KEY_0"])
                 persistence = values["persistence"]
                 # A fresh clone every start, read-only for the agents.
                 dotfiles = persistence["home-dotfiles"]
