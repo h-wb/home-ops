@@ -13,7 +13,9 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      automountServiceAccountToken: true
+      # No ambient cluster credentials. Private explicitly projects its Hermes
+      # exec token into the app container; general uses ToolHive exclusively.
+      automountServiceAccountToken: false
       enableServiceLinks: false
       # The ToolHive MCP gateway route (llm/toolhive) is internal-only: no public
       # record and CoreDNS forwards straight upstream, so pods can't resolve it.

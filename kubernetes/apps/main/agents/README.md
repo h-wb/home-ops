@@ -1,18 +1,80 @@
 # Paseo environments
 
-`paseo-general` and `paseo-private` share `kubernetes/components/paseo/base`.
-Their homes, credentials and runtime configuration are separate. Both use the
-`paseo` mise machine class; `PASEO_DATA_SCOPE` selects the data scope.
+Both Paseo environments live under `paseo/`, with their instance settings together
+in `paseo/ks.yaml`. Their homes, credentials and runtime configuration are separate.
+Both use the `paseo` mise machine class; `PASEO_DATA_SCOPE` selects the data scope.
+
+```text
+paseo/
+├── ks.yaml          # general, private and scratch Flux Kustomizations
+├── common/          # shared HelmRelease, ExternalSecrets and bootstrap files
+├── general/         # GitHub/memory credentials, NFS and the API egress policy
+├── private/         # explicit Hermes token mount and home-retention patch
+└── scratch/         # retained namespace and quotas, no agent RBAC grants
+```
+
+Edit `ks.yaml` for names, scope, credential item, hostnames, SSH IP and backup
+settings. Edit `common/helmrelease.yaml` for shared pod settings and
+`general/helmrelease.yaml` or `private/helmrelease.yaml` for environment-specific
+values. Both overlays import `../common` as a normal Kustomize base; there is no
+global Paseo component. Cross-app components for backup, Tailscale and the data
+policy remain in `ks.yaml`.
+
+The Flux names remain `paseo`, `paseo-private` and `paseo-scratch`. In particular,
+general keeps its historical `paseo` release, service account and home PVC, so
+moving these files does not rename persistent resources or client identities.
 
 | Environment | Providers                             | Data                                       | Operational access                                                         |
 | ----------- | ------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------- |
-| General     | Claude, Codex, Mistral Vibe, OpenCode | Code, `memini-general`                     | Existing cluster permissions, scratch workloads, NFS, Tailscale            |
+| General     | Claude, Codex, Mistral Vibe, OpenCode | Code, `memini-general`                     | Kubernetes through ToolHive, NFS, Tailscale                                |
 | Private     | Mistral Vibe, Hermes (`llm/hermes`)   | Obsidian, personal tools, `memini-private` | A token for `exec` into llm's `hermes-private-0` only; no NFS or Tailscale |
 
-Mistral in general gets general data and credentials. Claude/Codex retain cluster
-administration as requested. This separates normal workflows; it does not stop
-an administrator deliberately reaching private workloads. Backend services also
-retain in-cluster paths outside gateway authentication.
+All general providers use ToolHive's Kubernetes and Flux servers for cluster
+operations. The general pod has no mounted service-account token or direct RBAC
+grants, including in `agents-scratch`. Private retains its explicit token for the
+Hermes provider. Backend services also retain in-cluster paths outside gateway
+authentication.
+
+## General cluster access through ToolHive
+
+`common/helmrelease.yaml` disables token automounting for both environments,
+including init containers and sidecars. General's Cilium policy denies
+the local Kubernetes API entity on TCP 443/6443/7445 and denies TCP
+6443/7445/50000 to all destinations (Kubernetes, KubePrism and Talos). Other
+egress, including ToolHive HTTPS, providers, DNS and memory, remains available.
+This is a direct-connection restriction, not a general ban on tunnels or proxies;
+Tailscale and external tools remain available.
+
+ToolHive retains its own `mcp-readonly` and `flux-mcp` service accounts and RBAC.
+The kubectl server is read-only; Flux can still update Flux resource specs, not
+just request reconciliation. These MCP permissions remain administrative in
+effect and must be reviewed separately before claiming read-only cluster access.
+GitHub credentials and GitOps writes also remain an operational access path.
+
+Proton Pass access is deliberately retained. The general reader can still obtain
+bootstrap credentials through its approved `Infrastructure/homeops-bootstrap`,
+`Infrastructure/bws-cli`, `Infrastructure/talos-machine` and
+`Infrastructure/talos-cluster` item grants. Neither disabling token automounting
+nor removing fnox references revokes these grants. Cached sessions and previously
+materialized credentials also remain. This change removes the pod identity's
+permissions and blocks direct API connections; it does not establish a complete
+credential boundary around the general environment.
+
+For rollout:
+
+1. Reconcile `agents/paseo` and `agents/paseo-scratch`. Their `prune: true`
+   inventories remove `paseo-readonly`, `paseo-flux-write`,
+   `paseo-pod-restart` (binding and role), and `agents-scratch/paseo-edit`.
+   The HelmRelease change rolls the general pod; keep private untouched.
+2. In the replacement general pod, verify the service-account directory is
+   absent in app/init/sidecar specs, direct Kubernetes and Talos connections fail,
+   and a Kubernetes read through ToolHive succeeds. From an operator session,
+   verify `system:serviceaccount:agents:paseo` cannot read pods, update Flux
+   objects, delete pods, or edit scratch workloads/Secrets.
+
+Scratch namespace, quotas and existing workloads are retained, without a
+general-agent edit grant. The shared pod base still supports private's explicit
+Hermes token.
 
 ## Policy and stable identities
 
@@ -25,6 +87,11 @@ each app references its scope's files in a `${APP}-scope` ConfigMap mounted at
 homes, which pins private metadata to Mistral and disables general-only
 providers. `tests/test_data_scopes.py` keeps the fragments and the policy in
 sync.
+
+The local common base mounts these fragments read-only in `tools`, `app` and
+`sshd`, alongside its bootstrap and data-policy ConfigMaps. A missing scope mount
+fails dotfiles bootstrap. Client environment references must survive Flux
+substitution: write `$${MCP_API_KEY}` to deliver `${MCP_API_KEY}` to the client.
 
 Use `<service>-<scope>` for environments/endpoints and `<service>-<client>-<scope>`
 for client credentials. General includes operational secrets; it does not mean public.
@@ -62,7 +129,7 @@ transitional component with the per-scope fragments below.
    Item grants expose direct item shares rather than the containing vault. Use
    `pass://<item-share-id>/<item-id>/<field>` in the consumer's fnox references;
    get identifiers with `pass-cli personal-access-token access list-access
---personal-access-token-name <agent> --output json`. Name-based vault
+   --personal-access-token-name <agent> --output json`. Name-based vault
    references require vault access and will not resolve for an item-only token.
    The home-ops root and pipelines configs select the native `paseo-general`
    fnox profile from their mise environment on the scoped general host. Dotfiles

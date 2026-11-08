@@ -1,0 +1,33 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: ${APP}
+spec:
+  values:
+    # Hermes runs through kubectl exec into llm/hermes-private-0. Its Role in
+    # llm/hermes/app/rbac.yaml is the only grant for this service account.
+    # Project the token into the app only; automatic mounting stays disabled.
+    persistence:
+      kube-api-token:
+        type: custom
+        volumeSpec:
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        fieldPath: metadata.namespace
+        advancedMounts:
+          ${APP}:
+            app:
+              - path: /var/run/secrets/kubernetes.io/serviceaccount
+                readOnly: true

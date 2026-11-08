@@ -1,0 +1,39 @@
+---
+# General agents reach Kubernetes through ToolHive, which holds its own tokens.
+# Keep normal tool/provider traffic while denying direct control-plane access.
+# Deny rules take precedence over other Cilium/Kubernetes allow policies.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: paseo-toolhive-only
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: paseo
+  egress:
+    - toEntities:
+        - all
+  egressDeny:
+    # Includes the Kubernetes Service's port 443 and direct node endpoints.
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "6443"
+              protocol: TCP
+            - port: "7445"
+              protocol: TCP
+    # Also cover VIPs/other clusters that do not have the local API identity,
+    # and the Talos API. Provider HTTPS and ToolHive HTTPS remain available.
+    - toEntities:
+        - all
+      toPorts:
+        - ports:
+            - port: "6443"
+              protocol: TCP
+            - port: "7445"
+              protocol: TCP
+            - port: "50000"
+              protocol: TCP

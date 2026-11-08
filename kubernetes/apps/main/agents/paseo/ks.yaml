@@ -1,4 +1,6 @@
 ---
+# Instance settings live together here; common pod settings are in common/.
+# Preserve the historical general resource name "paseo" for storage and clients.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -14,7 +16,7 @@ spec:
     - ../../../../../components/tailscale/client
     - ../../../../../components/agent-data-policy
   interval: 30m
-  path: ./kubernetes/apps/main/agents/paseo-general/app
+  path: ./kubernetes/apps/main/agents/paseo/general
   postBuild:
     substitute:
       APP: paseo
@@ -38,11 +40,46 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: paseo-private
+  namespace: agents
+spec:
+  targetNamespace: agents
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: paseo-private
+  components:
+    - ../../../../../components/kopiur/backup
+    - ../../../../../components/agent-data-policy
+  interval: 30m
+  path: ./kubernetes/apps/main/agents/paseo/private
+  postBuild:
+    substitute:
+      APP: paseo-private
+      CLUSTER: ${CLUSTER}
+      KOPIUR_CAPACITY: 10Gi
+      KOPIUR_SCHEDULE: 48 4 * * *
+      PASEO_DATA_SCOPE: private
+      PASEO_CREDENTIAL_ITEM: paseo-private
+      PASEO_HOSTNAMES: paseo-private.${SECRET_DOMAIN}
+      PASEO_SERVICE_DOMAIN: svc-private
+      PASEO_SSH_IP: 192.168.1.212
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 10m
+  wait: false
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: paseo-scratch
   namespace: agents
 spec:
   interval: 30m
-  path: ./kubernetes/apps/main/agents/paseo-general/scratch
+  path: ./kubernetes/apps/main/agents/paseo/scratch
   prune: true
   retryInterval: 1m
   sourceRef:

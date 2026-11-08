@@ -219,6 +219,53 @@ class PaseoRendering(unittest.TestCase):
                             self.assertTrue(entry["readOnly"])
                 self.assertNotIn("browser", mounts)
 
+    def test_general_has_no_direct_kubernetes_credentials_or_grants(self):
+        values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]
+        self.assertIs(False, values["defaultPodOptions"]["automountServiceAccountToken"])
+        # A projected token would bypass automountServiceAccountToken: false.
+        for volume in values["persistence"].values():
+            sources = volume.get("volumeSpec", {}).get("projected", {}).get("sources", [])
+            self.assertFalse(any("serviceAccountToken" in source for source in sources))
+        scratch = self.documents(self.run_tool(
+            "kustomize", "build", "kubernetes/apps/main/agents/paseo/scratch"))
+        # Check both Flux inventories: removing only the app's ClusterRoleBindings
+        # would leave namespace edit/exec/Secret access through the scratch binding.
+        for doc in self.rendered["general"] + scratch:
+            if doc.get("kind") in ("RoleBinding", "ClusterRoleBinding"):
+                self.assertFalse(any(subject.get("kind") == "ServiceAccount"
+                                     and subject.get("name") == "paseo"
+                                     and subject.get("namespace") == "agents"
+                                     for subject in doc.get("subjects", [])))
+        self.assertTrue(any(doc.get("kind") == "ResourceQuota" for doc in scratch))
+
+    def test_general_network_policy_blocks_direct_control_plane_only(self):
+        policy = self.resource("general", "CiliumNetworkPolicy", "paseo-toolhive-only")["spec"]
+        self.assertEqual({"app.kubernetes.io/name": "paseo"},
+                         policy["endpointSelector"]["matchLabels"])
+        self.assertEqual([{"toEntities": ["all"]}], policy["egress"])
+        denied = {}
+        for rule in policy["egressDeny"]:
+            ports = {entry["port"] for group in rule["toPorts"]
+                     for entry in group["ports"] if entry["protocol"] == "TCP"}
+            for entity in rule["toEntities"]:
+                denied.setdefault(entity, set()).update(ports)
+        self.assertIn("443", denied["kube-apiserver"])
+        self.assertTrue({"6443", "7445", "50000"}.issubset(denied["all"]))
+        # ToolHive gateway, providers, memory and DNS must not be caught by
+        # destination-independent port denies.
+        self.assertFalse({"443", "4483", "8080", "53"} & denied["all"])
+        self.assertFalse(any(doc.get("kind") == "CiliumNetworkPolicy"
+                             for doc in self.rendered["private"]))
+
+    def test_private_retains_only_its_explicit_hermes_token_mount(self):
+        values = self.resource("private", "HelmRelease", "paseo-private")["spec"]["values"]
+        self.assertIs(False, values["defaultPodOptions"]["automountServiceAccountToken"])
+        token = values["persistence"]["kube-api-token"]
+        self.assertEqual({"paseo-private"}, set(token["advancedMounts"]))
+        self.assertEqual({"app"}, set(token["advancedMounts"]["paseo-private"]))
+        self.assertTrue(any("serviceAccountToken" in source
+                            for source in token["volumeSpec"]["projected"]["sources"]))
+
 
 if __name__ == "__main__":
     unittest.main()
