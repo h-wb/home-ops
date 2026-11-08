@@ -1,0 +1,13 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/toolhive.stacklok.dev/mcptelemetryconfig_v1beta1.json
+# Prometheus metrics for both gateways (telemetryConfigRef), on the diagnostics
+# port (9464) only: the MCP port is anonymous, and NetworkPolicy matches ports,
+# not paths, so metrics on it could not be opened to Prometheus alone.
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: MCPTelemetryConfig
+metadata:
+  name: prometheus
+spec:
+  prometheus:
+    enabled: true
+    metricsOnTransportPort: false

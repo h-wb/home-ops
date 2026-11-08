@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/podmonitor_v1.json
+# Both gateways' diagnostics port. The operator (0.63) declares only the MCP
+# port (4483) on the pod, so select that and point the address at 9464; a
+# portNumber target is dropped unless the pod declares the port.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: toolhive-vmcp
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: virtualmcpserver
+  podTargetLabels:
+    - app.kubernetes.io/instance
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_ip]
+          targetLabel: __address__
+          replacement: $1:9464

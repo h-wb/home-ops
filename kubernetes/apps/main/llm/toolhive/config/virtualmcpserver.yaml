@@ -31,6 +31,20 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
+  # Prometheus metrics on the diagnostics port (9464), off the MCP port: the MCP
+  # port is anonymous, so metrics get their own port and NetworkPolicy rule.
+  telemetryConfigRef:
+    name: prometheus
+  # Sessions in the toolhive-config Dragonfly (components/dragonfly), so they
+  # survive a gateway restart. One instance for both gateways, a prefix each,
+  # behind a password because every pod in llm may reach its port.
+  sessionStorage:
+    provider: redis
+    address: toolhive-config-dragonfly.llm.svc.cluster.local:6379
+    keyPrefix: "toolhive:mcp-gateway:"
+    passwordRef:
+      name: toolhive-config-redis
+      key: password
   podTemplateSpec:
     spec:
       containers:

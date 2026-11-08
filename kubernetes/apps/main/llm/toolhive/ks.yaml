@@ -63,11 +63,19 @@ spec:
   commonMetadata:
     labels:
       app.kubernetes.io/name: *app
+  # toolhive-config-dragonfly: the gateways' session storage.
+  components:
+    - ../../../../../components/dragonfly
   dependsOn:
     - name: toolhive
       namespace: llm
     - name: litellm
       namespace: llm
+  healthCheckExprs:
+    - apiVersion: dragonflydb.io/v1alpha1
+      kind: Dragonfly
+      failed: status.phase != 'ready'
+      current: status.phase == 'ready'
   interval: 30m
   path: ./kubernetes/apps/main/llm/toolhive/config
   postBuild:

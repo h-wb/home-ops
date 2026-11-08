@@ -35,8 +35,11 @@ spec:
           # The tier configs are raw configMaps outside this release: reloader
           # rolls the StatefulSet when they change.
           reloader.stakater.com/auto: "true"
-        labels:
-          assistant.scope: general
+        # On the pods, not the StatefulSet: the NetworkPolicies (hermes, toolhive)
+        # select pods by it. `labels` here would only label the controller.
+        pod:
+          labels:
+            assistant.scope: general
         statefulset:
           volumeClaimTemplates:
             - name: data
@@ -134,8 +137,11 @@ spec:
         replicas: 1
         annotations:
           reloader.stakater.com/auto: "true"
-        labels:
-          assistant.scope: private
+        # On the pods, not the StatefulSet: the NetworkPolicies (hermes, toolhive)
+        # select pods by it. `labels` here would only label the controller.
+        pod:
+          labels:
+            assistant.scope: private
         statefulset:
           volumeClaimTemplates:
             - name: data

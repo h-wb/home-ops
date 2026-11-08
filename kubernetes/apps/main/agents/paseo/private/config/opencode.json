@@ -175,16 +175,5 @@
     "plan": {
       "model": "mistral/mistral-medium-latest#none"
     }
-  },
-  "mcp": {
-    "servers": {
-      "toolhive-private": {
-        "type": "remote",
-        "url": "https://mcp-private.${SECRET_DOMAIN}/mcp",
-        "headers": {
-          "x-api-key": "{env:MCP_API_KEY}"
-        }
-      }
-    }
   }
 }

@@ -236,38 +236,7 @@
       ]
     }
   },
-  "mcp": {
-    "servers": {
-      "toolhive-general": {
-        "type": "remote",
-        "url": "https://mcp-general.${SECRET_DOMAIN}/mcp",
-        "headers": {
-          "x-api-key": "{env:MCP_API_KEY}"
-        }
-      },
-      "memini-general": {
-        "type": "remote",
-        "url": "http://memini-general.llm.svc.cluster.local:8080/mcp",
-        "headers": {
-          "Authorization": "Bearer {env:MEMINI_API_KEY}"
-        }
-      },
-      "chrome-devtools": {
-        "type": "local",
-        "command": ["chrome-devtools-mcp", "--browserUrl", "http://127.0.0.1:9222"]
-      }
-    }
-  },
   "permission": "allow",
-  "plugins": [
-    {
-      "package": "@eleboucher/opencode-memini-v2@0.7.39",
-      "options": {
-        "base_url": "http://memini-general.llm.svc.cluster.local:8080",
-        "auto_update": false
-      }
-    }
-  ],
   "compaction": {
     "auto": true,
     "keep": {

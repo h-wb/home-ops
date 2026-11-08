@@ -8,7 +8,6 @@ configMapGenerator:
   - name: ${APP}-config
     files:
       - config/paseo.json
-      - config/claude.json
       - config/opencode.json
     options:
       disableNameSuffixHash: true
