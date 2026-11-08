@@ -52,7 +52,7 @@ spec:
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
           configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-config
-          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-mcp,${APP}-ssh,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
+          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-ssh,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
         initContainers:
           # Clones ~/.dotfiles and runs its `paseo` class bootstrap (mise, the agent
           # CLIs, repos), then merges this scope's agent config (./config/provision.sh).
@@ -81,7 +81,7 @@ spec:
               MCP_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: ${APP}-mcp
+                    name: ${APP}-secret
                     key: MCP_API_KEY
               # System dirs first: the daemon must keep the image's node, its native
               # modules are built against it. Everything else falls through to mise.

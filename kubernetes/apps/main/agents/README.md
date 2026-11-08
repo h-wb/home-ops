@@ -71,15 +71,17 @@ complete credential boundary around general.
 ## Credentials and identities
 
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
-credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`
-and `KEYSEED`, plus the `MCP_API_KEY` field (ToolHive's CreatedOnce VMCP key,
-pasted once). General additionally holds `GH_TOKEN` and `OPENCODE_API_KEY`, and
-`LITELLM_API_KEY` — which exists only to compose Claude Code's
-`x-litellm-api-key` header (`paseo-claude`); the raw virtual key never passes
-through Bitwarden: the litellm-operator writes its Secret into the pods' own
-namespace from the `virtualkey.yaml` CR beside them, and the helmrelease binds
-it directly. Memini's client key lives once, in the `memini` item, read by both
-the server and the paseo-memory ExternalSecret. Proton Pass serves fnx
+credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`,
+`KEYSEED` and the `MCP_API_KEY` field (ToolHive's CreatedOnce VMCP key, pasted
+once). General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
+`LITELLM_API_KEY` — the last one only composes Claude Code's `x-litellm-api-key`
+header, the raw virtual key never passing through Bitwarden: the
+litellm-operator writes its Secret into the pods' own namespace from the
+`virtualkey.yaml` CR beside them, and the helmrelease binds it directly. The
+general pod's agent keys (GH, opencode, memini, the Claude header) come out of
+the `paseo-agents` Secret, whose single ExternalSecret extracts the credential
+and `memini` items together — memini's client key lives once, in the
+`memini` item, read by the server and the pod alike. Proton Pass serves fnx
 repository credentials through item-level viewer grants
 (`pass://<item-share-id>/<item-id>/<field>`).
 

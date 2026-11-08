@@ -24,22 +24,22 @@ spec:
               ANTHROPIC_CUSTOM_HEADERS:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-claude
+                    name: paseo-agents
                     key: ANTHROPIC_CUSTOM_HEADERS
               GH_TOKEN:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-github
+                    name: paseo-agents
                     key: GH_TOKEN
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-memory
+                    name: paseo-agents
                     key: MEMINI_API_KEY
               OPENCODE_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-opencode
+                    name: paseo-agents
                     key: OPENCODE_API_KEY
             envFrom:
               - secretRef:
@@ -52,22 +52,22 @@ spec:
               ANTHROPIC_CUSTOM_HEADERS:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-claude
+                    name: paseo-agents
                     key: ANTHROPIC_CUSTOM_HEADERS
               GH_TOKEN:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-github
+                    name: paseo-agents
                     key: GH_TOKEN
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-memory
+                    name: paseo-agents
                     key: MEMINI_API_KEY
               OPENCODE_API_KEY:
                 valueFrom:
                   secretKeyRef:
-                    name: paseo-opencode
+                    name: paseo-agents
                     key: OPENCODE_API_KEY
             envFrom:
               - secretRef:
@@ -75,7 +75,7 @@ spec:
               - secretRef:
                   name: ${APP}-ssh
         annotations:
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-mcp,paseo-ssh,paseo-tailscale,litellm-paseo-general,paseo-github,paseo-memory,paseo-opencode,paseo-claude
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-mcp,paseo-ssh,paseo-tailscale,litellm-paseo-general,paseo-agents
     persistence:
       data:
         type: nfs
