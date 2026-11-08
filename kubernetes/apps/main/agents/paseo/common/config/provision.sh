@@ -17,7 +17,8 @@ fi
 merge() {
 	node -e '
 const fs = require("fs"), path = require("path"), [dst, src] = process.argv.slice(1);
-const read = (f) => fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, "utf8")) : {};
+// A missing or empty file is {}; malformed JSON fails rather than being overwritten.
+const read = (f) => { const t = fs.existsSync(f) ? fs.readFileSync(f, "utf8").trim() : ""; return t ? JSON.parse(t) : {}; };
 const obj = (v) => v && typeof v === "object" && !Array.isArray(v);
 const merge = (a, b) => { for (const [k, v] of Object.entries(b)) a[k] = obj(v) && obj(a[k]) ? merge(a[k], v) : v; return a; };
 fs.mkdirSync(path.dirname(dst), { recursive: true });
@@ -25,5 +26,6 @@ fs.writeFileSync(dst, JSON.stringify(merge(read(dst), read(src)), null, 2) + "\n
 ' "$1" "$2"
 }
 merge "$HOME/.paseo/config.json" /etc/paseo/config/paseo.json
-# The image sets CLAUDE_CONFIG_DIR=~/.claude; Claude then reads its .claude.json there.
-merge "${CLAUDE_CONFIG_DIR:-$HOME}/.claude.json" /etc/paseo/config/claude.json
+# The image entrypoint (skipped by this init container) defaults CLAUDE_CONFIG_DIR to
+# ~/.claude, and Claude then reads its .claude.json there.
+merge "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.claude.json" /etc/paseo/config/claude.json
