@@ -18,10 +18,18 @@ ToolHive's gateways take callers anonymously, so who reaches each one is the
 boundary. In-cluster clients (Hermes, Paseo, Open WebUI) call the service with no
 key, and `toolhive/config/networkpolicy.yaml` admits only that scope's pods.
 Clients outside the cluster go through Envoy (`mcp-<scope>.${SECRET_DOMAIN}`),
-which checks `x-api-key` against that gateway's own list: one key per external
-client and scope, in the Bitwarden `toolhive` item
-(`TOOLHIVE_MACBOOK_GENERAL_API_KEY`, `TOOLHIVE_MACBOOK_PRIVATE_API_KEY`), next to
-the gateways' session store password (`TOOLHIVE_CONFIG_REDIS_PASSWORD`). The
+which checks `x-api-key` against that gateway's own list.
+
+Client keys are per holder (what you'd revoke if it leaked), shared by every
+agent on it, and named `<SCOPE>_<HOLDER>` in Bitwarden:
+
+| Item       | Fields                                                                                                                                                                   |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `toolhive` | `GENERAL_WORKSTATION`, `PRIVATE_WORKSTATION` (Envoy client `workstation`), `REDIS_PASSWORD` (the gateways' session store)                                                |
+| `memini`   | `GENERAL_ADMIN`, `GENERAL_WORKSTATION`, `GENERAL_PASEO`, `GENERAL_HERMES`, `PRIVATE_ADMIN`, `PRIVATE_TOOLHIVE`, `PRIVATE_HERMES`, `PRIVATE_WORKSTATION`, `PRIVATE_PASEO` |
+
+The workstation keys reach the workstations through Proton Pass
+(`Automation/toolhive`, `Automation/memini`, fields `general`/`private`). The
 litellm key is consumed directly: its CR lives beside the pods, so the operator
 writes the Secret into the agents namespace and the helmrelease binds it by name.
 

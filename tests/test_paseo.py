@@ -90,6 +90,21 @@ class PaseoRendering(unittest.TestCase):
                 aliases = [h for a in values["defaultPodOptions"]["hostAliases"] for h in a["hostnames"]]
                 self.assertEqual(["litellm.example.com"], aliases)
 
+    def test_each_pod_holds_its_own_scopes_memini_key(self):
+        # Bitwarden `memini` fields are <SCOPE>_<HOLDER>; this holder is `paseo`.
+        for scope, app, secret in (("general", "paseo", "paseo-agents"),
+                                   ("private", "paseo-private", "paseo-private-agents")):
+            with self.subTest(scope=scope):
+                spec = self.resource(scope, "ExternalSecret", secret)["spec"]
+                self.assertEqual("{{ .%s_PASEO }}" % scope.upper(),
+                                 spec["target"]["template"]["data"]["MEMINI_API_KEY"])
+                self.assertIn({"extract": {"key": "memini"}}, spec["dataFrom"])
+                runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
+                for name in ("app", "sshd"):
+                    ref = runtime["containers"][name]["env"]["MEMINI_API_KEY"]["valueFrom"]["secretKeyRef"]
+                    self.assertEqual(secret, ref["name"], name)
+                self.assertIn(secret, runtime["annotations"]["secret.reloader.stakater.com/reload"])
+
     def test_only_general_routes_claude_through_litellm(self):
         secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]
         self.assertEqual("x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}", secret["ANTHROPIC_CUSTOM_HEADERS"])

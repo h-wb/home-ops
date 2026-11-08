@@ -116,11 +116,11 @@ spec:
     name: mcp-ops-api-keys
     template:
       engineVersion: v2
-      # Clients outside the cluster only, one key each (Bitwarden `toolhive`); pods
+      # Clients outside the cluster only, <SCOPE>_<HOLDER> in Bitwarden `toolhive`; pods
       # come in-cluster, admitted by networkpolicy.yaml. A missing field fails the
       # template (missingkey=error), so the Secret keeps its last good keys.
       data:
-        macbook: "{{ .TOOLHIVE_MACBOOK_GENERAL_API_KEY }}"
+        workstation: "{{ .GENERAL_WORKSTATION }}"
   dataFrom:
     - extract:
         key: toolhive

@@ -55,14 +55,15 @@ class ToolHiveScopes(unittest.TestCase):
                 ], spec["ingress"])
 
     def test_envoy_takes_one_key_per_external_client_and_scope(self):
-        routes = {"mcp-gateway-api-key": ("mcp-gateway-api-keys", "TOOLHIVE_MACBOOK_PRIVATE_API_KEY"),
-                  "mcp-ops-api-key": ("mcp-ops-api-keys", "TOOLHIVE_MACBOOK_GENERAL_API_KEY")}
+        # Bitwarden fields are <SCOPE>_<HOLDER>; the Envoy client is the holder.
+        routes = {"mcp-gateway-api-key": ("mcp-gateway-api-keys", "PRIVATE_WORKSTATION"),
+                  "mcp-ops-api-key": ("mcp-ops-api-keys", "GENERAL_WORKSTATION")}
         for policy, (secret, field) in routes.items():
             with self.subTest(policy=policy):
                 refs = self.resource("SecurityPolicy", policy)["spec"]["apiKeyAuth"]["credentialRefs"]
                 self.assertEqual([secret], [r["name"] for r in refs])
                 spec = self.resource("ExternalSecret", secret)["spec"]
-                self.assertEqual({"macbook": "{{ .%s }}" % field}, spec["target"]["template"]["data"])
+                self.assertEqual({"workstation": "{{ .%s }}" % field}, spec["target"]["template"]["data"])
                 self.assertEqual([{"extract": {"key": "toolhive"}}], spec["dataFrom"])
 
     def test_gateways_share_sessions_and_expose_metrics_off_the_mcp_port(self):
@@ -77,7 +78,7 @@ class ToolHiveScopes(unittest.TestCase):
             prefixes.add(spec["sessionStorage"]["keyPrefix"])
         self.assertEqual(2, len(prefixes))
         redis = self.resource("ExternalSecret", "toolhive-config-redis")["spec"]
-        self.assertEqual({"password": "{{ .TOOLHIVE_CONFIG_REDIS_PASSWORD }}"}, redis["target"]["template"]["data"])
+        self.assertEqual({"password": "{{ .REDIS_PASSWORD }}"}, redis["target"]["template"]["data"])
         self.assertEqual([{"extract": {"key": "toolhive"}}], redis["dataFrom"])
         # Nothing is generated in-cluster: every value is in Bitwarden.
         self.assertFalse([d for d in self.docs if d["kind"] == "Password"])

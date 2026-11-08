@@ -4,6 +4,28 @@ metadata:
   name: ${APP}
 spec:
   values:
+    controllers:
+      ${APP}:
+        annotations:
+          # Replaces common's list, so it repeats it.
+          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-ssh,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE},paseo-private-agents
+        containers:
+          app:
+            env:
+              # memini-private's `paseo` client (Bitwarden `memini`, PRIVATE_PASEO).
+              MEMINI_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: paseo-private-agents
+                    key: MEMINI_API_KEY
+          sshd:
+            env:
+              # memini-private's `paseo` client (Bitwarden `memini`, PRIVATE_PASEO).
+              MEMINI_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: paseo-private-agents
+                    key: MEMINI_API_KEY
     # Hermes runs through kubectl exec into llm/hermes-private-0. Its Role in
     # llm/hermes/app/rbac.yaml is the only grant for this service account.
     # Project the token into the app only; automatic mounting stays disabled.
