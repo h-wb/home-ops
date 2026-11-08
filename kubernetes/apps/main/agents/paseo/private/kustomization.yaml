@@ -4,7 +4,8 @@ resources:
   - ../common
   - externalsecret.yaml
   - virtualkey.yaml
-# Agent config for this scope, mounted at /etc/paseo/config (see common/config/provision.sh).
+# Agent config for this scope, mounted at /etc/paseo/config (merged into
+# ~/.paseo/config.json by the dotfiles [dotfiles] entry at pod-start bootstrap).
 configMapGenerator:
   - name: ${APP}-config
     files:
@@ -16,6 +17,19 @@ patches:
   - path: helmrelease.yaml
     target:
       kind: HelmRelease
+  # Private has no general GitHub credential, so it cannot clone the
+  # [bootstrap.repos] checkouts: append `--skip repos` to the tools init
+  # container's `mise bootstrap` args (this was a shell `if` in the old
+  # provision.sh, now gone).
+  - target:
+      kind: HelmRelease
+    patch: |-
+      - op: add
+        path: /spec/values/controllers/${APP}/initContainers/tools/args/-
+        value: --skip
+      - op: add
+        path: /spec/values/controllers/${APP}/initContainers/tools/args/-
+        value: repos
   # Keep private's home if this Flux Kustomization is removed.
   - target:
       kind: PersistentVolumeClaim

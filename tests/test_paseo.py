@@ -184,6 +184,41 @@ class PaseoRendering(unittest.TestCase):
         self.assertTrue(any("serviceAccountToken" in source
                             for source in token["volumeSpec"]["projected"]["sources"]))
 
+    def test_tools_init_container_provisions_with_native_mise_bootstrap(self):
+        # No provision script: one args-only `mise bootstrap --from` on the
+        # jdx/mise image (ships mise+git) clones/ff's ~/.dotfiles, links
+        # ~/.config/mise to it, and applies the dotfiles' paseo class.
+        for scope, app in (("general", "paseo"), ("private", "paseo-private")):
+            with self.subTest(scope=scope):
+                self.assertFalse(any(doc.get("kind") == "ConfigMap"
+                                     and doc["metadata"]["name"] == f"{app}-provision"
+                                     for doc in self.rendered[scope]))
+                values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
+                tools = values["controllers"][app]["initContainers"]["tools"]
+                self.assertEqual("ghcr.io/jdx/mise", tools["image"]["repository"])
+                self.assertEqual(["mise"], tools["command"])
+                args = tools["args"]
+                self.assertEqual("bootstrap", args[0])
+                for flag in ("--from", "--from-dir", "--config-dir", "--update",
+                             "--yes", "--force-dotfiles", "--skip-dirty", "--locked"):
+                    self.assertIn(flag, args)
+                self.assertIn("https://github.com/h-wb/dotfiles.git", args)
+                self.assertEqual("/home/paseo/.dotfiles", args[args.index("--from-dir") + 1])
+                self.assertEqual(".", args[args.index("--config-dir") + 1])
+                # The jdx/mise image defaults these to /mise (a container layer).
+                self.assertEqual("/home/paseo/.local/share/mise", tools["env"]["MISE_DATA_DIR"])
+                self.assertEqual("/home/paseo/.config/mise", tools["env"]["MISE_CONFIG_DIR"])
+                self.assertEqual("/home/paseo/.local/share/mise/cache", tools["env"]["MISE_CACHE_DIR"])
+                # /etc/paseo/config is the only /etc/paseo mount (class marker +
+                # scope overlay for the dotfiles merge); no provision.sh anywhere.
+                self.assertNotIn("provision", values["persistence"])
+                for container in ("tools", "app", "sshd"):
+                    mounts = values["persistence"]["config"]["advancedMounts"][app][container]
+                    self.assertEqual([{"path": "/etc/paseo/config", "readOnly": True}], mounts)
+                # Private holds no general GitHub credential, so it skips the
+                # repos part (the old provision.sh's shell `if`).
+                self.assertEqual(scope == "private", args[-2:] == ["--skip", "repos"])
+
 
 class LiteLLMRendering(unittest.TestCase):
     @classmethod

@@ -4,11 +4,6 @@ resources:
   - helmrelease.yaml
   - externalsecret.yaml
 configMapGenerator:
-  - name: ${APP}-provision
-    files:
-      - provision.sh=./config/provision.sh
-    options:
-      disableNameSuffixHash: true
   - name: ${APP}-sshd
     files:
       - authorized_keys=./config/authorized_keys

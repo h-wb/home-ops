@@ -7,7 +7,7 @@ class for CLIs, repos and shell only.
 ```text
 paseo/
 ├── ks.yaml          # general, private and scratch Flux Kustomizations
-├── common/          # shared HelmRelease, ExternalSecrets, provision.sh, authorized_keys
+├── common/          # shared HelmRelease, ExternalSecrets, authorized_keys
 ├── general/
 │   ├── config/      # paseo.json, opencode.json for this scope
 │   └── ...          # GitHub/memory credentials, NFS and the API egress policy
@@ -37,9 +37,11 @@ mounted read-only at `/etc/paseo/config`:
 - `opencode.json`: models and providers, read in place (`OPENCODE_CONFIG`).
   OpenCode layers it over dotfiles' `~/.config/opencode/opencode.json` and
   merges both, so the MCP servers stay out of it.
-- `paseo.json`: deep-merged by `common/config/provision.sh` into
-  `~/.paseo/config.json` on every pod start, since Paseo keeps its own state
-  there. Our keys win; everything else is kept.
+- `paseo.json`: merged into `~/.paseo/config.json` on every pod start by the
+  dotfiles `[dotfiles]` merge entry (`conf.d/paseo/mise.paseo-overlay.toml`),
+  applied by the `tools` init container's `mise bootstrap --from` — Paseo keeps
+  its own state in that file, so only the overlay's keys are written. Our keys
+  win; everything else is kept.
 
 The files hold no secrets. Credentials come from ExternalSecrets as environment
 variables and are referenced by name (`{env:LITELLM_API_KEY}` for OpenCode). The

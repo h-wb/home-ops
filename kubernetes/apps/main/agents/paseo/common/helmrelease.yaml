@@ -50,17 +50,39 @@ spec:
           identifier: ${APP}
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
-          configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-config
+          configmap.reloader.stakater.com/reload: ${APP}-sshd,${APP}-config
           secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-ssh,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
         initContainers:
-          # Clones ~/.dotfiles and runs its `paseo` class bootstrap (mise, the agent
-          # CLIs, repos), then merges this scope's agent config (./config/provision.sh).
+          # One native command provisions the host: clone or fast-forward ~/.dotfiles
+          # (--from/--from-dir/--update), link ~/.config/mise to it (--config-dir .),
+          # then run the dotfiles' `paseo` class `mise bootstrap` — repos, dotfiles
+          # (incl. the /etc/paseo/config scope overlay merged into
+          # ~/.paseo/config.json), tools, and the `bootstrap` task. The jdx/mise
+          # image ships mise+git, so no script or ConfigMap is needed.
           tools:
-            image: &image
-              repository: ghcr.io/getpaseo/paseo
-              tag: 0.15.3
-            command: ["/bin/sh", "/etc/paseo/provision.sh"]
+            image:
+              repository: ghcr.io/jdx/mise
+              tag: 2026.11.2-debian
+            command: ["mise"]
+            args:
+              - bootstrap
+              - --from
+              - https://github.com/h-wb/dotfiles.git
+              - --from-dir
+              - /home/paseo/.dotfiles
+              - --config-dir
+              - .
+              - --update
+              - --yes
+              - --force-dotfiles
+              - --skip-dirty
+              - --locked
             env: &env
+              # The jdx/mise image defaults these to /mise (a container layer);
+              # everything must live under HOME, the PVC.
+              MISE_DATA_DIR: /home/paseo/.local/share/mise
+              MISE_CONFIG_DIR: /home/paseo/.config/mise
+              MISE_CACHE_DIR: /home/paseo/.local/share/mise/cache
               PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}
               HOME: /home/paseo
               OPENCODE_CONFIG: /etc/paseo/config/opencode.json
@@ -95,7 +117,9 @@ spec:
                 memory: 2Gi
         containers:
           app:
-            image: *image
+            image: &image
+              repository: ghcr.io/getpaseo/paseo
+              tag: 0.15.3
             env: &appEnv
               <<: *env
               PASEO_HOSTNAMES: "${PASEO_HOSTNAMES}"
@@ -255,19 +279,10 @@ spec:
               - path: /home/paseo
             app: *home
             sshd: *home
-      # /etc/paseo is also the marker dotfiles' miserc.toml detects the class by.
-      provision:
-        type: configMap
-        name: ${APP}-provision
-        advancedMounts:
-          ${APP}:
-            tools: &provision
-              - path: /etc/paseo/provision.sh
-                subPath: provision.sh
-                readOnly: true
-            app: *provision
-            sshd: *provision
-      # The overlay's config/ dir (${APP}-config): agent config for this scope.
+      # The overlay's config/ dir (${APP}-config): agent config for this scope,
+      # merged into ~/.paseo/config.json by the dotfiles [dotfiles] entry during
+      # the tools container's bootstrap. The mount also creates /etc/paseo, the
+      # marker dotfiles' miserc.toml detects the paseo class by.
       config:
         type: configMap
         name: ${APP}-config
