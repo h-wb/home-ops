@@ -39,9 +39,9 @@ hooks {
   // Pushes go straight to main, so render both clusters before they reach Flux.
   ["pre-push"] {
     steps {
-      ["data-scopes"] {
-        glob = List("kubernetes/**", "tests/test_data_scopes.py")
-        check = "python3 -B -m unittest discover -s tests -p test_data_scopes.py"
+      ["paseo"] {
+        glob = List("kubernetes/**", "tests/test_paseo.py")
+        check = "python3 -B -m unittest discover -s tests -p test_paseo.py"
       }
       ["flate"] {
         glob = "kubernetes/**"

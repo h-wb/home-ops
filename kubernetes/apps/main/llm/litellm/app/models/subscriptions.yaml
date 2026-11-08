@@ -1,6 +1,6 @@
 ---
-# Claude Code supplies and refreshes its own subscription OAuth token.
-# No Anthropic API key or subscription credential is stored on the gateway.
+# Claude Code supplies and refreshes its own subscription OAuth token; LiteLLM
+# forwards it. No Anthropic API key or subscription credential is on the gateway.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
@@ -10,30 +10,3 @@ spec:
   modelName: anthropic/*
   params:
     model: anthropic/*
----
-# Codex uses its native model names and supplies its own ChatGPT login.
-# Existing chatgpt/* aliases retain the proxy-owned login for background apps.
-apiVersion: litellm.home-operations.com/v1alpha1
-kind: LiteLLMModel
-metadata:
-  name: codex-subscription-gpt
-spec:
-  proxyRef: litellm
-  modelName: gpt-*
-  params:
-    model: chatgpt/gpt-*
-  info:
-    mode: responses
----
-# Codex also sends auxiliary requests such as codex-auto-review.
-apiVersion: litellm.home-operations.com/v1alpha1
-kind: LiteLLMModel
-metadata:
-  name: codex-subscription-auxiliary
-spec:
-  proxyRef: litellm
-  modelName: codex-*
-  params:
-    model: chatgpt/codex-*
-  info:
-    mode: responses

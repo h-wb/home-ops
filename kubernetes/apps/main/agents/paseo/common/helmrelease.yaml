@@ -17,10 +17,10 @@ spec:
       # exec token into the app container; general uses ToolHive exclusively.
       automountServiceAccountToken: false
       enableServiceLinks: false
-      # The ToolHive MCP gateway route (llm/toolhive) is internal-only: no public
-      # record and CoreDNS forwards straight upstream, so pods can't resolve it.
-      # Point it at envoy-internal (same LAN IP the route's Gateway listens on)
-      # for the Vibe agents' scoped MCP server. The gateway has a valid public cert.
+      # The ToolHive and LiteLLM routes are internal-only: no public record and
+      # CoreDNS forwards straight upstream, so pods can't resolve them. Point them
+      # at envoy-internal (same LAN IP the routes' Gateway listens on). The gateway
+      # has a valid public cert.
       hostAliases:
         - hostnames:
             - mcp-general.${SECRET_DOMAIN}
@@ -45,17 +45,17 @@ spec:
         # Since 0.14 the daemon releases an agent's provider runtime after an idle hour
         # and resumes the saved session on the next prompt; working agents are kept.
         # Accepted default. Opt out per scope with `agents.idleRuntimeCleanup: false`
-        # in components/agent-data-policy/scopes/<scope>/scope.json.
+        # in <scope>/config/paseo.json.
         strategy: Recreate
         serviceAccount:
           identifier: ${APP}
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
-          configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-data-policy,${APP}-scope
+          configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-config
           secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-litellm,${APP}-mcp,${APP}-ssh,${APP}-tailscale
         initContainers:
-          # Clones ~/.dotfiles and runs its `paseo` class bootstrap: mise, the agent
-          # CLIs, repos and agent configs all come from there (./config/provision.sh).
+          # Clones ~/.dotfiles and runs its `paseo` class bootstrap (mise, the agent
+          # CLIs, repos), then merges this scope's agent config (./config/provision.sh).
           tools:
             image: &image
               repository: ghcr.io/getpaseo/paseo
@@ -64,6 +64,7 @@ spec:
             env: &env
               PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}
               HOME: /home/paseo
+              OPENCODE_CONFIG: /etc/paseo/config/opencode.json
               TZ: Europe/Paris
               # Terminals (Paseo web UI, VS Code) use this to pick the shell;
               # without it they fall back to /bin/sh and skip ~/.bashrc.
@@ -109,10 +110,9 @@ spec:
                 secretRef:
                   name: ${APP}-litellm
                   optional: true
-              # x-api-key for https://mcp-${PASEO_DATA_SCOPE}.${SECRET_DOMAIN} (Vibe home-mcp server). The
-              # daemon inherits it and its spawned agents read auth.api_key_env through
-              # VIBE_MCP_SERVERS (dotfiles providers.json). ToolHive generates this
-              # client key and publishes it to Bitwarden with a scoped client name.
+              # x-api-key for https://mcp-${PASEO_DATA_SCOPE}.${SECRET_DOMAIN}. The daemon
+              # inherits it and the agents' MCP config (config/) references it by name.
+              # ToolHive generates this client key and publishes it to Bitwarden.
               - &mcpKey
                 secretRef:
                   name: ${APP}-mcp
@@ -275,25 +275,17 @@ spec:
                 readOnly: true
             app: *provision
             sshd: *provision
-      # Per-scope agent config fragments (from the app overlay's ${APP}-scope
-      # ConfigMap). dotfiles' mise bootstrap merges them into the agent homes.
-      scope:
+      # The overlay's config/ dir (${APP}-config): agent config for this scope.
+      config:
         type: configMap
-        name: ${APP}-scope
+        name: ${APP}-config
         advancedMounts:
           ${APP}:
-            tools: &scope
-              - path: /etc/paseo/scope/scope.json
-                subPath: scope.json
+            tools: &config
+              - path: /etc/paseo/config
                 readOnly: true
-              - path: /etc/paseo/scope/claude.json
-                subPath: claude.json
-                readOnly: true
-              - path: /etc/paseo/scope/codex.toml
-                subPath: codex.toml
-                readOnly: true
-            app: *scope
-            sshd: *scope
+            app: *config
+            sshd: *config
       sshd-config:
         type: configMap
         name: ${APP}-sshd
@@ -303,17 +295,6 @@ spec:
               - path: /etc/paseo/authorized_keys
                 subPath: authorized_keys
                 readOnly: true
-      data-policy:
-        type: configMap
-        name: ${APP}-data-policy
-        advancedMounts:
-          ${APP}:
-            tools: &policy
-              - path: /etc/paseo/policy.json
-                subPath: policy.json
-                readOnly: true
-            app: *policy
-            sshd: *policy
       tmp:
         type: emptyDir
         globalMounts:

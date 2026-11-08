@@ -14,7 +14,6 @@ spec:
   components:
     - ../../../../../components/kopiur/backup
     - ../../../../../components/tailscale/client
-    - ../../../../../components/agent-data-policy
   interval: 30m
   path: ./kubernetes/apps/main/agents/paseo/general
   postBuild:
@@ -49,7 +48,6 @@ spec:
       app.kubernetes.io/name: paseo-private
   components:
     - ../../../../../components/kopiur/backup
-    - ../../../../../components/agent-data-policy
   interval: 30m
   path: ./kubernetes/apps/main/agents/paseo/private
   postBuild:

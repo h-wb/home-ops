@@ -4,16 +4,13 @@ resources:
   - ../common
   - networkpolicy.yaml
   - externalsecret.yaml
-# Per-scope agent config fragments, owned by components/agent-data-policy;
-# the base mounts this at /etc/paseo/scope and dotfiles' bootstrap merges it
-# into the agent homes. tests/test_data_scopes.py keeps them in sync with
-# policy.json.
+# Agent config for this scope, mounted at /etc/paseo/config (see common/config/provision.sh).
 configMapGenerator:
-  - name: ${APP}-scope
+  - name: ${APP}-config
     files:
-      - scope.json=../../../../../components/agent-data-policy/scopes/general/scope.json
-      - claude.json=../../../../../components/agent-data-policy/scopes/general/claude.json
-      - codex.toml=../../../../../components/agent-data-policy/scopes/general/codex.toml
+      - config/paseo.json
+      - config/claude.json
+      - config/opencode.json
     options:
       disableNameSuffixHash: true
 patches:

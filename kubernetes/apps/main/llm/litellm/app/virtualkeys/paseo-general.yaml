@@ -8,14 +8,11 @@ spec:
   keyAlias: Paseo General
   secretName: litellm-paseo-general
   secretKey: api-key
-  # Only this execution environment is approved for general coding tools.
-  # The guard still checks MCP calls/history against the general tool policy.
-  metadata:
-    allow_general_agent_tools: "true"
+  # Cloud models are granted to general only; paseo-private stays on local + Mistral.
   models:
     - anthropic/*
-    - gpt-*
-    - codex-*
+    - chatgpt/gpt-6-astra
+    - chatgpt/gpt-6-luna
     - qwen3.5-9b
     - qwen3.5-9b-chat
     - mistral/mistral-small-latest

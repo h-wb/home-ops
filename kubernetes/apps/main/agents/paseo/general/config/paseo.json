@@ -1,0 +1,17 @@
+{
+  "agents": {
+    "resumeOnStartup": true,
+    "providers": {
+      "claude": { "enabled": true },
+      "opencode": { "enabled": true },
+      "codex": { "enabled": false },
+      "mistral-vibe": { "enabled": false },
+      "copilot": { "enabled": false },
+      "pi": { "enabled": false },
+      "muse": { "enabled": false },
+      "antigravity": { "enabled": false },
+      "omp": { "enabled": false },
+      "hermes-private": { "enabled": false }
+    }
+  }
+}

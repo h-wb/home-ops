@@ -9,6 +9,11 @@
       "type": "http",
       "url": "http://memini-general.llm.svc.cluster.local:8080/mcp",
       "headers": { "Authorization": "Bearer $${MEMINI_API_KEY}" }
+    },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "chrome-devtools-mcp",
+      "args": ["--browserUrl", "http://127.0.0.1:9222"]
     }
   }
 }

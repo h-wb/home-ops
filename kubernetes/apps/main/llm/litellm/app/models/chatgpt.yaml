@@ -5,9 +5,7 @@
 #
 # Cloud models, deliberately fenced:
 # - only under these explicit aliases, never as a rung of a local pool;
-# - a virtual key must list them to use them;
-# - only the mcp-general tools: patches/homeops_data_scope_guard.py refuses the rest,
-#   so tool results (health, location, memory) cannot reach them.
+# - a virtual key must list them to use them, and no private-scope key does.
 #
 # Non-streaming requests fail upstream ("Unknown items in responses API response",
 # BerriAI/litellm#37039); patches/homeops_chatgpt_nonstream.py works around it for

@@ -3,7 +3,7 @@
 # Hermes (nousresearch/hermes-agent) as the tier-split chat assistant, one
 # app-template release per tier: hermes-general and hermes-private. Pod names
 # stay hermes-{tier}-0: the Paseo providers exec into them (app/rbac.yaml and
-# components/agent-data-policy scopes), so tiers stay pinned by RBAC + egress
+# agents/paseo/private/config/paseo.json), so tiers stay pinned by RBAC + egress
 # netpol, and the only credentials each pod carries are its LiteLLM and Memini
 # keys. Ssegment differences live in the env (keys, Memini URL) and the mounted
 # config (config-{tier}.yaml). The image's s6 init runs as root and drops to the

@@ -12,7 +12,6 @@ spec:
   components:
     - ../../../../../components/dragonfly
     - ../../../../../components/cnpg/initdb
-    - ../../../../../components/agent-data-policy
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
