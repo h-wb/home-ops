@@ -101,7 +101,7 @@ class PaseoRendering(unittest.TestCase):
                 runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
                 ref = runtime["containers"]["app"]["env"]["MEMINI_API_KEY"]["valueFrom"]["secretKeyRef"]
                 self.assertEqual(secret, ref["name"])
-                self.assertIn(secret, runtime["annotations"]["secret.reloader.stakater.com/reload"])
+                self.assertEqual("true", runtime["annotations"]["reloader.stakater.com/auto"])
 
     def test_only_general_routes_claude_through_litellm(self):
         secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]

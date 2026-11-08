@@ -30,9 +30,7 @@ spec:
         serviceAccount:
           identifier: ${APP}
         annotations:
-          # Named lists, not `auto`: a roll kills running agents.
-          configmap.reloader.stakater.com/reload: ${APP}-config
-          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
+          reloader.stakater.com/auto: "true"
         initContainers:
           tools:
             image:

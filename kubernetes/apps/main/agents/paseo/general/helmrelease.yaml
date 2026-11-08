@@ -44,8 +44,6 @@ spec:
                   name: ${APP}-secret
               - secretRef:
                   name: ${APP}-password
-        annotations:
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-mcp,paseo-tailscale,litellm-paseo-general,paseo-agents
     persistence:
       data:
         type: nfs
