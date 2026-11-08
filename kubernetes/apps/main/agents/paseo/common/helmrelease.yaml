@@ -112,7 +112,8 @@ spec:
                   optional: true
               # x-api-key for https://mcp-${PASEO_DATA_SCOPE}.${SECRET_DOMAIN}. The daemon
               # inherits it and the agents' MCP config (config/) references it by name.
-              # ToolHive generates this client key and publishes it to Bitwarden.
+              # ToolHive generates this client key in the llm namespace; the Kubernetes
+              # SecretStore (llm-secretstore.yaml) pulls it over here.
               - &mcpKey
                 secretRef:
                   name: ${APP}-mcp

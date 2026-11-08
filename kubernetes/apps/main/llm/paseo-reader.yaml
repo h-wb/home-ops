@@ -1,0 +1,37 @@
+---
+# Cross-namespace read grant for the paseo pods' client keys (see
+# ../agents/paseo/common/llm-secretstore.yaml): the SecretStore there uses the
+# agents/paseo-secret-reader service account, and this Role lets it read exactly
+# the five generated secrets it needs out of llm — the litellm-operator's virtual
+# keys for the two scopes, ToolHive's VMCP keys for the same scopes, and
+# memini-general's own key secret. `get` only, no list/watch, and only these
+# names, so the agents namespace can never browse anything else here.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: paseo-secret-reader
+  namespace: llm
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - litellm-paseo-general
+      - litellm-paseo-private
+      - mcp-paseo-general
+      - mcp-paseo-private
+      - memini-code-secret
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: paseo-secret-reader
+  namespace: llm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: paseo-secret-reader
+subjects:
+  - kind: ServiceAccount
+    name: paseo-secret-reader
+    namespace: agents

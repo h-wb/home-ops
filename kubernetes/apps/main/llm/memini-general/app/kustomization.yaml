@@ -7,4 +7,3 @@ resources:
   - ./helmrelease.yaml
   - ./ocirepository.yaml
   - ./service-alias.yaml
-  - ./paseo-key.yaml

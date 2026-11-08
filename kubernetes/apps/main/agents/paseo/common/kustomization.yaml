@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - helmrelease.yaml
   - externalsecret.yaml
+  - llm-secretstore.yaml
 configMapGenerator:
   - name: ${APP}-provision
     files:
