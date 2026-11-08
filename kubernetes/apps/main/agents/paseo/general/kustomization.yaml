@@ -3,8 +3,7 @@ kind: Kustomization
 resources:
   - ../common
   - networkpolicy.yaml
-  - github-secret.yaml
-  - memory-secret.yaml
+  - externalsecret.yaml
 # Per-scope agent config fragments, owned by components/agent-data-policy;
 # the base mounts this at /etc/paseo/scope and dotfiles' bootstrap merges it
 # into the agent homes. tests/test_data_scopes.py keeps them in sync with
