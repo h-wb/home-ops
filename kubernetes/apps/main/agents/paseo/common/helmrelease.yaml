@@ -53,17 +53,19 @@ spec:
           configmap.reloader.stakater.com/reload: ${APP}-sshd,${APP}-config
           secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-ssh,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
         initContainers:
-          # One native command provisions the host: clone or fast-forward ~/.dotfiles
-          # (--from/--from-dir/--update), link ~/.config/mise to it (--config-dir .),
-          # then run the dotfiles' `paseo` class `mise bootstrap` — repos, dotfiles
-          # (incl. the /etc/paseo/config scope overlay merged into
-          # ~/.paseo/config.json), tools, and the `bootstrap` task. The jdx/mise
-          # image ships mise+git, so no script or ConfigMap is needed.
+          # Provisions the host from dotfiles (class `paseo`): clone or fast-forward
+          # ~/.dotfiles, link ~/.config/mise to it, apply its bootstrap.
           tools:
             image:
               repository: ghcr.io/jdx/mise
               tag: 2026.11.2-debian
-            command: ["mise"]
+            # Run mise from the PVC: shims link to the mise that created them, and
+            # the other containers only see $HOME.
+            command:
+              - sh
+              - -c
+              - install -D /usr/local/bin/mise "$HOME/.local/bin/mise" && PATH="$HOME/.local/bin:$PATH" exec mise "$@"
+              - mise
             args:
               - bootstrap
               - --from
@@ -77,12 +79,10 @@ spec:
               - --force-dotfiles
               - --skip-dirty
               - --locked
-            env: &env
-              # The jdx/mise image defaults these to /mise (a container layer);
-              # everything must live under HOME, the PVC.
+            env: &env # mise's defaults, which the jdx/mise image moves to /mise.
               MISE_DATA_DIR: /home/paseo/.local/share/mise
               MISE_CONFIG_DIR: /home/paseo/.config/mise
-              MISE_CACHE_DIR: /home/paseo/.local/share/mise/cache
+              MISE_CACHE_DIR: /home/paseo/.cache/mise
               PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}
               HOME: /home/paseo
               OPENCODE_CONFIG: /etc/paseo/config/opencode.json
@@ -279,10 +279,9 @@ spec:
               - path: /home/paseo
             app: *home
             sshd: *home
-      # The overlay's config/ dir (${APP}-config): agent config for this scope,
-      # merged into ~/.paseo/config.json by the dotfiles [dotfiles] entry during
-      # the tools container's bootstrap. The mount also creates /etc/paseo, the
-      # marker dotfiles' miserc.toml detects the paseo class by.
+      # This scope's agent config (<scope>/config). Its path is the contract with
+      # dotfiles: /etc/paseo selects the `paseo` class, and paseo.json is merged
+      # into ~/.paseo/config.json.
       config:
         type: configMap
         name: ${APP}-config

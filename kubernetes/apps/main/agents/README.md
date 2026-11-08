@@ -37,11 +37,14 @@ mounted read-only at `/etc/paseo/config`:
 - `opencode.json`: models and providers, read in place (`OPENCODE_CONFIG`).
   OpenCode layers it over dotfiles' `~/.config/opencode/opencode.json` and
   merges both, so the MCP servers stay out of it.
-- `paseo.json`: merged into `~/.paseo/config.json` on every pod start by the
-  dotfiles `[dotfiles]` merge entry (`conf.d/paseo/mise.paseo-overlay.toml`),
-  applied by the `tools` init container's `mise bootstrap --from` — Paseo keeps
-  its own state in that file, so only the overlay's keys are written. Our keys
-  win; everything else is kept.
+- `paseo.json`: merged into `~/.paseo/config.json`, where Paseo also keeps its
+  own state. Our keys win; everything else is kept.
+
+Provisioning is the `tools` init container: `mise bootstrap --from` the dotfiles
+repo, run from a copy of mise on the PVC so the shims work in the other
+containers. Dotfiles does the merge (`conf.d/paseo/mise.paseo-overlay.toml`),
+and that mount path is the only thing the two repos share. Private adds
+`--skip=repos`.
 
 The files hold no secrets. Credentials come from ExternalSecrets as environment
 variables and are referenced by name (`{env:LITELLM_API_KEY}` for OpenCode). The

@@ -5,8 +5,7 @@ resources:
   - networkpolicy.yaml
   - externalsecret.yaml
   - virtualkey.yaml
-# Agent config for this scope, mounted at /etc/paseo/config (merged into
-# ~/.paseo/config.json by the dotfiles [dotfiles] entry at pod-start bootstrap).
+# Agent config for this scope, mounted at /etc/paseo/config.
 configMapGenerator:
   - name: ${APP}-config
     files:
