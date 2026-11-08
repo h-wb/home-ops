@@ -13,27 +13,45 @@
       "models": {
         "chatgpt/gpt-6-astra": {
           "name": "GPT-6 Astra (ChatGPT)",
-          "limit": { "context": 272000, "output": 128000 }
+          "limit": {
+            "context": 272000,
+            "output": 128000
+          }
         },
         "chatgpt/gpt-6-luna": {
           "name": "GPT-6 Luna (ChatGPT)",
-          "limit": { "context": 272000, "output": 128000 }
+          "limit": {
+            "context": 272000,
+            "output": 128000
+          }
         },
         "chatgpt/gpt-6.1-sol": {
           "name": "GPT-6.1 Sol (ChatGPT)",
-          "limit": { "context": 272000, "output": 128000 }
+          "limit": {
+            "context": 272000,
+            "output": 128000
+          }
         },
         "chatgpt/gpt-6.1-terra": {
           "name": "GPT-6.1 Terra (ChatGPT)",
-          "limit": { "context": 272000, "output": 128000 }
+          "limit": {
+            "context": 272000,
+            "output": 128000
+          }
         },
         "qwen3.5-9b": {
           "name": "Qwen3.5 9B (MacBook)",
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
         },
         "qwen3.5-9b-chat": {
           "name": "Qwen3.5 9B no-think (MacBook)",
-          "limit": { "context": 32768, "output": 8192 }
+          "limit": {
+            "context": 32768,
+            "output": 8192
+          }
         }
       }
     },
@@ -44,21 +62,46 @@
           "name": "Mistral Large 3"
         },
         "mistral-large-4": {
-          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true
+            }
+          }
         },
         "mistral-medium-latest": {
           "name": "Mistral Medium 3.5",
-          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true
+            }
+          }
         },
         "mistral-small-latest": {
           "name": "Mistral Small 4",
-          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true
+            }
+          }
         },
         "zai-glm-5-3": {
-          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true
+            }
+          }
         },
         "zai-glm-5-3-flash": {
-          "capabilities": { "reasoning": { "supported": true, "toggle": true } }
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "toggle": true
+            }
+          }
         }
       }
     },
@@ -72,6 +115,38 @@
     },
     "plan": {
       "model": "mistral/mistral-medium-latest#none"
+    },
+    "coordinator": {
+      "mode": "primary",
+      "model": "litellm/chatgpt/gpt-6-astra",
+      "description": "Main agent: does bounded work itself, delegates research to explorer and risky-change review to reviewer.",
+      "system": "You are the coordinator. Make understood, bounded changes yourself; delegation is optional, not your identity. Delegate only when an isolated context or independent parallel work clearly outweighs the handoff cost; never spawn agents to fill slots.\n\nCONTEXT: targeted searches and reads, not broad dumps. Hand off the objective, settled decisions, owned files, exclusions and the acceptance check, never a transcript. Ask workers for findings, changed paths and checks, not file dumps.\n\nVERIFICATION: inspect the diff and run the cheapest relevant check. Reuse passing evidence while nothing relevant changed. Distinguish measured results from assumptions.\n\nREVIEW GATE: decide from the changed behavior and its failure modes, not file type or diff size. Do understood low-risk work directly (prose, typos, formatting, mechanical renames, routine config) and self-verify. Ask the `reviewer` for one bounded independent review only for nontrivial behavior changes or real risk: permissions/auth, secret exposure, destructive storage or recovery, concurrency, CI enforcement. Give it the goal, the diff and relevant test facts, not your reasoning. Re-review only material fixes. Stop when acceptance is met.\n\nLANES: `explorer` (Mistral Small) for bounded read-only discovery when you are genuinely uncertain; `reviewer` (Mistral Large, a different model family) for the review gate. The ChatGPT quota is shared with other services: prefer Mistral lanes for bulk reading."
+    },
+    "explorer": {
+      "mode": "subagent",
+      "model": "mistral/mistral-small-latest#none",
+      "description": "Read-only reconnaissance: where/how is X, code search, mapping unfamiliar code. Returns findings and paths, not dumps.",
+      "system": "You explore and report; you never modify files. Answer the question asked with file paths, line references and the minimum evidence. Say plainly what you could not find.",
+      "permissions": [
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
+    },
+    "reviewer": {
+      "mode": "subagent",
+      "model": "mistral/mistral-large-latest",
+      "description": "Independent adversarial review of a substantive or risky change. Reports concrete defects and missing coverage.",
+      "system": "Assume the change is broken and try to prove it. For each changed boundary, trace inherited authority and configuration, failure and cleanup paths, and construct a concrete failure scenario before calling anything safe. Report only concrete defects and missing coverage, most severe first, each with the input or state that triggers it. No style nits, no unrequested polish.",
+      "permissions": [
+        {
+          "action": "edit",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
     }
   },
   "mcp": {
@@ -79,17 +154,42 @@
       "toolhive-general": {
         "type": "remote",
         "url": "https://mcp-general.${SECRET_DOMAIN}/mcp",
-        "headers": { "x-api-key": "{env:MCP_API_KEY}" }
+        "headers": {
+          "x-api-key": "{env:MCP_API_KEY}"
+        }
       },
       "memini-general": {
         "type": "remote",
         "url": "http://memini-general.llm.svc.cluster.local:8080/mcp",
-        "headers": { "Authorization": "Bearer {env:MEMINI_API_KEY}" }
+        "headers": {
+          "Authorization": "Bearer {env:MEMINI_API_KEY}"
+        }
       },
       "chrome-devtools": {
         "type": "local",
         "command": ["chrome-devtools-mcp", "--browserUrl", "http://127.0.0.1:9222"]
       }
     }
+  },
+  "permission": "allow",
+  "plugins": [
+    {
+      "package": "@eleboucher/opencode-memini-v2@0.7.39",
+      "options": {
+        "base_url": "http://memini-general.llm.svc.cluster.local:8080",
+        "auto_update": false
+      }
+    }
+  ],
+  "compaction": {
+    "auto": true,
+    "keep": {
+      "tokens": 20000
+    },
+    "buffer": 16384
+  },
+  "tool_output": {
+    "max_lines": 800,
+    "max_bytes": 16384
   }
 }
