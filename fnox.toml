@@ -1,52 +1,28 @@
 [providers.protonpass]
 type = "proton-pass"
-vault = "Infrastructure"
+vault = "Agents General"
 
 [secrets]
-BITWARDEN_KUBERNETES_TOKEN = { provider = "protonpass", value = "pass://Infrastructure/homeops-bootstrap/bitwarden-kubernetes-token" }
+BITWARDEN_KUBERNETES_TOKEN = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/bitwarden-kubernetes-token" }
 # Same machine account, separate token for hand-run bws (revocable without touching the cluster).
-BWS_ACCESS_TOKEN = { provider = "protonpass", value = "pass://Infrastructure/bws-cli/access-token" }
-CLUSTER_SECRETS = { provider = "protonpass", value = "pass://Infrastructure/homeops-bootstrap/cluster-secrets" }
-AGE_KEY = { provider = "protonpass", value = "pass://Infrastructure/homeops-bootstrap/age-key" }
-SECRET_DOMAIN = { provider = "protonpass", value = "pass://Infrastructure/homeops-bootstrap/secret-domain" }
-LETS_ENCRYPT_TLS = { provider = "protonpass", value = "pass://Infrastructure/homeops-bootstrap/lets-encrypt-tls" }
+BWS_ACCESS_TOKEN = { provider = "protonpass", value = "pass://Agents General/bws-cli/access-token" }
+CLUSTER_SECRETS = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/cluster-secrets" }
+AGE_KEY = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/age-key" }
+SECRET_DOMAIN = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/secret-domain" }
+LETS_ENCRYPT_TLS = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/lets-encrypt-tls" }
 
-MACHINE_CA_CRT = { provider = "protonpass", value = "pass://Infrastructure/talos-machine/ca-crt" }
-MACHINE_CA_KEY = { provider = "protonpass", value = "pass://Infrastructure/talos-machine/ca-key" }
-MACHINE_TOKEN = { provider = "protonpass", value = "pass://Infrastructure/talos-machine/token" }
+MACHINE_CA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-machine/ca-crt" }
+MACHINE_CA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-machine/ca-key" }
+MACHINE_TOKEN = { provider = "protonpass", value = "pass://Agents General/talos-machine/token" }
 
-CLUSTER_CA_CRT = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/ca-crt" }
-CLUSTER_CA_KEY = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/ca-key" }
-CLUSTER_ID = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/id" }
-CLUSTER_SECRET = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/secret" }
-CLUSTER_TOKEN = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/token" }
-CLUSTER_AGGREGATORCA_CRT = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/aggregatorca-crt" }
-CLUSTER_AGGREGATORCA_KEY = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/aggregatorca-key" }
-CLUSTER_ETCD_CA_CRT = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/etcd-ca-crt" }
-CLUSTER_ETCD_CA_KEY = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/etcd-ca-key" }
-CLUSTER_SECRETBOXENCRYPTIONSECRET = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/secretboxencryptionsecret" }
-CLUSTER_SERVICEACCOUNT_KEY = { provider = "protonpass", value = "pass://Infrastructure/talos-cluster/serviceaccount-key" }
-
-# The general Paseo reader has individual item grants. Workstation tokens
-# retain the named-vault references above. Full share/item IDs need no vault grant.
-[profiles.paseo-general.secrets]
-BITWARDEN_KUBERNETES_TOKEN = { provider = "protonpass", value = "pass://MxMcAVgFgiektShmTX3U656vZNG8h6C6Nv32llgwvBN0DJLekG7RfWj_w_gYO4ZXI0_2lDPuXeGCnSuLXmfiKw==/qWbJ8dV2Npi_r_9rxi6T4DpCCF4IQ16Ilbkdqs_jsOOPibjE6t8rBCBhPBJFHXXVOuKs5hf3kJSo8TxHbpoZEg==/bitwarden-kubernetes-token" }
-BWS_ACCESS_TOKEN = { provider = "protonpass", value = "pass://BQ6Vw8ETauG8Oxf7aHvcar6X3usk94OgJpv2c6l6d_naOVf54_r8UW--dfmxII1PGgp4BCy2T_VNDmnlHfSLxA==/1MWe3ApVLe_FE4wCsVlP6VXnNrD4YX6X7kezO9QEZ8dcAjJj8FX-uE7VDXzjHO376r1D6H2XNP7YCL84DghDMA==/access-token" }
-CLUSTER_SECRETS = { provider = "protonpass", value = "pass://MxMcAVgFgiektShmTX3U656vZNG8h6C6Nv32llgwvBN0DJLekG7RfWj_w_gYO4ZXI0_2lDPuXeGCnSuLXmfiKw==/qWbJ8dV2Npi_r_9rxi6T4DpCCF4IQ16Ilbkdqs_jsOOPibjE6t8rBCBhPBJFHXXVOuKs5hf3kJSo8TxHbpoZEg==/cluster-secrets" }
-AGE_KEY = { provider = "protonpass", value = "pass://MxMcAVgFgiektShmTX3U656vZNG8h6C6Nv32llgwvBN0DJLekG7RfWj_w_gYO4ZXI0_2lDPuXeGCnSuLXmfiKw==/qWbJ8dV2Npi_r_9rxi6T4DpCCF4IQ16Ilbkdqs_jsOOPibjE6t8rBCBhPBJFHXXVOuKs5hf3kJSo8TxHbpoZEg==/age-key" }
-SECRET_DOMAIN = { provider = "protonpass", value = "pass://MxMcAVgFgiektShmTX3U656vZNG8h6C6Nv32llgwvBN0DJLekG7RfWj_w_gYO4ZXI0_2lDPuXeGCnSuLXmfiKw==/qWbJ8dV2Npi_r_9rxi6T4DpCCF4IQ16Ilbkdqs_jsOOPibjE6t8rBCBhPBJFHXXVOuKs5hf3kJSo8TxHbpoZEg==/secret-domain" }
-LETS_ENCRYPT_TLS = { provider = "protonpass", value = "pass://MxMcAVgFgiektShmTX3U656vZNG8h6C6Nv32llgwvBN0DJLekG7RfWj_w_gYO4ZXI0_2lDPuXeGCnSuLXmfiKw==/qWbJ8dV2Npi_r_9rxi6T4DpCCF4IQ16Ilbkdqs_jsOOPibjE6t8rBCBhPBJFHXXVOuKs5hf3kJSo8TxHbpoZEg==/lets-encrypt-tls" }
-MACHINE_CA_CRT = { provider = "protonpass", value = "pass://PxmToKsUc1lpgyjsrfHNwJQlBw3wdh2b1efd3_T14IO6dDvbiPoLlQaWGL9iVYOE6Z_gWqeQJqcud_Vvvtk0YQ==/u_o5szWqNuHuXV_RN2tolmFPdgf2LxZ3li_imQIAEgLYe6roNd7rv8UB7-f13ixcuSN3I9u7UMpoatI4c9ZTZw==/ca-crt" }
-MACHINE_CA_KEY = { provider = "protonpass", value = "pass://PxmToKsUc1lpgyjsrfHNwJQlBw3wdh2b1efd3_T14IO6dDvbiPoLlQaWGL9iVYOE6Z_gWqeQJqcud_Vvvtk0YQ==/u_o5szWqNuHuXV_RN2tolmFPdgf2LxZ3li_imQIAEgLYe6roNd7rv8UB7-f13ixcuSN3I9u7UMpoatI4c9ZTZw==/ca-key" }
-MACHINE_TOKEN = { provider = "protonpass", value = "pass://PxmToKsUc1lpgyjsrfHNwJQlBw3wdh2b1efd3_T14IO6dDvbiPoLlQaWGL9iVYOE6Z_gWqeQJqcud_Vvvtk0YQ==/u_o5szWqNuHuXV_RN2tolmFPdgf2LxZ3li_imQIAEgLYe6roNd7rv8UB7-f13ixcuSN3I9u7UMpoatI4c9ZTZw==/token" }
-CLUSTER_CA_CRT = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/ca-crt" }
-CLUSTER_CA_KEY = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/ca-key" }
-CLUSTER_ID = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/id" }
-CLUSTER_SECRET = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/secret" }
-CLUSTER_TOKEN = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/token" }
-CLUSTER_AGGREGATORCA_CRT = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/aggregatorca-crt" }
-CLUSTER_AGGREGATORCA_KEY = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/aggregatorca-key" }
-CLUSTER_ETCD_CA_CRT = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/etcd-ca-crt" }
-CLUSTER_ETCD_CA_KEY = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/etcd-ca-key" }
-CLUSTER_SECRETBOXENCRYPTIONSECRET = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/secretboxencryptionsecret" }
-CLUSTER_SERVICEACCOUNT_KEY = { provider = "protonpass", value = "pass://it5ublYxFe-6_8SbCPveKM3P9flSdsMfHlytC3hYcTn0_K1tDIZI1tv__6xzSdWpxNl-OREq1mWFY-k5AEOkQw==/tPkW3-qOWOQq4JP2hSM5UlCmCECUrUov33jGWvg-g5sYg_wyxTLHeuZ74Bv2Se6kyQRKJ04-UZO3dKA0hrG71g==/serviceaccount-key" }
+CLUSTER_CA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-cluster/ca-crt" }
+CLUSTER_CA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/ca-key" }
+CLUSTER_ID = { provider = "protonpass", value = "pass://Agents General/talos-cluster/id" }
+CLUSTER_SECRET = { provider = "protonpass", value = "pass://Agents General/talos-cluster/secret" }
+CLUSTER_TOKEN = { provider = "protonpass", value = "pass://Agents General/talos-cluster/token" }
+CLUSTER_AGGREGATORCA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-cluster/aggregatorca-crt" }
+CLUSTER_AGGREGATORCA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/aggregatorca-key" }
+CLUSTER_ETCD_CA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-cluster/etcd-ca-crt" }
+CLUSTER_ETCD_CA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/etcd-ca-key" }
+CLUSTER_SECRETBOXENCRYPTIONSECRET = { provider = "protonpass", value = "pass://Agents General/talos-cluster/secretboxencryptionsecret" }
+CLUSTER_SERVICEACCOUNT_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/serviceaccount-key" }

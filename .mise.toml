@@ -7,9 +7,6 @@ experimental = true
 config_roots = ["bootstrap", "docker/truenas", "kubernetes", "talos", "talos/*"]
 
 [env]
-# Select the item-scoped reader only on the scoped general host. Preserve an
-# explicitly selected fnox profile and the workstation's default references.
-FNOX_PROFILE = "{{ get_env(name='FNOX_PROFILE', default='paseo-general' if get_env(name='PASEO_DATA_SCOPE', default='') == 'general' else 'default') }}"
 _.python.venv = { path = "{{config_root}}/.venv", create = true }
 CLUSTER = "{{ get_env(name=\"CLUSTER\", default=\"main\") }}"
 SHARED_APPS = "{{config_root}}/kubernetes/apps/main"

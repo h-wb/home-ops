@@ -15,13 +15,13 @@ patches:
   - path: helmrelease.yaml
     target:
       kind: HelmRelease
-  # No GitHub credential for dotfiles' [bootstrap.repos].
+  # No GitHub credential for dotfiles' [bootstrap.repos], and no Proton Pass secrets to log in for.
   - target:
       kind: HelmRelease
     patch: |-
       - op: add
         path: /spec/values/controllers/${APP}/initContainers/tools/args/-
-        value: --skip=repos
+        value: --skip=repos,task
   # Keep private's home if this Flux Kustomization is removed.
   - target:
       kind: PersistentVolumeClaim

@@ -228,7 +228,7 @@ class PaseoRendering(unittest.TestCase):
                 for container in ("tools", "app"):
                     mounts = values["persistence"]["config"]["advancedMounts"][app][container]
                     self.assertEqual([{"path": "/etc/paseo/config", "readOnly": True}], mounts)
-                self.assertEqual(scope == "private", args[-1] == "--skip=repos")
+                self.assertEqual(scope == "private", args[-1] == "--skip=repos,task")
 
 
 class LiteLLMRendering(unittest.TestCase):
