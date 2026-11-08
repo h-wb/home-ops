@@ -170,7 +170,7 @@
   },
   "agents": {
     "build": {
-      "model": "mistral/mistral-medium-latest#none"
+      "model": "mistral/mistral-large-4"
     },
     "plan": {
       "model": "mistral/mistral-medium-latest#none"
