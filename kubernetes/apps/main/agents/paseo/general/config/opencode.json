@@ -58,6 +58,96 @@
     "mistral": {
       "env": ["MISTRAL_API_KEY"],
       "models": {
+        "codestral-2508": {
+          "disabled": true
+        },
+        "codestral-latest": {
+          "disabled": true
+        },
+        "deepseek-v4-1-flash-1017": {
+          "disabled": true
+        },
+        "devstral-2512": {
+          "disabled": true
+        },
+        "devstral-latest": {
+          "disabled": true
+        },
+        "devstral-medium-latest": {
+          "disabled": true
+        },
+        "glm-5-2": {
+          "disabled": true
+        },
+        "labs-devstral-small-2512": {
+          "disabled": true
+        },
+        "labs-leanstral-1-5-1": {
+          "disabled": true
+        },
+        "magistral-medium-latest": {
+          "disabled": true
+        },
+        "ministral-14b-2512": {
+          "disabled": true
+        },
+        "ministral-3b-2512": {
+          "disabled": true
+        },
+        "ministral-3b-latest": {
+          "disabled": true
+        },
+        "ministral-8b-2512": {
+          "disabled": true
+        },
+        "ministral-8b-latest": {
+          "disabled": true
+        },
+        "mistral-embed": {
+          "disabled": true
+        },
+        "mistral-large-2512": {
+          "disabled": true
+        },
+        "mistral-large-4-0-8": {
+          "disabled": true
+        },
+        "mistral-medium-2505": {
+          "disabled": true
+        },
+        "mistral-medium-2508": {
+          "disabled": true
+        },
+        "mistral-medium-2604": {
+          "disabled": true
+        },
+        "mistral-small-2506": {
+          "disabled": true
+        },
+        "mistral-small-2603": {
+          "disabled": true
+        },
+        "open-mistral-nemo": {
+          "disabled": true
+        },
+        "pixtral-12b": {
+          "disabled": true
+        },
+        "voxtral-mini-latest": {
+          "disabled": true
+        },
+        "voxtral-mini-tts-latest": {
+          "disabled": true
+        },
+        "voxtral-small-2507": {
+          "disabled": true
+        },
+        "voxtral-small-latest": {
+          "disabled": true
+        },
+        "zai-glm-5-2": {
+          "disabled": true
+        },
         "mistral-large-latest": {
           "name": "Mistral Large 3"
         },
@@ -105,8 +195,30 @@
         }
       }
     },
-    "opencode": {
-      "env": ["OPENCODE_API_KEY"]
+    "zen": {
+      "name": "OpenCode Zen (curated)",
+      "package": "aisdk:@ai-sdk/openai-compatible",
+      "settings": {
+        "baseURL": "https://opencode.ai/inference/openai/v1",
+        "apiKey": "{env:OPENCODE_API_KEY}"
+      },
+      "models": {
+        "deepseek-v4.1-flash-free": {
+          "name": "DeepSeek V4.1 Flash Free"
+        },
+        "glm-5.3-flash-free": {
+          "name": "GLM-5.3-Flash Free"
+        },
+        "grok-code": {
+          "name": "Grok Code Fast 1"
+        },
+        "kimi-k2.5-free": {
+          "name": "Kimi K2.5 Free"
+        },
+        "mimo-v2-pro-free": {
+          "name": "MiMo V2 Pro Free"
+        }
+      }
     }
   },
   "agents": {
@@ -191,5 +303,12 @@
   "tool_output": {
     "max_lines": 800,
     "max_bytes": 16384
-  }
+  },
+  "policies": [
+    {
+      "action": "provider.use",
+      "resource": "opencode",
+      "effect": "deny"
+    }
+  ]
 }
