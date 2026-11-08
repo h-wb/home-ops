@@ -5,7 +5,6 @@ resources:
   - networkpolicy.yaml
   - externalsecret.yaml
   - virtualkey.yaml
-# Agent config for this scope, mounted at /etc/paseo/config (see common/config/provision.sh).
 configMapGenerator:
   - name: ${APP}-config
     files:

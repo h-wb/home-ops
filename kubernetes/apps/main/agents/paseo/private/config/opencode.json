@@ -7,7 +7,7 @@
       "name": "LiteLLM",
       "package": "aisdk:@ai-sdk/openai-compatible",
       "settings": {
-        "baseURL": "https://litellm.${SECRET_DOMAIN}/v1",
+        "baseURL": "http://litellm.llm.svc.cluster.local:4000/v1",
         "apiKey": "{env:LITELLM_API_KEY}"
       },
       "models": {

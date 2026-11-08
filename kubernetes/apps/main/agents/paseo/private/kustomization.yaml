@@ -4,7 +4,6 @@ resources:
   - ../common
   - externalsecret.yaml
   - virtualkey.yaml
-# Agent config for this scope, mounted at /etc/paseo/config (see common/config/provision.sh).
 configMapGenerator:
   - name: ${APP}-config
     files:
@@ -16,6 +15,13 @@ patches:
   - path: helmrelease.yaml
     target:
       kind: HelmRelease
+  # No GitHub credential for dotfiles' [bootstrap.repos].
+  - target:
+      kind: HelmRelease
+    patch: |-
+      - op: add
+        path: /spec/values/controllers/${APP}/initContainers/tools/args/-
+        value: --skip=repos
   # Keep private's home if this Flux Kustomization is removed.
   - target:
       kind: PersistentVolumeClaim

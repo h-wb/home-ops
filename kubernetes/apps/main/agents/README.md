@@ -7,7 +7,7 @@ class for CLIs, repos and shell only.
 ```text
 paseo/
 ├── ks.yaml          # general, private and scratch Flux Kustomizations
-├── common/          # shared HelmRelease, ExternalSecrets, provision.sh, authorized_keys
+├── common/          # shared HelmRelease and ExternalSecrets
 ├── general/
 │   ├── config/      # paseo.json, opencode.json for this scope
 │   └── ...          # GitHub/memory credentials, NFS and the API egress policy
@@ -17,7 +17,7 @@ paseo/
 └── scratch/         # retained namespace and quotas, no agent RBAC grants
 ```
 
-Edit `ks.yaml` for names, scope, credential item, hostnames, SSH IP and backup
+Edit `ks.yaml` for names, scope, credential item, hostnames and backup
 settings; `common/helmrelease.yaml` for shared pod settings; the overlay's
 `helmrelease.yaml` for environment-specific values.
 
@@ -37,9 +37,14 @@ mounted read-only at `/etc/paseo/config`:
 - `opencode.json`: models and providers, read in place (`OPENCODE_CONFIG`).
   OpenCode layers it over dotfiles' `~/.config/opencode/opencode.json` and
   merges both, so the MCP servers stay out of it.
-- `paseo.json`: deep-merged by `common/config/provision.sh` into
-  `~/.paseo/config.json` on every pod start, since Paseo keeps its own state
-  there. Our keys win; everything else is kept.
+- `paseo.json`: merged into `~/.paseo/config.json`, where Paseo also keeps its
+  own state. Our keys win; everything else is kept.
+
+Provisioning is the `tools` init container: `mise bootstrap --from` the dotfiles
+repo, run from a copy of mise on the PVC so the shims work in the other
+containers. Dotfiles does the merge (`conf.d/paseo/mise.paseo-overlay.toml`),
+and that mount path is the only thing the two repos share. Private adds
+`--skip=repos`.
 
 The files hold no secrets. Credentials come from ExternalSecrets as environment
 variables and are referenced by name (`{env:LITELLM_API_KEY}` for OpenCode). The
@@ -79,9 +84,9 @@ complete credential boundary around general.
 ## Credentials and identities
 
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
-credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD`
-and `KEYSEED` (an old `MCP_API_KEY` field is unused: the pods reach ToolHive
-without a key). General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
+credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN` and
+`PASEO_PASSWORD`. Old `KEYSEED` (the removed sshd) and `MCP_API_KEY` (the pods
+reach ToolHive without a key) fields are unused. General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
 `LITELLM_API_KEY` — the last one only composes Claude Code's `x-litellm-api-key`
 header, the raw virtual key never passing through Bitwarden: the
 litellm-operator writes its Secret into the pods' own namespace from the

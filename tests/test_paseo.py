@@ -64,13 +64,13 @@ class PaseoRendering(unittest.TestCase):
                 self.assertNotIn("mcp", opencode)
                 self.assertNotIn("plugins", opencode)
                 litellm = opencode["providers"]["litellm"]["settings"]
-                self.assertEqual("https://litellm.example.com/v1", litellm["baseURL"])
+                self.assertEqual("http://litellm.llm.svc.cluster.local:4000/v1", litellm["baseURL"])
                 self.assertEqual("{env:LITELLM_API_KEY}", litellm["apiKey"])
                 values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
                 mounts = values["persistence"]["config"]["advancedMounts"][app]
                 runtime = values["controllers"][app]
                 containers = {**runtime["containers"], **runtime["initContainers"]}
-                for container in ("tools", "app", "sshd"):
+                for container in ("tools", "app"):
                     self.assertEqual([{"path": "/etc/paseo/config", "readOnly": True}], mounts[container])
                     self.assertEqual("/etc/paseo/config/opencode.json",
                                      containers[container]["env"]["OPENCODE_CONFIG"])
@@ -87,8 +87,7 @@ class PaseoRendering(unittest.TestCase):
                     self.assertNotIn("MCP_API_KEY", container.get("env", {}), name)
                 secret = self.resource(scope, "ExternalSecret", app)["spec"]["target"]["template"]["data"]
                 self.assertNotIn("MCP_API_KEY", secret)
-                aliases = [h for a in values["defaultPodOptions"]["hostAliases"] for h in a["hostnames"]]
-                self.assertEqual(["litellm.example.com"], aliases)
+                self.assertNotIn("hostAliases", values["defaultPodOptions"])
 
     def test_each_pod_holds_its_own_scopes_memini_key(self):
         # Bitwarden `memini` fields are <SCOPE>_<HOLDER>; this holder is `paseo`.
@@ -100,10 +99,9 @@ class PaseoRendering(unittest.TestCase):
                                  spec["target"]["template"]["data"]["MEMINI_API_KEY"])
                 self.assertIn({"extract": {"key": "memini"}}, spec["dataFrom"])
                 runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
-                for name in ("app", "sshd"):
-                    ref = runtime["containers"][name]["env"]["MEMINI_API_KEY"]["valueFrom"]["secretKeyRef"]
-                    self.assertEqual(secret, ref["name"], name)
-                self.assertIn(secret, runtime["annotations"]["secret.reloader.stakater.com/reload"])
+                ref = runtime["containers"]["app"]["env"]["MEMINI_API_KEY"]["valueFrom"]["secretKeyRef"]
+                self.assertEqual(secret, ref["name"])
+                self.assertEqual("true", runtime["annotations"]["reloader.stakater.com/auto"])
 
     def test_only_general_routes_claude_through_litellm(self):
         secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]
@@ -183,6 +181,37 @@ class PaseoRendering(unittest.TestCase):
         self.assertEqual({"app"}, set(token["advancedMounts"]["paseo-private"]))
         self.assertTrue(any("serviceAccountToken" in source
                             for source in token["volumeSpec"]["projected"]["sources"]))
+
+    def test_tools_init_container_provisions_with_native_mise_bootstrap(self):
+        for scope, app in (("general", "paseo"), ("private", "paseo-private")):
+            with self.subTest(scope=scope):
+                self.assertFalse(any(doc.get("kind") == "ConfigMap"
+                                     and doc["metadata"]["name"] == f"{app}-provision"
+                                     for doc in self.rendered[scope]))
+                values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
+                tools = values["controllers"][app]["initContainers"]["tools"]
+                self.assertEqual("ghcr.io/jdx/mise", tools["image"]["repository"])
+                # Shims must point into the PVC; Flux must leave $HOME/$PATH alone.
+                shell, flag, script, name = tools["command"]
+                self.assertEqual(["sh", "-c", "mise"], [shell, flag, name])
+                self.assertIn('install -D /usr/local/bin/mise "$HOME/.local/bin/mise"', script)
+                self.assertIn('PATH="$HOME/.local/bin:$PATH" exec mise "$@"', script)
+                args = tools["args"]
+                self.assertEqual("bootstrap", args[0])
+                for flag in ("--from", "--from-dir", "--config-dir", "--update",
+                             "--yes", "--force-dotfiles", "--skip-dirty", "--locked"):
+                    self.assertIn(flag, args)
+                self.assertIn("https://github.com/h-wb/dotfiles.git", args)
+                self.assertEqual("/home/paseo/.dotfiles", args[args.index("--from-dir") + 1])
+                self.assertEqual(".", args[args.index("--config-dir") + 1])
+                self.assertEqual("/home/paseo/.local/share/mise", tools["env"]["MISE_DATA_DIR"])
+                self.assertEqual("/home/paseo/.config/mise", tools["env"]["MISE_CONFIG_DIR"])
+                self.assertEqual("/home/paseo/.cache/mise", tools["env"]["MISE_CACHE_DIR"])
+                self.assertNotIn("provision", values["persistence"])
+                for container in ("tools", "app"):
+                    mounts = values["persistence"]["config"]["advancedMounts"][app][container]
+                    self.assertEqual([{"path": "/etc/paseo/config", "readOnly": True}], mounts)
+                self.assertEqual(scope == "private", args[-1] == "--skip=repos")
 
 
 class LiteLLMRendering(unittest.TestCase):

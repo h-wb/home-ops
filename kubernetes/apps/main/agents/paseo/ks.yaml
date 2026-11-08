@@ -1,6 +1,5 @@
 ---
-# Instance settings live together here; common pod settings are in common/.
-# Preserve the historical general resource name "paseo" for storage and clients.
+# General keeps the historical name "paseo" (PVC, clients).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -26,7 +25,6 @@ spec:
       PASEO_CREDENTIAL_ITEM: paseo-general
       PASEO_HOSTNAMES: paseo-general.${SECRET_DOMAIN},paseo.${SECRET_DOMAIN}
       PASEO_SERVICE_DOMAIN: svc
-      PASEO_SSH_IP: 192.168.1.204
   prune: true
   retryInterval: 1m
   sourceRef:
@@ -60,7 +58,6 @@ spec:
       PASEO_CREDENTIAL_ITEM: paseo-private
       PASEO_HOSTNAMES: paseo-private.${SECRET_DOMAIN}
       PASEO_SERVICE_DOMAIN: svc-private
-      PASEO_SSH_IP: 192.168.1.212
   prune: true
   retryInterval: 1m
   sourceRef:
