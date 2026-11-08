@@ -64,7 +64,7 @@ class PaseoRendering(unittest.TestCase):
                 self.assertNotIn("mcp", opencode)
                 self.assertNotIn("plugins", opencode)
                 litellm = opencode["providers"]["litellm"]["settings"]
-                self.assertEqual("https://litellm.example.com/v1", litellm["baseURL"])
+                self.assertEqual("http://litellm.llm.svc.cluster.local:4000/v1", litellm["baseURL"])
                 self.assertEqual("{env:LITELLM_API_KEY}", litellm["apiKey"])
                 values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
                 mounts = values["persistence"]["config"]["advancedMounts"][app]
@@ -87,8 +87,7 @@ class PaseoRendering(unittest.TestCase):
                     self.assertNotIn("MCP_API_KEY", container.get("env", {}), name)
                 secret = self.resource(scope, "ExternalSecret", app)["spec"]["target"]["template"]["data"]
                 self.assertNotIn("MCP_API_KEY", secret)
-                aliases = [h for a in values["defaultPodOptions"]["hostAliases"] for h in a["hostnames"]]
-                self.assertEqual(["litellm.example.com"], aliases)
+                self.assertNotIn("hostAliases", values["defaultPodOptions"])
 
     def test_each_pod_holds_its_own_scopes_memini_key(self):
         # Bitwarden `memini` fields are <SCOPE>_<HOLDER>; this holder is `paseo`.

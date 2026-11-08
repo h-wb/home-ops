@@ -14,11 +14,6 @@ spec:
     defaultPodOptions:
       automountServiceAccountToken: false
       enableServiceLinks: false
-      # litellm has no public record, so pods can't resolve it: pin envoy-internal.
-      hostAliases:
-        - hostnames:
-            - litellm.${SECRET_DOMAIN}
-          ip: 192.168.1.202
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

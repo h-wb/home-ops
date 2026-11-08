@@ -11,14 +11,14 @@ spec:
         initContainers:
           tools:
             env:
-              ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
+              ANTHROPIC_BASE_URL: http://litellm.llm.svc.cluster.local:4000
             envFrom:
               - secretRef:
                   name: ${APP}-secret
         containers:
           app:
             env:
-              ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
+              ANTHROPIC_BASE_URL: http://litellm.llm.svc.cluster.local:4000
               ANTHROPIC_CUSTOM_HEADERS:
                 valueFrom:
                   secretKeyRef:

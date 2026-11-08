@@ -35,8 +35,7 @@ writes the Secret into the agents namespace and the helmrelease binds it by name
 
 ## Agent model gateway
 
-Agents use `https://litellm.${SECRET_DOMAIN}` (internal route; both Paseo pods
-carry an Envoy host alias for it).
+Agents use the Service, `http://litellm.llm.svc.cluster.local:4000`, like every other in-cluster client.
 
 | Client      | Route                    | Provider credentials                                                                                                                                        |
 | ----------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
