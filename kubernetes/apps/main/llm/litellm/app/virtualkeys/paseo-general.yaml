@@ -6,9 +6,9 @@ metadata:
 spec:
   proxyRef: litellm
   keyAlias: Paseo General
-  # The value stays in-cluster: the paseo pods read it from this secret through
-  # the Kubernetes SecretStore in agents/paseo/common/llm-secretstore.yaml (the
-  # Bitwarden push is gone).
+  # The pods consume this key as the LITELLM_API_KEY field of their paseo
+  # credential item (paste the value there once; update it if the key ever
+  # rotates, since no PushSecret carries it anymore).
   secretName: litellm-paseo-general
   secretKey: api-key
   # Cloud models are granted to general only; paseo-private stays on local + Mistral.

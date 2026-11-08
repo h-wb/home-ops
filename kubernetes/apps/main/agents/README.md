@@ -70,15 +70,14 @@ complete credential boundary around general.
 
 ## Credentials and identities
 
-Bitwarden JSON items `paseo-general` and `paseo-private` hold `GIT_EMAIL`,
-`MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`, `PASEO_PASSWORD` and `KEYSEED`; general
-also holds `GH_TOKEN` and `OPENCODE_API_KEY`. The pods' generated client keys
-never touch Bitwarden: ESO's Kubernetes SecretStore
-(`paseo/common/llm-secretstore.yaml`) reads them from the llm namespace, where
-the litellm-operator, ToolHive's generators and memini each keep their own
-(`llm/paseo-reader.yaml` grants exactly those five secrets). Proton Pass serves
-fnox repository credentials through item-level viewer grants
-(`pass://<item-share-id>/<item-id>/<field>`).
+Bitwarden JSON items `paseo-general` and `paseo-private` hold everything their
+pod consumes (jory-shape): `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN`,
+`PASEO_PASSWORD`, `KEYSEED` and the client keys `LITELLM_API_KEY` and
+`MCP_API_KEY`, whose values the cluster generated elsewhere (the
+litellm-operator's virtual keys, ToolHive's CreatedOnce VMCP keys) and were
+pasted in once. General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
+`MEMINI_API_KEY`. Proton Pass serves fnx repository credentials through
+item-level viewer grants (`pass://<item-share-id>/<item-id>/<field>`).
 
 General keeps its historical `paseo` release, service account, PVC and backup
 identity, plus the `paseo.<domain>` and `svc` aliases. Private uses `paseo-private`

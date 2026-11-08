@@ -14,6 +14,11 @@ a separate pod. No private-scope key lists a cloud model.
 | General | `mcp-general` | `memini-general` | `mcp-paseo-general`, `litellm-paseo-general` |
 | Private | `mcp-private` | `memini-private` | `mcp-paseo-private`, `litellm-paseo-private` |
 
+The "Paseo client keys" are the cluster-side identities the values come from
+(litellm-operator virtual keys, ToolHive's CreatedOnce VMCP keys); the pods
+themselves consume them as the `LITELLM_API_KEY` / `MCP_API_KEY` fields of
+their per-scope Bitwarden `paseo-*` credential item.
+
 ## Agent model gateway
 
 Agents use `https://litellm.${SECRET_DOMAIN}` (internal route; both Paseo pods

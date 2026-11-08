@@ -6,7 +6,6 @@ namespace: llm
 components:
   - ../../../components/common
 resources:
-  - ./paseo-reader.yaml
   - ./litellm-operator/ks.yaml
   - ./embed/ks.yaml
   - ./litellm/ks.yaml

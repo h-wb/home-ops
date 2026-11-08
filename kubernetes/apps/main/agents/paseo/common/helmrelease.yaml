@@ -52,7 +52,7 @@ spec:
         annotations:
           # Named lists, not `auto`: every roll kills the running agents.
           configmap.reloader.stakater.com/reload: ${APP}-provision,${APP}-sshd,${APP}-config
-          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-litellm,${APP}-mcp,${APP}-ssh,${APP}-tailscale
+          secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-ssh,${APP}-tailscale
         initContainers:
           # Clones ~/.dotfiles and runs its `paseo` class bootstrap (mise, the agent
           # CLIs, repos), then merges this scope's agent config (./config/provision.sh).
@@ -77,8 +77,6 @@ spec:
               - &secret
                 secretRef:
                   name: ${APP}-secret
-              - secretRef:
-                  name: ${APP}-mcp
             securityContext: &securityContext
               allowPrivilegeEscalation: false
               capabilities: { drop: ["ALL"] }
@@ -106,18 +104,6 @@ spec:
               - secretRef:
                   name: ${APP}-password
               - *secret
-              - &litellm
-                secretRef:
-                  name: ${APP}-litellm
-                  optional: true
-              # x-api-key for https://mcp-${PASEO_DATA_SCOPE}.${SECRET_DOMAIN}. The daemon
-              # inherits it and the agents' MCP config (config/) references it by name.
-              # ToolHive generates this client key in the llm namespace; the Kubernetes
-              # SecretStore (llm-secretstore.yaml) pulls it over here.
-              - &mcpKey
-                secretRef:
-                  name: ${APP}-mcp
-                  optional: true
             probes:
               startup:
                 enabled: true
@@ -168,8 +154,6 @@ spec:
               <<: *appEnv
             envFrom:
               - *secret
-              - *litellm
-              - *mcpKey
               - secretRef:
                   name: ${APP}-ssh
             securityContext: *securityContext

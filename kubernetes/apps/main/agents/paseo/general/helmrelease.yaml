@@ -16,10 +16,6 @@ spec:
               - secretRef:
                   name: ${APP}-secret
               - secretRef:
-                  name: ${APP}-mcp
-              - secretRef:
-                  name: ${APP}-litellm
-              - secretRef:
                   name: paseo-github
               - secretRef:
                   name: paseo-memory
@@ -32,10 +28,6 @@ spec:
             envFrom:
               - secretRef:
                   name: ${APP}-secret
-              - secretRef:
-                  name: ${APP}-litellm
-              - secretRef:
-                  name: ${APP}-mcp
               - secretRef:
                   name: paseo-github
               - secretRef:
@@ -51,10 +43,6 @@ spec:
               - secretRef:
                   name: ${APP}-secret
               - secretRef:
-                  name: ${APP}-litellm
-              - secretRef:
-                  name: ${APP}-mcp
-              - secretRef:
                   name: paseo-github
               - secretRef:
                   name: ${APP}-ssh
@@ -63,7 +51,7 @@ spec:
               - secretRef:
                   name: paseo-opencode
         annotations:
-          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-litellm,paseo-mcp,paseo-ssh,paseo-tailscale,paseo-github,paseo-memory,paseo-opencode
+          secret.reloader.stakater.com/reload: paseo-password,paseo-secret,paseo-ssh,paseo-tailscale,paseo-github,paseo-memory,paseo-opencode
     persistence:
       data:
         type: nfs
