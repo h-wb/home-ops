@@ -1,6 +1,5 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-# Headless agent host, modelled on david-driscoll/home-operations (kubernetes/apps/agents/paseo).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -13,21 +12,13 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      # No ambient cluster credentials. Private explicitly projects its Hermes
-      # exec token into the app container; general uses ToolHive exclusively.
       automountServiceAccountToken: false
       enableServiceLinks: false
-      # The LiteLLM route is internal-only: no public record and CoreDNS forwards
-      # straight upstream, so pods can't resolve it. Point it at envoy-internal
-      # (same LAN IP the route's Gateway listens on), which has a valid public
-      # cert. ToolHive needs no alias: the pods call its in-cluster services,
-      # admitted per scope by llm/toolhive's NetworkPolicy, with no key.
+      # litellm has no public record, so pods can't resolve it: pin envoy-internal.
       hostAliases:
         - hostnames:
             - litellm.${SECRET_DOMAIN}
           ip: 192.168.1.202
-      # The image's entrypoint only needs root to chown volumes, then drops to `paseo`
-      # (1000); starting as 1000 with fsGroup does the same and skips that step.
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -40,29 +31,19 @@ spec:
       ${APP}: {}
     controllers:
       ${APP}:
-        # Agents run for hours and hold an RWO volume.
-        # Since 0.14 the daemon releases an agent's provider runtime after an idle hour
-        # and resumes the saved session on the next prompt; working agents are kept.
-        # Accepted default. Opt out per scope with `agents.idleRuntimeCleanup: false`
-        # in <scope>/config/paseo.json.
         strategy: Recreate
         serviceAccount:
           identifier: ${APP}
         annotations:
-          # Named lists, not `auto`: every roll kills the running agents.
+          # Named lists, not `auto`: a roll kills running agents.
           configmap.reloader.stakater.com/reload: ${APP}-config
           secret.reloader.stakater.com/reload: ${APP}-password,${APP}-secret,${APP}-tailscale,litellm-paseo-${PASEO_DATA_SCOPE}
         initContainers:
-          # Provisions the host from dotfiles (class `paseo`): clone or fast-forward
-          # ~/.dotfiles, link ~/.config/mise to it, apply its bootstrap.
           tools:
             image:
               repository: ghcr.io/jdx/mise
               tag: 2026.11.2-debian
-            # Copy mise onto the PVC and run that copy. Shims are symlinks to the
-            # mise that created them, and only /home/paseo is shared with the app
-            # container: shims pointing at this image's /usr/local/bin/mise would
-            # be dangling there.
+            # Shims symlink to the mise that made them: run it from the PVC.
             command:
               - sh
               - -c
@@ -81,7 +62,7 @@ spec:
               - --force-dotfiles
               - --skip-dirty
               - --locked
-            # MISE_*: mise's defaults, which the jdx/mise image moves to /mise.
+            # MISE_*: back to mise's defaults; the image moves them to /mise.
             env: &env
               MISE_DATA_DIR: /home/paseo/.local/share/mise
               MISE_CONFIG_DIR: /home/paseo/.config/mise
@@ -90,21 +71,14 @@ spec:
               HOME: /home/paseo
               OPENCODE_CONFIG: /etc/paseo/config/opencode.json
               TZ: Europe/Paris
-              # Terminals (Paseo web UI, VS Code) use this to pick the shell;
-              # without it they fall back to /bin/sh and skip ~/.bashrc.
               SHELL: /bin/bash
-              # The LiteLLM virtual key, straight from the secret the
-              # litellm-operator writes into this namespace (virtualkey.yaml in
-              # each overlay) — no ExternalSecret in between.
               LITELLM_API_KEY:
                 valueFrom:
                   secretKeyRef:
                     name: litellm-paseo-${PASEO_DATA_SCOPE}
                     key: api-key
-              # System dirs first: the daemon must keep the image's node, its native
-              # modules are built against it. Everything else falls through to mise.
+              # System dirs first: the daemon needs the image's node.
               PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/paseo/.local/bin:/home/paseo/.local/share/mise/shims
-            # GIT_EMAIL renders the dotfiles' git config.
             envFrom:
               - &secret
                 secretRef:
@@ -126,13 +100,9 @@ spec:
             env: &appEnv
               <<: *env
               PASEO_HOSTNAMES: "${PASEO_HOSTNAMES}"
-              # Workspace services (paseo.json scripts) at <service>--<project>.svc.${SECRET_DOMAIN}.
-              # Must not be a parent of PASEO_HOSTNAMES: every host under the base is treated
-              # as a service, so a bare ${SECRET_DOMAIN} 404s the daemon itself.
+              # Must not be a parent of PASEO_HOSTNAMES, or the daemon itself 404s.
               PASEO_SERVICE_PROXY_PUBLIC_BASE_URL: "https://${PASEO_SERVICE_DOMAIN}.${SECRET_DOMAIN}"
-              # envoy-internal reaches the daemon from the pod network.
               PASEO_TRUSTED_PROXIES: loopback,10.42.0.0/16
-              # Clients connect directly over LAN/WireGuard; no third-party relay.
               PASEO_RELAY_ENABLED: "false"
             envFrom:
               - secretRef:
@@ -169,8 +139,6 @@ spec:
                 memory: 1Gi
               limits:
                 memory: 8Gi
-          # Headless Chromium for browser MCPs (chrome-devtools-mcp --browserUrl
-          # http://127.0.0.1:9222). Pod-local, so CDP is never exposed.
           browser:
             image:
               repository: docker.io/chromedp/headless-shell
@@ -210,8 +178,7 @@ spec:
           gethomepage.dev/description: Coding agents
         hostnames:
           - "paseo-${PASEO_DATA_SCOPE}.${SECRET_DOMAIN}"
-        # Internal only and no OIDC: the native and CLI clients authenticate to the
-        # daemon with PASEO_PASSWORD and cannot follow a login redirect.
+        # No OIDC: the native and CLI clients can't follow a login redirect.
         parentRefs:
           - name: envoy-internal
             namespace: network
@@ -219,8 +186,6 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
-      # Workspace services; the gateway cert carries *.svc.${SECRET_DOMAIN}. Unknown names
-      # get Paseo's "service not running" page. Internal only, like the daemon.
       services:
         hostnames:
           - "*.${PASEO_SERVICE_DOMAIN}.${SECRET_DOMAIN}"
@@ -232,7 +197,7 @@ spec:
               - identifier: app
                 port: *port
     persistence:
-      # Not in the browser sidecar: a page it loads should never reach agent logins.
+      # Never in the browser sidecar: pages must not reach agent logins.
       home:
         existingClaim: *app
         advancedMounts:
@@ -240,9 +205,7 @@ spec:
             tools: &home
               - path: /home/paseo
             app: *home
-      # This scope's agent config (<scope>/config). Its path is the contract with
-      # dotfiles: /etc/paseo selects the `paseo` class, and paseo.json is merged
-      # into ~/.paseo/config.json.
+      # dotfiles reads this path: /etc/paseo selects its class, paseo.json is merged.
       config:
         type: configMap
         name: ${APP}-config

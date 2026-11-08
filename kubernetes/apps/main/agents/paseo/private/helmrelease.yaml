@@ -12,15 +12,12 @@ spec:
         containers:
           app:
             env:
-              # memini-private's `paseo` client (Bitwarden `memini`, PRIVATE_PASEO).
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
                     name: paseo-private-agents
                     key: MEMINI_API_KEY
-    # Hermes runs through kubectl exec into llm/hermes-private-0. Its Role in
-    # llm/hermes/app/rbac.yaml is the only grant for this service account.
-    # Project the token into the app only; automatic mounting stays disabled.
+    # Hermes' exec token (llm/hermes/app/rbac.yaml), app container only.
     persistence:
       kube-api-token:
         type: custom

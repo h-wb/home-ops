@@ -184,7 +184,6 @@ class PaseoRendering(unittest.TestCase):
                             for source in token["volumeSpec"]["projected"]["sources"]))
 
     def test_tools_init_container_provisions_with_native_mise_bootstrap(self):
-        # `mise bootstrap --from` the dotfiles repo, no provision script.
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
             with self.subTest(scope=scope):
                 self.assertFalse(any(doc.get("kind") == "ConfigMap"
@@ -193,9 +192,7 @@ class PaseoRendering(unittest.TestCase):
                 values = self.resource(scope, "HelmRelease", app)["spec"]["values"]
                 tools = values["controllers"][app]["initContainers"]["tools"]
                 self.assertEqual("ghcr.io/jdx/mise", tools["image"]["repository"])
-                # Shims link to the mise that wrote them, so it must run from the
-                # PVC (the app image has no /usr/local/bin/mise), and
-                # Flux must leave the shell's $HOME/$PATH alone.
+                # Shims must point into the PVC; Flux must leave $HOME/$PATH alone.
                 shell, flag, script, name = tools["command"]
                 self.assertEqual(["sh", "-c", "mise"], [shell, flag, name])
                 self.assertIn('install -D /usr/local/bin/mise "$HOME/.local/bin/mise"', script)
@@ -208,16 +205,13 @@ class PaseoRendering(unittest.TestCase):
                 self.assertIn("https://github.com/h-wb/dotfiles.git", args)
                 self.assertEqual("/home/paseo/.dotfiles", args[args.index("--from-dir") + 1])
                 self.assertEqual(".", args[args.index("--config-dir") + 1])
-                # The jdx/mise image moves these to /mise, off the PVC.
                 self.assertEqual("/home/paseo/.local/share/mise", tools["env"]["MISE_DATA_DIR"])
                 self.assertEqual("/home/paseo/.config/mise", tools["env"]["MISE_CONFIG_DIR"])
                 self.assertEqual("/home/paseo/.cache/mise", tools["env"]["MISE_CACHE_DIR"])
-                # /etc/paseo/config is dotfiles' class marker and overlay source.
                 self.assertNotIn("provision", values["persistence"])
                 for container in ("tools", "app"):
                     mounts = values["persistence"]["config"]["advancedMounts"][app][container]
                     self.assertEqual([{"path": "/etc/paseo/config", "readOnly": True}], mounts)
-                # Private holds no general GitHub credential.
                 self.assertEqual(scope == "private", args[-1] == "--skip=repos")
 
 

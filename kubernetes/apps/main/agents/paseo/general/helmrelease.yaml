@@ -19,8 +19,6 @@ spec:
           app:
             env:
               ANTHROPIC_BASE_URL: https://litellm.${SECRET_DOMAIN}
-              # Every agent key binds by name to its proper secret (jory-shape)
-              # instead of riding envFrom.
               ANTHROPIC_CUSTOM_HEADERS:
                 valueFrom:
                   secretKeyRef:

@@ -4,7 +4,6 @@ resources:
   - ../common
   - externalsecret.yaml
   - virtualkey.yaml
-# Agent config for this scope, mounted at /etc/paseo/config.
 configMapGenerator:
   - name: ${APP}-config
     files:
@@ -16,7 +15,7 @@ patches:
   - path: helmrelease.yaml
     target:
       kind: HelmRelease
-  # No general GitHub credential here: don't clone dotfiles' [bootstrap.repos].
+  # No GitHub credential for dotfiles' [bootstrap.repos].
   - target:
       kind: HelmRelease
     patch: |-

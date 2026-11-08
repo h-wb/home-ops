@@ -1,6 +1,5 @@
 ---
-# Instance settings live together here; common pod settings are in common/.
-# Preserve the historical general resource name "paseo" for storage and clients.
+# General keeps the historical name "paseo" (PVC, clients).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
