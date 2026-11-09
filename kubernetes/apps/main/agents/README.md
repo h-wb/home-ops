@@ -79,6 +79,17 @@ ToolHive keeps its own `mcp-readonly` and `flux-mcp` service accounts. Flux MCP 
 update Flux resource specs, so it is still administrative in effect. GitHub
 credentials and GitOps writes are another operational path.
 
+In the pod there is **no kubeconfig**: token automounting is off, Cilium denies the
+API, and `kubernetes/clusters/*/kubeconfig` is gitignored (workstation-only), so the
+`KUBECONFIG` that `.mise.toml` sets points at nothing and bare `kubectl`/`flux`
+fall back to localhost:8080. Run cluster operations through the ToolHive MCP tools
+instead (`kubectl_kubectl_get`, `kubectl_get_custom_resource`, `flux_get_kubernetes_resources`,
+`flux_reconcile_flux_resource`, …) — e.g. reconciling an app is
+`flux_reconcile_flux_resource(kind=Kustomization, name=<app>, namespace=<ns>, with_source=true)`
+then the same for `kind=HelmRelease`, which replaces
+`mise exec -- flux reconcile ks <app> -n <ns> --with-source` + `flux reconcile hr <app> -n <ns>`
+from a workstation.
+
 General's Proton Pass token is granted only the `Automation General` vault
 (repository credentials). Home-ops' bootstrap and Talos material
 (`homeops-bootstrap`, `bws-cli`, `talos-machine`, `talos-cluster`) lives in
