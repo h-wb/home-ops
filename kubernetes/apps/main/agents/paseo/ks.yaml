@@ -19,7 +19,7 @@ spec:
     substitute:
       APP: paseo
       CLUSTER: ${CLUSTER}
-      KOPIUR_CAPACITY: 40Gi
+      KOPIUR_CAPACITY: 50Gi
       KOPIUR_SCHEDULE: 38 4 * * *
       PASEO_DATA_SCOPE: general
       PASEO_CREDENTIAL_ITEM: paseo-general
