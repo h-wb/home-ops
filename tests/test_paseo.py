@@ -105,7 +105,10 @@ class PaseoRendering(unittest.TestCase):
 
     def test_only_general_routes_claude_through_litellm(self):
         secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]
-        self.assertEqual("x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}", secret["ANTHROPIC_CUSTOM_HEADERS"])
+        self.assertNotIn("ANTHROPIC_CUSTOM_HEADERS", secret)
+        app = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]["controllers"]["paseo"]
+        self.assertEqual({"value": "x-litellm-api-key: Bearer $(LITELLM_API_KEY)", "dependsOn": "LITELLM_API_KEY"},
+                         app["containers"]["app"]["env"]["ANTHROPIC_CUSTOM_HEADERS"])
         with self.assertRaises(StopIteration):
             self.resource("private", "ExternalSecret", "paseo-agents")
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
