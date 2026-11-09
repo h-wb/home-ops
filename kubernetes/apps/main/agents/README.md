@@ -79,10 +79,11 @@ ToolHive keeps its own `mcp-readonly` and `flux-mcp` service accounts. Flux MCP 
 update Flux resource specs, so it is still administrative in effect. GitHub
 credentials and GitOps writes are another operational path.
 
-Proton Pass access is deliberately retained: general's token has a viewer grant
-on the `Automation General` vault, which holds home-ops' bootstrap and Talos
-material (`homeops-bootstrap`, `bws-cli`, `talos-machine`, `talos-cluster`).
-This is not a complete credential boundary around general.
+General's Proton Pass token is granted only the `Automation General` vault
+(repository credentials). Home-ops' bootstrap and Talos material
+(`homeops-bootstrap`, `bws-cli`, `talos-machine`, `talos-cluster`) lives in
+`Machines`, read by workstations only: either would hand a pod every Bitwarden
+secret or the cluster CAs.
 
 ## Credentials and identities
 
