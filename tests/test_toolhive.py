@@ -54,6 +54,13 @@ class ToolHiveScopes(unittest.TestCase):
                     {"from": PROMETHEUS, "ports": [{"port": 9464, "protocol": "TCP"}]},
                 ], spec["ingress"])
 
+    def test_general_gateway_never_lists_private_data(self):
+        # Cloud models sit behind general; private's gateway serves everything.
+        private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "metabase", "homeassistant"}
+        aggregation = self.resource("VirtualMCPServer", "mcp-ops")["spec"]["config"]["aggregation"]
+        self.assertEqual("deny", aggregation["defaultToolVisibility"])
+        self.assertFalse({t["workload"] for t in aggregation["tools"]} & private)
+
     def test_envoy_takes_one_key_per_external_client_and_scope(self):
         # Bitwarden fields are <SCOPE>_<HOLDER>; the Envoy client is the holder.
         routes = {"mcp-gateway-api-key": ("mcp-gateway-api-keys", "PRIVATE_WORKSTATION"),
