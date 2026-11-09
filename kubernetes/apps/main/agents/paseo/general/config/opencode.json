@@ -153,6 +153,7 @@
         },
         "mistral-large-4": {
           "capabilities": {
+            "input": ["text", "image"],
             "reasoning": {
               "supported": true,
               "toggle": true
