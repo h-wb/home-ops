@@ -19,6 +19,10 @@ spec:
           app:
             env:
               ANTHROPIC_BASE_URL: http://litellm.llm.svc.cluster.local:4000
+              # Kubernetes expands $(VAR): the header follows the operator's live key.
+              ANTHROPIC_CUSTOM_HEADERS:
+                value: "x-litellm-api-key: Bearer $(LITELLM_API_KEY)"
+                dependsOn: LITELLM_API_KEY
               GH_TOKEN:
                 valueFrom:
                   secretKeyRef:
