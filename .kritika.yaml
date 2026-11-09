@@ -21,4 +21,4 @@ tools:
   # renovate: datasource=github-releases depName=BurntSushi/ripgrep
   aqua:BurntSushi/ripgrep: 15.2.0
   # renovate: datasource=github-releases depName=mikefarah/yq
-  aqua:mikefarah/yq: v4.54.2
+  aqua:mikefarah/yq: v4.54.3
