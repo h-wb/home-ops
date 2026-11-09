@@ -22,6 +22,10 @@ spec:
               tag: 0.9.1@sha256:31181a32f0dda73cae68721867028a7253d57881b58bea5754cd9e578e75421a
             env:
               TZ: Europe/Paris
+              # The image entrypoint copies its default config from /tmp/config on
+              # first boot, so /tmp must stay the image's own (read-only is fine).
+              # Redirect dotnet scratch writes to the tmpfs cache mount instead.
+              TMPDIR: /kavita/config/cache
             resources:
               requests:
                 cpu: 15m
@@ -70,8 +74,6 @@ spec:
             subPath: logs
           - path: /kavita/config/cache
             subPath: cache
-          - path: /tmp
-            subPath: tmp
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
