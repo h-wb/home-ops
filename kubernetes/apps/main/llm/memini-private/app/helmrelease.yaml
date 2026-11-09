@@ -47,6 +47,13 @@ spec:
                   secretKeyRef:
                     name: litellm-key-memini
                     key: api-key
+              # LiteLLM's long-lived session pins all embed traffic to ONE embed
+              # pod; under burst that pod queues for seconds while its twin idles.
+              # The 2s/5s default budgets then degrade recall to keyword-only and
+              # writes to vectorless rows (whose backfill only adds load), so give
+              # both paths room to wait out the queue instead.
+              MEMINI_RECALL_EMBED_TIMEOUT: "15s"
+              MEMINI_WRITE_EMBED_TIMEOUT: "20s"
             resources:
               requests:
                 cpu: 10m
