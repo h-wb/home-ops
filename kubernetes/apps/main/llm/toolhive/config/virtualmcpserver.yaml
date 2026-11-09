@@ -14,6 +14,21 @@ spec:
       conflictResolution: prefix
       conflictResolutionConfig:
         prefixFormat: "{workload}_"
+      # Private data and personal services only: cluster and GitOps tools stay on
+      # mcp-ops, so a private agent holding personal data has no write path out.
+      defaultToolVisibility: deny
+      tools:
+        - workload: vault-ro
+        - workload: vault-inbox
+        - workload: personal-tasks
+        - workload: homelab-tasks
+        - workload: dawarich
+        - workload: metabase
+        - workload: homeassistant
+        - workload: anki
+        - workload: excel
+        - workload: arr
+        - workload: overseerr
     # Tool search over embeddings, so clients get the relevant tools instead of the
     # whole catalogue. Uses LiteLLM's in-cluster `embed`.
     optimizer:
