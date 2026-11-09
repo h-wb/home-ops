@@ -48,7 +48,7 @@ agent:
 mcp_servers:
   # The private VMCP (llm/toolhive/config), reached in-cluster: the same endpoint the
   # private Paseo tier takes through Envoy. This pod's egress (networkpolicy.yaml)
-  # pins it to mcp-gateway — the private allowlist, including the vault — while
+  # pins it to mcp-gateway — the full mcp-tools catalogue including the vault — while
   # no other tier's pod may reach that endpoint at all.
   tools:
     url: http://vmcp-mcp-gateway.llm.svc.cluster.local:4483/mcp
