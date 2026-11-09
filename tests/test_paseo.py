@@ -105,7 +105,8 @@ class PaseoRendering(unittest.TestCase):
 
     def test_only_general_routes_claude_through_litellm(self):
         secret = self.resource("general", "ExternalSecret", "paseo-agents")["spec"]["target"]["template"]["data"]
-        self.assertEqual("x-litellm-api-key: Bearer {{ .LITELLM_API_KEY }}", secret["ANTHROPIC_CUSTOM_HEADERS"])
+        # dotfiles composes the header from the live LITELLM_API_KEY below.
+        self.assertNotIn("ANTHROPIC_CUSTOM_HEADERS", secret)
         with self.assertRaises(StopIteration):
             self.resource("private", "ExternalSecret", "paseo-agents")
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
@@ -115,6 +116,7 @@ class PaseoRendering(unittest.TestCase):
                     continue
                 env = container.get("env", {})
                 self.assertNotIn("ANTHROPIC_API_KEY", env)
+                self.assertNotIn("ANTHROPIC_CUSTOM_HEADERS", env)
                 self.assertEqual(scope == "general", "ANTHROPIC_BASE_URL" in env, (scope, name))
                 # The virtual key binds the operator's Secret directly, in the
                 # pods' own namespace (the CR sits beside them).

@@ -89,12 +89,12 @@ This is not a complete credential boundary around general.
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
 credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN` and
 `PASEO_PASSWORD`. Old `KEYSEED` (the removed sshd) and `MCP_API_KEY` (the pods
-reach ToolHive without a key) fields are unused. General additionally holds `GH_TOKEN`, `OPENCODE_API_KEY` and
-`LITELLM_API_KEY` — the last one only composes Claude Code's `x-litellm-api-key`
-header, the raw virtual key never passing through Bitwarden: the
-litellm-operator writes its Secret into the pods' own namespace from the
-`virtualkey.yaml` CR beside them, and the helmrelease binds it directly. The
-general pod's agent keys (GH, opencode, memini, the Claude header) come out of
+reach ToolHive without a key) fields are unused. General additionally holds `GH_TOKEN` and `OPENCODE_API_KEY`.
+The LiteLLM virtual key never passes through Bitwarden: the litellm-operator
+writes its Secret into the pods' own namespace from the `virtualkey.yaml` CR
+beside them, the helmrelease binds it as `LITELLM_API_KEY`, and dotfiles composes
+Claude Code's `x-litellm-api-key` header from it, so a rotation needs nothing. The
+general pod's agent keys (GH, opencode, memini) come out of
 the `paseo-agents` Secret, whose single ExternalSecret extracts the credential
 and `memini` items together — memini's client key lives once, in the
 `memini` item, read by the server and the pod alike. Proton Pass serves the

@@ -19,11 +19,6 @@ spec:
           app:
             env:
               ANTHROPIC_BASE_URL: http://litellm.llm.svc.cluster.local:4000
-              ANTHROPIC_CUSTOM_HEADERS:
-                valueFrom:
-                  secretKeyRef:
-                    name: paseo-agents
-                    key: ANTHROPIC_CUSTOM_HEADERS
               GH_TOKEN:
                 valueFrom:
                   secretKeyRef:
