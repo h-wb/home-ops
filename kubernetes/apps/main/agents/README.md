@@ -46,7 +46,8 @@ start and read-only in the app container. mise itself is the `ghcr.io/jdx/mise`
 image mounted at `/opt/mise` in both containers, so its shims resolve
 everywhere. Work on dotfiles in `~/Repositories/dotfiles`. Dotfiles does the
 merge (`conf.d/paseo/mise.paseo-overlay.toml`), and that mount path is the only
-thing the two repos share. Private adds `--skip=repos`.
+thing the two repos share. Private adds `--skip=repos,task`: it has no GitHub
+credential, and no Proton Pass secrets to log in for.
 
 The files hold no secrets. Credentials come from ExternalSecrets as environment
 variables and are referenced by name (`{env:LITELLM_API_KEY}` for OpenCode). The
@@ -78,10 +79,10 @@ ToolHive keeps its own `mcp-readonly` and `flux-mcp` service accounts. Flux MCP 
 update Flux resource specs, so it is still administrative in effect. GitHub
 credentials and GitOps writes are another operational path.
 
-Proton Pass access is deliberately retained: general can still read
-`Infrastructure/homeops-bootstrap`, `Infrastructure/bws-cli`,
-`Infrastructure/talos-machine` and `Infrastructure/talos-cluster`. This is not a
-complete credential boundary around general.
+Proton Pass access is deliberately retained: general's token has a viewer grant
+on the `Automation General` vault, which holds home-ops' bootstrap and Talos
+material (`homeops-bootstrap`, `bws-cli`, `talos-machine`, `talos-cluster`).
+This is not a complete credential boundary around general.
 
 ## Credentials and identities
 
@@ -96,9 +97,9 @@ litellm-operator writes its Secret into the pods' own namespace from the
 general pod's agent keys (GH, opencode, memini, the Claude header) come out of
 the `paseo-agents` Secret, whose single ExternalSecret extracts the credential
 and `memini` items together — memini's client key lives once, in the
-`memini` item, read by the server and the pod alike. Proton Pass serves fnx
-repository credentials through item-level viewer grants
-(`pass://<item-share-id>/<item-id>/<field>`).
+`memini` item, read by the server and the pod alike. Proton Pass serves the
+repositories' credentials from the `Automation General` vault, through one vault
+grant and readable `pass://Automation General/<item>/<field>` references.
 
 General keeps its historical `paseo` release, service account, PVC and backup
 identity, plus the `paseo.<domain>` and `svc` aliases. Private uses `paseo-private`

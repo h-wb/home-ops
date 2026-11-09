@@ -29,7 +29,7 @@ agent on it, and named `<SCOPE>_<HOLDER>` in Bitwarden:
 | `memini`   | `GENERAL_ADMIN`, `GENERAL_WORKSTATION`, `GENERAL_PASEO`, `GENERAL_HERMES`, `PRIVATE_ADMIN`, `PRIVATE_HERMES`, `PRIVATE_WORKSTATION`, `PRIVATE_PASEO` |
 
 The workstation keys reach the workstations through Proton Pass
-(`Automation/toolhive`, `Automation/memini`, fields `general`/`private`). The
+(`Machines/toolhive`, `Machines/memini`, fields `general`/`private`). The
 litellm key is consumed directly: its CR lives beside the pods, so the operator
 writes the Secret into the agents namespace and the helmrelease binds it by name.
 
