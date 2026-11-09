@@ -21,10 +21,10 @@ Edit `ks.yaml` for names, scope, credential item, hostnames and backup
 settings; `common/helmrelease.yaml` for shared pod settings; the overlay's
 `helmrelease.yaml` for environment-specific values.
 
-| Environment | Agents                          | Models (LiteLLM key)                         | Tools and data                                  |
-| ----------- | ------------------------------- | -------------------------------------------- | ----------------------------------------------- |
-| General     | Claude Code, OpenCode           | Claude subscription, ChatGPT, Mistral, local | `mcp-general`, `memini-general`, NFS, Tailscale |
-| Private     | OpenCode, Hermes (`llm/hermes`) | Mistral, local                               | `mcp-private`, Obsidian; no NFS or Tailscale    |
+| Environment | Agents                          | Models (LiteLLM key)                         | Tools and data                                                                             |
+| ----------- | ------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| General     | Claude Code, OpenCode           | Claude subscription, ChatGPT, Mistral, local | `toolhive` (mcp-general gateway), `memini` (memini-general), NFS, Tailscale                |
+| Private     | OpenCode, Hermes (`llm/hermes`) | Mistral, local                               | `toolhive` (mcp-private gateway), `memini` (memini-private), Obsidian; no NFS or Tailscale |
 
 ## Agent config
 
