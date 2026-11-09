@@ -1,28 +1,28 @@
 [providers.protonpass]
 type = "proton-pass"
-vault = "Agents General"
+vault = "Automation General"
 
 [secrets]
-BITWARDEN_KUBERNETES_TOKEN = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/bitwarden-kubernetes-token" }
+BITWARDEN_KUBERNETES_TOKEN = { provider = "protonpass", value = "pass://Automation General/homeops-bootstrap/bitwarden-kubernetes-token" }
 # Same machine account, separate token for hand-run bws (revocable without touching the cluster).
-BWS_ACCESS_TOKEN = { provider = "protonpass", value = "pass://Agents General/bws-cli/access-token" }
-CLUSTER_SECRETS = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/cluster-secrets" }
-AGE_KEY = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/age-key" }
-SECRET_DOMAIN = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/secret-domain" }
-LETS_ENCRYPT_TLS = { provider = "protonpass", value = "pass://Agents General/homeops-bootstrap/lets-encrypt-tls" }
+BWS_ACCESS_TOKEN = { provider = "protonpass", value = "pass://Automation General/bws-cli/access-token" }
+CLUSTER_SECRETS = { provider = "protonpass", value = "pass://Automation General/homeops-bootstrap/cluster-secrets" }
+AGE_KEY = { provider = "protonpass", value = "pass://Automation General/homeops-bootstrap/age-key" }
+SECRET_DOMAIN = { provider = "protonpass", value = "pass://Automation General/homeops-bootstrap/secret-domain" }
+LETS_ENCRYPT_TLS = { provider = "protonpass", value = "pass://Automation General/homeops-bootstrap/lets-encrypt-tls" }
 
-MACHINE_CA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-machine/ca-crt" }
-MACHINE_CA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-machine/ca-key" }
-MACHINE_TOKEN = { provider = "protonpass", value = "pass://Agents General/talos-machine/token" }
+MACHINE_CA_CRT = { provider = "protonpass", value = "pass://Automation General/talos-machine/ca-crt" }
+MACHINE_CA_KEY = { provider = "protonpass", value = "pass://Automation General/talos-machine/ca-key" }
+MACHINE_TOKEN = { provider = "protonpass", value = "pass://Automation General/talos-machine/token" }
 
-CLUSTER_CA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-cluster/ca-crt" }
-CLUSTER_CA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/ca-key" }
-CLUSTER_ID = { provider = "protonpass", value = "pass://Agents General/talos-cluster/id" }
-CLUSTER_SECRET = { provider = "protonpass", value = "pass://Agents General/talos-cluster/secret" }
-CLUSTER_TOKEN = { provider = "protonpass", value = "pass://Agents General/talos-cluster/token" }
-CLUSTER_AGGREGATORCA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-cluster/aggregatorca-crt" }
-CLUSTER_AGGREGATORCA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/aggregatorca-key" }
-CLUSTER_ETCD_CA_CRT = { provider = "protonpass", value = "pass://Agents General/talos-cluster/etcd-ca-crt" }
-CLUSTER_ETCD_CA_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/etcd-ca-key" }
-CLUSTER_SECRETBOXENCRYPTIONSECRET = { provider = "protonpass", value = "pass://Agents General/talos-cluster/secretboxencryptionsecret" }
-CLUSTER_SERVICEACCOUNT_KEY = { provider = "protonpass", value = "pass://Agents General/talos-cluster/serviceaccount-key" }
+CLUSTER_CA_CRT = { provider = "protonpass", value = "pass://Automation General/talos-cluster/ca-crt" }
+CLUSTER_CA_KEY = { provider = "protonpass", value = "pass://Automation General/talos-cluster/ca-key" }
+CLUSTER_ID = { provider = "protonpass", value = "pass://Automation General/talos-cluster/id" }
+CLUSTER_SECRET = { provider = "protonpass", value = "pass://Automation General/talos-cluster/secret" }
+CLUSTER_TOKEN = { provider = "protonpass", value = "pass://Automation General/talos-cluster/token" }
+CLUSTER_AGGREGATORCA_CRT = { provider = "protonpass", value = "pass://Automation General/talos-cluster/aggregatorca-crt" }
+CLUSTER_AGGREGATORCA_KEY = { provider = "protonpass", value = "pass://Automation General/talos-cluster/aggregatorca-key" }
+CLUSTER_ETCD_CA_CRT = { provider = "protonpass", value = "pass://Automation General/talos-cluster/etcd-ca-crt" }
+CLUSTER_ETCD_CA_KEY = { provider = "protonpass", value = "pass://Automation General/talos-cluster/etcd-ca-key" }
+CLUSTER_SECRETBOXENCRYPTIONSECRET = { provider = "protonpass", value = "pass://Automation General/talos-cluster/secretboxencryptionsecret" }
+CLUSTER_SERVICEACCOUNT_KEY = { provider = "protonpass", value = "pass://Automation General/talos-cluster/serviceaccount-key" }

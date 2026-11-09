@@ -80,7 +80,7 @@ update Flux resource specs, so it is still administrative in effect. GitHub
 credentials and GitOps writes are another operational path.
 
 Proton Pass access is deliberately retained: general's token has a viewer grant
-on the `Agents General` vault, which holds home-ops' bootstrap and Talos
+on the `Automation General` vault, which holds home-ops' bootstrap and Talos
 material (`homeops-bootstrap`, `bws-cli`, `talos-machine`, `talos-cluster`).
 This is not a complete credential boundary around general.
 
@@ -98,8 +98,8 @@ general pod's agent keys (GH, opencode, memini, the Claude header) come out of
 the `paseo-agents` Secret, whose single ExternalSecret extracts the credential
 and `memini` items together — memini's client key lives once, in the
 `memini` item, read by the server and the pod alike. Proton Pass serves the
-repositories' credentials from the `Agents General` vault, through one vault
-grant and readable `pass://Agents General/<item>/<field>` references.
+repositories' credentials from the `Automation General` vault, through one vault
+grant and readable `pass://Automation General/<item>/<field>` references.
 
 General keeps its historical `paseo` release, service account, PVC and backup
 identity, plus the `paseo.<domain>` and `svc` aliases. Private uses `paseo-private`
