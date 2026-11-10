@@ -1,0 +1,13 @@
+---
+# The shared dotfiles skills; written by the sync Job, mounted read-only by Hermes.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hermes-skills
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ceph-filesystem
+  resources:
+    requests:
+      storage: 100Mi

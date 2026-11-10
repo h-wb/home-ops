@@ -88,6 +88,11 @@ flowchart LR
   routine is created when the pod starts; the first is the daily briefing, at
   07:00 Toronto time, delivered to Telegram. A scheduled run has nobody to
   ask, so a call that needs a yes is refused.
+- Shared skills: the general skills folder in dotfiles (`conf.d/ai/skills`) is
+  synced by a Job (`hermes/app/skills-sync/`) at a pinned dotfiles commit into
+  a volume mounted read-only at `/opt/dotfiles-skills`, listed in
+  `skills.external_dirs` next to the routines. The pod itself cannot reach
+  GitHub.
 - Skills and sub-agents are on. Hermes's bundled skills are kept out, except
   the one about itself, which it always adds back. A skill it writes itself
   waits for your yes. Sub-agents get the assistant's tools and no others. It
