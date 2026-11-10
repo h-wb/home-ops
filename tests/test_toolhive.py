@@ -20,6 +20,11 @@ def pods(**labels):
     return {"podSelector": {"matchLabels": labels}}
 
 
+def yaml_of(path):
+    return json.loads(subprocess.run(["yq", "-o=json", "-I=0", ".", str(path)], capture_output=True,
+                                     text=True, timeout=60, check=True).stdout)
+
+
 class ToolHiveScopes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -225,6 +230,36 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertEqual([{"extract": {"key": "hermes"}}], secret["dataFrom"])
         config = (ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml").read_text()
         self.assertIn("\nunauthorized_dm_behavior: ignore\n", config)
+
+    def test_routines_are_read_only_and_bring_no_shell(self):
+        config = yaml_of(ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml")
+        # Skills and sub-agents are on; everything that is a shell or a way out stays off,
+        # and so does the tool that would let the assistant schedule jobs by itself.
+        off = set(config["agent"]["disabled_toolsets"])
+        self.assertLessEqual({"terminal", "code_execution", "file", "browser", "computer_use", "web",
+                              "search", "x_search", "cronjob"}, off)
+        self.assertFalse({"skills", "delegation"} & off)
+        # Nobody answers a scheduled run, so it must not be able to approve itself.
+        self.assertEqual({"mode": "manual", "cron_mode": "deny"}, config["approvals"])
+        self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills"], "write_approval": True},
+                         config["skills"])
+        self.assertEqual(1, config["delegation"]["max_spawn_depth"])
+        values = next(d for d in self.docs if d["kind"] == "HelmRelease")["spec"]["values"]
+        mounts = values["persistence"]["routines"]["globalMounts"]
+        self.assertTrue(all(m["readOnly"] for m in mounts))
+        self.assertIn("/opt/hermes-routines/skills/daily-briefing/SKILL.md", [m["path"] for m in mounts])
+        main = values["controllers"]["main"]
+        sync = main["initContainers"]["routines"]
+        self.assertEqual(main["containers"]["hermes"]["image"], sync["image"])
+        self.assertEqual(10000, sync["securityContext"]["runAsUser"])
+        self.assertFalse(sync["securityContext"]["allowPrivilegeEscalation"])
+        # Every routine's skill is in the ConfigMap the release mounts.
+        routines = next(d for d in self.docs if d["kind"] == "ConfigMap" and d["metadata"]["name"] == "hermes-routines")
+        script = routines["data"]["sync.sh"]
+        self.assertNotIn("${", script)  # Flux would substitute it
+        for name in [line.split()[1] for line in script.splitlines() if line.startswith("routine ")]:
+            self.assertIn(f"name: {name}\n", routines["data"][f"{name}.md"])
+            self.assertIn(f"/opt/hermes-routines/skills/{name}/SKILL.md", [m["path"] for m in mounts])
 
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
         keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]

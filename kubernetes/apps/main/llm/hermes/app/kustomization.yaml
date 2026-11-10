@@ -29,3 +29,9 @@ configMapGenerator:
       disableNameSuffixHash: true
     files:
       - shim.py=./acp-shim.py
+  - name: hermes-routines
+    options:
+      disableNameSuffixHash: true
+    files:
+      - daily-briefing.md=./routines/daily-briefing/SKILL.md
+      - sync.sh=./routines/sync.sh

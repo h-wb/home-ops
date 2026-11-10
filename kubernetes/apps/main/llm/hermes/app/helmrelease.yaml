@@ -44,16 +44,39 @@ spec:
               accessMode: ReadWriteOnce
               size: 2Gi
               storageClass: ceph-block
-        containers:
-          hermes:
-            image:
+        # Creates the routines' scheduled jobs before the assistant starts
+        # (routines/sync.sh). As the image's own user, which s6 drops to below.
+        initContainers:
+          routines:
+            image: &image
               repository: docker.io/nousresearch/hermes-agent
               tag: v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
+            command: ["/bin/sh", "/opt/hermes-routines/bin/sync.sh"]
+            env:
+              HERMES_HOME: &home /data/hermes
+              HOME: *home
+              TZ: &tz Europe/Paris
+            securityContext:
+              runAsNonRoot: true
+              runAsUser: 10000
+              runAsGroup: 10000
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+        containers:
+          hermes:
+            image: *image
             args: ["gateway", "run"]
             env:
-              HERMES_HOME: /data/hermes
-              HOME: /data/hermes
-              TZ: Europe/Paris
+              HERMES_HOME: *home
+              HOME: *home
+              TZ: *tz
               # Fail fast: the NetworkPolicy silently drops internet traffic, so Hermes's update
               # and model-catalog checks each waited out a TCP timeout (about 20 s per new
               # session). A closed local port refuses at once; in-cluster names bypass it.
@@ -139,6 +162,18 @@ spec:
         globalMounts:
           - path: /data/hermes/SOUL.md
             subPath: SOUL.md
+            readOnly: true
+      # The routines (routines/): each skill as <name>/SKILL.md, read-only, so the
+      # assistant can load a routine and cannot rewrite one.
+      routines:
+        type: configMap
+        name: hermes-routines
+        globalMounts:
+          - path: /opt/hermes-routines/skills/daily-briefing/SKILL.md
+            subPath: daily-briefing.md
+            readOnly: true
+          - path: /opt/hermes-routines/bin/sync.sh
+            subPath: sync.sh
             readOnly: true
       # Paseo's entry point: `python /opt/hermes-acp/shim.py` (maps Paseo's cwd).
       acp-shim:

@@ -27,6 +27,8 @@ memory:
   user_profile_enabled: false
 approvals:
   mode: manual
+  # A scheduled run has nobody to ask, so a call that needs a yes is refused.
+  cron_mode: deny
 # Anyone not on a platform's allow list gets no answer, not even a pairing code.
 unauthorized_dm_behavior: ignore
 security:
@@ -38,7 +40,7 @@ agent:
     - connections
     - kanban
     # Vault and budget data plus clipped web text: no outbound path (web, search) and no
-    # shell, code, file, browser or delegation tools.
+    # shell, code, file or browser tools.
     - web
     - search
     - x_search
@@ -46,9 +48,18 @@ agent:
     - code_execution
     - file
     - browser
-    - delegation
     - computer_use
-    - skills
+# Routines (./routines), mounted read-only. A skill the assistant writes itself
+# waits for a yes in chat (/skills pending).
+skills:
+  external_dirs:
+    - /opt/hermes-routines/skills
+  write_approval: true
+# Sub-agents get the parent's toolsets, so no shell there either.
+delegation:
+  max_spawn_depth: 1
+  max_concurrent_children: 3
+  orchestrator_enabled: false
 mcp_servers:
   # The assistant's own gateway (llm/toolhive/config/assistant-gateway.yaml): the
   # private catalogue with real tool names, which Hermes searches itself. This
