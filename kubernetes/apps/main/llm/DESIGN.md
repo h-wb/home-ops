@@ -204,19 +204,50 @@ request.
 
 ## Shared state
 
-| Thing            | Where                         | Read by          | Written by       |
-| ---------------- | ----------------------------- | ---------------- | ---------------- |
-| General memory   | General memory store          | Everyone         | General agents   |
-| Private memory   | Private memory store          | Private agents   | Private agents   |
-| Shared skills    | One git directory, `SKILL.md` | Everyone         | You, through git |
-| Repo skills      | In the repo                   | Whoever opens it | You, through git |
-| Assistant skills | The assistant's own volume    | The assistant    | The assistant    |
+| Thing              | Where                          | Read by          | Written by       |
+| ------------------ | ------------------------------ | ---------------- | ---------------- |
+| General memory     | General memory store           | Everyone         | General agents   |
+| Private memory     | Private memory store           | Private agents   | Private agents   |
+| General skills     | One folder in dotfiles         | Everyone         | You, through git |
+| Repo skills        | In the repo                    | Whoever opens it | You, through git |
+| Assistant routines | home-ops, beside the assistant | The assistant    | You, through git |
+| Learned skills     | The assistant's own volume     | The assistant    | The assistant    |
 
-Private agents never write to general memory or the shared skills directory:
+Private agents never write to general memory or the general skills folder:
 either would carry private facts to the general side. They read general memory
 with a read-only key; the question they ask is logged by the general store, so
 it should not carry private detail. Skills the assistant
 learns stay private until you promote one into git by hand.
+
+## Skills
+
+A skill is a folder with a `SKILL.md`: a name, one line saying when to use it,
+and the procedure. Every agent here reads that format, and loads a skill only
+when its line matches the task.
+
+Guidance lives where its subject lives:
+
+| Kind                | Example                                 | Lives in                                      |
+| ------------------- | --------------------------------------- | --------------------------------------------- |
+| What a tool is for  | "Restoring replaces the configuration"  | The tool's description, on the gateway        |
+| A repo's procedures | Add an app; reconcile a day of location | That repo                                     |
+| General habits      | How to use the tool gateway             | dotfiles, one folder, linked into every agent |
+| Assistant routines  | The briefing; filing a task             | home-ops, beside the assistant, read-only     |
+
+Review and delegation are not skills to write. The workshop ships them
+(a second opinion, a committee of two, a hand-off), and picks who does the work
+from agent profiles: a provider, a model and a note saying when to use it.
+
+What makes a smaller model succeed, in order of effect:
+
+1. Fewer tools in view, with short descriptions. Fix the description before
+   writing a skill about it.
+2. Anything that must happen the same way every time is a named tool or a job,
+   not prose.
+3. One skill, one job: exact tool names, the order, and how to check it worked.
+4. A stronger model plans and reviews; a cheaper one does the work.
+5. When an agent stumbles twice on the same thing, change the tool description
+   or the skill, not the prompt.
 
 ## Where configuration lives
 
@@ -310,7 +341,8 @@ To verify:
   its automatic splitting of new cards can be turned off.
 - Scheduled jobs can be created from versioned definitions at deploy time
   (`hermes cron create`).
-- Hermes reads the shared skills directory (`skills.external_dirs`).
+- Hermes reads a routines folder mounted read-only (`skills.external_dirs`),
+  and its bundled skills can be kept out (`.no-bundled-skills`).
 
 ## Getting there
 
@@ -328,6 +360,8 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
 5. Assistant → general workshop daemon, behind approval.
 6. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
    projected token) once the messaging app is in daily use.
-7. Shared skills directory in dotfiles, mounted read-only into the assistant.
+7. Skills: the general folder in dotfiles and agent profiles in the workshops;
+   then the assistant's routines folder, with its first routine, when its
+   skills are switched on (its bundled skills kept out).
 8. Task board, then homelab alerts → cards.
 9. Retire the Open WebUI data and legacy hostnames.
