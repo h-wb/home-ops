@@ -14,6 +14,14 @@ spec:
       conflictResolution: prefix
       conflictResolutionConfig:
         prefixFormat: "{workload}_"
+      tools:
+        # Same short description as on mcp-private; the original is 8.6k characters.
+        - workload: homeassistant
+          overrides:
+            ha_manage_backup:
+              description: >-
+                Create, list, restore or delete Home Assistant backups. Restoring
+                replaces the current configuration, so ask before doing it.
   incomingAuth:
     type: anonymous
   outgoingAuth:
