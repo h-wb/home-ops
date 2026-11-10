@@ -1,0 +1,64 @@
+---
+# Reruns when sync.sh or the pins change (hashed ConfigMap name, Flux force).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hermes-skills-sync
+  annotations:
+    kustomize.toolkit.fluxcd.io/force: enabled
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sync
+          image: docker.io/alpine/k8s:1.37.1
+          command:
+            - /bin/sh
+            - /scripts/sync.sh
+          env:
+            # h-wb/dotfiles origin/master, "feat(ai): shared paseo-workspace-hygiene skill (#22)".
+            # DOTFILES_TAR_SHA256 is the codeload tarball for that ref; bump both together.
+            - name: DOTFILES_REF
+              value: aee21dd9b0be69afc0a6845f986cd3ea89b2b1ee
+            - name: DOTFILES_TAR_SHA256
+              value: 33c2a0b92cfe65557928b70302db1651d482858e31be8f7e546727ec5820ddb8
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 128Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+              readOnly: true
+            - name: skills
+              mountPath: /skills
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: scripts
+          configMap:
+            name: hermes-skills-sync
+        - name: skills
+          persistentVolumeClaim:
+            claimName: hermes-skills
+        - name: tmp
+          emptyDir: {}

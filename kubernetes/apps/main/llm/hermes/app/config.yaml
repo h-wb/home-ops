@@ -63,11 +63,13 @@ agent:
     - file
     - browser
     - computer_use
-# Routines (./routines), mounted read-only. A skill the assistant writes itself
-# waits for a yes in chat (/skills pending).
+# Routines (./routines) and the shared dotfiles skills (skills-sync/), both
+# mounted read-only. A skill the assistant writes itself waits for a yes in
+# chat (/skills pending).
 skills:
   external_dirs:
     - /opt/hermes-routines/skills
+    - /opt/dotfiles-skills
   write_approval: true
 # Sub-agents get the parent's toolsets, so no shell there either.
 delegation:

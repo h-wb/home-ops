@@ -241,8 +241,8 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertFalse({"skills", "delegation"} & off)
         # Nobody answers a scheduled run, so it must not be able to approve itself.
         self.assertEqual({"mode": "manual", "cron_mode": "deny"}, config["approvals"])
-        self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills"], "write_approval": True},
-                         config["skills"])
+        self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
+                          "write_approval": True}, config["skills"])
         self.assertEqual(1, config["delegation"]["max_spawn_depth"])
         values = next(d for d in self.docs if d["kind"] == "HelmRelease")["spec"]["values"]
         mounts = values["persistence"]["routines"]["globalMounts"]
@@ -260,6 +260,34 @@ class HermesIsPrivateOnly(unittest.TestCase):
         for name in [line.split()[1] for line in script.splitlines() if line.startswith("routine ")]:
             self.assertIn(f"name: {name}\n", routines["data"][f"{name}.md"])
             self.assertIn(f"/opt/hermes-routines/skills/{name}/SKILL.md", [m["path"] for m in mounts])
+
+    def test_dotfiles_skills_are_synced_pinned_and_read_only(self):
+        # The shared skills folder in h-wb/dotfiles (conf.d/ai/skills) reaches the pod
+        # the way the Memini plugin does: a Job fetches the repo at a pinned, checksummed
+        # ref into a volume mounted read-only. The pod's egress never sees GitHub.
+        config = yaml_of(ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml")
+        self.assertEqual(["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
+                         config["skills"]["external_dirs"])
+        values = next(d for d in self.docs if d["kind"] == "HelmRelease")["spec"]["values"]
+        mount = values["persistence"]["dotfiles-skills"]
+        self.assertEqual("hermes-skills", mount["existingClaim"])
+        self.assertEqual([{"path": "/opt/dotfiles-skills", "readOnly": True}], mount["globalMounts"])
+        job = next(d for d in self.docs if d["kind"] == "Job" and d["metadata"]["name"] == "hermes-skills-sync")
+        env = {e["name"]: e["value"] for e in job["spec"]["template"]["spec"]["containers"][0]["env"]}
+        self.assertEqual(40, len(env["DOTFILES_REF"]))  # a commit sha
+        self.assertEqual(64, len(env["DOTFILES_TAR_SHA256"]))  # sha256 of the tarball
+        volumes = {v["name"]: v for v in job["spec"]["template"]["spec"]["volumes"]}
+        self.assertEqual("hermes-skills", volumes["skills"]["persistentVolumeClaim"]["claimName"])
+        self.assertTrue(volumes["scripts"]["configMap"]["name"].startswith("hermes-skills-sync"))
+        script = next(d for d in self.docs if d["kind"] == "ConfigMap"
+                      and d["metadata"]["name"].startswith("hermes-skills-sync"))["data"]["sync.sh"]
+        self.assertNotIn("${", script)  # Flux would substitute it
+        self.assertIn("codeload.github.com/h-wb/dotfiles", script)
+        self.assertIn("conf.d/ai/skills", script)
+        self.assertIn("sha256sum -c", script)
+        pvc = next(d for d in self.docs if d["kind"] == "PersistentVolumeClaim"
+                   and d["metadata"]["name"] == "hermes-skills")
+        self.assertEqual(["ReadWriteMany"], pvc["spec"]["accessModes"])
 
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
         keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]
