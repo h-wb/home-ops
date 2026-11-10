@@ -14,7 +14,7 @@ Call these tools by their exact names with `tool_call`. If a name is not
 found, search for the part after `mcp__tools__`. The day is the user's:
 timezone `America/Toronto`, whatever the clock here says.
 
-1. `mcp__tools__homelab-tasks-ro_list_tasks` with `status: "open"`: the open
+1. `mcp__tools__homelab_tasks_ro_list_tasks` with `status: "open"`: the open
    homelab tasks.
 2. `mcp__tools__ticktick_list_undone_tasks_by_time_query` with
    `query_command: "today"` and `client_timezone: "America/Toronto"`: tasks
