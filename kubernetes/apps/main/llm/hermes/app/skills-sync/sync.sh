@@ -13,13 +13,21 @@ tar -xzf /tmp/dotfiles.tar.gz -C /tmp/dotfiles
 skills="/tmp/dotfiles/dotfiles-$DOTFILES_REF/conf.d/ai/skills"
 # Fail instead of mounting an empty folder: every skill is a <name>/SKILL.md.
 test -n "$(find "$skills" -name SKILL.md -print -quit)"
-rm -rf /skills.new
-cp -r "$skills" /skills.new
-# The directory may predate this Job (kubelet creates mount points), so set files only.
-chmod -R a+r,go-w /skills.new
-# Swap, so a pod starting mid-sync never sees a half-written tree.
-rm -rf /skills.old
-if [ -d /skills ]; then mv /skills /skills.old; fi
-mv /skills.new /skills
-rm -rf /skills.old
+# Everything is written inside the volume: the root filesystem is read-only and
+# /skills is a mount point, so it cannot be renamed. Each skill is swapped by
+# rename, so a pod reading mid-sync never sees a half-written one.
+rm -rf /skills/.new /skills/.old
+cp -r "$skills" /skills/.new
+chmod -R a+r,go-w /skills/.new
+for new in /skills/.new/*; do
+  name=$(basename "$new")
+  if [ -e "/skills/$name" ]; then mv "/skills/$name" /skills/.old; fi
+  mv "$new" "/skills/$name"
+  rm -rf /skills/.old
+done
+rmdir /skills/.new
+# Skills that left dotfiles leave the volume too.
+for old in /skills/*; do
+  [ -e "$skills/$(basename "$old")" ] || rm -rf "$old"
+done
 echo "dotfiles skills $DOTFILES_REF written"
