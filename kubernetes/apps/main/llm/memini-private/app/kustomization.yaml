@@ -6,6 +6,7 @@ resources:
   - ./externalsecret.yaml
   - ./grafanadashboard.yaml
   - ./helmrelease.yaml
+  - ./networkpolicy.yaml
   - ./ocirepository.yaml
   - ./prometheusrule.yaml
   - ./service-alias.yaml

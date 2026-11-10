@@ -1,0 +1,43 @@
+---
+# Private memory takes calls from the private scope only. The client keys already
+# refuse everyone else; this is the second lock.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: memini-private
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: memini
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/managed-by: envoy-gateway
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hermes-private
+              assistant.scope: private
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: paseo-private
+      ports:
+        - port: 8080
+          protocol: TCP
+        - port: 8081
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 9090
+          protocol: TCP

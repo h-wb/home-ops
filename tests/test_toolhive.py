@@ -48,6 +48,14 @@ class ToolHiveScopes(unittest.TestCase):
                     {"from": PROMETHEUS, "ports": [{"port": 9464, "protocol": "TCP"}]},
                 ], spec["ingress"])
 
+    def test_tool_servers_answer_toolhive_only(self):
+        # Otherwise any pod in the cluster reaches a tool server around the gateways.
+        spec = self.resource("NetworkPolicy", "tool-servers")["spec"]
+        self.assertEqual({"toolhive": "true"}, spec["podSelector"]["matchLabels"])
+        self.assertEqual([{"key": "app.kubernetes.io/name", "operator": "NotIn", "values": ["virtualmcpserver"]}],
+                         spec["podSelector"]["matchExpressions"])
+        self.assertEqual([{"from": [pods(toolhive="true")]}], spec["ingress"])
+
     def test_general_gateway_never_lists_private_data(self):
         # Cloud models sit behind general; private's gateway serves everything.
         private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "metabase", "homeassistant"}

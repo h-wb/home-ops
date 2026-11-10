@@ -84,3 +84,27 @@ spec:
       ports:
         - port: 9464
           protocol: TCP
+---
+# The tool servers (each one's proxy and backend pod) answer ToolHive's own pods
+# only: the gateways and the proxies. Any other pod has to come through its
+# scope's gateway, which is the one that is admitted by scope above.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tool-servers
+spec:
+  podSelector:
+    matchLabels:
+      toolhive: "true"
+    matchExpressions:
+      # The gateways carry the label too; their own policies above decide for them.
+      - key: app.kubernetes.io/name
+        operator: NotIn
+        values: [virtualmcpserver]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              toolhive: "true"
