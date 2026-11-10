@@ -55,4 +55,6 @@ spec:
         cpu: 50m
         memory: 256Mi
       limits:
-        memory: 1Gi
+        # Every push to main makes all open PRs stale, and re-rendering them together
+        # went past 1Gi: the main instance was OOM-killed 81 times in 19 days.
+        memory: 2Gi
