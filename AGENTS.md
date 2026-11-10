@@ -132,7 +132,7 @@ postBuild:
 
 ## Operations
 
-- **From a Paseo pod there is no kubeconfig** (token automount off, API egress denied, `kubernetes/clusters/*/kubeconfig` is gitignored/workstation-only) — bare `kubectl`/`flux` fall back to localhost:8080. Use the ToolHive MCP tools instead (`kubectl_kubectl_get`, `flux_reconcile_flux_resource`, …); see `kubernetes/apps/main/agents/README.md` → "General cluster access through ToolHive". The CLI commands below are the workstation flow.
+- **From a Paseo pod there is no kubeconfig** (token automount off, API egress denied, `kubernetes/clusters/*/kubeconfig` is gitignored/workstation-only) — bare `kubectl`/`flux` fall back to localhost:8080. Use the ToolHive MCP tools instead (`kubectl_kubectl_get`, `flux_reconcile_flux_resource`, …); see `kubernetes/apps/main/llm/paseo/README.md` → "General cluster access through ToolHive". The CLI commands below are the workstation flow.
 - **Status**: `flux get all -A` ; `kubectl get events -A --sort-by=.lastTimestamp | tail`
 - **Reconcile a thing**: `flux -n <ns> reconcile kustomization <name>` (use `--force` for `HelmRelease`)
 - **Fetch latest git**: `flux -n flux-system reconcile source git flux-system`

@@ -30,3 +30,19 @@ patches:
         path: /metadata/annotations
         value:
           kustomize.toolkit.fluxcd.io/prune: disabled
+  # Move from `agents`: the backups are filed under that namespace, and a restore
+  # that finds none must stop, not hand over an empty home. Both go once the
+  # first backup from `llm` exists.
+  - target:
+      kind: SnapshotPolicy
+    patch: |-
+      - op: add
+        path: /spec/identity
+        value:
+          hostname: agents
+  - target:
+      kind: Restore
+    patch: |-
+      - op: replace
+        path: /spec/policy/onMissingSnapshot
+        value: Fail

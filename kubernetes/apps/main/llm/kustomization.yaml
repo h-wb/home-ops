@@ -13,4 +13,5 @@ resources:
   - ./memini-general/ks.yaml
   - ./toolhive/ks.yaml
   - ./hermes/ks.yaml
+  - ./paseo/ks.yaml
   - ./open-webui/ks.yaml

@@ -84,7 +84,7 @@ Open WebUI key remains inert in the old general key set.
 
 ## Execution boundaries
 
-See [Paseo environments](../agents/README.md). General reaches Kubernetes through
+See [Paseo environments](./paseo/README.md). General reaches Kubernetes through
 ToolHive; its pod has no service-account token or direct RBAC grants. ToolHive
 permissions, GitOps writes and retained bootstrap credentials remain operational
 access paths. Backend services also have in-cluster paths outside gateway

@@ -30,10 +30,7 @@ spec:
             matchLabels:
               app.kubernetes.io/name: hermes-private
               assistant.scope: private
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: agents
-          podSelector:
+        - podSelector:
             matchLabels:
               app.kubernetes.io/name: paseo-private
       ports:

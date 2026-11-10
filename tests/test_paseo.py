@@ -35,10 +35,13 @@ class PaseoRendering(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        parent = cls.run_tool("kustomize", "build", "kubernetes/apps/main/agents",
-                              "--load-restrictor=LoadRestrictionsNone")
         variables = {"CLUSTER": "main", "SECRET_DOMAIN": "example.com"}
-        children = cls.documents(cls.substitute(parent, variables))
+        children = []
+        # General is still in `agents` until its move to `llm`.
+        for namespace in ("agents", "llm"):
+            parent = cls.run_tool("kustomize", "build", f"kubernetes/apps/main/{namespace}",
+                                  "--load-restrictor=LoadRestrictionsNone")
+            children += cls.documents(cls.substitute(parent, variables))
         cls.rendered = {}
         for child in children:
             if child.get("kind") != "Kustomization" or child["metadata"]["name"] not in ("paseo", "paseo-private"):
@@ -132,17 +135,11 @@ class PaseoRendering(unittest.TestCase):
         for volume in values["persistence"].values():
             sources = volume.get("volumeSpec", {}).get("projected", {}).get("sources", [])
             self.assertFalse(any("serviceAccountToken" in source for source in sources))
-        scratch = self.documents(self.run_tool(
-            "kustomize", "build", "kubernetes/apps/main/agents/paseo/scratch"))
-        # Check both Flux inventories: removing only the app's ClusterRoleBindings
-        # would leave namespace edit/exec/Secret access through the scratch binding.
-        for doc in self.rendered["general"] + scratch:
+        for doc in self.rendered["general"]:
             if doc.get("kind") in ("RoleBinding", "ClusterRoleBinding"):
                 self.assertFalse(any(subject.get("kind") == "ServiceAccount"
                                      and subject.get("name") == "paseo"
-                                     and subject.get("namespace") == "agents"
                                      for subject in doc.get("subjects", [])))
-        self.assertTrue(any(doc.get("kind") == "ResourceQuota" for doc in scratch))
 
     def test_general_network_policy_blocks_direct_control_plane_only(self):
         policy = self.resource("general", "CiliumNetworkPolicy", "paseo-toolhive-only")["spec"]

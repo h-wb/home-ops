@@ -2,7 +2,7 @@
 
 Target design, agreed 2026-11-09. It describes where the setup is going, not
 what is deployed: current state lives in [this directory's README](./README.md)
-and [Paseo environments](../agents/README.md). The last section lists what has
+and [Paseo environments](./paseo/README.md). The last section lists what has
 to change to get there.
 
 ## The invariant

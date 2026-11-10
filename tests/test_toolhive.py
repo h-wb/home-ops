@@ -40,7 +40,8 @@ class ToolHiveScopes(unittest.TestCase):
     def test_each_gateway_admits_only_its_scope(self):
         expected = {
             "mcp-gateway": [ENVOY, pods(**{"app.kubernetes.io/name": "hermes-private",
-                                           "assistant.scope": "private"}), agents("paseo-private")],
+                                           "assistant.scope": "private"}),
+                            pods(**{"app.kubernetes.io/name": "paseo-private"})],
             "mcp-ops": [ENVOY, agents("paseo")],
         }
         for gateway, clients in expected.items():

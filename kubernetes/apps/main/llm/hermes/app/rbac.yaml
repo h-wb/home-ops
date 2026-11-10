@@ -1,7 +1,7 @@
 ---
 # The private Paseo's Hermes provider: `kubectl exec -i hermes-private-0 -c hermes -- ...`.
-# The only Kubernetes grant that ServiceAccount has (agents/paseo-private mounts no
-# other token). Never grant it to general: Hermes's answers carry private data.
+# The only Kubernetes grant that ServiceAccount has (paseo-private mounts no other
+# token). Never grant it to general: Hermes's answers carry private data.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -36,4 +36,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: paseo-private
-    namespace: agents
+    namespace: llm

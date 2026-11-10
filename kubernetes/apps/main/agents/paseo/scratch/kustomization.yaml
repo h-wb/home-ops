@@ -1,9 +1,0 @@
----
-# yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# Retain the namespace and quotas for existing experiments, without granting
-# Paseo direct access. Flux prunes the former paseo-edit RoleBinding.
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-resources:
-  - ./namespace.yaml
-  - ./quota.yaml
