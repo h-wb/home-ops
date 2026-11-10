@@ -12,6 +12,7 @@ import sqlite3
 from datetime import datetime, timezone
 
 from mcp.server.mcpserver import MCPServer
+from mcp.types import ToolAnnotations
 
 BOARD = os.environ["TASKS_BOARD"]
 READ_ONLY = os.environ.get("TASKS_READ_ONLY") == "1"
@@ -90,7 +91,8 @@ def update_task(task_id: int, append_notes: str = "", status: str = "") -> dict:
 
 
 for tool in (list_tasks, get_task, find_open_task_by_fingerprint):
-    server.add_tool(tool)
+    # Marked read-only: a client that asks before every write (the assistant) lets these through.
+    server.add_tool(tool, annotations=ToolAnnotations(readOnlyHint=True))
 if not READ_ONLY:
     for tool in (create_task, update_task):
         server.add_tool(tool)

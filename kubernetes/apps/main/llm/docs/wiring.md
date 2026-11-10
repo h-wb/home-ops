@@ -59,6 +59,9 @@ flowchart LR
 - Its gateway serves the private catalogue without the search step: Hermes
   searches tools itself, and a call to any tool not marked read-only waits for
   your yes.
+- Of the 690 tools, 401 are marked read-only by their servers. Three servers
+  mark none (arr, kubesearch, overseerr), so even their lookups ask until you
+  approve a tool for good.
 - The memory plugin is a patched build that records nothing unless told to.
 
 ## Claude Code in the general workshop

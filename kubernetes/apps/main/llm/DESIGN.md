@@ -108,8 +108,9 @@ can do.
 The private workshop takes no part in this. It is where you work directly, with
 a shell, on private repos and on the jobs themselves.
 
-Today: Hermes asks before any write-capable call on a tool server marked
-`trust: untrusted`, and treats tools annotated read-only as free. Tools approved
+Today: Hermes has its own tool gateway with the real tool names, searches it
+itself, asks before any call to a tool its server has not marked read-only, and
+lets the read-only ones through. Tools approved
 for good are a list in its managed config, so the list is versioned here.
 
 ## Places
@@ -297,7 +298,6 @@ To verify:
   private data.
 - The approval prompt for a write reaches you: today in the workshop's chat
   window, later in the messaging app.
-- The upstream tool servers annotate their read-only tools, so reads stay free.
 - Hermes Kanban fits as a task board: cards nobody is assigned to stay put, and
   its automatic splitting of new cards can be turned off.
 - Scheduled jobs can be created from versioned definitions at deploy time
