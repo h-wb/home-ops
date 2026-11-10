@@ -84,6 +84,14 @@ flowchart LR
   approve a tool for good.
 - Its memory plugin recalls before a turn and records after it, like the
   workshops' one. General memory it can only read.
+- Routines: skills in `hermes/app/routines/`, mounted read-only. A job per
+  routine is created when the pod starts; the first is the daily briefing, at
+  07:00 Toronto time, delivered to Telegram. A scheduled run has nobody to
+  ask, so a call that needs a yes is refused.
+- Skills and sub-agents are on. Hermes's bundled skills are kept out, except
+  the one about itself, which it always adds back. A skill it writes itself
+  waits for your yes. Sub-agents get the assistant's tools and no others. It
+  cannot schedule jobs by itself.
 
 ## Claude Code in the general workshop
 

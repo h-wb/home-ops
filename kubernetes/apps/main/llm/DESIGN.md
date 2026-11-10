@@ -170,6 +170,11 @@ Telegram's servers can read them.
 skills), reads through the private tool gateway, and delivers to the messaging
 app. The daily briefing is the first one; it also covers open homelab tasks.
 
+Today: a routine is a skill in `hermes/app/routines/`, and its job is created
+when the pod starts. The briefing runs at 07:00, Toronto time, on TickTick's
+tasks and calendar events and the homelab tasks; mail waits for a tool server.
+A scheduled run has nobody to ask, so a routine can only read.
+
 **A job on private data.** "Reconcile yesterday's location":
 
 1. The assistant reads what it needs through the private tool gateway.
@@ -345,10 +350,8 @@ To verify:
   it is a message with buttons: once, this chat, always, deny.
 - Hermes Kanban fits as a task board: cards nobody is assigned to stay put, and
   its automatic splitting of new cards can be turned off.
-- Scheduled jobs can be created from versioned definitions at deploy time
-  (`hermes cron create`).
-- Hermes reads a routines folder mounted read-only (`skills.external_dirs`),
-  and its bundled skills can be kept out (`.no-bundled-skills`).
+- A scheduled run that tries a write is refused, and a sub-agent's write still
+  asks.
 
 ## Getting there
 
@@ -356,10 +359,12 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
 `llm` namespace as `llm/paseo`; the old `agents` namespace deleted.
 
 1. The assistant: Telegram is wired (a bot credential, and one egress rule to
-   Telegram's API only). Next iMessage, then its scheduler, skills and
-   sub-agents switched back on. Still no shell.
-2. First routine: the daily briefing. Needs mail and calendar tools, which the
-   catalogue does not have yet.
+   Telegram's API only). Its skills and sub-agents are on, and its scheduler
+   runs the routines in git; it cannot schedule by itself. Still no shell.
+   Next iMessage.
+2. First routine: the daily briefing, deployed on TickTick's tasks and
+   calendar events and the homelab tasks. Next: mail and calendar tools, which
+   the catalogue does not have yet.
 3. The private workshop as a real workshop: a GitHub credential (read general
    repos, write private ones), repo bootstrap enabled.
 4. Job tools: Prefect's read-only tool server plus one small tool that starts
@@ -368,8 +373,8 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
    with the prompt on the approval card.
 6. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
    projected token) once the messaging app is in daily use.
-7. Skills: the general folder in dotfiles and agent profiles in the workshops;
-   then the assistant's routines folder, with its first routine, when its
-   skills are switched on (its bundled skills kept out).
+7. Skills: the general folder in dotfiles and agent profiles in the workshops.
+   Done: the assistant's routines folder, with its first routine and its
+   bundled skills kept out.
 8. Task board, then homelab alerts → cards.
 9. Retire the Open WebUI data and legacy hostnames.

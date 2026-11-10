@@ -56,6 +56,12 @@ agents there. The assistant's messaging credentials are their own item, `hermes`
 user IDs it answers, comma-separated) and `TELEGRAM_HOME_CHANNEL` (the chat its
 routines deliver to; your own user ID for a direct chat).
 
+A routine is a skill plus a scheduled job, both in `hermes/app/routines/`. To
+add one: write `<name>/SKILL.md`, add it to the `hermes-routines` ConfigMap
+(`hermes/app/kustomization.yaml`) and to the mounts in the release, and add a
+`routine <name> <schedule> <model>` line to `sync.sh`. The pod restarts and its
+`routines` init container creates the job; read that container's log to see it.
+
 ## Agent model gateway
 
 Agents use the Service, `http://litellm.llm.svc.cluster.local:4000`, like every other in-cluster client.
