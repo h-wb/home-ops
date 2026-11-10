@@ -12,9 +12,9 @@ resources:
   - ./mcpgroup.yaml
   - ./networkpolicy.yaml
   - ./podmonitor.yaml
+  - ./private-gateway.yaml
   - ./securitypolicy.yaml
   - ./telemetry.yaml
-  - ./virtualmcpserver.yaml
 # The dragonfly component (added by ks.yaml) has no password, and its client
 # policy opens 6379 to every pod in the namespace, so this instance requires the
 # gateways' password. Kind-only target: the name is still ${APP}-dragonfly here.

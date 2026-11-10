@@ -3,7 +3,7 @@
 # The Obsidian vault, private tier (agents README): the Belphemur headless-sync image
 # keeps a pull-only copy in sync (helmrelease.yaml), and the two Seekstone servers
 # (read-only, and inbox-write) serve it through the mcp-tools group — private data,
-# so only mcp-gateway lists these workloads.
+# so only mcp-private lists these workloads.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:

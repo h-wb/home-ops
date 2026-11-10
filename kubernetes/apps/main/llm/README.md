@@ -24,8 +24,8 @@ each Paseo scope is a separate pod. No private-scope key lists a model outside t
 
 | Scope   | Tool endpoint (in-cluster)         | Memory endpoint  | Paseo client key        |
 | ------- | ---------------------------------- | ---------------- | ----------------------- |
-| General | `mcp-general` (`vmcp-mcp-ops`)     | `memini-general` | `litellm-paseo-general` |
-| Private | `mcp-private` (`vmcp-mcp-gateway`) | `memini-private` | `litellm-paseo-private` |
+| General | `mcp-general` (`vmcp-mcp-general`) | `memini-general` | `litellm-paseo-general` |
+| Private | `mcp-private` (`vmcp-mcp-private`) | `memini-private` | `litellm-paseo-private` |
 
 The assistant has a third endpoint on the private side, `vmcp-mcp-assistant`: the
 same catalogue without the search optimizer, because Hermes searches tools itself
@@ -92,8 +92,9 @@ Memini keys do not restrict readable namespaces: keep the stores separate and us
 namespaces only to organize projects/agents within each. General Paseo initially
 reuses the existing general `codex` credential for all its agents.
 
-ToolHive retains its `mcp-ops` and `mcp-gateway` resource identities and legacy
-hostnames as aliases. New clients use scoped names. Existing CreatedOnce key sets
+ToolHive's gateways are named for their scope (`mcp-general`, `mcp-private`,
+`mcp-assistant`); they hold no data, so they were renamed outright. The old
+`mcp-ops` hostname still answers. Existing CreatedOnce key sets
 are intentionally unchanged to prevent rotating every old client; a retired
 Open WebUI key remains inert in the old general key set.
 

@@ -41,7 +41,7 @@ spec:
             # 2.0 refuses non-loopback binds without OAuth; only the ToolHive proxy reaches it
             - name: MCP_ALLOW_UNAUTHENTICATED
               value: "true"
-            # 2.0 defaults to core+helm; mcp-ops does find_tool/call_tool, so expose everything
+            # 2.0 defaults to core+helm; mcp-general does find_tool/call_tool, so expose everything
             - name: MCP_TOOLSETS
               value: all
   groupRef:

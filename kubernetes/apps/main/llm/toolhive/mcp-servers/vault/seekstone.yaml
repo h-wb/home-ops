@@ -6,8 +6,8 @@
 # instead of a bare version, and no shared tools PVC or install Job to keep in step.
 # A lockfile bump takes effect on the next backend pod start: kubectl rollout restart
 # statefulset -n llm vault-ro vault-inbox.
-# Privacy is the two gateways (llm/toolhive/config): mcp-gateway exposes this to the
-# private tier; mcp-ops does not list these workloads, so general never sees the
+# Privacy is the two gateways (llm/toolhive/config): mcp-private exposes this to the
+# private tier; mcp-general does not list these workloads, so general never sees the
 # vault, and networkpolicy.yaml only lets ToolHive pods talk to the backends.
 # The mcp container runs /tools/node_modules/.bin/seekstone; toolhive stamps that
 # container with its own hardened securityContext (uid 1000, read-only rootfs), so

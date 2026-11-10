@@ -51,6 +51,8 @@ spec:
               - --locked
             env: &env
               PASEO_DATA_SCOPE: ${PASEO_DATA_SCOPE}
+              # The scope's tool gateway; dotfiles renders it into every agent's config.
+              TOOLHIVE_URL: http://vmcp-mcp-${PASEO_DATA_SCOPE}.llm.svc.cluster.local:4483/mcp
               HOME: /home/paseo
               # The ~/.dotfiles emptyDir's mount point is root's: without this, git
               # refuses the checkout, and an init retry fails on the existing clone.

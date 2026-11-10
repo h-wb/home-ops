@@ -1,6 +1,6 @@
 ---
 # ha-mcp has no authentication of its own: anything that reaches it controls the
-# house. Only the two private gateways (mcp-gateway, mcp-assistant) may connect.
+# house. Only the two private gateways (mcp-private, mcp-assistant) may connect.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -15,7 +15,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/instance: mcp-gateway
+              app.kubernetes.io/instance: mcp-private
         - podSelector:
             matchLabels:
               app.kubernetes.io/instance: mcp-assistant

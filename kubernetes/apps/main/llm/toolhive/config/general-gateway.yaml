@@ -2,7 +2,7 @@
 apiVersion: toolhive.stacklok.dev/v1beta1
 kind: VirtualMCPServer
 metadata:
-  name: mcp-ops
+  name: mcp-general
 spec:
   groupRef:
     name: mcp-tools
@@ -25,7 +25,7 @@ spec:
         - workload: anki
         - workload: excel
         # Private tier data (vault, personal tasks) never appears in this list: general
-        # gets the shared board, private gets the whole catalogue via mcp-gateway.
+        # gets the shared board, private gets the whole catalogue via mcp-private.
         - workload: homelab-tasks
     optimizer:
       embeddingModel: embed
@@ -47,7 +47,7 @@ spec:
   sessionStorage:
     provider: redis
     address: toolhive-config-dragonfly.llm.svc.cluster.local:6379
-    keyPrefix: "toolhive:mcp-ops:"
+    keyPrefix: "toolhive:mcp-general:"
     passwordRef:
       name: toolhive-config-redis
       key: password
@@ -71,33 +71,34 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: mcp-ops
+  name: mcp-general
 spec:
   hostnames:
     - mcp-general.${SECRET_DOMAIN}
+    # The gateway's old name; kept until no client uses it.
     - mcp-ops.${SECRET_DOMAIN}
   parentRefs:
     - name: envoy-internal
       namespace: network
   rules:
     - backendRefs:
-        - name: vmcp-mcp-ops
+        - name: vmcp-mcp-general
           port: 4483
 ---
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
-  name: mcp-ops-api-key
+  name: mcp-general-api-key
 spec:
   targetRefs:
     - group: gateway.networking.k8s.io
       kind: HTTPRoute
-      name: mcp-ops
+      name: mcp-general
   apiKeyAuth:
     credentialRefs:
       - group: ""
         kind: Secret
-        name: mcp-ops-api-keys
+        name: mcp-general-api-keys
     extractFrom:
       - headers:
           - x-api-key
@@ -106,14 +107,14 @@ spec:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: mcp-ops-api-keys
+  name: mcp-general-api-keys
 spec:
   secretStoreRef:
     name: bitwarden-secrets-manager
     kind: ClusterSecretStore
   refreshInterval: 15m
   target:
-    name: mcp-ops-api-keys
+    name: mcp-general-api-keys
     template:
       engineVersion: v2
       # Clients outside the cluster only, <SCOPE>_<HOLDER> in Bitwarden `toolhive`; pods

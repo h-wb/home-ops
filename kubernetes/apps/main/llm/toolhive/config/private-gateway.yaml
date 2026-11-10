@@ -5,7 +5,7 @@
 apiVersion: toolhive.stacklok.dev/v1beta1
 kind: VirtualMCPServer
 metadata:
-  name: mcp-gateway
+  name: mcp-private
 spec:
   groupRef:
     name: mcp-tools
@@ -41,7 +41,7 @@ spec:
   sessionStorage:
     provider: redis
     address: toolhive-config-dragonfly.llm.svc.cluster.local:6379
-    keyPrefix: "toolhive:mcp-gateway:"
+    keyPrefix: "toolhive:mcp-private:"
     passwordRef:
       name: toolhive-config-redis
       key: password

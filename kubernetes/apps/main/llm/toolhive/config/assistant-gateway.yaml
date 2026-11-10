@@ -1,7 +1,7 @@
 ---
 # The assistant's gateway: the private catalogue with its real tool names.
 # Hermes searches tools itself and asks before a write-capable call, which needs
-# the names that the optimizer on mcp-gateway hides. In-cluster only, no route.
+# the names that the optimizer on mcp-private hides. In-cluster only, no route.
 apiVersion: toolhive.stacklok.dev/v1beta1
 kind: VirtualMCPServer
 metadata:

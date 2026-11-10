@@ -1,5 +1,5 @@
-"""ToolHive gateway scopes: who may reach mcp-general (mcp-ops) and mcp-private
-(mcp-gateway), in-cluster and through Envoy.
+"""ToolHive gateway scopes: who may reach mcp-general and mcp-private, in-cluster
+and through Envoy.
 
 Run with python3 -B -m unittest discover -s tests -p test_toolhive.py.
 """
@@ -34,10 +34,10 @@ class ToolHiveScopes(unittest.TestCase):
 
     def test_each_gateway_admits_only_its_scope(self):
         expected = {
-            "mcp-gateway": [ENVOY, pods(**{"app.kubernetes.io/name": "paseo-private"})],
+            "mcp-private": [ENVOY, pods(**{"app.kubernetes.io/name": "paseo-private"})],
             # In-cluster only: no Envoy route, the assistant alone.
             "mcp-assistant": [pods(**{"app.kubernetes.io/name": "hermes-private", "assistant.scope": "private"})],
-            "mcp-ops": [ENVOY, pods(**{"app.kubernetes.io/name": "paseo"})],
+            "mcp-general": [ENVOY, pods(**{"app.kubernetes.io/name": "paseo"})],
         }
         for gateway, clients in expected.items():
             with self.subTest(gateway=gateway):
@@ -67,14 +67,14 @@ class ToolHiveScopes(unittest.TestCase):
     def test_general_gateway_never_lists_private_data(self):
         # Cloud models sit behind general; private's gateway serves everything.
         private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "metabase", "homeassistant"}
-        aggregation = self.resource("VirtualMCPServer", "mcp-ops")["spec"]["config"]["aggregation"]
+        aggregation = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]
         self.assertEqual("deny", aggregation["defaultToolVisibility"])
         self.assertFalse({t["workload"] for t in aggregation["tools"]} & private)
 
     def test_envoy_takes_one_key_per_external_client_and_scope(self):
         # Bitwarden fields are <SCOPE>_<HOLDER>; the Envoy client is the holder.
-        routes = {"mcp-gateway-api-key": ("mcp-gateway-api-keys", "PRIVATE_WORKSTATION"),
-                  "mcp-ops-api-key": ("mcp-ops-api-keys", "GENERAL_WORKSTATION")}
+        routes = {"mcp-private-api-key": ("mcp-private-api-keys", "PRIVATE_WORKSTATION"),
+                  "mcp-general-api-key": ("mcp-general-api-keys", "GENERAL_WORKSTATION")}
         for policy, (secret, field) in routes.items():
             with self.subTest(policy=policy):
                 refs = self.resource("SecurityPolicy", policy)["spec"]["apiKeyAuth"]["credentialRefs"]
@@ -87,7 +87,7 @@ class ToolHiveScopes(unittest.TestCase):
         telemetry = self.resource("MCPTelemetryConfig", "prometheus")["spec"]["prometheus"]
         self.assertEqual({"enabled": True, "metricsOnTransportPort": False}, telemetry)
         prefixes = set()
-        for gateway in ("mcp-gateway", "mcp-assistant", "mcp-ops"):
+        for gateway in ("mcp-private", "mcp-assistant", "mcp-general"):
             spec = self.resource("VirtualMCPServer", gateway)["spec"]
             self.assertEqual({"name": "prometheus"}, spec["telemetryConfigRef"])
             self.assertEqual({"name": "toolhive-config-redis", "key": "password"},
