@@ -40,10 +40,10 @@ which checks `x-api-key` against that gateway's own list.
 Client keys are per holder (what you'd revoke if it leaked), shared by every
 agent on it, and named `<SCOPE>_<HOLDER>` in Bitwarden:
 
-| Item       | Fields                                                                                                                             |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `toolhive` | `GENERAL_WORKSTATION`, `PRIVATE_WORKSTATION` (Envoy client `workstation`), `REDIS_PASSWORD` (the gateways' session store)          |
-| `memini`   | `GENERAL_ADMIN`, `GENERAL_WORKSTATION`, `GENERAL_PASEO`, `PRIVATE_ADMIN`, `PRIVATE_HERMES`, `PRIVATE_WORKSTATION`, `PRIVATE_PASEO` |
+| Item       | Fields                                                                                                                                                           |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `toolhive` | `GENERAL_WORKSTATION`, `PRIVATE_WORKSTATION` (Envoy client `workstation`), `REDIS_PASSWORD` (the gateways' session store)                                        |
+| `memini`   | `GENERAL_ADMIN`, `GENERAL_WORKSTATION`, `GENERAL_PASEO`, `GENERAL_HERMES` (read-only), `PRIVATE_ADMIN`, `PRIVATE_HERMES`, `PRIVATE_WORKSTATION`, `PRIVATE_PASEO` |
 
 The workstation keys reach the workstations through Proton Pass
 (`Machines/toolhive`, `Machines/memini`, fields `general`/`private`). The
