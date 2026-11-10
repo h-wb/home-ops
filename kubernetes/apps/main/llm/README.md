@@ -4,12 +4,12 @@ What is deployed. Where it is going, and why, is in [DESIGN.md](./DESIGN.md).
 
 Use **general** and **private** as data scopes. General includes operational
 secrets and code; private includes personal notes, location, health and memory.
-Cloud models (Claude, ChatGPT) are general only; direct Mistral and local
-inference serve both.
+Private data only reaches models trusted with it, today direct Mistral and local
+inference; Claude and ChatGPT work on general data only.
 
 Scopes are enforced per client: each LiteLLM virtual key lists the models it may
 use, each Memini has its own client keys, ToolHive has one gateway per scope, and
-each Paseo scope is a separate pod. No private-scope key lists a cloud model.
+each Paseo scope is a separate pod. No private-scope key lists a model outside the trusted set.
 
 | Scope   | Tool endpoint (in-cluster)         | Memory endpoint  | Paseo client key        |
 | ------- | ---------------------------------- | ---------------- | ----------------------- |

@@ -61,7 +61,7 @@ Separation is enforced by what each pod can reach, not by request inspection:
 
 - Each pod has its own LiteLLM and Memini keys, and only its own scope's ToolHive
   gateway admits it (NetworkPolicy, no key). Only `paseo-general`'s
-  LiteLLM key is granted cloud models (`anthropic/*`, `chatgpt/*`); private's key
+  LiteLLM key lists models outside the trusted set (`anthropic/*`, `chatgpt/*`); private's key
   has local and Mistral models only.
 - General cannot reach the private gateway and has no private Memini credentials;
   private has no GitHub token.
@@ -131,8 +131,9 @@ daily and annotated so Flux never prunes it.
   restore, mise still reports those tools as installed; reinstall them with
   `mise install --force <tool>` and re-run `uv sync` in the repos.
 - The backups are filed under `<app>@agents`, the namespace the pods ran in
-  until 2026-11-09. The overlays pin that identity, and make a restore fail
-  when no backup is found, until the first backup from `llm` exists.
+  until 2026-11-09. The overlays pin that identity, so the history stays in one
+  piece, and make a restore fail when it finds no backup: a home never comes
+  back empty without anyone noticing.
 
 ## Checks
 
