@@ -20,10 +20,8 @@ spec:
       embeddingModel: embed
       embeddingProvider: openai
       embeddingService: http://litellm.llm.svc.cluster.local:4000/v1
-      # The first session embeds every tool in one request, about a minute for
-      # 690 tools on the CPU embedder. At 60s that never finished, and each new
-      # session waited the full timeout and then had no tools. Stays under
-      # LiteLLM's own 300s.
+      # The first session embeds every tool in one request: about a minute for
+      # 690 tools on the CPU embedder. Stays under LiteLLM's own 300s.
       embeddingServiceTimeout: 280s
       # Every hit comes back with its full input schema (~3k chars each), so the
       # default 8 floods a small model's context; 4 is enough to pick from.
