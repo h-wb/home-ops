@@ -8,7 +8,6 @@ kind: Kustomization
 resources:
   - ./pvc.yaml
   - ./mcpservers.yaml
-  - ./networkpolicy.yaml
 configMapGenerator:
   # Referenced by literal name inside the MCPServer CRs (kustomize cannot rewrite
   # references in arbitrary CRs), so the hash suffix stays off.

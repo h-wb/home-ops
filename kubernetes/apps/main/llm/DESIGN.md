@@ -118,8 +118,8 @@ the place, not the orchestrator or a prompt rule:
 - A place has exactly one scope. Models outside the trusted set run only in
   general places.
 - A place holds only its own scope's credentials.
-- Private places deny egress by default and allow a short list (model gateway,
-  tools, memory, the messaging app, GitHub, package indexes).
+- The assistant's pod denies egress by default and allows a short list (model
+  gateway, tools, memory, the messaging app). The workshops keep open internet.
 
 | Place                | Scope   | Who works there                     |
 | -------------------- | ------- | ----------------------------------- |
@@ -227,6 +227,8 @@ A new harness or machine picks a scope; it does not get its own config.
 - The workstation is a mixed place: any agent there can read every repo and
   note on its disk. Keep private data out of working trees on it.
 - Pasted text is not covered: don't paste private data into a general agent.
+- The private workshop has a shell, private data and open internet, so an agent
+  tricked there could send data out. Accepted, to keep it usable.
 - Someone with cluster or Bitwarden admin rights in the general scope can reach
   private workloads. The boundary guards normal workflows, not an administrator.
 
@@ -246,23 +248,26 @@ A new harness or machine picks a scope; it does not get its own config.
 
 ## Decisions
 
-| Date       | Decision                                                              |
-| ---------- | --------------------------------------------------------------------- |
-| 2026-11-05 | One model gateway, LiteLLM                                            |
-| 2026-11-07 | Hardened pods, not OpenShell sandboxes                                |
-| 2026-11-09 | The rule is about trusted models, not about cloud against local       |
-| 2026-11-09 | One assistant, private only; the general Hermes was removed           |
-| 2026-11-09 | One workshop daemon per scope; both kept, both in the `llm` namespace |
-| 2026-11-09 | The assistant is reached through a messaging app                      |
-| 2026-11-09 | The assistant has no shell; everything it does is a named tool        |
-| 2026-11-09 | Reads are free, writes ask                                            |
-| 2026-11-09 | GLM models served by Mistral's API are trusted                        |
-| 2026-11-09 | Every model call goes through the model gateway, OpenCode's included  |
-| 2026-11-09 | Jobs on private data are named tools, not free-form agents            |
-| 2026-11-09 | Hand-offs to the general workshop need the prompt approved            |
-| 2026-11-09 | Repos hold code, services hold data                                   |
-| 2026-11-09 | The briefing covers open homelab tasks                                |
-| 2026-11-09 | "Scope" is the only term (not tier or segment)                        |
+| Date       | Decision                                                                                     |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| 2026-11-05 | One model gateway, LiteLLM                                                                   |
+| 2026-11-07 | Hardened pods, not OpenShell sandboxes                                                       |
+| 2026-11-09 | The rule is about trusted models, not about cloud against local                              |
+| 2026-11-09 | One assistant, private only; the general Hermes was removed                                  |
+| 2026-11-09 | One workshop daemon per scope; both kept, both in the `llm` namespace                        |
+| 2026-11-09 | The assistant is reached through a messaging app                                             |
+| 2026-11-09 | The assistant has no shell; everything it does is a named tool                               |
+| 2026-11-09 | Reads are free, writes ask                                                                   |
+| 2026-11-09 | GLM models served by Mistral's API are trusted                                               |
+| 2026-11-09 | Every model call goes through the model gateway, OpenCode's included                         |
+| 2026-11-09 | Exceptions to that: workstation agents, and OpenCode's hosted models in the general workshop |
+| 2026-11-09 | The private workshop keeps open internet; the assistant stays restricted                     |
+| 2026-11-09 | Tool servers answer ToolHive's own pods only                                                 |
+| 2026-11-09 | Jobs on private data are named tools, not free-form agents                                   |
+| 2026-11-09 | Hand-offs to the general workshop need the prompt approved                                   |
+| 2026-11-09 | Repos hold code, services hold data                                                          |
+| 2026-11-09 | The briefing covers open homelab tasks                                                       |
+| 2026-11-09 | "Scope" is the only term (not tier or segment)                                               |
 
 ## Open
 
@@ -309,7 +314,7 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
 2. First routine: the daily briefing. Needs mail and calendar tools, which the
    catalogue does not have yet.
 3. The private workshop as a real workshop: a GitHub credential (read general
-   repos, write private ones), repo bootstrap enabled, an egress allowlist.
+   repos, write private ones), repo bootstrap enabled.
 4. Job tools: Prefect's read-only tool server plus one small tool that starts
    an allowed deployment. First jobs: the location repo's.
 5. Assistant → general workshop daemon, behind approval.

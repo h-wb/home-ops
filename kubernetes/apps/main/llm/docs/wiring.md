@@ -24,7 +24,7 @@ arrow forms used here so it can read them.
 | Vibe                        | Workstation      | Private | Mistral directly, own key                            | Private gateway, from outside | Private store, from outside    |
 
 In the pods the tool gateways need no key: a network rule admits only that
-scope's pods. From a workstation they are reached through Envoy with a key per
+scope's pods, and the tool servers behind them answer the gateways only. From a workstation they are reached through Envoy with a key per
 scope. Memory always needs the client's own key. The agents' tool and memory
 servers are defined once, in dotfiles (`conf.d/ai/`), and rendered per scope.
 
@@ -161,29 +161,27 @@ Not agents, but they hold a model gateway key too.
    policy. These calls skip both, so in the private workshop any model on that
    account is reachable. Decided: route them through the gateway and drop the
    API key from the pods. The GLM models served there are trusted.
-2. **Workstation agents call their vendors directly.** The gateway is
-   in-cluster only. To decide: accept this as the exception it is, or not.
-3. **The assistant cannot see tool names.** The tool gateways put every tool
+2. **The assistant cannot see tool names.** The tool gateways put every tool
    behind `find_tool` and `call_tool`. "Writes ask" needs the real names.
    Decided: give the assistant the tools without the search step.
-4. **Tool servers answer any pod directly.** The gateway's admission rule
-   guards the gateway only. The servers behind it (kubectl, Flux, GitHub, Talos
-   and the rest) listen on their own address with no key, so any pod in the
-   cluster can call them, not only the general workshop. The private ones
-   (vault, tasks, home) are closed by network rules; the same rule for all of
-   them would close this.
-5. **Private memory is closed by key only.** The general workshop can reach its
-   port and is refused for lack of a private key. A network rule would make it
-   two locks.
-6. **OpenCode loads a memory plugin next to the memory server.** To check:
-   whether the plugin records conversations by itself. The assistant's plugin
-   is patched not to.
-7. **Egress.** The private workshop has no egress rule. The general one only
-   denies the Kubernetes and Talos APIs.
-8. **The general workshop holds a key for OpenCode's hosted models.** A model
-   picked from that provider leaves by a third path. To check: still used?
-9. **The location repo is cloned in the general workshop.** That fits "repos
-   hold code" only while the clone holds no data and the workshop holds no
-   credentials for the location service.
-10. **A stale entry on the workstation.** Claude Code's `plugin:memini` server
-    points at a hostname that no longer resolves.
+3. **The location repo's clone in the general workshop holds data.** Next to
+   the code it has an ignored `data/` directory and a `local-notes.md`. "Repos
+   hold code" means those belong on the private side. To do: move them out.
+4. **OpenCode records conversations by itself.** Its memory plugin recalls
+   before every turn and records after it, in both workshops; the memory
+   server next to it adds the on-demand tools. The assistant's plugin is
+   patched to record only when told. Each writes to its own scope's store, so
+   the rule holds. To decide: whether the workshops keep recording by
+   themselves.
+5. **Workstation agents call their vendors directly.** The gateway is
+   in-cluster only. Accepted: tool use is meant to happen in the workshops.
+6. **The general workshop holds a key for OpenCode's hosted models.** A second
+   path next to the gateway. Accepted for the general workshop; it never goes
+   into the private one.
+7. **The private workshop has open internet.** Accepted: an allowlist costs
+   too much friction. The assistant stays restricted to its three
+   destinations.
+
+Closed on 2026-11-09: tool servers answered any pod in the cluster directly,
+and private memory was guarded by its key alone. Both now have a network rule
+(`toolhive/config/networkpolicy.yaml`, `memini-private/app/networkpolicy.yaml`).
