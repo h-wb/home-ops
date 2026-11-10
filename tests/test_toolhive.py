@@ -66,10 +66,17 @@ class ToolHiveScopes(unittest.TestCase):
 
     def test_general_gateway_never_lists_private_data(self):
         # Cloud models sit behind general; private's gateway serves everything.
-        private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "metabase", "homeassistant"}
+        private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "metabase", "homeassistant", "ticktick"}
         aggregation = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]
         self.assertEqual("deny", aggregation["defaultToolVisibility"])
         self.assertFalse({t["workload"] for t in aggregation["tools"]} & private)
+        # TickTick is listed under its entry's name, with a token from Bitwarden.
+        server = ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/ticktick"
+        entry = (server / "mcpserverentry.yaml").read_text()
+        self.assertIn("\n  name: ticktick\n", entry)
+        self.assertIn("\n  remoteUrl: https://mcp.ticktick.com\n", entry)
+        self.assertIn('authorization: "Bearer {{ .TICKTICK_API_TOKEN }}"', (server / "externalsecret.yaml").read_text())
+        self.assertIn("mcp-servers/ticktick\n", (ROOT / "kubernetes/apps/main/llm/toolhive/ks.yaml").read_text())
 
     def test_envoy_takes_one_key_per_external_client_and_scope(self):
         # Bitwarden fields are <SCOPE>_<HOLDER>; the Envoy client is the holder.

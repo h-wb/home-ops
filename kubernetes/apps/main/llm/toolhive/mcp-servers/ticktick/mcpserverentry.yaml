@@ -1,0 +1,22 @@
+---
+# TickTick's own hosted MCP server, reached with an API token (TickTick web →
+# Settings → Account → API Token). Personal tasks: mcp-general does not list it,
+# so only the private gateways serve its tools.
+#
+# The gateway pods mount this entry's header secret themselves, so if the secret
+# is missing a gateway fails to start, not just this backend.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: ticktick
+spec:
+  remoteUrl: https://mcp.ticktick.com
+  transport: streamable-http
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: Authorization
+        valueSecretRef:
+          name: toolhive-ticktick
+          key: authorization
+  groupRef:
+    name: mcp-tools
