@@ -8,6 +8,8 @@ to change to get there.
 The design is written in roles. Product and model names appear as the current
 choice for a role, for reference; swapping one does not change the design.
 
+![The map: three places in two scopes, sharing a model gateway, a tool catalogue and a memory store per scope](./docs/img/map.svg)
+
 ## The rule
 
 **Private data only reaches models you trust with it.**

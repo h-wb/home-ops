@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 968 426" role="img" aria-label="Code in general, data in private: Repos hold code and services hold data. A general agent writes the code without the data, and the private side runs it on the real thing." class="seq"><style>svg {   --bg: #eef1f4; --surface: #fbfcfd; --ink: #17212b; --muted: #5a6876; --rule: #c5ced7;
+  --private: #9a5200; --private-bg: #fbe9cf; --private-wash: #f8f0e2;
+  --general: #1c58b0; --general-bg: #dde9fa; --general-wash: #eaf1fb;
+  --gate: #c0271d;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace; --sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; --display: var(--sans); --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; } @media (prefers-color-scheme: dark) { svg {   --bg: #0f141a; --surface: #161d25; --ink: #e4e9ee; --muted: #93a0ad; --rule: #34404c;
+  --private: #f0aa52; --private-bg: #3a2a10; --private-wash: #231b10;
+  --general: #78aefc; --general-bg: #14294a; --general-wash: #121c2c;
+  --gate: #ff7468;  } } .sheet { fill: var(--surface) }
+.d-text { fill: var(--ink); font-family: var(--sans); font-size: 12.5px }
+.d-small { font-size: 11.5px }
+.d-strong { font-weight: 600; font-size: 13px }
+.d-muted { fill: var(--muted) }
+.d-mono { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em }
+.d-mono.d-muted { fill: var(--muted) }
+.d-private { fill: var(--private) }
+.d-general { fill: var(--general) }
+.d-gate { fill: var(--gate); font-weight: 600 }
+.box { stroke-width: 1.4 }
+.box-private { fill: var(--private-bg); stroke: var(--private) }
+.box-general { fill: var(--general-bg); stroke: var(--general) }
+.box-you { fill: var(--surface); stroke: var(--ink) }
+.box-shared { fill: var(--bg); stroke: var(--muted) }
+.box.planned, .note.planned { stroke-dasharray: 6 4 }
+.zone { stroke: none }
+.zone-private { fill: var(--private-wash) }
+.zone-general { fill: var(--general-wash) }
+.note { stroke-width: 1.2 }
+.note-private { fill: var(--private-bg); stroke: var(--private) }
+.note-general { fill: var(--general-bg); stroke: var(--general) }
+.note-you { fill: var(--surface); stroke: var(--ink) }
+.line { stroke: var(--ink); stroke-width: 1.5; fill: none }
+.line.planned { stroke-dasharray: 6 4 }
+.line.gate { stroke: var(--gate); stroke-width: 2 }
+.line.off { stroke: var(--gate); stroke-width: 2; stroke-dasharray: 2 5; stroke-linecap: round }
+.head { fill: var(--ink) }
+.head.gate, .head.off { fill: var(--gate) }
+.gate-mark { fill: var(--gate); stroke: var(--surface); stroke-width: 2 }
+.ask-mark { fill: var(--surface); stroke: var(--ink); stroke-width: 1.6 }
+.lifeline { stroke: var(--rule); stroke-width: 1.2; stroke-dasharray: 2 5 }
+.lifeline.idle { opacity: .5 }
+.lane.idle { opacity: .38 }
+.scope { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 1 6; stroke-linecap: round }
+.badge { fill: var(--ink) }
+.badge-t { fill: var(--surface); font-family: var(--mono); font-size: 10.5px; font-weight: 600 }
+
+</style><rect x="0" y="0" width="968" height="426" class="sheet"/><text x="370" y="24" text-anchor="middle" class="d-mono d-private">PRIVATE SCOPE</text><text x="795" y="24" text-anchor="middle" class="d-mono d-general">GENERAL SCOPE</text><line x1="606" y1="12" x2="606" y2="404" class="scope"/><text x="606" y="418" text-anchor="middle" class="d-mono d-muted">scope line</text><line x1="70" y1="86" x2="70" y2="404" class="lifeline"/><g class="lane"><rect x="4.0" y="40" width="132" height="46" rx="5" class="box box-you"/><text x="70" y="60" text-anchor="middle" class="d-text d-strong">You</text><text x="70" y="76" text-anchor="middle" class="d-text d-small d-muted">phone, laptop</text></g><line x1="220" y1="86" x2="220" y2="404" class="lifeline idle"/><g class="lane idle"><rect x="154.0" y="40" width="132" height="46" rx="5" class="box box-private"/><text x="220" y="60" text-anchor="middle" class="d-text d-strong">Assistant</text><text x="220" y="76" text-anchor="middle" class="d-text d-small d-muted">trusted models</text></g><line x1="370" y1="86" x2="370" y2="404" class="lifeline idle"/><g class="lane idle"><rect x="304.0" y="40" width="132" height="46" rx="5" class="box box-private"/><text x="370" y="60" text-anchor="middle" class="d-text d-strong">Private tools</text><text x="370" y="76" text-anchor="middle" class="d-text d-small d-muted">named tools</text></g><line x1="520" y1="86" x2="520" y2="404" class="lifeline"/><g class="lane"><rect x="454.0" y="40" width="132" height="46" rx="5" class="box box-private"/><text x="520" y="60" text-anchor="middle" class="d-text d-strong">Private workshop</text><text x="520" y="76" text-anchor="middle" class="d-text d-small d-muted">trusted models</text></g><line x1="704" y1="86" x2="704" y2="404" class="lifeline"/><g class="lane"><rect x="638.0" y="40" width="132" height="46" rx="5" class="box box-general"/><text x="704" y="60" text-anchor="middle" class="d-text d-strong">General workshop</text><text x="704" y="76" text-anchor="middle" class="d-text d-small d-muted">any model</text></g><line x1="886" y1="86" x2="886" y2="404" class="lifeline"/><g class="lane"><rect x="820.0" y="40" width="132" height="46" rx="5" class="box box-general"/><text x="886" y="60" text-anchor="middle" class="d-text d-strong">Homelab</text><text x="886" y="76" text-anchor="middle" class="d-text d-small d-muted">monitoring, git host</text></g><line x1="80" y1="142" x2="696" y2="142" class="line"/><polygon points="704,142 695,137.5 695,146.5" class="head"/><text x="391.0" y="134" text-anchor="middle" class="d-text">ask for a change</text><circle cx="70" cy="142" r="10" class="badge"/><text x="70" y="145.6" text-anchor="middle" class="badge-t">1</text><line x1="714" y1="186" x2="878" y2="186" class="line"/><polygon points="886,186 877,181.5 877,190.5" class="head"/><text x="799.0" y="178" text-anchor="middle" class="d-text">push the code</text><circle cx="704" cy="186" r="10" class="badge"/><text x="704" y="189.6" text-anchor="middle" class="badge-t">2</text><line x1="876" y1="230" x2="528" y2="230" class="line planned"/><polygon points="520,230 529,225.5 529,234.5" class="head"/><text x="699.0" y="222" text-anchor="middle" class="d-text">the private workshop pulls it</text><circle cx="886" cy="230" r="10" class="badge"/><text x="886" y="233.6" text-anchor="middle" class="badge-t">3</text><rect x="445.0" y="254" width="150" height="44" rx="4" class="note note-private planned"/><text x="526" y="272" text-anchor="middle" class="d-text d-small">runs it on your</text><text x="526" y="287" text-anchor="middle" class="d-text d-small">real data</text><circle cx="445.0" cy="276.0" r="10" class="badge"/><text x="445.0" y="279.6" text-anchor="middle" class="badge-t">4</text><line x1="510" y1="336" x2="78" y2="336" class="line planned"/><polygon points="70,336 79,331.5 79,340.5" class="head"/><text x="291.0" y="328" text-anchor="middle" class="d-text">a bug that only real data shows</text><circle cx="520" cy="336" r="10" class="badge"/><text x="520" y="339.6" text-anchor="middle" class="badge-t">5</text><line x1="80" y1="380" x2="696" y2="380" class="line"/><polygon points="704,380 695,375.5 695,384.5" class="head"/><text x="391.0" y="372" text-anchor="middle" class="d-text">you describe it, in your words</text><circle cx="70" cy="380" r="10" class="badge"/><text x="70" y="383.6" text-anchor="middle" class="badge-t">6</text></svg>

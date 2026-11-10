@@ -9,8 +9,9 @@ What is deployed. The rest of the documentation:
 | [docs/wiring.md](./docs/wiring.md)   | How each agent connects today, and where that differs from the design |
 | [paseo/README.md](./paseo/README.md) | The two workshops: pods, config, credentials, volumes                 |
 
-`docs/build.py` draws the three design documents as one page. Change a flow or a
-connection in the documents first, then the manifests, then rebuild the page.
+`docs/build.py` draws the documents' diagrams (`docs/img/`) from the Mermaid text
+folded under each one, and the same drawings as one published page. Change a flow
+or a connection in the text first, run it, then change the manifests.
 
 Use **general** and **private** as data scopes. General includes operational
 secrets and code; private includes personal notes, location, health and memory.

@@ -1,10 +1,11 @@
-"""Draws ../DESIGN.md, flows.md and wiring.md as one page (static inline SVG).
+"""Draws ../DESIGN.md, flows.md and wiring.md (static SVG, no runtime).
 
-    python3 kubernetes/apps/main/llm/docs/build.py /tmp/assistant-flow-map.html
+    python3 kubernetes/apps/main/llm/docs/build.py [page.html]   # img/*.svg, and the page if named
+    python3 kubernetes/apps/main/llm/docs/build.py --check       # fail if img/*.svg are stale
 
-The page is published as the "Assistant Flow Map" artifact; republish that file
-to the same artifact after changing any of the three documents. The diagrams
-come from the documents' Mermaid blocks, the prose around them from their text.
+The diagrams come from the documents' Mermaid blocks. img/*.svg are what the
+documents show on GitHub; the page is published as the "Assistant Flow Map"
+artifact, so republish it there after changing any of the three documents.
 """
 from html import escape
 from pathlib import Path
@@ -73,7 +74,7 @@ def paragraphs(body):
         if line.startswith("```"):
             fenced = not fenced
             continue
-        if fenced or line.startswith(("|", "- ", "#")) or re.match(r"^\d+\. ", line) or line.startswith("  "):
+        if fenced or line.startswith(("|", "- ", "#", "<", "![")) or re.match(r"^\d+\. ", line) or line.startswith("  "):
             if buf:
                 out.append(" ".join(buf))
                 buf = []
@@ -190,6 +191,13 @@ def sequence(names, steps, label):
     return "".join(out + body) + "</svg>"
 
 
+IMAGES = {}
+
+
+def slug(title):
+    return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+
+
 def flows_html():
     out = []
     for title, body in sections(FLOWS_MD).items():
@@ -201,12 +209,13 @@ def flows_html():
         notes = dict(i.split(": ", 1) for i in items(body))
         names, steps = parse_sequence(mermaid(body))
         cls = {"works today": "live", "partly today": "partly"}.get(status, "planned")
+        drawing = IMAGES[f"flow-{m[1].lower()}"] = sequence(names, steps, m[2] + ": " + paras[0])
         out.append(f"""
 <article class="flow" id="flow-{m[1].lower()}">
   <div class="flow-head"><span class="eyebrow">Flow {m[1]}</span><h3>{inline(m[2])}</h3><span class="status {cls}">{escape(status)}</span></div>
   <p>{inline(paras[0])}</p>
   <figure>
-    <div class="scroll">{sequence(names, steps, m[2] + ': ' + paras[0])}</div>
+    <div class="scroll">{drawing}</div>
     <figcaption>{inline(paras[1]) if len(paras) > 1 else ''}</figcaption>
   </figure>
   <dl class="verdict">
@@ -305,12 +314,13 @@ def wiring_html():
         if not chart:
             continue
         nodes, edges = parse_flowchart(chart)
+        drawing = IMAGES[f"wiring-{slug(title)}"] = wiring_svg(nodes, edges, title)
         notes = "".join(f"<li>{inline(i)}</li>" for i in items(body))
         out.append(f"""
 <article class="flow">
   <div class="flow-head"><h3>{inline(title)}</h3></div>
   {''.join(f'<p>{inline(p)}</p>' for p in paragraphs(body))}
-  <figure><div class="scroll">{wiring_svg(nodes, edges, title)}</div></figure>
+  <figure><div class="scroll">{drawing}</div></figure>
   {f'<ul class="notes">{notes}</ul>' if notes else ''}
 </article>""")
     services = secs["Services that call models"]
@@ -573,7 +583,7 @@ PAGE = f"""<title>Assistant Flow Map</title>
   <h2>The map</h2>
   <p class="intro">What exists, where it sits, and what it can reach.</p>
   <figure>
-    <div class="scroll">{system_map()}</div>
+    <div class="scroll">{IMAGES.setdefault("map", system_map())}</div>
     <figcaption>Three places in two scopes. Each place uses its own side of the shared services.
     One link crosses the scope line: the assistant starting an agent in the general workshop, and it waits for your approval.</figcaption>
   </figure>
@@ -664,6 +674,35 @@ PAGE = f"""<title>Assistant Flow Map</title>
 </script>
 """
 
-out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("/tmp/assistant-flow-map.html")
-out.write_text(PAGE)
-print(out, len(PAGE))
+# ── standalone drawings for the documents ────────────────────────────────────
+LIGHT = re.search(r":root \{\n(.*?)\n\}", CSS, flags=re.S)[1]
+DARK = re.search(r':root\[data-theme="dark"\] \{\n(.*?)color-scheme: dark \}', CSS, flags=re.S)[1]
+SVG_CSS = CSS[CSS.index(".sheet {"):CSS.index(".flows {")]
+# An image cannot load web fonts, so the files use the system ones.
+FONTS = ('--sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; --display: var(--sans); '
+         '--mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;')
+STYLE = (f"<style>svg {{ {LIGHT} {FONTS} }} @media (prefers-color-scheme: dark) {{ svg {{ {DARK} }} }} {SVG_CSS}</style>")
+
+
+def standalone(svg):
+    return svg.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ', 1).replace(">", ">" + STYLE, 1) + "\n"
+
+
+files = {HERE / "img" / f"{name}.svg": standalone(svg) for name, svg in IMAGES.items()}
+if "--check" in sys.argv:
+    stale = [str(f.relative_to(HERE)) for f, text in files.items() if not f.exists() or f.read_text() != text]
+    stale += [str(f.relative_to(HERE)) for f in (HERE / "img").glob("*.svg") if f not in files]
+    if stale:
+        sys.exit("stale drawings, run build.py: " + ", ".join(sorted(stale)))
+    print(f"{len(files)} drawings are current")
+else:
+    (HERE / "img").mkdir(exist_ok=True)
+    for f in (HERE / "img").glob("*.svg"):
+        if f not in files:
+            f.unlink()
+    for f, text in files.items():
+        f.write_text(text)
+    print(f"wrote {len(files)} drawings to {HERE / 'img'}")
+    if len(sys.argv) > 1:
+        Path(sys.argv[1]).write_text(PAGE)
+        print(sys.argv[1], len(PAGE))

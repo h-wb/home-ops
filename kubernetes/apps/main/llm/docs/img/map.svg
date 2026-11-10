@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 606" role="img" class="map" aria-label="Three places in two scopes: the assistant and the private workshop on the private side, the general workshop on the general side. Each uses its own side of the shared model, tool and memory services. Only the assistant starting a general agent crosses the scope line, after your approval."><style>svg {   --bg: #eef1f4; --surface: #fbfcfd; --ink: #17212b; --muted: #5a6876; --rule: #c5ced7;
+  --private: #9a5200; --private-bg: #fbe9cf; --private-wash: #f8f0e2;
+  --general: #1c58b0; --general-bg: #dde9fa; --general-wash: #eaf1fb;
+  --gate: #c0271d;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace; --sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; --display: var(--sans); --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; } @media (prefers-color-scheme: dark) { svg {   --bg: #0f141a; --surface: #161d25; --ink: #e4e9ee; --muted: #93a0ad; --rule: #34404c;
+  --private: #f0aa52; --private-bg: #3a2a10; --private-wash: #231b10;
+  --general: #78aefc; --general-bg: #14294a; --general-wash: #121c2c;
+  --gate: #ff7468;  } } .sheet { fill: var(--surface) }
+.d-text { fill: var(--ink); font-family: var(--sans); font-size: 12.5px }
+.d-small { font-size: 11.5px }
+.d-strong { font-weight: 600; font-size: 13px }
+.d-muted { fill: var(--muted) }
+.d-mono { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em }
+.d-mono.d-muted { fill: var(--muted) }
+.d-private { fill: var(--private) }
+.d-general { fill: var(--general) }
+.d-gate { fill: var(--gate); font-weight: 600 }
+.box { stroke-width: 1.4 }
+.box-private { fill: var(--private-bg); stroke: var(--private) }
+.box-general { fill: var(--general-bg); stroke: var(--general) }
+.box-you { fill: var(--surface); stroke: var(--ink) }
+.box-shared { fill: var(--bg); stroke: var(--muted) }
+.box.planned, .note.planned { stroke-dasharray: 6 4 }
+.zone { stroke: none }
+.zone-private { fill: var(--private-wash) }
+.zone-general { fill: var(--general-wash) }
+.note { stroke-width: 1.2 }
+.note-private { fill: var(--private-bg); stroke: var(--private) }
+.note-general { fill: var(--general-bg); stroke: var(--general) }
+.note-you { fill: var(--surface); stroke: var(--ink) }
+.line { stroke: var(--ink); stroke-width: 1.5; fill: none }
+.line.planned { stroke-dasharray: 6 4 }
+.line.gate { stroke: var(--gate); stroke-width: 2 }
+.line.off { stroke: var(--gate); stroke-width: 2; stroke-dasharray: 2 5; stroke-linecap: round }
+.head { fill: var(--ink) }
+.head.gate, .head.off { fill: var(--gate) }
+.gate-mark { fill: var(--gate); stroke: var(--surface); stroke-width: 2 }
+.ask-mark { fill: var(--surface); stroke: var(--ink); stroke-width: 1.6 }
+.lifeline { stroke: var(--rule); stroke-width: 1.2; stroke-dasharray: 2 5 }
+.lifeline.idle { opacity: .5 }
+.lane.idle { opacity: .38 }
+.scope { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 1 6; stroke-linecap: round }
+.badge { fill: var(--ink) }
+.badge-t { fill: var(--surface); font-family: var(--mono); font-size: 10.5px; font-weight: 600 }
+
+</style><rect x="0" y="0" width="960" height="606" class="sheet"/><text x="374" y="26" text-anchor="middle" class="d-mono d-private">PRIVATE SCOPE</text><text x="374" y="43" text-anchor="middle" class="d-text d-small d-muted">trusted models only</text><text x="772" y="26" text-anchor="middle" class="d-mono d-general">GENERAL SCOPE</text><text x="772" y="43" text-anchor="middle" class="d-text d-small d-muted">any model</text><rect x="176" y="136" width="396" height="224" rx="8" class="zone zone-private"/><rect x="608" y="136" width="328" height="224" rx="8" class="zone zone-general"/><text x="24" y="84" text-anchor="start" class="d-text d-strong">You</text><text x="24" y="100" text-anchor="start" class="d-text d-small d-muted">your devices</text><text x="24" y="236" text-anchor="start" class="d-text d-strong">Places</text><text x="24" y="252" text-anchor="start" class="d-text d-small d-muted">one scope each</text><text x="24" y="418" text-anchor="start" class="d-text d-strong">Models</text><text x="24" y="434" text-anchor="start" class="d-text d-small d-muted">one gateway</text><text x="24" y="477" text-anchor="start" class="d-text d-strong">Tools</text><text x="24" y="493" text-anchor="start" class="d-text d-small d-muted">one catalogue</text><text x="24" y="536" text-anchor="start" class="d-text d-strong">Memory</text><text x="24" y="552" text-anchor="start" class="d-text d-small d-muted">a store per scope</text><rect x="192" y="62" width="140" height="44" rx="5" class="box box-you planned"/><text x="262.0" y="86" text-anchor="middle" class="d-text d-strong">Messaging app</text><rect x="432" y="62" width="484" height="44" rx="5" class="box box-you"/><text x="674.0" y="86" text-anchor="middle" class="d-text d-strong">Workshop app · one app, two hosts</text><rect x="192" y="176" width="140" height="116" rx="5" class="box box-private"/><text x="262.0" y="200" text-anchor="middle" class="d-text d-strong">Assistant</text><text x="262.0" y="218" text-anchor="middle" class="d-text d-small">talks, remembers,</text><text x="262.0" y="236" text-anchor="middle" class="d-text d-small">runs routines</text><text x="262.0" y="254" text-anchor="middle" class="d-text d-small d-muted">no shell</text><rect x="432" y="176" width="124" height="116" rx="5" class="box box-private"/><text x="494.0" y="200" text-anchor="middle" class="d-text d-strong">Private workshop</text><text x="494.0" y="218" text-anchor="middle" class="d-text d-small">agents with a shell</text><text x="494.0" y="236" text-anchor="middle" class="d-text d-small d-muted">private repos</text><text x="494.0" y="254" text-anchor="middle" class="d-text d-small d-muted">yours, directly</text><rect x="667" y="176" width="210" height="116" rx="5" class="box box-general"/><text x="772.0" y="200" text-anchor="middle" class="d-text d-strong">General workshop</text><text x="772.0" y="218" text-anchor="middle" class="d-text d-small">agents with a shell</text><text x="772.0" y="236" text-anchor="middle" class="d-text d-small d-muted">code repos</text><text x="772.0" y="254" text-anchor="middle" class="d-text d-small d-muted">no private data</text><polyline points="262,106 262,168" class="line planned"/><polygon points="262,176 257.5,167 266.5,167" class="head "/><text x="270" y="128" text-anchor="start" class="d-text d-small">talk</text><polyline points="494,106 494,168" class="line "/><polygon points="494,176 489.5,167 498.5,167" class="head "/><text x="502" y="128" text-anchor="start" class="d-text d-small">watch, steer</text><polyline points="772,106 772,168" class="line "/><polygon points="772,176 767.5,167 776.5,167" class="head "/><text x="780" y="128" text-anchor="start" class="d-text d-small">watch, steer</text><polyline points="432,234 340,234" class="line "/><polygon points="332,234 341,229.5 341,238.5" class="head "/><text x="386" y="252" text-anchor="middle" class="d-text d-small d-muted">chat bridge,</text><text x="386" y="266" text-anchor="middle" class="d-text d-small d-muted">today only</text><polyline points="262,292 262,330 772,330 772,300" class="line planned gate"/><polygon points="772,292 767.5,301 776.5,301" class="head gate"/><polygon points="590,321 599,330 590,339 581,330" class="gate-mark"/><text x="420" y="348" text-anchor="middle" class="d-text d-small d-gate">starts agents</text><text x="690" y="348" text-anchor="middle" class="d-text d-small d-gate">after you approve the prompt</text><polyline points="374,360 374,388" class="line "/><polygon points="374,396 369.5,387 378.5,387" class="head "/><text x="384" y="379" text-anchor="start" class="d-text d-small">reads freely, asks before a write</text><polyline points="772,360 772,388" class="line "/><polygon points="772,396 767.5,387 776.5,387" class="head "/><text x="782" y="379" text-anchor="start" class="d-text d-small">its own key, gateway, store</text><rect x="176" y="396" width="396" height="48" rx="5" class="box box-private"/><text x="374" y="425" text-anchor="middle" class="d-text d-small">the models you trust with private data</text><rect x="608" y="396" width="328" height="48" rx="5" class="box box-general"/><text x="772" y="425" text-anchor="middle" class="d-text d-small">any model</text><rect x="176" y="455" width="396" height="48" rx="5" class="box box-private"/><text x="374" y="484" text-anchor="middle" class="d-text d-small">every tool: notes, tasks, location, home, cluster, jobs</text><rect x="608" y="455" width="328" height="48" rx="5" class="box box-general"/><text x="772" y="484" text-anchor="middle" class="d-text d-small">cluster, git host, homelab tasks, media</text><rect x="176" y="514" width="396" height="48" rx="5" class="box box-private"/><text x="374" y="543" text-anchor="middle" class="d-text d-small">private store</text><rect x="608" y="514" width="328" height="48" rx="5" class="box box-general"/><text x="772" y="543" text-anchor="middle" class="d-text d-small">general store</text><line x1="590" y1="118" x2="590" y2="572" class="scope"/><text x="590" y="592" text-anchor="middle" class="d-mono d-muted">scope line · private data never moves to the right of it</text></svg>

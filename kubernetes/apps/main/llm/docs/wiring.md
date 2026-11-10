@@ -8,8 +8,9 @@ Read a diagram left to right. A solid arrow is as designed. A dotted arrow
 differs from the design, and is explained under
 [Differs from the design](#differs-from-the-design).
 
-The published page draws these diagrams with `build.py`; keep to the node and
-arrow forms used here so it can read them.
+Each drawing is made by `build.py` from the Mermaid text folded under it. Edit
+the text, keep to the arrow and node forms already used, run the script, and
+commit both.
 
 ## At a glance
 
@@ -34,6 +35,11 @@ Hermes, in its own pod, private scope. Its network rule allows the three
 destinations below and DNS, nothing else. The private workshop reaches it
 through an exec bridge, which goes once the messaging app is in use.
 
+![Wiring: The assistant](./img/wiring-the-assistant.svg)
+
+<details>
+<summary>The same diagram as text</summary>
+
 ```mermaid
 flowchart LR
     A["Assistant<br/>Hermes"]:::private
@@ -47,10 +53,17 @@ flowchart LR
     A -->|"own client key, by plugin"| M
 ```
 
+</details>
+
 - Key: `hermes-private`, three Mistral models.
 - The memory plugin is a patched build that records nothing unless told to.
 
 ## Claude Code in the general workshop
+
+![Wiring: Claude Code in the general workshop](./img/wiring-claude-code-in-the-general-workshop.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -65,11 +78,18 @@ flowchart LR
     A -->|"client key"| M
 ```
 
+</details>
+
 - The gateway holds no Anthropic key: a request without the subscription login
   fails instead of being billed.
 - The pod has no Kubernetes credentials; cluster work goes through the tools.
 
 ## OpenCode in the general workshop
+
+![Wiring: OpenCode in the general workshop](./img/wiring-opencode-in-the-general-workshop.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -88,11 +108,18 @@ flowchart LR
     A -->|"client key, server and plugin"| M
 ```
 
+</details>
+
 - Roles today: coordinator on ChatGPT; build, plan and explorer on Mistral
   models; the reviewer on a GLM model.
 - The pod also holds a key for OpenCode's own hosted models. None is in use.
 
 ## OpenCode in the private workshop
+
+![Wiring: OpenCode in the private workshop](./img/wiring-opencode-in-the-private-workshop.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -109,12 +136,19 @@ flowchart LR
     A -->|"client key, server and plugin"| M
 ```
 
+</details>
+
 - The gateway is the only provider its config allows. OpenCode's own free
   hosted models, which need no key, are switched off here.
 
 ## Claude Code, Claude Desktop and Codex on a workstation
 
 General scope. Keys come from Proton Pass through fnox when the agent starts.
+
+![Wiring: Claude Code, Claude Desktop and Codex on a workstation](./img/wiring-claude-code-claude-desktop-and-codex-on-a-workstation.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -127,9 +161,16 @@ flowchart LR
     A -->|"client key"| M
 ```
 
+</details>
+
 ## Vibe on a workstation
 
 Private scope.
+
+![Wiring: Vibe on a workstation](./img/wiring-vibe-on-a-workstation.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -141,6 +182,8 @@ flowchart LR
     A -->|"through Envoy, key per scope"| T
     A -->|"client key"| M
 ```
+
+</details>
 
 ## Services that call models
 

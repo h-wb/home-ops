@@ -14,14 +14,20 @@ so a flow can be judged by what crosses between them.
 - An arrow from the private side to the general side carries a prompt you
   approved. Arrows the other way are free.
 
-The published page draws these diagrams with `build.py`; keep to the
-arrow and note forms used here so it can read them.
+Each drawing is made by `build.py` from the Mermaid text folded under it. Edit
+the text, keep to the arrow and node forms already used, run the script, and
+commit both.
 
 ## A. Ask the assistant
 
 Status: partly today
 
 You ask the assistant something about your life or your homelab, and it answers from what it can reach.
+
+![Flow A: Ask the assistant](./img/flow-a.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 sequenceDiagram
@@ -40,6 +46,8 @@ sequenceDiagram
     H-->>Y: the answer
 ```
 
+</details>
+
 Today the same conversation runs through the private workshop, which opens a chat into the assistant. The messaging app replaces that window.
 
 - Why it is safe: Nothing leaves the private side.
@@ -50,6 +58,11 @@ Today the same conversation runs through the private workshop, which opens a cha
 Status: planned
 
 A scheduled job gathers your day and sends it to you. Nobody has to ask.
+
+![Flow B: Morning briefing](./img/flow-b.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 sequenceDiagram
@@ -69,6 +82,8 @@ sequenceDiagram
     H-->>Y: the briefing
 ```
 
+</details>
+
 In step 2 the assistant is the one acting: it fetches the task list, so the briefing can cover the homelab too. The list moves from general to private, which is the allowed direction.
 
 - Why it is safe: No prompt and no data cross to the general side.
@@ -79,6 +94,11 @@ In step 2 the assistant is the one acting: it fetches the task list, so the brie
 Status: planned
 
 You ask for work on private data, such as reconciling yesterday's location. The assistant reads what it needs freely, and asks before it changes anything.
+
+![Flow C: A job on your own data](./img/flow-c.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 sequenceDiagram
@@ -102,6 +122,8 @@ sequenceDiagram
     H-->>Y: done, summary
 ```
 
+</details>
+
 Each job is a named tool with fixed inputs, so the assistant cannot improvise a command. The private workshop takes no part.
 
 - Why it is safe: Reading stays on the private side. Anything that changes your data is a named tool, and it runs after you say yes.
@@ -112,6 +134,11 @@ Each job is a named tool with fixed inputs, so the assistant cannot improvise a 
 Status: planned
 
 You ask for a code change. The assistant writes the prompt, you read it, and only then does it leave the private side.
+
+![Flow D: A coding job for the general workshop](./img/flow-d.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 sequenceDiagram
@@ -135,6 +162,8 @@ sequenceDiagram
     H-->>Y: done, with the link
 ```
 
+</details>
+
 Step 5 is the only arrow in the whole design that carries something from private to general.
 
 - Why it is safe: The prompt is the one thing that crosses, and you read it first. The result comes back freely.
@@ -145,6 +174,11 @@ Step 5 is the only arrow in the whole design that carries something from private
 Status: works today
 
 The workshops do not depend on the assistant. You open the workshop's app and start or steer agents yourself.
+
+![Flow E: You, directly](./img/flow-e.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 sequenceDiagram
@@ -162,6 +196,8 @@ sequenceDiagram
     Y->>P: the same, for private repos
 ```
 
+</details>
+
 This is how you work today, and it stays next to flow D.
 
 - Why it is safe: You choose the workshop, so you choose which models see the work.
@@ -172,6 +208,11 @@ This is how you work today, and it stays next to flow D.
 Status: partly today
 
 Repos hold code and services hold data. A general agent writes the code without the data, and the private side runs it on the real thing.
+
+![Flow F: Code in general, data in private](./img/flow-f.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 sequenceDiagram
@@ -193,6 +234,8 @@ sequenceDiagram
     Y->>G: you describe it, in your words
 ```
 
+</details>
+
 Code moves from general to private. What you say in step 6 is your call.
 
 - Why it is safe: The general side gets the code and never the data.
@@ -203,6 +246,11 @@ Code moves from general to private. What you say in step 6 is your call.
 Status: planned
 
 Monitoring stays the detector. An alert becomes one task, the assistant tells you, and the fix is a coding job like any other.
+
+![Flow G: A homelab alert](./img/flow-g.svg)
+
+<details>
+<summary>The same diagram as text</summary>
 
 ```mermaid
 sequenceDiagram
@@ -223,6 +271,8 @@ sequenceDiagram
     H-->>G: start an agent, with the approved prompt
     G-->>X: the fix, through git
 ```
+
+</details>
 
 Steps 4 and 5 are flow D, shortened.
 

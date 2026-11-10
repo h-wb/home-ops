@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 266" role="img" aria-label="OpenCode in the private workshop" class="wire"><style>svg {   --bg: #eef1f4; --surface: #fbfcfd; --ink: #17212b; --muted: #5a6876; --rule: #c5ced7;
+  --private: #9a5200; --private-bg: #fbe9cf; --private-wash: #f8f0e2;
+  --general: #1c58b0; --general-bg: #dde9fa; --general-wash: #eaf1fb;
+  --gate: #c0271d;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "IBM Plex Sans", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace; --sans: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; --display: var(--sans); --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; } @media (prefers-color-scheme: dark) { svg {   --bg: #0f141a; --surface: #161d25; --ink: #e4e9ee; --muted: #93a0ad; --rule: #34404c;
+  --private: #f0aa52; --private-bg: #3a2a10; --private-wash: #231b10;
+  --general: #78aefc; --general-bg: #14294a; --general-wash: #121c2c;
+  --gate: #ff7468;  } } .sheet { fill: var(--surface) }
+.d-text { fill: var(--ink); font-family: var(--sans); font-size: 12.5px }
+.d-small { font-size: 11.5px }
+.d-strong { font-weight: 600; font-size: 13px }
+.d-muted { fill: var(--muted) }
+.d-mono { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em }
+.d-mono.d-muted { fill: var(--muted) }
+.d-private { fill: var(--private) }
+.d-general { fill: var(--general) }
+.d-gate { fill: var(--gate); font-weight: 600 }
+.box { stroke-width: 1.4 }
+.box-private { fill: var(--private-bg); stroke: var(--private) }
+.box-general { fill: var(--general-bg); stroke: var(--general) }
+.box-you { fill: var(--surface); stroke: var(--ink) }
+.box-shared { fill: var(--bg); stroke: var(--muted) }
+.box.planned, .note.planned { stroke-dasharray: 6 4 }
+.zone { stroke: none }
+.zone-private { fill: var(--private-wash) }
+.zone-general { fill: var(--general-wash) }
+.note { stroke-width: 1.2 }
+.note-private { fill: var(--private-bg); stroke: var(--private) }
+.note-general { fill: var(--general-bg); stroke: var(--general) }
+.note-you { fill: var(--surface); stroke: var(--ink) }
+.line { stroke: var(--ink); stroke-width: 1.5; fill: none }
+.line.planned { stroke-dasharray: 6 4 }
+.line.gate { stroke: var(--gate); stroke-width: 2 }
+.line.off { stroke: var(--gate); stroke-width: 2; stroke-dasharray: 2 5; stroke-linecap: round }
+.head { fill: var(--ink) }
+.head.gate, .head.off { fill: var(--gate) }
+.gate-mark { fill: var(--gate); stroke: var(--surface); stroke-width: 2 }
+.ask-mark { fill: var(--surface); stroke: var(--ink); stroke-width: 1.6 }
+.lifeline { stroke: var(--rule); stroke-width: 1.2; stroke-dasharray: 2 5 }
+.lifeline.idle { opacity: .5 }
+.lane.idle { opacity: .38 }
+.scope { stroke: var(--ink); stroke-width: 1.6; stroke-dasharray: 1 6; stroke-linecap: round }
+.badge { fill: var(--ink) }
+.badge-t { fill: var(--surface); font-family: var(--mono); font-size: 10.5px; font-weight: 600 }
+
+</style><rect x="0" y="0" width="920" height="266" class="sheet"/><line x1="188" y1="133.0" x2="208" y2="133.0" class="line"/><line x1="208" y1="40" x2="208" y2="226" class="line"/><line x1="208" y1="40" x2="416" y2="40" class="line"/><polygon points="424,40 415,35.5 415,44.5" class="head"/><text x="220" y="32" text-anchor="start" class="d-text d-small">gateway key: trusted models</text><rect x="424" y="18.0" width="200" height="44" rx="5" class="box box-shared"/><text x="524.0" y="37" text-anchor="middle" class="d-text d-strong">Model gateway</text><text x="524.0" y="53" text-anchor="middle" class="d-text d-small d-muted">LiteLLM</text><line x1="624" y1="40" x2="714" y2="40" class="line"/><polygon points="722,40 713,35.5 713,44.5" class="head"/><rect x="722" y="18.0" width="184" height="44" rx="5" class="box box-you"/><text x="814.0" y="37" text-anchor="middle" class="d-text d-strong">Mistral&#x27;s API</text><text x="814.0" y="53" text-anchor="middle" class="d-text d-small d-muted">Mistral and GLM models</text><line x1="654" y1="40" x2="654" y2="102" class="line"/><line x1="654" y1="102" x2="714" y2="102" class="line"/><polygon points="722,102 713,97.5 713,106.5" class="head"/><rect x="722" y="80.0" width="184" height="44" rx="5" class="box box-you"/><text x="814.0" y="99" text-anchor="middle" class="d-text d-strong">Local models</text><text x="814.0" y="115" text-anchor="middle" class="d-text d-small d-muted">the Mac</text><line x1="208" y1="164" x2="416" y2="164" class="line"/><polygon points="424,164 415,159.5 415,168.5" class="head"/><text x="220" y="156" text-anchor="start" class="d-text d-small">no key, network rule</text><rect x="424" y="142.0" width="200" height="44" rx="5" class="box box-private"/><text x="524.0" y="161" text-anchor="middle" class="d-text d-strong">Private tool gateway</text><text x="524.0" y="177" text-anchor="middle" class="d-text d-small d-muted">every tool</text><line x1="208" y1="226" x2="416" y2="226" class="line"/><polygon points="424,226 415,221.5 415,230.5" class="head"/><text x="220" y="218" text-anchor="start" class="d-text d-small">client key, server and plugin</text><rect x="424" y="204.0" width="200" height="44" rx="5" class="box box-private"/><text x="524.0" y="223" text-anchor="middle" class="d-text d-strong">Private memory</text><text x="524.0" y="239" text-anchor="middle" class="d-text d-small d-muted">Memini</text><rect x="16" y="111.0" width="172" height="44" rx="5" class="box box-private"/><text x="102.0" y="130.0" text-anchor="middle" class="d-text d-strong">OpenCode</text><text x="102.0" y="146.0" text-anchor="middle" class="d-text d-small d-muted">private workshop</text></svg>
