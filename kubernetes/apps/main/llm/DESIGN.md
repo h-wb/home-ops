@@ -119,7 +119,7 @@ the place, not the orchestrator or a prompt rule:
   general places.
 - A place holds only its own scope's credentials.
 - The assistant's pod denies egress by default and allows a short list (model
-  gateway, tools, memory, the messaging app). The workshops keep open internet.
+  gateway, tools, memory, the messaging app). The workshops have open internet today.
 
 | Place                | Scope   | Who works there                     |
 | -------------------- | ------- | ----------------------------------- |
@@ -210,7 +210,9 @@ request.
 | Assistant skills | The assistant's own volume    | The assistant    | The assistant    |
 
 Private agents never write to general memory or the shared skills directory:
-either would carry private facts to the general side. Skills the assistant
+either would carry private facts to the general side. They read general memory
+with a read-only key; the question they ask is logged by the general store, so
+it should not carry private detail. Skills the assistant
 learns stay private until you promote one into git by hand.
 
 ## Where configuration lives
@@ -228,7 +230,7 @@ A new harness or machine picks a scope; it does not get its own config.
   note on its disk. Keep private data out of working trees on it.
 - Pasted text is not covered: don't paste private data into a general agent.
 - The private workshop has a shell, private data and open internet, so an agent
-  tricked there could send data out. Accepted, to keep it usable.
+  tricked there could send data out. Whether that stays is an open decision.
 - Someone with cluster or Bitwarden admin rights in the general scope can reach
   private workloads. The boundary guards normal workflows, not an administrator.
 
@@ -261,7 +263,6 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-09 | GLM models served by Mistral's API are trusted                                               |
 | 2026-11-09 | Every model call goes through the model gateway, OpenCode's included                         |
 | 2026-11-09 | Exceptions to that: workstation agents, and OpenCode's hosted models in the general workshop |
-| 2026-11-09 | The private workshop keeps open internet; the assistant stays restricted                     |
 | 2026-11-09 | Tool servers answer ToolHive's own pods only                                                 |
 | 2026-11-09 | Jobs on private data are named tools, not free-form agents                                   |
 | 2026-11-09 | Hand-offs to the general workshop need the prompt approved                                   |
@@ -274,6 +275,7 @@ A new harness or machine picks a scope; it does not get its own config.
 To decide:
 
 - Which messaging app: Telegram or Signal.
+- Whether the private workshop keeps open internet or gets an allowlist.
 - Task board. Proposal: the assistant's built-in board (Hermes Kanban). It is
   already part of the assistant, has a web view, takes cards from chat, and
   dedupes cards created by automation, which is what alerts need. It replaces
@@ -301,7 +303,6 @@ To verify:
   its automatic splitting of new cards can be turned off.
 - Scheduled jobs can be created from versioned definitions at deploy time
   (`hermes cron create`).
-- Memini supports read-only keys, so private agents can read general memory.
 - Hermes reads the shared skills directory (`skills.external_dirs`).
 
 ## Getting there
@@ -321,5 +322,6 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
 6. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
    projected token) once the messaging app is in daily use.
 7. Shared skills directory in dotfiles, mounted read-only into the assistant.
+   A read-only key on the general memory store for the private side.
 8. Task board, then homelab alerts → cards.
 9. Retire the Open WebUI data and legacy hostnames.

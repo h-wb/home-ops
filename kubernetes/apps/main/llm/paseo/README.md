@@ -34,7 +34,9 @@ rendered by the pod-start bootstrap for this pod's `PASEO_DATA_SCOPE`. Each
 overlay's `config/` holds the rest. It becomes the `${APP}-config` ConfigMap,
 mounted read-only at `/etc/paseo/config`:
 
-- `opencode.json`: models and providers, read in place (`OPENCODE_CONFIG`).
+- `opencode.json`: models and agents, read in place (`OPENCODE_CONFIG`). The
+  gateway is its only provider; private allows no other (`enabled_providers`),
+  because OpenCode's own free hosted models need no key.
   OpenCode layers it over dotfiles' `~/.config/opencode/opencode.json` and
   merges both, so the MCP servers stay out of it.
 - `paseo.json`: merged into `~/.paseo/config.json`, where Paseo also keeps its
@@ -99,9 +101,9 @@ secret or the cluster CAs.
 ## Credentials and identities
 
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
-credentials `GIT_EMAIL`, `MISTRAL_API_KEY`, `PROTON_PASS_TOKEN` and
-`PASEO_PASSWORD`. Old `KEYSEED` (the removed sshd) and `MCP_API_KEY` (the pods
-reach ToolHive without a key) fields are unused. General additionally holds `GH_TOKEN` and `OPENCODE_API_KEY`.
+credentials `GIT_EMAIL`, `PROTON_PASS_TOKEN` and `PASEO_PASSWORD`. Old `KEYSEED`
+(the removed sshd), `MCP_API_KEY` (the pods reach ToolHive without a key) and
+`MISTRAL_API_KEY` (every model call goes through LiteLLM) fields are unused. General additionally holds `GH_TOKEN` and `OPENCODE_API_KEY`.
 The LiteLLM virtual key never passes through Bitwarden: the litellm-operator
 writes its Secret into the pods' own namespace from the `virtualkey.yaml` CR
 beside them, the helmrelease binds it as `LITELLM_API_KEY` and builds Claude

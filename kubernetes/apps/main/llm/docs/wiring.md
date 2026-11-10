@@ -17,8 +17,8 @@ arrow forms used here so it can read them.
 | --------------------------- | ---------------- | ------- | ---------------------------------------------------- | ----------------------------- | ------------------------------ |
 | Assistant (Hermes)          | Its own pod      | Private | Model gateway, own key                               | Private gateway, in-cluster   | Private store, by plugin       |
 | Claude Code                 | General workshop | General | Model gateway, which forwards its subscription login | General gateway, in-cluster   | General store                  |
-| OpenCode                    | General workshop | General | Model gateway, and Mistral's API directly            | General gateway, in-cluster   | General store, server + plugin |
-| OpenCode                    | Private workshop | Private | Model gateway, and Mistral's API directly            | Private gateway, in-cluster   | Private store, server + plugin |
+| OpenCode                    | General workshop | General | Model gateway                                        | General gateway, in-cluster   | General store, server + plugin |
+| OpenCode                    | Private workshop | Private | Model gateway                                        | Private gateway, in-cluster   | Private store, server + plugin |
 | Claude Code, Claude Desktop | Workstation      | General | Anthropic directly, own login                        | General gateway, from outside | General store, from outside    |
 | Codex                       | Workstation      | General | OpenAI directly, own login                           | General gateway, from outside | General store, from outside    |
 | Vibe                        | Workstation      | Private | Mistral directly, own key                            | Private gateway, from outside | Private store, from outside    |
@@ -76,20 +76,21 @@ flowchart LR
     A["OpenCode<br/>general workshop"]:::general
     L["Model gateway<br/>LiteLLM"]:::shared
     CG["ChatGPT"]:::outside
-    LO["Local models<br/>the Mac"]:::outside
     MI["Mistral's API<br/>Mistral and GLM models"]:::outside
+    LO["Local models<br/>the Mac"]:::outside
     T["General tool gateway<br/>curated tools"]:::general
     M["General memory<br/>Memini"]:::general
     A -->|"gateway key"| L
     L -->|"shared login"| CG
+    L --> MI
     L --> LO
-    A -.->|"pod-held API key, direct"| MI
     A -->|"no key, network rule"| T
     A -->|"client key, server and plugin"| M
 ```
 
-- Roles today: coordinator on ChatGPT through the gateway; build, plan and
-  explorer on Mistral models and the reviewer on a GLM model, all direct.
+- Roles today: coordinator on ChatGPT; build, plan and explorer on Mistral
+  models; the reviewer on a GLM model.
+- The pod also holds a key for OpenCode's own hosted models. None is in use.
 
 ## OpenCode in the private workshop
 
@@ -97,19 +98,19 @@ flowchart LR
 flowchart LR
     A["OpenCode<br/>private workshop"]:::private
     L["Model gateway<br/>LiteLLM"]:::shared
-    LO["Local models<br/>the Mac"]:::outside
     MI["Mistral's API<br/>Mistral and GLM models"]:::outside
+    LO["Local models<br/>the Mac"]:::outside
     T["Private tool gateway<br/>every tool"]:::private
     M["Private memory<br/>Memini"]:::private
-    A -->|"gateway key: local models"| L
+    A -->|"gateway key: trusted models"| L
+    L --> MI
     L --> LO
-    A -.->|"pod-held API key, direct"| MI
     A -->|"no key, network rule"| T
     A -->|"client key, server and plugin"| M
 ```
 
-- Its gateway key lists local and Mistral models, but the Mistral calls do not
-  go through the gateway.
+- The gateway is the only provider its config allows. OpenCode's own free
+  hosted models, which need no key, are switched off here.
 
 ## Claude Code, Claude Desktop and Codex on a workstation
 
@@ -156,32 +157,32 @@ Not agents, but they hold a model gateway key too.
 
 ## Differs from the design
 
-1. **OpenCode calls Mistral's API directly, in both workshops.** The design has
-   one path to any model, the gateway, and the gateway key's model list is the
-   policy. These calls skip both, so in the private workshop any model on that
-   account is reachable. Decided: route them through the gateway and drop the
-   API key from the pods. The GLM models served there are trusted.
-2. **The assistant cannot see tool names.** The tool gateways put every tool
+1. **The assistant cannot see tool names.** The tool gateways put every tool
    behind `find_tool` and `call_tool`. "Writes ask" needs the real names.
    Decided: give the assistant the tools without the search step.
-3. **The location repo's clone in the general workshop holds data.** Next to
-   the code it has an ignored `data/` directory and a `local-notes.md`. "Repos
-   hold code" means those belong on the private side. To do: move them out.
-4. **OpenCode records conversations by itself.** Its memory plugin recalls
+2. **OpenCode records conversations by itself.** Its memory plugin recalls
    before every turn and records after it, in both workshops; the memory
    server next to it adds the on-demand tools. The assistant's plugin is
    patched to record only when told. Each writes to its own scope's store, so
-   the rule holds. To decide: whether the workshops keep recording by
-   themselves.
+   the rule holds. Leaning: on the private side recording by itself is fine,
+   which would also make the assistant's patch unnecessary.
+3. **Private agents cannot read general memory yet.** The design lets them
+   read it and never write it. Memini has read-only keys for exactly this; none
+   is set up.
+4. **The private workshop has open internet.** With a shell and private data,
+   a tricked agent could send data out. To decide: keep it, or an allowlist.
 5. **Workstation agents call their vendors directly.** The gateway is
    in-cluster only. Accepted: tool use is meant to happen in the workshops.
 6. **The general workshop holds a key for OpenCode's hosted models.** A second
-   path next to the gateway. Accepted for the general workshop; it never goes
-   into the private one.
-7. **The private workshop has open internet.** Accepted: an allowlist costs
-   too much friction. The assistant stays restricted to its three
-   destinations.
+   path next to the gateway. Accepted for the general workshop only.
 
-Closed on 2026-11-09: tool servers answered any pod in the cluster directly,
-and private memory was guarded by its key alone. Both now have a network rule
-(`toolhive/config/networkpolicy.yaml`, `memini-private/app/networkpolicy.yaml`).
+Closed on 2026-11-09:
+
+- Tool servers answered any pod in the cluster directly, and private memory was
+  guarded by its key alone. Both now have a network rule.
+- OpenCode called Mistral's API directly with a key held in the pods, around
+  the gateway and its model lists. It now uses the gateway only.
+- The private workshop's OpenCode offered its vendor's free hosted models,
+  which need no key. Its config now allows the gateway and nothing else.
+- The location repo's clone in the general workshop held a data file and a
+  notes file. Both moved to the private workshop.

@@ -1,7 +1,8 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "mistral/mistral-medium-latest",
-  "small_model": "mistral/mistral-small-latest",
+  "model": "litellm/mistral/mistral-medium-latest",
+  "small_model": "litellm/mistral/mistral-small-latest",
+  "disabled_providers": ["mistral"],
   "providers": {
     "litellm": {
       "name": "LiteLLM",
@@ -52,145 +53,94 @@
             "context": 32768,
             "output": 8192
           }
-        }
-      }
-    },
-    "mistral": {
-      "env": ["MISTRAL_API_KEY"],
-      "models": {
-        "codestral-2508": {
-          "disabled": true
         },
-        "codestral-latest": {
-          "disabled": true
+        "mistral/mistral-small-latest": {
+          "name": "Mistral Small 4",
+          "limit": {
+            "context": 262144,
+            "output": 32768
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "effort": ["low", "medium", "high"]
+            }
+          },
+          "variants": [
+            {
+              "id": "none",
+              "settings": {
+                "reasoningEffort": "none"
+              }
+            }
+          ]
         },
-        "deepseek-v4-1-flash-1017": {
-          "disabled": true
+        "mistral/mistral-medium-latest": {
+          "name": "Mistral Medium 3.5",
+          "limit": {
+            "context": 262144,
+            "output": 32768
+          },
+          "capabilities": {
+            "reasoning": {
+              "supported": true,
+              "effort": ["low", "medium", "high"]
+            }
+          },
+          "variants": [
+            {
+              "id": "none",
+              "settings": {
+                "reasoningEffort": "none"
+              }
+            }
+          ]
         },
-        "devstral-2512": {
-          "disabled": true
+        "mistral/mistral-large-latest": {
+          "name": "Mistral Large 3",
+          "limit": {
+            "context": 262144,
+            "output": 32768
+          }
         },
-        "devstral-latest": {
-          "disabled": true
-        },
-        "devstral-medium-latest": {
-          "disabled": true
-        },
-        "glm-5-2": {
-          "disabled": true
-        },
-        "labs-devstral-small-2512": {
-          "disabled": true
-        },
-        "labs-leanstral-1-5-1": {
-          "disabled": true
-        },
-        "magistral-medium-latest": {
-          "disabled": true
-        },
-        "ministral-14b-2512": {
-          "disabled": true
-        },
-        "ministral-3b-2512": {
-          "disabled": true
-        },
-        "ministral-3b-latest": {
-          "disabled": true
-        },
-        "ministral-8b-2512": {
-          "disabled": true
-        },
-        "ministral-8b-latest": {
-          "disabled": true
-        },
-        "mistral-embed": {
-          "disabled": true
-        },
-        "mistral-large-2512": {
-          "disabled": true
-        },
-        "mistral-large-4-0-8": {
-          "disabled": true
-        },
-        "mistral-medium-2505": {
-          "disabled": true
-        },
-        "mistral-medium-2508": {
-          "disabled": true
-        },
-        "mistral-medium-2604": {
-          "disabled": true
-        },
-        "mistral-small-2506": {
-          "disabled": true
-        },
-        "mistral-small-2603": {
-          "disabled": true
-        },
-        "open-mistral-nemo": {
-          "disabled": true
-        },
-        "pixtral-12b": {
-          "disabled": true
-        },
-        "voxtral-mini-latest": {
-          "disabled": true
-        },
-        "voxtral-mini-tts-latest": {
-          "disabled": true
-        },
-        "voxtral-small-2507": {
-          "disabled": true
-        },
-        "voxtral-small-latest": {
-          "disabled": true
-        },
-        "zai-glm-5-2": {
-          "disabled": true
-        },
-        "mistral-large-latest": {
-          "name": "Mistral Large 3"
-        },
-        "mistral-large-4": {
+        "mistral/mistral-large-4": {
+          "name": "Mistral Large 4",
+          "limit": {
+            "context": 1048576,
+            "output": 32768
+          },
           "capabilities": {
             "input": ["text", "image"],
             "reasoning": {
               "supported": true,
-              "toggle": true
+              "effort": ["low", "medium", "high"]
             }
           }
         },
-        "mistral-medium-latest": {
-          "name": "Mistral Medium 3.5",
+        "mistral/zai-glm-5-3": {
+          "name": "GLM 5.3",
+          "limit": {
+            "context": 1048576,
+            "output": 32768
+          },
           "capabilities": {
+            "input": ["text"],
             "reasoning": {
               "supported": true,
-              "toggle": true
+              "effort": ["low", "high", "max"]
             }
           }
         },
-        "mistral-small-latest": {
-          "name": "Mistral Small 4",
+        "mistral/zai-glm-5-3-flash": {
+          "name": "GLM 5.3 Flash",
+          "limit": {
+            "context": 1048576,
+            "output": 32768
+          },
           "capabilities": {
             "reasoning": {
               "supported": true,
-              "toggle": true
-            }
-          }
-        },
-        "zai-glm-5-3": {
-          "capabilities": {
-            "reasoning": {
-              "supported": true,
-              "toggle": true
-            }
-          }
-        },
-        "zai-glm-5-3-flash": {
-          "capabilities": {
-            "reasoning": {
-              "supported": true,
-              "toggle": true
+              "effort": ["low", "high", "max"]
             }
           }
         }
@@ -199,10 +149,10 @@
   },
   "agents": {
     "build": {
-      "model": "mistral/mistral-large-4"
+      "model": "litellm/mistral/mistral-large-4"
     },
     "plan": {
-      "model": "mistral/mistral-medium-latest#none"
+      "model": "litellm/mistral/mistral-medium-latest#none"
     },
     "coordinator": {
       "mode": "primary",
@@ -212,7 +162,7 @@
     },
     "explorer": {
       "mode": "subagent",
-      "model": "mistral/mistral-large-4",
+      "model": "litellm/mistral/mistral-large-4",
       "description": "Read-only reconnaissance: where/how is X, code search, mapping unfamiliar code. Returns findings and paths, not dumps.",
       "system": "You explore and report; you never modify files. Answer the question asked with file paths, line references and the minimum evidence. Say plainly what you could not find.",
       "permissions": [
@@ -225,7 +175,7 @@
     },
     "reviewer": {
       "mode": "subagent",
-      "model": "mistral/zai-glm-5-3",
+      "model": "litellm/mistral/zai-glm-5-3",
       "description": "Independent adversarial review of a substantive or risky change. Reports concrete defects and missing coverage.",
       "system": "Assume the change is broken and try to prove it. For each changed boundary, trace inherited authority and configuration, failure and cleanup paths, and construct a concrete failure scenario before calling anything safe. Report only concrete defects and missing coverage, most severe first, each with the input or state that triggers it. No style nits, no unrequested polish.",
       "permissions": [

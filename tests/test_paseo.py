@@ -125,6 +125,20 @@ class PaseoRendering(unittest.TestCase):
                 self.assertEqual("api-key", litellm["key"])
                 self.assertEqual(f"litellm-paseo-{scope}", litellm["name"])
 
+    def test_opencode_reaches_models_through_the_gateway_only(self):
+        for scope, app in (("general", "paseo"), ("private", "paseo-private")):
+            with self.subTest(scope=scope):
+                config = json.loads(self.resource(scope, "ConfigMap", f"{app}-config")["data"]["opencode.json"])
+                self.assertEqual(["litellm"], list(config["providers"]))
+                key = next(d for d in self.rendered[scope] if d.get("kind") == "LiteLLMVirtualKey")["spec"]
+                # Offering a model the key cannot call only fails at the first prompt.
+                self.assertFalse(set(config["providers"]["litellm"]["models"]) - set(key["models"]))
+                secret = self.resource(scope, "ExternalSecret", app)["spec"]["target"]["template"]["data"]
+                self.assertNotIn("MISTRAL_API_KEY", secret)
+        # OpenCode's own free hosted models need no key, so private names the gateway alone.
+        private = json.loads(self.resource("private", "ConfigMap", "paseo-private-config")["data"]["opencode.json"])
+        self.assertEqual(["litellm"], private["enabled_providers"])
+
     def test_general_has_no_direct_kubernetes_credentials_or_grants(self):
         values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]
         self.assertIs(False, values["defaultPodOptions"]["automountServiceAccountToken"])
