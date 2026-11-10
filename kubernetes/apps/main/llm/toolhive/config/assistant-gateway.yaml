@@ -1,0 +1,39 @@
+---
+# The assistant's gateway: the private catalogue with its real tool names.
+# Hermes searches tools itself and asks before a write-capable call, which needs
+# the names that the optimizer on mcp-gateway hides. In-cluster only, no route.
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: VirtualMCPServer
+metadata:
+  name: mcp-assistant
+spec:
+  groupRef:
+    name: mcp-tools
+  config:
+    aggregation:
+      conflictResolution: prefix
+      conflictResolutionConfig:
+        prefixFormat: "{workload}_"
+  incomingAuth:
+    type: anonymous
+  outgoingAuth:
+    source: discovered
+  telemetryConfigRef:
+    name: prometheus
+  sessionStorage:
+    provider: redis
+    address: toolhive-config-dragonfly.llm.svc.cluster.local:6379
+    keyPrefix: "toolhive:mcp-assistant:"
+    passwordRef:
+      name: toolhive-config-redis
+      key: password
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: vmcp
+          resources:
+            requests:
+              cpu: 25m
+              memory: 128Mi
+            limits:
+              memory: 1Gi

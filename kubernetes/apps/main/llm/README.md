@@ -27,6 +27,10 @@ each Paseo scope is a separate pod. No private-scope key lists a model outside t
 | General | `mcp-general` (`vmcp-mcp-ops`)     | `memini-general` | `litellm-paseo-general` |
 | Private | `mcp-private` (`vmcp-mcp-gateway`) | `memini-private` | `litellm-paseo-private` |
 
+The assistant has a third endpoint on the private side, `vmcp-mcp-assistant`: the
+same catalogue without the search optimizer, because Hermes searches tools itself
+and decides per tool name whether to ask first.
+
 ToolHive's gateways take callers anonymously, so who reaches each one is the
 boundary. In-cluster clients (Hermes, Paseo) call the service with no
 key, and `toolhive/config/networkpolicy.yaml` admits only that scope's pods.

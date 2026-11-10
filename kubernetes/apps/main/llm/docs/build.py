@@ -10,6 +10,7 @@ artifact, so republish it there after changing any of the three documents.
 from html import escape
 from pathlib import Path
 import re
+import subprocess
 import sys
 
 HERE = Path(__file__).resolve().parent
@@ -547,6 +548,9 @@ LEGEND_WIRING = f"""
 </ul>"""
 
 design = sections(DESIGN)
+# Which revision of the documents the page shows, so a stale page can be told apart.
+STAMP = subprocess.run(["git", "log", "-1", "--format=commit %h, %cs", "--", "."], cwd=HERE.parent,
+                       capture_output=True, text=True).stdout.strip() or "an unknown revision"
 rule = re.search(r"^\*\*(.+)\*\*$", design["The rule"], flags=re.M)[1]
 trusted = tables(design["The rule"])[0]
 roles = tables(design["Roles"])[0]
@@ -653,7 +657,8 @@ PAGE = f"""<title>Assistant Flow Map</title>
 </main>
 
 <footer>Drawn from <code>DESIGN.md</code>, <code>docs/flows.md</code> and <code>docs/wiring.md</code> in
-<code>kubernetes/apps/main/llm</code> of home-ops. Change those, then rebuild this page.</footer>
+<code>kubernetes/apps/main/llm</code> of home-ops, as of {STAMP}. Those documents are the source;
+if this page and they disagree, the page is the stale one.</footer>
 </div>
 <script>
 (function () {{

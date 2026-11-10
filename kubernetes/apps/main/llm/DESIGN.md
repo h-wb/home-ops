@@ -295,11 +295,8 @@ To verify:
 - General GitHub credentials (the general workshop's token, the general tool
   gateway's GitHub tool, the workstation's login) cannot read repos that hold
   private data.
-- Marking a tool server `trust: untrusted` in Hermes makes its write-capable
-  calls ask for approval in the messaging app.
-- The tool gateway shows the assistant real tool names. Its search optimizer
-  hides them behind `find_tool` and `call_tool` today, and approval per tool
-  needs the names.
+- The approval prompt for a write reaches you: today in the workshop's chat
+  window, later in the messaging app.
 - The upstream tool servers annotate their read-only tools, so reads stay free.
 - Hermes Kanban fits as a task board: cards nobody is assigned to stay put, and
   its automatic splitting of new cards can be turned off.

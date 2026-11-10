@@ -45,7 +45,7 @@ spec:
         # The gateway is also netpol-gated on its side (llm/toolhive/config).
         - podSelector:
             matchLabels:
-              app.kubernetes.io/instance: mcp-gateway
+              app.kubernetes.io/instance: mcp-assistant
       ports:
         - port: 4483
           protocol: TCP

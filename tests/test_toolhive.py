@@ -34,9 +34,9 @@ class ToolHiveScopes(unittest.TestCase):
 
     def test_each_gateway_admits_only_its_scope(self):
         expected = {
-            "mcp-gateway": [ENVOY, pods(**{"app.kubernetes.io/name": "hermes-private",
-                                           "assistant.scope": "private"}),
-                            pods(**{"app.kubernetes.io/name": "paseo-private"})],
+            "mcp-gateway": [ENVOY, pods(**{"app.kubernetes.io/name": "paseo-private"})],
+            # In-cluster only: no Envoy route, the assistant alone.
+            "mcp-assistant": [pods(**{"app.kubernetes.io/name": "hermes-private", "assistant.scope": "private"})],
             "mcp-ops": [ENVOY, pods(**{"app.kubernetes.io/name": "paseo"})],
         }
         for gateway, clients in expected.items():
@@ -47,6 +47,14 @@ class ToolHiveScopes(unittest.TestCase):
                     {"from": clients, "ports": [{"port": 4483, "protocol": "TCP"}]},
                     {"from": PROMETHEUS, "ports": [{"port": 9464, "protocol": "TCP"}]},
                 ], spec["ingress"])
+
+    def test_the_assistant_sees_real_tool_names(self):
+        # "Writes ask" is decided per tool name; the optimizer would leave only find_tool/call_tool.
+        config = self.resource("VirtualMCPServer", "mcp-assistant")["spec"]["config"]
+        self.assertNotIn("optimizer", config)
+        hermes = (ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml").read_text()
+        self.assertIn("url: http://vmcp-mcp-assistant.llm.svc.cluster.local:4483/mcp\n", hermes)
+        self.assertIn("    trust: untrusted\n", hermes)
 
     def test_tool_servers_answer_toolhive_only(self):
         # Otherwise any pod in the cluster reaches a tool server around the gateways.
@@ -79,13 +87,13 @@ class ToolHiveScopes(unittest.TestCase):
         telemetry = self.resource("MCPTelemetryConfig", "prometheus")["spec"]["prometheus"]
         self.assertEqual({"enabled": True, "metricsOnTransportPort": False}, telemetry)
         prefixes = set()
-        for gateway in ("mcp-gateway", "mcp-ops"):
+        for gateway in ("mcp-gateway", "mcp-assistant", "mcp-ops"):
             spec = self.resource("VirtualMCPServer", gateway)["spec"]
             self.assertEqual({"name": "prometheus"}, spec["telemetryConfigRef"])
             self.assertEqual({"name": "toolhive-config-redis", "key": "password"},
                              spec["sessionStorage"]["passwordRef"])
             prefixes.add(spec["sessionStorage"]["keyPrefix"])
-        self.assertEqual(2, len(prefixes))
+        self.assertEqual(3, len(prefixes))
         redis = self.resource("ExternalSecret", "toolhive-config-redis")["spec"]
         self.assertEqual({"password": "{{ .REDIS_PASSWORD }}"}, redis["target"]["template"]["data"])
         self.assertEqual([{"extract": {"key": "toolhive"}}], redis["dataFrom"])

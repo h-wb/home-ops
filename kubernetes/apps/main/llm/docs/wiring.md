@@ -16,7 +16,7 @@ commit both.
 
 | Agent                       | Runs in          | Scope   | Models                                               | Tools                         | Memory                         |
 | --------------------------- | ---------------- | ------- | ---------------------------------------------------- | ----------------------------- | ------------------------------ |
-| Assistant (Hermes)          | Its own pod      | Private | Model gateway, own key                               | Private gateway, in-cluster   | Private store, by plugin       |
+| Assistant (Hermes)          | Its own pod      | Private | Model gateway, own key                               | Its own gateway, in-cluster   | Private store, by plugin       |
 | Claude Code                 | General workshop | General | Model gateway, which forwards its subscription login | General gateway, in-cluster   | General store                  |
 | OpenCode                    | General workshop | General | Model gateway                                        | General gateway, in-cluster   | General store, server + plugin |
 | OpenCode                    | Private workshop | Private | Model gateway                                        | Private gateway, in-cluster   | Private store, server + plugin |
@@ -45,17 +45,20 @@ flowchart LR
     A["Assistant<br/>Hermes"]:::private
     L["Model gateway<br/>LiteLLM"]:::shared
     MI["Mistral"]:::outside
-    T["Private tool gateway<br/>every tool"]:::private
+    T["Assistant's tool gateway<br/>every tool, real names"]:::private
     M["Private memory<br/>Memini"]:::private
     A -->|"own key: Mistral models only"| L
     L --> MI
-    A -.->|"no key; tool names hidden"| T
+    A -->|"no key; writes ask first"| T
     A -->|"own client key, by plugin"| M
 ```
 
 </details>
 
 - Key: `hermes-private`, three Mistral models.
+- Its gateway serves the private catalogue without the search step: Hermes
+  searches tools itself, and a call to any tool not marked read-only waits for
+  your yes.
 - The memory plugin is a patched build that records nothing unless told to.
 
 ## Claude Code in the general workshop
@@ -200,23 +203,20 @@ Not agents, but they hold a model gateway key too.
 
 ## Differs from the design
 
-1. **The assistant cannot see tool names.** The tool gateways put every tool
-   behind `find_tool` and `call_tool`. "Writes ask" needs the real names.
-   Decided: give the assistant the tools without the search step.
-2. **OpenCode records conversations by itself.** Its memory plugin recalls
+1. **OpenCode records conversations by itself.** Its memory plugin recalls
    before every turn and records after it, in both workshops; the memory
    server next to it adds the on-demand tools. The assistant's plugin is
    patched to record only when told. Each writes to its own scope's store, so
    the rule holds. Leaning: on the private side recording by itself is fine,
    which would also make the assistant's patch unnecessary.
-3. **Private agents cannot read general memory yet.** The design lets them
+2. **Private agents cannot read general memory yet.** The design lets them
    read it and never write it. Memini has read-only keys for exactly this; none
    is set up.
-4. **The private workshop has open internet.** With a shell and private data,
+3. **The private workshop has open internet.** With a shell and private data,
    a tricked agent could send data out. To decide: keep it, or an allowlist.
-5. **Workstation agents call their vendors directly.** The gateway is
+4. **Workstation agents call their vendors directly.** The gateway is
    in-cluster only. Accepted: tool use is meant to happen in the workshops.
-6. **The general workshop holds a key for OpenCode's hosted models.** A second
+5. **The general workshop holds a key for OpenCode's hosted models.** A second
    path next to the gateway. Accepted for the general workshop only.
 
 Closed on 2026-11-09:
@@ -229,3 +229,5 @@ Closed on 2026-11-09:
   which need no key. Its config now allows the gateway and nothing else.
 - The location repo's clone in the general workshop held a data file and a
   notes file. Both moved to the private workshop.
+- The assistant could not see tool names behind the gateway's search step. It
+  now has its own gateway with the real names, and asks before a write.

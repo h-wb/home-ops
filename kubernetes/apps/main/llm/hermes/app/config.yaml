@@ -46,9 +46,11 @@ agent:
     - computer_use
     - skills
 mcp_servers:
-  # The private VMCP (llm/toolhive/config), reached in-cluster: the same endpoint the
-  # private Paseo tier takes through Envoy. This pod's egress (networkpolicy.yaml)
-  # pins it to mcp-gateway — the full mcp-tools catalogue including the vault — while
-  # no other tier's pod may reach that endpoint at all.
+  # The assistant's own gateway (llm/toolhive/config/assistant-gateway.yaml): the
+  # private catalogue with real tool names, which Hermes searches itself. This
+  # pod's egress (networkpolicy.yaml) pins it there.
   tools:
-    url: http://vmcp-mcp-gateway.llm.svc.cluster.local:4483/mcp
+    url: http://vmcp-mcp-assistant.llm.svc.cluster.local:4483/mcp
+    # Reads are free, writes ask: any call to a tool not annotated read-only waits
+    # for approval. A yes "for good" lands in command_allowlist as mcp:tools/<tool>.
+    trust: untrusted

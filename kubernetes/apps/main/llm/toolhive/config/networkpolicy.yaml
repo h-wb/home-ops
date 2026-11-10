@@ -6,8 +6,8 @@
 # key: these policies name them, one scope each. Prometheus may only reach the
 # diagnostics port (9464), never the MCP port.
 #
-# mcp-gateway (mcp-private) aggregates private-tier data (the Obsidian vault,
-# personal tasks): only Envoy and the private-scope pods.
+# mcp-gateway (mcp-private) aggregates private data (the Obsidian vault, personal
+# tasks): only Envoy and the private workshop. The assistant has its own below.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -26,10 +26,6 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: envoy-gateway
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: hermes-private
-              assistant.scope: private
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: paseo-private
@@ -71,6 +67,38 @@ spec:
             matchLabels:
               # The general Paseo keeps its historical `paseo` name.
               app.kubernetes.io/name: paseo
+      ports:
+        - port: 4483
+          protocol: TCP
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 9464
+          protocol: TCP
+---
+# mcp-assistant: the same private catalogue with real tool names, for the
+# assistant alone.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mcp-assistant
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: mcp-assistant
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hermes-private
+              assistant.scope: private
       ports:
         - port: 4483
           protocol: TCP
