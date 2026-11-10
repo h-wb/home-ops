@@ -29,6 +29,20 @@ approvals:
   mode: manual
   # A scheduled run has nobody to ask, so a call that needs a yes is refused.
   cron_mode: deny
+# "Always" answers from chat, per server/tool: mcp:<server>/<tool>. The tools
+# gateway is untrusted (below), so these TickTick task writes run without asking;
+# habits, calendars, projects and every other server still ask.
+command_allowlist:
+  - "mcp:tools/ticktick_create_task"
+  - "mcp:tools/ticktick_batch_add_tasks"
+  - "mcp:tools/ticktick_update_task"
+  - "mcp:tools/ticktick_batch_update_tasks"
+  - "mcp:tools/ticktick_complete_task"
+  - "mcp:tools/ticktick_complete_tasks_in_project"
+  - "mcp:tools/ticktick_delete_task"
+  - "mcp:tools/ticktick_move_task"
+  - "mcp:tools/ticktick_unassign_task"
+  - "mcp:tools/ticktick_add_comment"
 # Anyone not on a platform's allow list gets no answer, not even a pairing code.
 unauthorized_dm_behavior: ignore
 security:
