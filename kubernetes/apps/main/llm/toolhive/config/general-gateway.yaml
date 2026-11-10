@@ -7,6 +7,10 @@ spec:
   groupRef:
     name: mcp-tools
   config:
+    # Same reason as on mcp-private.
+    operational:
+      failureHandling:
+        healthCheckInterval: 5m
     aggregation:
       conflictResolution: prefix
       conflictResolutionConfig:

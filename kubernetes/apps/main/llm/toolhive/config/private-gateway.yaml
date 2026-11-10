@@ -10,6 +10,12 @@ spec:
   groupRef:
     name: mcp-tools
   config:
+    # Each gateway checks every server in the catalogue, the hosted ones included.
+    # At the default 30s, three gateways used up TickTick's request allowance, and
+    # a session that started then came up without its tools.
+    operational:
+      failureHandling:
+        healthCheckInterval: 5m
     aggregation:
       conflictResolution: prefix
       conflictResolutionConfig:
