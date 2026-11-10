@@ -13,16 +13,14 @@ $hermes skills opt-out --remove --yes || failed=1
 
 # Hermes reads its skills settings from its own config file only, not from the
 # managed one, so copy that block over. Without it no routine's skill is found.
-/opt/hermes/.venv/bin/python - <<'PY' || failed=1
-import os, yaml
-managed = yaml.safe_load(open("/etc/hermes/config.yaml"))
-path = os.path.join(os.environ["HERMES_HOME"], "config.yaml")
-own = (yaml.safe_load(open(path)) if os.path.exists(path) else None) or {}
-own["skills"] = {**(own.get("skills") or {}), **managed["skills"]}
-with open(path, "w") as f:
-    yaml.safe_dump(own, f, sort_keys=False)
-print("skills settings copied:", own["skills"])
-PY
+# Plain awk: the image's Python has no YAML module outside the hermes command.
+own="$HERMES_HOME/config.yaml"
+touch "$own"
+{
+  awk '/^skills:/ {skip = 1; next} skip && /^[^ \t]/ {skip = 0} !skip' "$own"
+  awk '/^skills:/ {keep = 1; print; next} keep && /^[^ \t]/ {keep = 0} keep' /etc/hermes/config.yaml
+} > "$own.new" && cat "$own.new" > "$own" && rm "$own.new" || failed=1
+grep -A4 '^skills:' "$own" || failed=1
 
 # routine <name> <schedule> <model>: the job loads the skill of the same name.
 # Schedules are on your clock, not the pod's.
