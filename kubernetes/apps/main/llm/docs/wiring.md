@@ -14,15 +14,15 @@ commit both.
 
 ## At a glance
 
-| Agent                       | Runs in          | Scope   | Models                                               | Tools                         | Memory                            |
-| --------------------------- | ---------------- | ------- | ---------------------------------------------------- | ----------------------------- | --------------------------------- |
-| Assistant (Hermes)          | Its own pod      | Private | Model gateway, own key                               | Its own gateway, in-cluster   | Private store; general, read-only |
-| Claude Code                 | General workshop | General | Model gateway, which forwards its subscription login | General gateway, in-cluster   | General store                     |
-| OpenCode                    | General workshop | General | Model gateway                                        | General gateway, in-cluster   | General store, server + plugin    |
-| OpenCode                    | Private workshop | Private | Model gateway                                        | Private gateway, in-cluster   | Private store, server + plugin    |
-| Claude Code, Claude Desktop | Workstation      | General | Anthropic directly, own login                        | General gateway, from outside | General store, from outside       |
-| Codex                       | Workstation      | General | OpenAI directly, own login                           | General gateway, from outside | General store, from outside       |
-| Vibe                        | Workstation      | Private | Mistral directly, own key                            | Private gateway, from outside | Private store, from outside       |
+| Agent                       | Runs in          | Scope   | Models                                               | Tools                         | Memory                                             |
+| --------------------------- | ---------------- | ------- | ---------------------------------------------------- | ----------------------------- | -------------------------------------------------- |
+| Assistant (Hermes)          | Its own pod      | Private | Model gateway, own key                               | Its own gateway, in-cluster   | Private store; general, read-only                  |
+| Claude Code                 | General workshop | General | Model gateway, which forwards its subscription login | General gateway, in-cluster   | General store                                      |
+| OpenCode                    | General workshop | General | Model gateway                                        | General gateway, in-cluster   | General store, server + plugin                     |
+| OpenCode                    | Private workshop | Private | Model gateway                                        | Private gateway, in-cluster   | Private store, server + plugin; general, read-only |
+| Claude Code, Claude Desktop | Workstation      | General | Anthropic directly, own login                        | General gateway, from outside | General store, from outside                        |
+| Codex                       | Workstation      | General | OpenAI directly, own login                           | General gateway, from outside | General store, from outside                        |
+| Vibe                        | Workstation      | Private | Mistral directly, own key                            | Private gateway, from outside | Private store, from outside                        |
 
 In the pods the tool gateways need no key: a network rule admits only that
 scope's pods, and the tool servers behind them answer the gateways only. From a workstation they are reached through Envoy with a key per
@@ -138,17 +138,21 @@ flowchart LR
     LO["Local models<br/>the Mac"]:::outside
     T["Private tool gateway<br/>every tool"]:::private
     M["Private memory<br/>Memini"]:::private
+    G["General memory<br/>Memini"]:::general
     A -->|"gateway key: trusted models"| L
     L --> MI
     L --> LO
     A -->|"no key, network rule"| T
     A -->|"client key, server and plugin"| M
+    A -->|"read-only key, lookups only"| G
 ```
 
 </details>
 
 - The gateway is the only provider its config allows. OpenCode's own free
   hosted models, which need no key, are switched off here.
+- General memory is a second server it can only look things up in: its key is
+  read-only on the store, which refuses every write.
 
 ## Claude Code, Claude Desktop and Codex on a workstation
 
@@ -209,19 +213,16 @@ Not agents, but they hold a model gateway key too.
 
 ## Differs from the design
 
-1. **The private workshop cannot read general memory yet.** The design lets the
-   private side read it and never write it. The assistant does, with a
-   read-only key; the workshop needs one of its own.
-2. **The private workshop has open internet.** With a shell and private data,
+1. **The private workshop has open internet.** With a shell and private data,
    a tricked agent could send data out. Kept as it is for now; an open
    decision.
-3. **The general gateway reports itself unhealthy.** It health-checks every
+2. **The general gateway reports itself unhealthy.** It health-checks every
    server in the shared catalogue, the Home Assistant one included, which it
    is rightly not allowed to reach. ToolHive has no setting to skip one.
    Harmless.
-4. **Workstation agents call their vendors directly.** The gateway is
+3. **Workstation agents call their vendors directly.** The gateway is
    in-cluster only. Accepted: tool use is meant to happen in the workshops.
-5. **The general workshop holds a key for OpenCode's hosted models.** A second
+4. **The general workshop holds a key for OpenCode's hosted models.** A second
    path next to the gateway. Accepted for the general workshop only.
 
 Closed on 2026-11-09:
@@ -236,5 +237,5 @@ Closed on 2026-11-09:
   notes file. Both moved to the private workshop.
 - The assistant could not see tool names behind the gateway's search step. It
   now has its own gateway with the real names, and asks before a write.
-- The assistant could not read general memory. It now has a read-only key and
-  the lookup tools.
+- Private agents could not read general memory. The assistant and the private
+  workshop now each have a read-only key and the lookup tools.

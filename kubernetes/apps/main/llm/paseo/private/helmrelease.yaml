@@ -14,6 +14,14 @@ spec:
                   secretKeyRef:
                     name: paseo-private-agents
                     key: MEMINI_API_KEY
+              # General memory, read-only: dotfiles adds it to every agent as a second
+              # server when both are set.
+              MEMINI_GENERAL_URL: http://memini-general.llm.svc.cluster.local:8080
+              MEMINI_GENERAL_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: paseo-private-agents
+                    key: MEMINI_GENERAL_API_KEY
     # Hermes' exec token (llm/hermes/app/rbac.yaml), app container only.
     persistence:
       kube-api-token:

@@ -30,7 +30,9 @@ settings; `common/helmrelease.yaml` for shared pod settings; the overlay's
 
 The agents' MCP servers (ToolHive, Memini, the Chromium sidecar) are defined in
 dotfiles (`conf.d/ai/`), the same definitions every workstation uses, and
-rendered by the pod-start bootstrap for this pod's `PASEO_DATA_SCOPE`. Each
+rendered by the pod-start bootstrap for this pod's `PASEO_DATA_SCOPE`. The
+private pod also gets general memory as a read-only server (`MEMINI_GENERAL_URL`
+and a read-only key). Each
 overlay's `config/` holds the rest. It becomes the `${APP}-config` ConfigMap,
 mounted read-only at `/etc/paseo/config`:
 

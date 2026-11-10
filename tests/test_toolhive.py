@@ -132,14 +132,19 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertEqual({"assistant.scope": "private"}, main["pod"]["labels"])
         self.assertNotIn("labels", main)
 
-    def test_general_memory_is_read_only_for_the_assistant(self):
+    def test_general_memory_is_read_only_for_the_private_side(self):
         # Private facts must never be written into the store general agents read.
         keys = (ROOT / "kubernetes/apps/main/llm/memini-general/app/externalsecret.yaml").read_text()
-        entry = keys[keys.index("- name: hermes"):]
-        self.assertIn("read_only: true", entry.split("- name:")[1])
+        for holder in ("hermes", "paseo-private"):
+            entry = keys[keys.index(f"- name: {holder}\n"):]
+            self.assertIn("read_only: true", entry.split("- name:")[1], holder)
         config = (ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml").read_text()
         server = config[config.index("  general_memory:"):]
         self.assertIn("include: [memory_recall, memory_briefing, memory_get, memory_list, memory_history]", server)
+        # The private workshop gets the store's address and its key; dotfiles renders the server.
+        release = (ROOT / "kubernetes/apps/main/llm/paseo/private/helmrelease.yaml").read_text()
+        self.assertIn("MEMINI_GENERAL_URL: http://memini-general.llm.svc.cluster.local:8080", release)
+        self.assertIn("key: MEMINI_GENERAL_API_KEY", release)
 
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
         keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]

@@ -323,7 +323,5 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
 6. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
    projected token) once the messaging app is in daily use.
 7. Shared skills directory in dotfiles, mounted read-only into the assistant.
-   A read-only key on the general memory store for the private workshop (the
-   assistant has one).
 8. Task board, then homelab alerts → cards.
 9. Retire the Open WebUI data and legacy hostnames.
