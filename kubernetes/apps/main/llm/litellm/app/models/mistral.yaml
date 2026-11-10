@@ -61,3 +61,58 @@ spec:
     mode: chat
     supportsVision: true
     supportsFunctionCalling: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: mistral-large-4
+spec:
+  modelName: mistral/mistral-large-4
+  proxyRef: litellm
+  params:
+    model: mistral/mistral-large-4
+    apiBase: https://api.mistral.ai/v1
+    apiKeyRef:
+      name: litellm-secret
+      key: MISTRAL_API_KEY
+  info:
+    mode: chat
+    supportsVision: true
+    supportsFunctionCalling: true
+---
+# GLM models served by Mistral's API: trusted with private data like Mistral's own (../../../DESIGN.md).
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: mistral-glm-5-3
+spec:
+  modelName: mistral/zai-glm-5-3
+  proxyRef: litellm
+  params:
+    model: mistral/zai-glm-5-3
+    apiBase: https://api.mistral.ai/v1
+    apiKeyRef:
+      name: litellm-secret
+      key: MISTRAL_API_KEY
+  info:
+    mode: chat
+    supportsVision: false
+    supportsFunctionCalling: true
+---
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: mistral-glm-5-3-flash
+spec:
+  modelName: mistral/zai-glm-5-3-flash
+  proxyRef: litellm
+  params:
+    model: mistral/zai-glm-5-3-flash
+    apiBase: https://api.mistral.ai/v1
+    apiKeyRef:
+      name: litellm-secret
+      key: MISTRAL_API_KEY
+  info:
+    mode: chat
+    supportsVision: true
+    supportsFunctionCalling: true
