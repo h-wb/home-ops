@@ -77,8 +77,10 @@ spec:
         # 0.3 keeps every chunk over the floor, as before 0.0.77 added the margin.
         similarMargin: 0.3
       review:
-        # No fallback on purpose: out of quota means the pull request waits.
-        # Luna pinned to max reasoning effort (LiteLLM alias); see models/chatgpt.yaml.
+        # Luna pinned to max reasoning effort (LiteLLM alias); see
+        # llm/litellm/app/models/chatgpt.yaml. Out of Luna quota the LiteLLM router
+        # falls back to mistral/mistral-large-4 (routerSettings.fallbacks in
+        # llm/litellm/app/litellmproxy.yaml), so the review still runs.
         model: litellm/chatgpt/gpt-6-luna-max
         # kritika is the approval the main-require-review ruleset needs (it replaced
         # the Claude Code "Renovate PR Review" workflow on 2026-10-03): a review with
