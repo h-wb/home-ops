@@ -3,7 +3,9 @@
 # writes to $HERMES_HOME. The doubled dollar is Flux's escape; Hermes expands the reference from
 # the pod env (the tier's LiteLLM virtual key).
 model:
-  default: mistral/mistral-small-latest
+  # Small could not work the tools from a plain request (it reported them missing);
+  # Medium and Large 4 can. Small stays for the background jobs below.
+  default: mistral/mistral-medium-latest
   provider: litellm
 providers:
   litellm:

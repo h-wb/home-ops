@@ -73,8 +73,9 @@ flowchart LR
   answers the user IDs on its allow list and ignores anyone else. A write's
   approval arrives as a message with buttons. Bot chats are not end-to-end
   encrypted.
-- Key: `hermes-private`, four models served by Mistral's API: Mistral Small
-  (the default), Medium and Large 4, and GLM 5.3. You switch per chat.
+- Key: `hermes-private`, four models served by Mistral's API: Mistral Medium
+  (the default), Small, Large 4 and GLM 5.3. You switch per chat. Small does
+  the background jobs; it is too weak to work the tools from a plain request.
 - Its gateway serves the private catalogue without the search step: Hermes
   searches tools itself, and a call to any tool not marked read-only waits for
   your yes.
