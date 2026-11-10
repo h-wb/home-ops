@@ -143,7 +143,8 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertIn("include: [memory_recall, memory_briefing, memory_get, memory_list, memory_history]", server)
         # The private workshop gets the store's address and its key; dotfiles renders the server.
         release = (ROOT / "kubernetes/apps/main/llm/paseo/private/helmrelease.yaml").read_text()
-        self.assertIn("MEMINI_GENERAL_URL: http://memini-general.llm.svc.cluster.local:8080", release)
+        self.assertIn("MEMINI_GENERAL_URL: &general-memory http://memini-general.llm.svc.cluster.local:8080", release)
+        self.assertIn("MEMINI_GENERAL_URL: *general-memory", release)
         self.assertIn("key: MEMINI_GENERAL_API_KEY", release)
 
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):

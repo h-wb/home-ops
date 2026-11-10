@@ -6,6 +6,11 @@ spec:
   values:
     controllers:
       ${APP}:
+        initContainers:
+          tools:
+            env:
+              # The bootstrap renders the agents' servers, so it needs the address too.
+              MEMINI_GENERAL_URL: &general-memory http://memini-general.llm.svc.cluster.local:8080
         containers:
           app:
             env:
@@ -16,7 +21,7 @@ spec:
                     key: MEMINI_API_KEY
               # General memory, read-only: dotfiles adds it to every agent as a second
               # server when both are set.
-              MEMINI_GENERAL_URL: http://memini-general.llm.svc.cluster.local:8080
+              MEMINI_GENERAL_URL: *general-memory
               MEMINI_GENERAL_API_KEY:
                 valueFrom:
                   secretKeyRef:
