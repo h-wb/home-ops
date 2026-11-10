@@ -158,18 +158,20 @@ Not agents, but they hold a model gateway key too.
 
 1. **OpenCode calls Mistral's API directly, in both workshops.** The design has
    one path to any model, the gateway, and the gateway key's model list is the
-   policy. These calls skip both. In the private workshop that means any model
-   on that account is reachable, and its config enables two GLM models there.
-   To decide: whether GLM is on the trusted list. Either way, route these calls
-   through the gateway and drop the API key from the pods.
+   policy. These calls skip both, so in the private workshop any model on that
+   account is reachable. Decided: route them through the gateway and drop the
+   API key from the pods. The GLM models served there are trusted.
 2. **Workstation agents call their vendors directly.** The gateway is
    in-cluster only. To decide: accept this as the exception it is, or not.
 3. **The assistant cannot see tool names.** The tool gateways put every tool
    behind `find_tool` and `call_tool`. "Writes ask" needs the real names.
-4. **General tool servers answer any pod directly.** The kubectl, GitHub and
-   Talos servers respond to the general workshop without passing the gateway,
-   so its curated list is a menu, not a wall. The private ones (vault, tasks,
-   home) are closed by network rules.
+   Decided: give the assistant the tools without the search step.
+4. **Tool servers answer any pod directly.** The gateway's admission rule
+   guards the gateway only. The servers behind it (kubectl, Flux, GitHub, Talos
+   and the rest) listen on their own address with no key, so any pod in the
+   cluster can call them, not only the general workshop. The private ones
+   (vault, tasks, home) are closed by network rules; the same rule for all of
+   them would close this.
 5. **Private memory is closed by key only.** The general workshop can reach its
    port and is refused for lack of a private key. A network rule would make it
    two locks.

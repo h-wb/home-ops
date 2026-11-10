@@ -14,10 +14,10 @@ choice for a role, for reference; swapping one does not change the design.
 
 Which models are trusted is a list, not part of the design:
 
-|                           | Today                 |
-| ------------------------- | --------------------- |
-| Trusted with private data | Mistral, local models |
-| General data only         | Claude, ChatGPT       |
+|                           | Today                                                       |
+| ------------------------- | ----------------------------------------------------------- |
+| Trusted with private data | Models served by Mistral's API (Mistral, GLM), local models |
+| General data only         | Claude, ChatGPT                                             |
 
 Moving a model from one row to the other is one change, to the model lists on
 the keys. Nothing else moves.
@@ -256,6 +256,8 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-09 | The assistant is reached through a messaging app                      |
 | 2026-11-09 | The assistant has no shell; everything it does is a named tool        |
 | 2026-11-09 | Reads are free, writes ask                                            |
+| 2026-11-09 | GLM models served by Mistral's API are trusted                        |
+| 2026-11-09 | Every model call goes through the model gateway, OpenCode's included  |
 | 2026-11-09 | Jobs on private data are named tools, not free-form agents            |
 | 2026-11-09 | Hand-offs to the general workshop need the prompt approved            |
 | 2026-11-09 | Repos hold code, services hold data                                   |
@@ -274,8 +276,6 @@ To decide:
   which the direction rule allows.
 - Assistant memory: keep the patched Memini plugin and its sync job, or connect
   Memini as a plain MCP server and drop both.
-- Send every model call through the model gateway and drop the direct
-  `MISTRAL_API_KEY` from the workshop pods.
 - Adopt the community `paseo-agent-orchestration` skill for the assistant, or
   write a smaller one.
 
