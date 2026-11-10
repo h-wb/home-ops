@@ -1,5 +1,7 @@
 ---
-# The model allowlist lives here, not in the pod: Mistral only, no cloud models.
+# The model allowlist lives here, not in the pod: trusted models only, all served
+# by Mistral's API. `mistral-large-latest` is still Large 3 there (2512), so Large 4
+# is named outright.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMVirtualKey
 metadata:
@@ -13,4 +15,5 @@ spec:
   models:
     - mistral/mistral-small-latest
     - mistral/mistral-medium-latest
-    - mistral/mistral-large-latest
+    - mistral/mistral-large-4
+    - mistral/zai-glm-5-3
