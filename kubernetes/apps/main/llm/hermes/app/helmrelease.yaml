@@ -55,7 +55,7 @@ spec:
             env:
               HERMES_HOME: &home /data/hermes
               HOME: *home
-              TZ: &tz Europe/Paris
+              TZ: &tz America/New_York
             securityContext:
               runAsNonRoot: true
               runAsUser: 10000
