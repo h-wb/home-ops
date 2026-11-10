@@ -243,6 +243,9 @@ Guidance lives where its subject lives:
 | General habits      | How to use the tool gateway             | dotfiles, one folder, linked into every agent |
 | Assistant routines  | The briefing; filing a task             | home-ops, beside the assistant, read-only     |
 
+Where each of these is today, with paths, is in the
+[README](./README.md#where-things-live).
+
 Review and delegation are not skills to write. The workshop ships them
 (a second opinion, a committee of two, a hand-off), and picks who does the work
 from agent profiles: a provider, a model and a note saying when to use it.

@@ -1,6 +1,9 @@
 ---
 name: daily-briefing
 description: Write the morning briefing (today's tasks and events, overdue tasks, open homelab tasks). Use when the daily-briefing routine runs or when asked for the briefing.
+metadata:
+  schedule: "0 7 * * *"
+  model: mistral/mistral-large-4
 ---
 
 # Daily briefing

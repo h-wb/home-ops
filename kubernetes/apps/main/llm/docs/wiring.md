@@ -84,17 +84,19 @@ flowchart LR
   approve a tool for good.
 - Its memory plugin recalls before a turn and records after it, like the
   workshops' one. General memory it can only read.
-- Routines: skills in `hermes/app/routines/`, mounted read-only. A job per
-  routine is created when the pod starts, on Toronto time, delivered to
-  Telegram: the briefing at 07:00, a nudge at 12:30, a check-in at 20:30, and
-  reminders every half hour from 08:00 to 21:30, silent when nothing is
-  coming up. A routine's message joins the chat, so you can answer it; the
+- Routines: skills in `hermes/app/routines/`, mounted read-only. One whose
+  front matter has a schedule gets a job when the pod starts, on Toronto time,
+  delivered to Telegram: the briefing at 07:00, a nudge at 12:30, a check-in
+  at 20:30, and reminders every half hour from 08:00 to 21:30, silent when
+  nothing is coming up. A routine's message joins the chat, so you can answer it; the
   `task-followup` skill then completes or moves the tasks and notes each
   postponement as a comment on the task.
 - A scheduled run has nobody to ask, so a call that needs a yes is refused.
   The TickTick task writes approved for good need none, so a scheduled run
   could make them; the routines are written to read only, which is an
   instruction and not a lock.
+- Documentation: its `system-docs` skill lists these pages, and it reads them
+  from git through the GitHub tool. It holds no copy.
 - Shared skills: the general skills folder in dotfiles (`conf.d/ai/skills`) is
   synced by a Job (`hermes/app/skills-sync/`) at a pinned dotfiles commit into
   a volume mounted read-only at `/opt/dotfiles-skills`, listed in

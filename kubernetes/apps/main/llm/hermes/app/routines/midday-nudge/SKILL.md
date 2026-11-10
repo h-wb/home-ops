@@ -1,6 +1,9 @@
 ---
 name: midday-nudge
 description: Send the midday nudge (what is still open today). Use when the midday-nudge routine runs.
+metadata:
+  schedule: "30 12 * * *"
+  model: mistral/mistral-medium-latest
 ---
 
 # Midday nudge

@@ -44,14 +44,14 @@ spec:
               accessMode: ReadWriteOnce
               size: 2Gi
               storageClass: ceph-block
-        # Creates the routines' scheduled jobs before the assistant starts
-        # (routines/sync.sh). As the image's own user, which s6 drops to below.
+        # Lays out the routines' skills and creates their scheduled jobs before
+        # the assistant starts (routines/sync.sh). As the image's own user, which s6 drops to below.
         initContainers:
           routines:
             image: &image
               repository: docker.io/nousresearch/hermes-agent
               tag: v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
-            command: ["/bin/sh", "/opt/hermes-routines/bin/sync.sh"]
+            command: ["/bin/sh", "/opt/hermes-routines/src/sync.sh"]
             env:
               HERMES_HOME: &home /data/hermes
               HOME: *home
@@ -170,30 +170,24 @@ spec:
           - path: /data/hermes/SOUL.md
             subPath: SOUL.md
             readOnly: true
-      # The routines (routines/): each skill as <name>/SKILL.md, read-only, so the
-      # assistant can load a routine and cannot rewrite one.
+      # The routines (routines/) as kustomize ships them: one flat file per skill.
       routines:
         type: configMap
         name: hermes-routines
         globalMounts:
-          - path: /opt/hermes-routines/skills/daily-briefing/SKILL.md
-            subPath: daily-briefing.md
+          - path: /opt/hermes-routines/src
             readOnly: true
-          - path: /opt/hermes-routines/skills/midday-nudge/SKILL.md
-            subPath: midday-nudge.md
-            readOnly: true
-          - path: /opt/hermes-routines/skills/evening-checkin/SKILL.md
-            subPath: evening-checkin.md
-            readOnly: true
-          - path: /opt/hermes-routines/skills/task-reminders/SKILL.md
-            subPath: task-reminders.md
-            readOnly: true
-          - path: /opt/hermes-routines/skills/task-followup/SKILL.md
-            subPath: task-followup.md
-            readOnly: true
-          - path: /opt/hermes-routines/bin/sync.sh
-            subPath: sync.sh
-            readOnly: true
+      # The same skills as <name>/SKILL.md, laid out by the init container. The
+      # assistant can load one and cannot rewrite one.
+      routine-skills:
+        type: emptyDir
+        advancedMounts:
+          main:
+            routines:
+              - path: /opt/hermes-routines/skills
+            hermes:
+              - path: /opt/hermes-routines/skills
+                readOnly: true
       # Paseo's entry point: `python /opt/hermes-acp/shim.py` (maps Paseo's cwd).
       acp-shim:
         type: configMap

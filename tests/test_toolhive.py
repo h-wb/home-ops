@@ -25,6 +25,11 @@ def yaml_of(path):
                                      text=True, timeout=60, check=True).stdout)
 
 
+def yaml_text(text):
+    return json.loads(subprocess.run(["yq", "-o=json", "-I=0", "."], input=text, capture_output=True,
+                                     text=True, timeout=60, check=True).stdout)
+
+
 class ToolHiveScopes(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -248,21 +253,35 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertEqual("America/Toronto", config["timezone"])
         self.assertTrue(config["cron"]["mirror_delivery"])
         values = next(d for d in self.docs if d["kind"] == "HelmRelease")["spec"]["values"]
-        mounts = values["persistence"]["routines"]["globalMounts"]
-        self.assertTrue(all(m["readOnly"] for m in mounts))
-        self.assertIn("/opt/hermes-routines/skills/daily-briefing/SKILL.md", [m["path"] for m in mounts])
+        # The folder is mounted whole, read-only; the init container lays the skills out in a
+        # volume that only it may write.
+        self.assertEqual([{"path": "/opt/hermes-routines/src", "readOnly": True}],
+                         values["persistence"]["routines"]["globalMounts"])
+        laid_out = values["persistence"]["routine-skills"]["advancedMounts"]["main"]
+        self.assertEqual([{"path": "/opt/hermes-routines/skills"}], laid_out["routines"])
+        self.assertEqual([{"path": "/opt/hermes-routines/skills", "readOnly": True}], laid_out["hermes"])
         main = values["controllers"]["main"]
         sync = main["initContainers"]["routines"]
         self.assertEqual(main["containers"]["hermes"]["image"], sync["image"])
         self.assertEqual(10000, sync["securityContext"]["runAsUser"])
         self.assertFalse(sync["securityContext"]["allowPrivilegeEscalation"])
-        # Every routine's skill is in the ConfigMap the release mounts.
         routines = next(d for d in self.docs if d["kind"] == "ConfigMap" and d["metadata"]["name"] == "hermes-routines")
-        script = routines["data"]["sync.sh"]
-        self.assertNotIn("${", script)  # Flux would substitute it
-        for name in [line.split()[1] for line in script.splitlines() if line.startswith("routine ")]:
-            self.assertIn(f"name: {name}\n", routines["data"][f"{name}.md"])
-            self.assertIn(f"/opt/hermes-routines/skills/{name}/SKILL.md", [m["path"] for m in mounts])
+        self.assertNotIn("${", routines["data"]["sync.sh"])  # Flux would substitute it
+        # Every skill is named after its file, and every folder in the repo is shipped. One with
+        # a schedule names a model the assistant's key allows.
+        allowed = next(d for d in self.docs if d["kind"] == "LiteLLMVirtualKey")["spec"]["models"]
+        folder = ROOT / "kubernetes/apps/main/llm/hermes/app/routines"
+        skills = {key[:-3]: text for key, text in routines["data"].items() if key.endswith(".md")}
+        self.assertEqual({d.name for d in folder.iterdir() if d.is_dir()}, set(skills))
+        scheduled = []
+        for name, text in skills.items():
+            front = yaml_text(text.split("\n---\n")[0])
+            self.assertEqual(name, front["name"])
+            if "metadata" in front:
+                self.assertIn(front["metadata"]["model"], allowed, name)
+                self.assertRegex(front["metadata"]["schedule"], r"^\S+ \S+ \S+ \S+ \S+$", name)
+                scheduled.append(name)
+        self.assertIn("daily-briefing", scheduled)
 
     def test_dotfiles_skills_are_synced_pinned_and_read_only(self):
         # The shared skills folder in h-wb/dotfiles (conf.d/ai/skills) reaches the pod

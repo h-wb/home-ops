@@ -1,6 +1,9 @@
 ---
 name: evening-checkin
 description: Send the evening check-in (ask which of today's tasks got done). Use when the evening-checkin routine runs.
+metadata:
+  schedule: "30 20 * * *"
+  model: mistral/mistral-large-4
 ---
 
 # Evening check-in

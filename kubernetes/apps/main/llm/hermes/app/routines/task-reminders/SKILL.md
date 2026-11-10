@@ -1,6 +1,9 @@
 ---
 name: task-reminders
 description: Send reminders for tasks and events that start in the next half hour. Use when the task-reminders routine runs.
+metadata:
+  schedule: "*/30 8-21 * * *"
+  model: mistral/mistral-medium-latest
 ---
 
 # Task reminders

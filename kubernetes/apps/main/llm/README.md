@@ -56,11 +56,41 @@ agents there. The assistant's messaging credentials are their own item, `hermes`
 user IDs it answers, comma-separated) and `TELEGRAM_HOME_CHANNEL` (the chat its
 routines deliver to; your own user ID for a direct chat).
 
-A routine is a skill plus a scheduled job, both in `hermes/app/routines/`. To
-add one: write `<name>/SKILL.md`, add it to the `hermes-routines` ConfigMap
-(`hermes/app/kustomization.yaml`) and to the mounts in the release, and add a
-`routine <name> <schedule> <model>` line to `sync.sh`. The pod restarts and its
-`routines` init container creates the job; read that container's log to see it.
+## Where things live
+
+One place for each kind of thing. A skill is a folder with a `SKILL.md` (the
+Agent Skills format), kept in git, so every agent here can read it.
+
+| What                                  | Where                         | Who reads it                                          |
+| ------------------------------------- | ----------------------------- | ----------------------------------------------------- |
+| A habit true on every machine         | dotfiles, `conf.d/ai/skills/` | Every agent; a Job copies the folder to the assistant |
+| Facts about one repo                  | That repo's `AGENTS.md`       | Whoever opens the repo                                |
+| A procedure for one repo              | That repo's `.agents/skills/` | Whoever opens the repo                                |
+| The assistant's routines and skills   | `hermes/app/routines/`        | The assistant                                         |
+| The assistant's standing instructions | `hermes/app/SOUL.md`          | The assistant, in every chat                          |
+| What is deployed, and this table      | This file                     | You; the assistant, through its `system-docs` skill   |
+| Why it is built this way              | `DESIGN.md`, `docs/`          | You; the assistant, through its `system-docs` skill   |
+| Your notes and anything private       | The Obsidian vault            | You; private agents, through the vault tools          |
+| What agents learn as they work        | Memini, one store per scope   | The agents. Nothing to maintain by hand               |
+
+- Nothing an agent has to follow lives in the vault. It is private, so the
+  general agents could not read it.
+- Claude Code reads `.claude/skills` only. dotfiles links the shared skills
+  there as well as into `~/.agents/skills`, which Codex and OpenCode read.
+- The assistant has no file tools. It reads these pages from git through the
+  GitHub tool, so it always sees the current version and holds no copy.
+
+### Routines
+
+A routine is a skill in `hermes/app/routines/<name>/SKILL.md`. With
+`metadata.schedule` (a cron line, on your clock) and `metadata.model` in its
+front matter it also gets a scheduled job, delivered to Telegram. Without them
+it is a skill the assistant loads when the task fits.
+
+To add one, write the folder and add its file to the `hermes-routines`
+ConfigMap (`hermes/app/kustomization.yaml`). The pod restarts, and its
+`routines` init container lays the skills out and rebuilds the jobs; a job
+whose skill is gone is removed. Read that container's log to see it.
 
 ## Agent model gateway
 
