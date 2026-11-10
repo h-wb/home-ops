@@ -11,6 +11,19 @@ $hermes --version
 touch "$HERMES_HOME/.no-bundled-skills"
 $hermes skills opt-out --remove --yes || failed=1
 
+# Hermes reads its skills settings from its own config file only, not from the
+# managed one, so copy that block over. Without it no routine's skill is found.
+/opt/hermes/.venv/bin/python - <<'PY' || failed=1
+import os, yaml
+managed = yaml.safe_load(open("/etc/hermes/config.yaml"))
+path = os.path.join(os.environ["HERMES_HOME"], "config.yaml")
+own = (yaml.safe_load(open(path)) if os.path.exists(path) else None) or {}
+own["skills"] = {**(own.get("skills") or {}), **managed["skills"]}
+with open(path, "w") as f:
+    yaml.safe_dump(own, f, sort_keys=False)
+print("skills settings copied:", own["skills"])
+PY
+
 # routine <name> <schedule> <model>: the job loads the skill of the same name.
 # Schedules are on your clock, not the pod's.
 routine() {
