@@ -30,6 +30,16 @@ patches:
         path: /metadata/annotations
         value:
           kustomize.toolkit.fluxcd.io/prune: disabled
+  # Restore as the uid that took the backup: the mover's own uid would own every
+  # file, and mise refuses a home it cannot chmod.
+  - target:
+      kind: Restore
+    patch: |-
+      - op: add
+        path: /spec/mover
+        value:
+          inheritSecurityContextFrom:
+            snapshot: {}
   # Move from `agents`: the backups are filed under that namespace, and a restore
   # that finds none must stop, not hand over an empty home. Both go once the
   # first backup from `llm` exists.
