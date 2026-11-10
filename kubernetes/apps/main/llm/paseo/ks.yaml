@@ -1,5 +1,40 @@
 ---
-# The workshops (../DESIGN.md): one Paseo daemon per scope.
+# The workshops (../DESIGN.md): one Paseo daemon per scope. General keeps the
+# historical name "paseo" (PVC, hostnames, clients).
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: paseo
+  namespace: llm
+spec:
+  targetNamespace: llm
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: paseo
+  components:
+    - ../../../../../components/kopiur/backup
+    - ../../../../../components/tailscale/client
+  interval: 30m
+  path: ./kubernetes/apps/main/llm/paseo/general
+  postBuild:
+    substitute:
+      APP: paseo
+      CLUSTER: ${CLUSTER}
+      KOPIUR_CAPACITY: 50Gi
+      KOPIUR_SCHEDULE: 38 4 * * *
+      PASEO_DATA_SCOPE: general
+      PASEO_CREDENTIAL_ITEM: paseo-general
+      PASEO_HOSTNAMES: paseo-general.${SECRET_DOMAIN},paseo.${SECRET_DOMAIN}
+      PASEO_SERVICE_DOMAIN: svc
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 10m
+  wait: false
+---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:

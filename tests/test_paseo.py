@@ -35,13 +35,10 @@ class PaseoRendering(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        parent = cls.run_tool("kustomize", "build", "kubernetes/apps/main/llm",
+                              "--load-restrictor=LoadRestrictionsNone")
         variables = {"CLUSTER": "main", "SECRET_DOMAIN": "example.com"}
-        children = []
-        # General is still in `agents` until its move to `llm`.
-        for namespace in ("agents", "llm"):
-            parent = cls.run_tool("kustomize", "build", f"kubernetes/apps/main/{namespace}",
-                                  "--load-restrictor=LoadRestrictionsNone")
-            children += cls.documents(cls.substitute(parent, variables))
+        children = cls.documents(cls.substitute(parent, variables))
         cls.rendered = {}
         for child in children:
             if child.get("kind") != "Kustomization" or child["metadata"]["name"] not in ("paseo", "paseo-private"):

@@ -1,20 +1,20 @@
 # Paseo environments
 
-Two Paseo pods, **general** and **private**, with separate homes, credentials and
-agent config. `PASEO_DATA_SCOPE` names the scope; both use dotfiles' `paseo` mise
-class for CLIs, repos and shell only.
+The workshops of the [assistant design](../DESIGN.md). Two Paseo pods in the
+`llm` namespace, **general** and **private**, with separate homes, credentials
+and agent config. `PASEO_DATA_SCOPE` names the scope; both use dotfiles' `paseo`
+mise class for CLIs, repos and shell only.
 
 ```text
 paseo/
-├── ks.yaml          # general, private and scratch Flux Kustomizations
+├── ks.yaml          # general and private Flux Kustomizations
 ├── common/          # shared HelmRelease and ExternalSecrets
 ├── general/
 │   ├── config/      # paseo.json, opencode.json for this scope
 │   └── ...          # GitHub/memory credentials, NFS and the API egress policy
-├── private/
-│   ├── config/
-│   └── ...          # explicit Hermes token mount and home-retention patch
-└── scratch/         # retained namespace and quotas, no agent RBAC grants
+└── private/
+    ├── config/
+    └── ...          # explicit Hermes token mount
 ```
 
 Edit `ks.yaml` for names, scope, credential item, hostnames and backup
@@ -70,10 +70,10 @@ Separation is enforced by what each pod can reach, not by request inspection:
 ## General cluster access through ToolHive
 
 `common/helmrelease.yaml` disables token automounting for both environments. General
-has no direct RBAC grants, including in `agents-scratch`. Its Cilium policy denies
+has no direct RBAC grants. Its Cilium policy denies
 the Kubernetes API entity on TCP 443/6443/7445 and TCP 6443/7445/50000 to all
 destinations (Kubernetes, KubePrism and Talos); other egress stays open. Private
-projects one token, for `exec` into `llm/hermes-private-0` only.
+projects one token, for `exec` into `hermes-private-0` only.
 
 ToolHive keeps its own `mcp-readonly` and `flux-mcp` service accounts. Flux MCP can
 update Flux resource specs, so it is still administrative in effect. GitHub
@@ -117,6 +117,22 @@ grant and readable `pass://Automation General/<item>/<field>` references.
 General keeps its historical `paseo` release, service account, PVC and backup
 identity, plus the `paseo.<domain>` and `svc` aliases. Private uses `paseo-private`
 and `svc-private`.
+
+## Home volumes
+
+Each home is a `ceph-block` PVC from the kopiur backup component, backed up
+daily and annotated so Flux never prunes it.
+
+- A restore runs as the uid recorded on the backup (overlay patch on the
+  `Restore`). Without it every file comes back owned by the mover's uid, and
+  mise refuses a home it cannot chmod.
+- Backups skip directories that carry a `CACHEDIR.TAG`: uv virtualenvs
+  (project `.venv`, mise's pipx tools), Cargo and Gradle caches. After a
+  restore, mise still reports those tools as installed; reinstall them with
+  `mise install --force <tool>` and re-run `uv sync` in the repos.
+- The backups are filed under `<app>@agents`, the namespace the pods ran in
+  until 2026-11-09. The overlays pin that identity, and make a restore fail
+  when no backup is found, until the first backup from `llm` exists.
 
 ## Checks
 

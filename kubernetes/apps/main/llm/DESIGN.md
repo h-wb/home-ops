@@ -240,9 +240,11 @@ To verify:
 
 ## Getting there
 
-Done: `hermes-general` removed (2026-11-09).
+Done (2026-11-09): `hermes-general` removed; Paseo moved into the `llm`
+namespace as `llm/paseo`.
 
-1. Paseo moves into the `llm` namespace, as `llm/paseo`; `agents` goes away.
+1. Unpin the Paseo backup identities once a backup from `llm` exists, then
+   delete the old `agents` namespace and its retained volumes.
 2. Hermes: the messaging app (credential, one egress rule), then cron, skills
    and sub-agents switched back on. Still no shell.
 3. First routine: the daily briefing. Needs mail and calendar tools, which the

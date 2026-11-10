@@ -16,11 +16,6 @@ PROMETHEUS = [{"namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.nam
                "podSelector": {"matchLabels": {"app.kubernetes.io/name": "prometheus"}}}]
 
 
-def agents(name):
-    return {"namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "agents"}},
-            "podSelector": {"matchLabels": {"app.kubernetes.io/name": name}}}
-
-
 def pods(**labels):
     return {"podSelector": {"matchLabels": labels}}
 
@@ -42,7 +37,7 @@ class ToolHiveScopes(unittest.TestCase):
             "mcp-gateway": [ENVOY, pods(**{"app.kubernetes.io/name": "hermes-private",
                                            "assistant.scope": "private"}),
                             pods(**{"app.kubernetes.io/name": "paseo-private"})],
-            "mcp-ops": [ENVOY, agents("paseo")],
+            "mcp-ops": [ENVOY, pods(**{"app.kubernetes.io/name": "paseo"})],
         }
         for gateway, clients in expected.items():
             with self.subTest(gateway=gateway):

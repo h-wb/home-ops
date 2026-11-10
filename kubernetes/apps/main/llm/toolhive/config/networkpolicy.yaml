@@ -67,10 +67,7 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: envoy-gateway
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: agents
-          podSelector:
+        - podSelector:
             matchLabels:
               # The general Paseo keeps its historical `paseo` name.
               app.kubernetes.io/name: paseo
