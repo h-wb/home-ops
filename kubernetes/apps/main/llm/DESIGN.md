@@ -290,6 +290,12 @@ To decide:
   connect Memini as a plain MCP server and drop both.
 - Adopt the community `paseo-agent-orchestration` skill for the assistant, or
   write a smaller one.
+- iMessage for the assistant, after Telegram. Its adapter talks to a BlueBubbles
+  server on a Mac: it needs that server's address and password, a way in for
+  the server's webhook and one egress rule out. To settle first: whether the
+  edge MacBook runs BlueBubbles or OpenBubbles (which does not fit a pod), and
+  which Apple ID it is signed into. With your own, you would be texting
+  yourself.
 
 To verify:
 
