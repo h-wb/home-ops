@@ -16,3 +16,11 @@ patches:
   - path: helmrelease.yaml
     target:
       kind: HelmRelease
+  # Keep general's home if this Flux Kustomization is removed.
+  - target:
+      kind: PersistentVolumeClaim
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          kustomize.toolkit.fluxcd.io/prune: disabled
