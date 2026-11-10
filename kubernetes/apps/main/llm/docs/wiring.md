@@ -1,0 +1,187 @@
+# Wiring
+
+How each agent is connected today: which path its model calls take, where its
+tools come from, and where it remembers things. The design it should match is
+[DESIGN.md](../DESIGN.md); the flows are in [flows.md](./flows.md).
+
+Read a diagram left to right. A solid arrow is as designed. A dotted arrow
+differs from the design, and is explained under
+[Differs from the design](#differs-from-the-design).
+
+The published page draws these diagrams with `build.py`; keep to the node and
+arrow forms used here so it can read them.
+
+## At a glance
+
+| Agent                       | Runs in          | Scope   | Models                                               | Tools                         | Memory                         |
+| --------------------------- | ---------------- | ------- | ---------------------------------------------------- | ----------------------------- | ------------------------------ |
+| Assistant (Hermes)          | Its own pod      | Private | Model gateway, own key                               | Private gateway, in-cluster   | Private store, by plugin       |
+| Claude Code                 | General workshop | General | Model gateway, which forwards its subscription login | General gateway, in-cluster   | General store                  |
+| OpenCode                    | General workshop | General | Model gateway, and Mistral's API directly            | General gateway, in-cluster   | General store, server + plugin |
+| OpenCode                    | Private workshop | Private | Model gateway, and Mistral's API directly            | Private gateway, in-cluster   | Private store, server + plugin |
+| Claude Code, Claude Desktop | Workstation      | General | Anthropic directly, own login                        | General gateway, from outside | General store, from outside    |
+| Codex                       | Workstation      | General | OpenAI directly, own login                           | General gateway, from outside | General store, from outside    |
+| Vibe                        | Workstation      | Private | Mistral directly, own key                            | Private gateway, from outside | Private store, from outside    |
+
+In the pods the tool gateways need no key: a network rule admits only that
+scope's pods. From a workstation they are reached through Envoy with a key per
+scope. Memory always needs the client's own key. The agents' tool and memory
+servers are defined once, in dotfiles (`conf.d/ai/`), and rendered per scope.
+
+## The assistant
+
+Hermes, in its own pod, private scope. Its network rule allows the three
+destinations below and DNS, nothing else. The private workshop reaches it
+through an exec bridge, which goes once the messaging app is in use.
+
+```mermaid
+flowchart LR
+    A["Assistant<br/>Hermes"]:::private
+    L["Model gateway<br/>LiteLLM"]:::shared
+    MI["Mistral"]:::outside
+    T["Private tool gateway<br/>every tool"]:::private
+    M["Private memory<br/>Memini"]:::private
+    A -->|"own key: Mistral models only"| L
+    L --> MI
+    A -.->|"no key; tool names hidden"| T
+    A -->|"own client key, by plugin"| M
+```
+
+- Key: `hermes-private`, three Mistral models.
+- The memory plugin is a patched build that records nothing unless told to.
+
+## Claude Code in the general workshop
+
+```mermaid
+flowchart LR
+    A["Claude Code<br/>general workshop"]:::general
+    L["Model gateway<br/>LiteLLM"]:::shared
+    AN["Anthropic"]:::outside
+    T["General tool gateway<br/>curated tools"]:::general
+    M["General memory<br/>Memini"]:::general
+    A -->|"subscription login, gateway key"| L
+    L -->|"passes it on"| AN
+    A -->|"no key, network rule"| T
+    A -->|"client key"| M
+```
+
+- The gateway holds no Anthropic key: a request without the subscription login
+  fails instead of being billed.
+- The pod has no Kubernetes credentials; cluster work goes through the tools.
+
+## OpenCode in the general workshop
+
+```mermaid
+flowchart LR
+    A["OpenCode<br/>general workshop"]:::general
+    L["Model gateway<br/>LiteLLM"]:::shared
+    CG["ChatGPT"]:::outside
+    LO["Local models<br/>the Mac"]:::outside
+    MI["Mistral's API<br/>Mistral and GLM models"]:::outside
+    T["General tool gateway<br/>curated tools"]:::general
+    M["General memory<br/>Memini"]:::general
+    A -->|"gateway key"| L
+    L -->|"shared login"| CG
+    L --> LO
+    A -.->|"pod-held API key, direct"| MI
+    A -->|"no key, network rule"| T
+    A -->|"client key, server and plugin"| M
+```
+
+- Roles today: coordinator on ChatGPT through the gateway; build, plan and
+  explorer on Mistral models and the reviewer on a GLM model, all direct.
+
+## OpenCode in the private workshop
+
+```mermaid
+flowchart LR
+    A["OpenCode<br/>private workshop"]:::private
+    L["Model gateway<br/>LiteLLM"]:::shared
+    LO["Local models<br/>the Mac"]:::outside
+    MI["Mistral's API<br/>Mistral and GLM models"]:::outside
+    T["Private tool gateway<br/>every tool"]:::private
+    M["Private memory<br/>Memini"]:::private
+    A -->|"gateway key: local models"| L
+    L --> LO
+    A -.->|"pod-held API key, direct"| MI
+    A -->|"no key, network rule"| T
+    A -->|"client key, server and plugin"| M
+```
+
+- Its gateway key lists local and Mistral models, but the Mistral calls do not
+  go through the gateway.
+
+## Claude Code, Claude Desktop and Codex on a workstation
+
+General scope. Keys come from Proton Pass through fnox when the agent starts.
+
+```mermaid
+flowchart LR
+    A["Claude Code, Codex<br/>workstation"]:::general
+    V["Anthropic, OpenAI"]:::outside
+    T["General tool gateway<br/>curated tools"]:::general
+    M["General memory<br/>Memini"]:::general
+    A -.->|"own login, direct"| V
+    A -->|"through Envoy, key per scope"| T
+    A -->|"client key"| M
+```
+
+## Vibe on a workstation
+
+Private scope.
+
+```mermaid
+flowchart LR
+    A["Vibe<br/>workstation"]:::private
+    MI["Mistral"]:::outside
+    T["Private tool gateway<br/>every tool"]:::private
+    M["Private memory<br/>Memini"]:::private
+    A -.->|"own key, direct"| MI
+    A -->|"through Envoy, key per scope"| T
+    A -->|"client key"| M
+```
+
+## Services that call models
+
+Not agents, but they hold a model gateway key too.
+
+| Service                       | Models on its key                      |
+| ----------------------------- | -------------------------------------- |
+| Both memory stores            | In-cluster embeddings                  |
+| Both tool gateways            | In-cluster embeddings, for tool search |
+| Paperless and its OCR helper  | Local models, in-cluster embeddings    |
+| Karakeep                      | ChatGPT, in-cluster embeddings         |
+| Kritika (pull request review) | ChatGPT, in-cluster embeddings         |
+| Lingarr                       | ChatGPT                                |
+
+## Differs from the design
+
+1. **OpenCode calls Mistral's API directly, in both workshops.** The design has
+   one path to any model, the gateway, and the gateway key's model list is the
+   policy. These calls skip both. In the private workshop that means any model
+   on that account is reachable, and its config enables two GLM models there.
+   To decide: whether GLM is on the trusted list. Either way, route these calls
+   through the gateway and drop the API key from the pods.
+2. **Workstation agents call their vendors directly.** The gateway is
+   in-cluster only. To decide: accept this as the exception it is, or not.
+3. **The assistant cannot see tool names.** The tool gateways put every tool
+   behind `find_tool` and `call_tool`. "Writes ask" needs the real names.
+4. **General tool servers answer any pod directly.** The kubectl, GitHub and
+   Talos servers respond to the general workshop without passing the gateway,
+   so its curated list is a menu, not a wall. The private ones (vault, tasks,
+   home) are closed by network rules.
+5. **Private memory is closed by key only.** The general workshop can reach its
+   port and is refused for lack of a private key. A network rule would make it
+   two locks.
+6. **OpenCode loads a memory plugin next to the memory server.** To check:
+   whether the plugin records conversations by itself. The assistant's plugin
+   is patched not to.
+7. **Egress.** The private workshop has no egress rule. The general one only
+   denies the Kubernetes and Talos APIs.
+8. **The general workshop holds a key for OpenCode's hosted models.** A model
+   picked from that provider leaves by a third path. To check: still used?
+9. **The location repo is cloned in the general workshop.** That fits "repos
+   hold code" only while the clone holds no data and the workshop holds no
+   credentials for the location service.
+10. **A stale entry on the workstation.** Claude Code's `plugin:memini` server
+    points at a hostname that no longer resolves.

@@ -51,6 +51,8 @@ agents get the full tool catalogue.
 | Model gateway | The only path to any model; each client's key lists its models | LiteLLM    |
 | Tool gateway  | One catalogue of tools, served through one gateway per scope   | ToolHive   |
 | Memory        | What agents remember between sessions; one store per scope     | Memini     |
+| Job runner    | Runs a named job with fixed inputs on real data                | Prefect    |
+| Task board    | The one place tasks live, whoever created them                 | Not chosen |
 | Messaging app | How you reach the assistant                                    | Not chosen |
 
 ## One assistant, one workshop per scope
@@ -71,8 +73,8 @@ agents get the full tool catalogue.
   workshop has no per-agent sandbox: an agent with a shell can read everything
   its daemon can, so a daemon belongs to one scope.
 - **The assistant has no shell and no repo checkouts.** It reads untrusted text
-  (mail, clipped web pages) next to private data, so its hands are the
-  workshops, reached through the workshop's own tools.
+  (mail, clipped web pages) next to private data, so everything it does goes
+  through named tools.
 
 The assistant and the workshop overlap (both can schedule, spawn agents and load
 skills). Each overlapping feature has one owner:
@@ -82,9 +84,31 @@ skills). Each overlapping feature has one owner:
 | Talking to the assistant                         | Assistant, over the messaging app             |
 | Personal routines (briefing, reminders, notices) | Assistant's scheduler, delivered to the app   |
 | Lookups and sub-tasks done through tools         | Assistant and its sub-agents                  |
+| Jobs on private data (reconcile, repair, export) | Named tools in front of the job runner        |
 | Anything that needs a shell or a repo            | Workshop, in the scope of the data it touches |
 | Repo routines (dependency sweeps, CI watching)   | Workshop schedules                            |
 | Models, tools, memory                            | The shared gateways and stores                |
+
+## The assistant acts through tools
+
+Everything the assistant does is a call to a named tool on the private tool
+gateway. Tools are the control point: what exists there is what the assistant
+can do.
+
+- **Reads are free.** Looking something up never asks.
+- **Writes ask.** A tool that changes something runs after you say yes, in the
+  messaging app. A yes can cover one call, the rest of the chat, or that tool
+  for good.
+- **Jobs are tools.** Work on private data that used to be a script in a repo
+  becomes a named job with fixed inputs. The assistant can start it; it cannot
+  improvise a command.
+
+The private workshop takes no part in this. It is where you work directly, with
+a shell, on private repos and on the jobs themselves.
+
+Today: Hermes asks before any write-capable call on a tool server marked
+`trust: untrusted`, and treats tools annotated read-only as free. Tools approved
+for good are a list in its managed config, so the list is versioned here.
 
 ## Places
 
@@ -129,6 +153,10 @@ the vault, so the repo stays general.
 
 ## Flows
 
+Each flow is drawn step by step in [docs/flows.md](./docs/flows.md). How every
+agent is connected today, and where that differs from this design, is in
+[docs/wiring.md](./docs/wiring.md).
+
 **Talk.** Messaging app → assistant. The app is not chosen yet; Hermes supports
 Telegram, Signal, Matrix and others. Whatever the assistant writes there is
 private data, so prefer an end-to-end encrypted one (Telegram bot chats are
@@ -138,23 +166,28 @@ not).
 skills), reads through the private tool gateway, and delivers to the messaging
 app. The daily briefing is the first one; it also covers open homelab tasks.
 
-**Hand-off to a workshop.** "Reconcile yesterday's location", "fix this bug":
+**A job on private data.** "Reconcile yesterday's location":
 
-1. The assistant picks the workshop from the scope of the data involved and
-   drafts a prompt.
-2. General workshop only: the assistant shows the exact prompt and waits for
-   approval.
-3. The assistant starts an agent on that workshop's daemon; the agent appears
-   in the workshop's app, where you can watch and steer it.
-4. The assistant checks its status and reports back.
+1. The assistant reads what it needs through the private tool gateway.
+2. It tells you what it wants to run and waits for a yes.
+3. It starts the named job; the job runner runs it on the real data.
+4. It reads the result and reports back.
 
-| Work touches | Workshop | Models  | Approval               |
-| ------------ | -------- | ------- | ---------------------- |
-| Private data | Private  | Trusted | None, same scope       |
-| Code only    | General  | Any     | You approve the prompt |
+Today the location repo's jobs are already Prefect deployments. Prefect's own
+tool server is read-only, so starting a deployment needs one small tool of ours
+that accepts a deployment from an allowed list and its parameters.
+
+**Hand-off to the general workshop.** "Fix this bug":
+
+1. The assistant drafts a prompt.
+2. It shows the exact prompt and waits for approval.
+3. It starts an agent on the general workshop's daemon; the agent appears in
+   the workshop's app, where you can watch and steer it.
+4. It checks the agent's status and reports back.
 
 Step 2 is the only place private data could reach a model outside the trusted
-set, so it is never automatic. Results coming back need no guard.
+set, so it is never automatic. Results coming back need no guard. You can also
+skip the assistant and start the agent yourself in the workshop's app.
 
 Today that link is Paseo's MCP server (`/mcp/agents` on the daemon port, the
 daemon password as bearer token). The assistant is given its agent tools only
@@ -213,30 +246,32 @@ A new harness or machine picks a scope; it does not get its own config.
 
 ## Decisions
 
-| Date       | Decision                                                                |
-| ---------- | ----------------------------------------------------------------------- |
-| 2026-11-05 | One model gateway, LiteLLM                                              |
-| 2026-11-07 | Hardened pods, not OpenShell sandboxes                                  |
-| 2026-11-09 | The rule is about trusted models, not about cloud against local         |
-| 2026-11-09 | One assistant, private only; the general Hermes was removed             |
-| 2026-11-09 | One workshop daemon per scope; both kept, both in the `llm` namespace   |
-| 2026-11-09 | The assistant is reached through a messaging app                        |
-| 2026-11-09 | The assistant has no shell; it drives the workshops through their tools |
-| 2026-11-09 | Hand-offs to the general workshop need the prompt approved              |
-| 2026-11-09 | Repos hold code, services hold data                                     |
-| 2026-11-09 | The briefing covers open homelab tasks                                  |
-| 2026-11-09 | "Scope" is the only term (not tier or segment)                          |
+| Date       | Decision                                                              |
+| ---------- | --------------------------------------------------------------------- |
+| 2026-11-05 | One model gateway, LiteLLM                                            |
+| 2026-11-07 | Hardened pods, not OpenShell sandboxes                                |
+| 2026-11-09 | The rule is about trusted models, not about cloud against local       |
+| 2026-11-09 | One assistant, private only; the general Hermes was removed           |
+| 2026-11-09 | One workshop daemon per scope; both kept, both in the `llm` namespace |
+| 2026-11-09 | The assistant is reached through a messaging app                      |
+| 2026-11-09 | The assistant has no shell; everything it does is a named tool        |
+| 2026-11-09 | Reads are free, writes ask                                            |
+| 2026-11-09 | Jobs on private data are named tools, not free-form agents            |
+| 2026-11-09 | Hand-offs to the general workshop need the prompt approved            |
+| 2026-11-09 | Repos hold code, services hold data                                   |
+| 2026-11-09 | The briefing covers open homelab tasks                                |
+| 2026-11-09 | "Scope" is the only term (not tier or segment)                        |
 
 ## Open
 
 To decide:
 
-- Which messaging app.
-- Whether the assistant may start private jobs without asking, or waits for a
-  yes there too.
-- Task system. Proposal: homelab tasks as GitHub issues in this repo, with the
-  alert fingerprint as a label; personal tasks wherever they already live. This
-  replaces the three synthetic task boards.
+- Which messaging app: Telegram or Signal.
+- Task board. Proposal: the assistant's built-in board (Hermes Kanban). It is
+  already part of the assistant, has a web view, takes cards from chat, and
+  dedupes cards created by automation, which is what alerts need. It replaces
+  the three synthetic task boards. Homelab tasks then live on the private side,
+  which the direction rule allows.
 - Assistant memory: keep the patched Memini plugin and its sync job, or connect
   Memini as a plain MCP server and drop both.
 - Send every model call through the model gateway and drop the direct
@@ -251,8 +286,14 @@ To verify:
 - General GitHub credentials (the general workshop's token, the general tool
   gateway's GitHub tool, the workstation's login) cannot read repos that hold
   private data.
-- Marking the general workshop's server `trust: untrusted` in Hermes makes
-  `create_agent` ask for approval in the messaging app.
+- Marking a tool server `trust: untrusted` in Hermes makes its write-capable
+  calls ask for approval in the messaging app.
+- The tool gateway shows the assistant real tool names. Its search optimizer
+  hides them behind `find_tool` and `call_tool` today, and approval per tool
+  needs the names.
+- The upstream tool servers annotate their read-only tools, so reads stay free.
+- Hermes Kanban fits as a task board: cards nobody is assigned to stay put, and
+  its automatic splitting of new cards can be turned off.
 - Scheduled jobs can be created from versioned definitions at deploy time
   (`hermes cron create`).
 - Memini supports read-only keys, so private agents can read general memory.
@@ -269,9 +310,11 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
    catalogue does not have yet.
 3. The private workshop as a real workshop: a GitHub credential (read general
    repos, write private ones), repo bootstrap enabled, an egress allowlist.
-4. Assistant → both workshop daemons; approval on the general one.
-5. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
+4. Job tools: Prefect's read-only tool server plus one small tool that starts
+   an allowed deployment. First jobs: the location repo's.
+5. Assistant → general workshop daemon, behind approval.
+6. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
    projected token) once the messaging app is in daily use.
-6. Shared skills directory in dotfiles, mounted read-only into the assistant.
-7. Homelab alerts → tasks.
-8. Retire the Open WebUI data and legacy hostnames.
+7. Shared skills directory in dotfiles, mounted read-only into the assistant.
+8. Task board, then homelab alerts → cards.
+9. Retire the Open WebUI data and legacy hostnames.

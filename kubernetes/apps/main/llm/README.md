@@ -1,6 +1,16 @@
 # Models, tools and memory
 
-What is deployed. Where it is going, and why, is in [DESIGN.md](./DESIGN.md).
+What is deployed. The rest of the documentation:
+
+| Document                             | What it holds                                                         |
+| ------------------------------------ | --------------------------------------------------------------------- |
+| [DESIGN.md](./DESIGN.md)             | The target: the rule, roles, decisions, what is left to do            |
+| [docs/flows.md](./docs/flows.md)     | How work moves, one diagram per flow                                  |
+| [docs/wiring.md](./docs/wiring.md)   | How each agent connects today, and where that differs from the design |
+| [paseo/README.md](./paseo/README.md) | The two workshops: pods, config, credentials, volumes                 |
+
+`docs/build.py` draws the three design documents as one page. Change a flow or a
+connection in the documents first, then the manifests, then rebuild the page.
 
 Use **general** and **private** as data scopes. General includes operational
 secrets and code; private includes personal notes, location, health and memory.
