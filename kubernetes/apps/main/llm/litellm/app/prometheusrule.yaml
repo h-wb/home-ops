@@ -34,7 +34,7 @@ spec:
             summary: LiteLLM {{ $labels.requested_model }} failing more than 25% of requests
           labels:
             severity: warning
-        # Kept for when ordered fallbacks are added; inert until then.
+        # Live since the luna-max alias gained a router fallback (litellmproxy.yaml).
         - alert: LiteLLMFallbackChainExhausted
           expr: |-
             sum by (requested_model, exception_status, exception_class) (

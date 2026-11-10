@@ -90,6 +90,10 @@ spec:
     routing_strategy: simple-shuffle
     cooldown_time: 30
     enable_pre_call_checks: true
+    # Luna out of subscription quota (kritika's review alias, models/chatgpt.yaml)
+    # reroutes to Mistral Large 4 instead of erroring.
+    fallbacks:
+      - chatgpt/gpt-6-luna-max: [mistral/mistral-large-4]
   litellmSettings:
     callbacks:
       # Makes chatgpt/* answer non-streaming requests (BerriAI/litellm#37039), which

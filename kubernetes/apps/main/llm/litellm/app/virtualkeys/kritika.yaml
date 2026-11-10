@@ -5,6 +5,9 @@
 #   under review, not ToolHive. Only public repositories
 #   should have the bot-dupont App installed, since everything it reviews goes here.
 # - `embed`: the in-cluster embedder for the similar-code index (stays local).
+# - `mistral/mistral-large-4`: only reached as the router's fallback for luna-max
+#   when Luna's quota is out (routerSettings.fallbacks in litellmproxy.yaml);
+#   listed so the fallback passes this key's model access check.
 # The value is copied into the Bitwarden `kritika` item, since kritika runs in its
 # own namespace.
 apiVersion: litellm.home-operations.com/v1alpha1
@@ -18,4 +21,5 @@ spec:
   secretKey: api-key
   models:
     - chatgpt/gpt-6-luna-max
+    - mistral/mistral-large-4
     - embed

@@ -108,6 +108,8 @@ spec:
 # Luna with reasoning effort pinned to max, for kritika's reviews: the light tier is
 # noticeably stronger at max effort than at its default, at the cost of slower answers
 # and more output tokens. A separate alias so karakeep's tagging stays on plain Luna.
+# When Luna's subscription quota is out, the router falls back to
+# mistral/mistral-large-4 (routerSettings.fallbacks in ../litellmproxy.yaml).
 # `extra_body` is merged onto the request after the provider's parameter filtering,
 # which would strip a bare `reasoning_effort`. It is a default: a caller that sends
 # its own effort wins.
