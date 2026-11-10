@@ -67,6 +67,12 @@ spec:
                     name: memini-secret
                     key: hermes
               MEMINI_BASE_URL: http://memini-private.llm.svc.cluster.local:8080
+              # Read-only key on the general store (config.yaml, general_memory).
+              MEMINI_GENERAL_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: memini-code-secret
+                    key: hermes
               MEMINI_NAMESPACE: hugo
             resources:
               requests:
@@ -82,7 +88,7 @@ spec:
         globalMounts:
           - path: /etc/hermes
             readOnly: true
-      # The patched Memini plugin (plugin-sync/).
+      # The Memini plugin (plugin-sync/).
       plugins:
         existingClaim: hermes-plugins
         globalMounts:

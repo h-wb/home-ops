@@ -132,6 +132,15 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertEqual({"assistant.scope": "private"}, main["pod"]["labels"])
         self.assertNotIn("labels", main)
 
+    def test_general_memory_is_read_only_for_the_assistant(self):
+        # Private facts must never be written into the store general agents read.
+        keys = (ROOT / "kubernetes/apps/main/llm/memini-general/app/externalsecret.yaml").read_text()
+        entry = keys[keys.index("- name: hermes"):]
+        self.assertIn("read_only: true", entry.split("- name:")[1])
+        config = (ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml").read_text()
+        server = config[config.index("  general_memory:"):]
+        self.assertIn("include: [memory_recall, memory_briefing, memory_get, memory_list, memory_history]", server)
+
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
         keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]
         self.assertEqual(["hermes-private"], [k["metadata"]["name"] for k in keys])

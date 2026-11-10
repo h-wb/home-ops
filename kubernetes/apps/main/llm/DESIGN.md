@@ -263,6 +263,8 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-09 | The assistant is reached through a messaging app                                             |
 | 2026-11-09 | The assistant has no shell; everything it does is a named tool                               |
 | 2026-11-09 | Reads are free, writes ask                                                                   |
+| 2026-11-09 | Agents record conversations by themselves, each into its own scope's memory                  |
+| 2026-11-09 | Home Assistant is private                                                                    |
 | 2026-11-09 | GLM models served by Mistral's API are trusted                                               |
 | 2026-11-09 | Every model call goes through the model gateway, OpenCode's included                         |
 | 2026-11-09 | Exceptions to that: workstation agents, and OpenCode's hosted models in the general workshop |
@@ -284,8 +286,8 @@ To decide:
   dedupes cards created by automation, which is what alerts need. It replaces
   the three synthetic task boards. Homelab tasks then live on the private side,
   which the direction rule allows.
-- Assistant memory: keep the patched Memini plugin and its sync job, or connect
-  Memini as a plain MCP server and drop both.
+- Assistant memory: keep the Memini plugin and the job that installs it, or
+  connect Memini as a plain MCP server and drop both.
 - Adopt the community `paseo-agent-orchestration` skill for the assistant, or
   write a smaller one.
 
@@ -321,6 +323,7 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
 6. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
    projected token) once the messaging app is in daily use.
 7. Shared skills directory in dotfiles, mounted read-only into the assistant.
-   A read-only key on the general memory store for the private side.
+   A read-only key on the general memory store for the private workshop (the
+   assistant has one).
 8. Task board, then homelab alerts → cards.
 9. Retire the Open WebUI data and legacy hostnames.

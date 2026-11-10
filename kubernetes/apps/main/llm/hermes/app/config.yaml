@@ -54,3 +54,14 @@ mcp_servers:
     # Reads are free, writes ask: any call to a tool not annotated read-only waits
     # for approval. A yes "for good" lands in command_allowlist as mcp:tools/<tool>.
     trust: untrusted
+  # General memory, to read only: the key is read-only on the server, and only the
+  # lookup tools are registered. A question asked here is logged by the general
+  # store, so it should not carry private detail.
+  general_memory:
+    url: http://memini-general.llm.svc.cluster.local:8080/mcp
+    headers:
+      Authorization: Bearer $${MEMINI_GENERAL_API_KEY}
+    tools:
+      include: [memory_recall, memory_briefing, memory_get, memory_list, memory_history]
+      resources: false
+      prompts: false

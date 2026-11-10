@@ -1,5 +1,5 @@
 ---
-# The patched Memini plugin; written by the sync Job, mounted read-only by both Hermes tiers.
+# The Memini plugin; written by the sync Job, mounted read-only by Hermes.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

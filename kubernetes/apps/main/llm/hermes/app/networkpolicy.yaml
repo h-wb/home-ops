@@ -1,6 +1,6 @@
 ---
-# Hermes may reach DNS, LiteLLM (its key picks the models), the private Memini and
-# the private ToolHive gateway; nothing else, and nothing may connect to it (Paseo
+# Hermes may reach DNS, LiteLLM (its key picks the models), both Memini stores (the
+# general one read-only) and its own ToolHive gateway; nothing else, and nothing may connect to it (Paseo
 # uses the API server's exec, not the pod network).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -38,6 +38,10 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/instance: memini
+        # General memory too, with a read-only key.
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: memini-code
       ports:
         - port: 8080
           protocol: TCP
