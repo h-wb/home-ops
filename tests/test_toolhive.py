@@ -244,6 +244,9 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
                           "write_approval": True}, config["skills"])
         self.assertEqual(1, config["delegation"]["max_spawn_depth"])
+        # Schedules and "today" are on the user's clock, and a routine's message can be answered.
+        self.assertEqual("America/Toronto", config["timezone"])
+        self.assertTrue(config["cron"]["mirror_delivery"])
         values = next(d for d in self.docs if d["kind"] == "HelmRelease")["spec"]["values"]
         mounts = values["persistence"]["routines"]["globalMounts"]
         self.assertTrue(all(m["readOnly"] for m in mounts))

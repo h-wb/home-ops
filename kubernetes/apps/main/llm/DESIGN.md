@@ -173,7 +173,10 @@ app. The daily briefing is the first one; it also covers open homelab tasks.
 Today: a routine is a skill in `hermes/app/routines/`, and its job is created
 when the pod starts. The briefing runs at 07:00, Toronto time, on TickTick's
 tasks and calendar events and the homelab tasks; mail waits for a tool server.
-A scheduled run has nobody to ask, so a routine can only read.
+A nudge at midday, a check-in in the evening and half-hourly reminders follow
+the same pattern, and you answer them in the chat. A scheduled run has nobody
+to ask, so it can only read and use the tools approved for good; the routines
+are written to read only.
 
 **A job on private data.** "Reconcile yesterday's location":
 

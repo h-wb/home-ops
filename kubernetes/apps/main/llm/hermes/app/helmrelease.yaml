@@ -179,6 +179,18 @@ spec:
           - path: /opt/hermes-routines/skills/daily-briefing/SKILL.md
             subPath: daily-briefing.md
             readOnly: true
+          - path: /opt/hermes-routines/skills/midday-nudge/SKILL.md
+            subPath: midday-nudge.md
+            readOnly: true
+          - path: /opt/hermes-routines/skills/evening-checkin/SKILL.md
+            subPath: evening-checkin.md
+            readOnly: true
+          - path: /opt/hermes-routines/skills/task-reminders/SKILL.md
+            subPath: task-reminders.md
+            readOnly: true
+          - path: /opt/hermes-routines/skills/task-followup/SKILL.md
+            subPath: task-followup.md
+            readOnly: true
           - path: /opt/hermes-routines/bin/sync.sh
             subPath: sync.sh
             readOnly: true

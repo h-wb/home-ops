@@ -20,6 +20,10 @@ routine() {
 }
 
 routine daily-briefing "0 7 * * *" mistral/mistral-large-4
+routine midday-nudge "30 12 * * *" mistral/mistral-medium-latest
+routine evening-checkin "30 20 * * *" mistral/mistral-large-4
+# Every half hour from 08:00 to 21:30; silent unless something is coming up.
+routine task-reminders "*/30 8-21 * * *" mistral/mistral-medium-latest
 
 $hermes cron list || failed=1
 if [ "$failed" = 1 ]; then echo "ROUTINES SYNC FAILED: see the errors above"; fi

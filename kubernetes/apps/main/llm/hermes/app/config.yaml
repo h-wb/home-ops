@@ -25,6 +25,15 @@ memory:
   provider: memini
   memory_enabled: false
   user_profile_enabled: false
+# The assistant's clock is yours, not the pod's.
+timezone: America/Toronto
+cron:
+  # A routine's message joins the chat, so a reply to it ("1 done, 2 tomorrow")
+  # is read with the message in view.
+  mirror_delivery: true
+  # No header and no "the agent cannot see this message" footer, which the line
+  # above makes untrue.
+  wrap_response: false
 approvals:
   mode: manual
   # A scheduled run has nobody to ask, so a call that needs a yes is refused.

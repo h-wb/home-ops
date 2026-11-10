@@ -35,4 +35,8 @@ configMapGenerator:
       disableNameSuffixHash: true
     files:
       - daily-briefing.md=./routines/daily-briefing/SKILL.md
+      - midday-nudge.md=./routines/midday-nudge/SKILL.md
+      - evening-checkin.md=./routines/evening-checkin/SKILL.md
+      - task-reminders.md=./routines/task-reminders/SKILL.md
+      - task-followup.md=./routines/task-followup/SKILL.md
       - sync.sh=./routines/sync.sh
