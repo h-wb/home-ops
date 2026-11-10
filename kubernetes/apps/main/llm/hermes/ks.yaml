@@ -1,8 +1,8 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# The tier-split Hermes assistant (agents README): one hardened pod per tier, its
-# tools through llm/toolhive's gateways, its memories in its tier's Memini, its
-# models through its tier's LiteLLM key. Paseo reaches it with kubectl exec only.
+# The assistant (../DESIGN.md): one hardened pod in the private scope, its tools
+# through the private ToolHive gateway, its memories in the private Memini, its
+# models through its own LiteLLM key.
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -15,8 +15,6 @@ spec:
       app.kubernetes.io/name: *app
   dependsOn:
     - name: litellm
-      namespace: llm
-    - name: memini-code
       namespace: llm
     - name: memini
       namespace: llm

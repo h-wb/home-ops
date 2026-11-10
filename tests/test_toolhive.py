@@ -41,9 +41,7 @@ class ToolHiveScopes(unittest.TestCase):
         expected = {
             "mcp-gateway": [ENVOY, pods(**{"app.kubernetes.io/name": "hermes-private",
                                            "assistant.scope": "private"}), agents("paseo-private")],
-            "mcp-ops": [ENVOY, pods(**{"app.kubernetes.io/name": "hermes-general",
-                                       "assistant.scope": "general"}),
-                        pods(**{"app.kubernetes.io/name": "open-webui"}), agents("paseo")],
+            "mcp-ops": [ENVOY, agents("paseo")],
         }
         for gateway, clients in expected.items():
             with self.subTest(gateway=gateway):
@@ -105,17 +103,30 @@ class MeminiStaysOutOfToolHive(unittest.TestCase):
         self.assertNotIn("PRIVATE_TOOLHIVE", keys)
 
 
-class HermesScopeLabels(unittest.TestCase):
-    def test_scope_labels_are_on_the_pods(self):
+class HermesIsPrivateOnly(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        built = subprocess.run(["kustomize", "build", "kubernetes/apps/main/llm/hermes/app"], cwd=ROOT,
+                               capture_output=True, text=True, timeout=60, check=True).stdout
+        cls.docs = json.loads(subprocess.run(["yq", "eval-all", "-o=json", "-I=0", "[.]", "-"],
+                                             input=built, capture_output=True, text=True,
+                                             timeout=60, check=True).stdout)
+
+    def test_one_release_labelled_on_its_pods(self):
         # The NetworkPolicies select pods; a controller label never reaches them.
-        text = (ROOT / "kubernetes/apps/main/llm/hermes/app/helmrelease.yaml").read_text()
-        docs = json.loads(subprocess.run(["yq", "eval-all", "-o=json", "-I=0", "[.]", "-"],
-                                         input=text, capture_output=True, text=True,
-                                         timeout=60, check=True).stdout)
-        for doc, scope in zip(docs, ("general", "private")):
-            main = doc["spec"]["values"]["controllers"]["main"]
-            self.assertEqual({"assistant.scope": scope}, main["pod"]["labels"])
-            self.assertNotIn("labels", main)
+        releases = [d for d in self.docs if d["kind"] == "HelmRelease"]
+        self.assertEqual(["hermes-private"], [r["metadata"]["name"] for r in releases])
+        main = releases[0]["spec"]["values"]["controllers"]["main"]
+        self.assertEqual({"assistant.scope": "private"}, main["pod"]["labels"])
+        self.assertNotIn("labels", main)
+
+    def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
+        keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]
+        self.assertEqual(["hermes-private"], [k["metadata"]["name"] for k in keys])
+        cloud = ("anthropic/", "chatgpt/", "gpt-", "codex-")
+        self.assertFalse([m for m in keys[0]["spec"]["models"] if m.startswith(cloud)])
+        subjects = [s["name"] for d in self.docs if d["kind"] == "RoleBinding" for s in d["subjects"]]
+        self.assertEqual(["paseo-private"], subjects)
 
 
 if __name__ == "__main__":

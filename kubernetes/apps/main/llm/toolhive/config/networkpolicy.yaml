@@ -51,7 +51,7 @@ spec:
           protocol: TCP
 ---
 # mcp-ops (mcp-general): the curated, non-private tools. Envoy and the
-# general-scope pods; Open WebUI too, which runs in this namespace.
+# general-scope pod.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -70,13 +70,6 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/managed-by: envoy-gateway
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: hermes-general
-              assistant.scope: general
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: open-webui
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: agents

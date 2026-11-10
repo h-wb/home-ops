@@ -1,5 +1,7 @@
 # Models, tools and memory
 
+What is deployed. Where it is going, and why, is in [DESIGN.md](./DESIGN.md).
+
 Use **general** and **private** as data scopes. General includes operational
 secrets and code; private includes personal notes, location, health and memory.
 Cloud models (Claude, ChatGPT) are general only; direct Mistral and local
@@ -15,7 +17,7 @@ each Paseo scope is a separate pod. No private-scope key lists a cloud model.
 | Private | `mcp-private` (`vmcp-mcp-gateway`) | `memini-private` | `litellm-paseo-private` |
 
 ToolHive's gateways take callers anonymously, so who reaches each one is the
-boundary. In-cluster clients (Hermes, Paseo, Open WebUI) call the service with no
+boundary. In-cluster clients (Hermes, Paseo) call the service with no
 key, and `toolhive/config/networkpolicy.yaml` admits only that scope's pods.
 Clients outside the cluster go through Envoy (`mcp-<scope>.${SECRET_DOMAIN}`),
 which checks `x-api-key` against that gateway's own list.
@@ -23,10 +25,10 @@ which checks `x-api-key` against that gateway's own list.
 Client keys are per holder (what you'd revoke if it leaked), shared by every
 agent on it, and named `<SCOPE>_<HOLDER>` in Bitwarden:
 
-| Item       | Fields                                                                                                                                               |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `toolhive` | `GENERAL_WORKSTATION`, `PRIVATE_WORKSTATION` (Envoy client `workstation`), `REDIS_PASSWORD` (the gateways' session store)                            |
-| `memini`   | `GENERAL_ADMIN`, `GENERAL_WORKSTATION`, `GENERAL_PASEO`, `GENERAL_HERMES`, `PRIVATE_ADMIN`, `PRIVATE_HERMES`, `PRIVATE_WORKSTATION`, `PRIVATE_PASEO` |
+| Item       | Fields                                                                                                                             |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `toolhive` | `GENERAL_WORKSTATION`, `PRIVATE_WORKSTATION` (Envoy client `workstation`), `REDIS_PASSWORD` (the gateways' session store)          |
+| `memini`   | `GENERAL_ADMIN`, `GENERAL_WORKSTATION`, `GENERAL_PASEO`, `PRIVATE_ADMIN`, `PRIVATE_HERMES`, `PRIVATE_WORKSTATION`, `PRIVATE_PASEO` |
 
 The workstation keys reach the workstations through Proton Pass
 (`Machines/toolhive`, `Machines/memini`, fields `general`/`private`). The
@@ -42,7 +44,7 @@ Agents use the Service, `http://litellm.llm.svc.cluster.local:4000`, like every 
 | Claude Code | Root URL, `anthropic/*`  | Claude Code owns its subscription login; LiteLLM forwards it. `ANTHROPIC_CUSTOM_HEADERS` carries the LiteLLM key                                            |
 | OpenCode    | `/v1`, explicit aliases  | LiteLLM owns the shared `chatgpt/*` login and local/Qwen; Mistral goes direct via the pod's `MISTRAL_API_KEY`, native provider with thinking off by default |
 | Codex       | `/v1`, `gpt-*`/`codex-*` | Codex owns its subscription sign-in, LiteLLM forwards it; requests without one ride the shared `chatgpt/*` login                                            |
-| Hermes      | In-cluster `/v1`         | Separate general/private keys, Mistral only                                                                                                                 |
+| Hermes      | In-cluster `/v1`         | Private only, its own key, Mistral only                                                                                                                     |
 
 Claude's URL and header are injected into general's containers. Keep
 `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `apiKeyHelper` unset. The gateway

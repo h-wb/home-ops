@@ -1,38 +1,7 @@
 ---
-# The general Paseo ACP bridge: `kubectl exec -i hermes-general-0 -c hermes -- ...`.
-# Exec only, into the general Hermes only: private Hermes reads the real vault, and
-# its answers must never reach a general (Claude) session. Whoever execs here can
-# read the general tier's keys.
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: paseo-hermes-general-exec
-rules:
-  - apiGroups:
-      - ""
-    resources:
-      - pods/exec
-    resourceNames:
-      - hermes-general-0
-    verbs:
-      - create
-      - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: paseo-hermes-general-exec
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: paseo-hermes-general-exec
-subjects:
-  - kind: ServiceAccount
-    name: paseo
-    namespace: agents
----
-# The private Paseo's Hermes (private) provider: `kubectl exec -i hermes-private-0 -c hermes -- ...`.
-# The only Kubernetes grant that ServiceAccount has (agents/paseo-private mounts no other token).
+# The private Paseo's Hermes provider: `kubectl exec -i hermes-private-0 -c hermes -- ...`.
+# The only Kubernetes grant that ServiceAccount has (agents/paseo-private mounts no
+# other token). Never grant it to general: Hermes's answers carry private data.
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

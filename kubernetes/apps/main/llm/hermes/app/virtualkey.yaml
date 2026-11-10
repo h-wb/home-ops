@@ -1,0 +1,16 @@
+---
+# The model allowlist lives here, not in the pod: Mistral only, no cloud models.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMVirtualKey
+metadata:
+  name: hermes-private
+spec:
+  proxyRef: litellm
+  proxyNamespace: llm
+  keyAlias: Hermes private
+  secretName: litellm-hermes-private
+  secretKey: api-key
+  models:
+    - mistral/mistral-small-latest
+    - mistral/mistral-medium-latest
+    - mistral/mistral-large-latest

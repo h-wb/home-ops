@@ -1,119 +1,7 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-# Hermes (nousresearch/hermes-agent) as the tier-split chat assistant, one
-# app-template release per tier: hermes-general and hermes-private. Pod names
-# stay hermes-{tier}-0: the Paseo providers exec into them (app/rbac.yaml and
-# agents/paseo/private/config/paseo.json), so tiers stay pinned by RBAC + egress
-# netpol, and the only credentials each pod carries are its LiteLLM and Memini
-# keys. Ssegment differences live in the env (keys, Memini URL) and the mounted
-# config (config-{tier}.yaml). The image's s6 init runs as root and drops to the
-# hermes user itself; the pod carries no ServiceAccount token.
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: &app hermes-general
-spec:
-  interval: 1h
-  chartRef:
-    kind: OCIRepository
-    name: app-template
-  dependsOn: []
-  values:
-    defaultPodOptions:
-      securityContext:
-        # The image's s6 init starts as root, supervises the gateway and reaps its
-        # exited children; files land uid 10000, matching the image's hermes user.
-        fsGroup: 10000
-        fsGroupChangePolicy: OnRootMismatch
-        seccompProfile:
-          type: RuntimeDefault
-    controllers:
-      main:
-        type: statefulset
-        replicas: 1
-        annotations:
-          # The tier configs are raw configMaps outside this release: reloader
-          # rolls the StatefulSet when they change.
-          reloader.stakater.com/auto: "true"
-        # On the pods, not the StatefulSet: the NetworkPolicies (hermes, toolhive)
-        # select pods by it. `labels` here would only label the controller.
-        pod:
-          labels:
-            assistant.scope: general
-        statefulset:
-          volumeClaimTemplates:
-            - name: data
-              accessMode: ReadWriteOnce
-              size: 2Gi
-              storageClass: ceph-block
-        containers:
-          hermes:
-            image:
-              repository: docker.io/nousresearch/hermes-agent
-              tag: v0.23.0@sha256:adb7890916de63245523492be8f68f9d2095fecbec4e2a6dab7960381f0fc002
-            args: ["gateway", "run"]
-            env:
-              HERMES_HOME: /data/hermes
-              HOME: /data/hermes
-              TZ: Europe/Paris
-              # Fail fast: the NetworkPolicy silently drops internet traffic, so Hermes's update
-              # and model-catalog checks each waited out a TCP timeout (about 20 s per new
-              # session). A closed local port refuses at once; in-cluster names bypass it.
-              HTTPS_PROXY: http://127.0.0.1:9
-              HTTP_PROXY: http://127.0.0.1:9
-              https_proxy: http://127.0.0.1:9
-              http_proxy: http://127.0.0.1:9
-              NO_PROXY: .svc.cluster.local,.svc,localhost,127.0.0.1
-              no_proxy: .svc.cluster.local,.svc,localhost,127.0.0.1
-              # The tier's models (litellm-keys.yaml) and its memories (the general
-              # Memini instance; memini-general is memini-code's alias).
-              LITELLM_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: litellm-hermes-general
-                    key: api-key
-              MEMINI_API_KEY:
-                valueFrom:
-                  secretKeyRef:
-                    name: memini-code-secret
-                    key: hermes
-              MEMINI_BASE_URL: http://memini-general.llm.svc.cluster.local:8080
-              MEMINI_NAMESPACE: hugo
-            resources:
-              requests:
-                cpu: 50m
-                memory: 512Mi
-              limits:
-                memory: 1536Mi
-    persistence:
-      # The managed config, read-only: wins over anything the agent writes.
-      config:
-        type: configMap
-        name: hermes-config-general
-        globalMounts:
-          - path: /etc/hermes
-            readOnly: true
-      # The patched Memini plugin (plugin-sync/); read-only under HERMES_HOME.
-      plugins:
-        existingClaim: hermes-plugins
-        globalMounts:
-          - path: /data/hermes/plugins/memini
-            subPath: memini
-            readOnly: true
-      # Paseo's entry point: `python /opt/hermes-acp/shim.py` (maps Paseo's cwd).
-      acp-shim:
-        type: configMap
-        name: hermes-acp-shim
-        globalMounts:
-          - path: /opt/hermes-acp
-            readOnly: true
-      # Binds to the statefulset's claim template above (hermes-general-0).
-      data:
-        existingClaim: data
-        globalMounts:
-          - path: /data
----
-# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# The assistant (../../DESIGN.md): private scope only. The pod name stays
+# hermes-private-0, which the Paseo provider execs into (rbac.yaml).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -127,6 +15,7 @@ spec:
   values:
     defaultPodOptions:
       securityContext:
+        # The image's s6 init starts as root and drops to its hermes user (10000).
         fsGroup: 10000
         fsGroupChangePolicy: OnRootMismatch
         seccompProfile:
@@ -167,8 +56,6 @@ spec:
               http_proxy: http://127.0.0.1:9
               NO_PROXY: .svc.cluster.local,.svc,localhost,127.0.0.1
               no_proxy: .svc.cluster.local,.svc,localhost,127.0.0.1
-              # The private tier's models and the private Memini instance; the
-              # memories and this pod's reach (mcp-gateway only) are private data.
               LITELLM_API_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -188,24 +75,28 @@ spec:
               limits:
                 memory: 1536Mi
     persistence:
+      # The managed config, read-only: wins over anything the agent writes.
       config:
         type: configMap
         name: hermes-config-private
         globalMounts:
           - path: /etc/hermes
             readOnly: true
+      # The patched Memini plugin (plugin-sync/).
       plugins:
         existingClaim: hermes-plugins
         globalMounts:
           - path: /data/hermes/plugins/memini
             subPath: memini
             readOnly: true
+      # Paseo's entry point: `python /opt/hermes-acp/shim.py` (maps Paseo's cwd).
       acp-shim:
         type: configMap
         name: hermes-acp-shim
         globalMounts:
           - path: /opt/hermes-acp
             readOnly: true
+      # Binds to the statefulset's claim template above.
       data:
         existingClaim: data
         globalMounts:

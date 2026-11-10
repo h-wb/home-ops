@@ -1,8 +1,7 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# Hermes, one pod per tier. The releases mount the tier configs and the ACP shim by
-# literal name (configMapGenerator must keep stable names for references inside
-# HelmRelease values, which kustomize cannot rewrite); changes roll via Reloader.
+# The release mounts the config and the ACP shim by literal name (kustomize cannot
+# rewrite references inside HelmRelease values); changes roll via Reloader.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: llm
@@ -11,18 +10,13 @@ resources:
   - ./helmrelease.yaml
   - ./networkpolicy.yaml
   - ./rbac.yaml
-  - ./litellm-keys.yaml
+  - ./virtualkey.yaml
 configMapGenerator:
-  - name: hermes-config-general
-    options:
-      disableNameSuffixHash: true
-    files:
-      - config.yaml=./config-general.yaml
   - name: hermes-config-private
     options:
       disableNameSuffixHash: true
     files:
-      - config.yaml=./config-private.yaml
+      - config.yaml=./config.yaml
   - name: hermes-acp-shim
     options:
       disableNameSuffixHash: true
