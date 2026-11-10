@@ -139,6 +139,42 @@ class PaseoRendering(unittest.TestCase):
         private = json.loads(self.resource("private", "ConfigMap", "paseo-private-config")["data"]["opencode.json"])
         self.assertEqual(["litellm"], private["enabled_providers"])
 
+    def test_profiles_name_only_what_the_workshop_can_run(self):
+        # An orchestrating agent launches a worker from a profile's provider, model
+        # and mode. One the key cannot call only fails at the first prompt, and in
+        # private the key is what keeps the work on trusted models.
+        for scope, app in (("general", "paseo"), ("private", "paseo-private")):
+            with self.subTest(scope=scope):
+                data = self.resource(scope, "ConfigMap", f"{app}-config")["data"]
+                paseo, opencode = json.loads(data["paseo.json"]), json.loads(data["opencode.json"])
+                key = next(d for d in self.rendered[scope] if d.get("kind") == "LiteLLMVirtualKey")["spec"]
+                enabled = {name for name, provider in paseo["agents"]["providers"].items()
+                           if provider.get("enabled")}
+                profiles = {profile["id"]: profile for profile in paseo["daemon"]["agentProfiles"]}
+                self.assertEqual(["plan", "build", "review"], list(profiles))
+                for name, profile in profiles.items():
+                    self.assertIn(profile["provider"], enabled, name)
+                    self.assertTrue(profile["notes"], name)
+                    if profile["provider"] == "claude":
+                        self.assertIn("anthropic/*", key["models"], name)
+                        continue
+                    self.assertEqual("opencode", profile["provider"], name)
+                    gateway, _, model = profile["model"].partition("/")
+                    self.assertEqual("litellm", gateway, name)
+                    self.assertIn(model, key["models"], name)
+                    # An OpenCode mode is one of its agents.
+                    self.assertIn(profile["modeId"], opencode["agents"], name)
+                    efforts = opencode["providers"]["litellm"]["models"][model]["capabilities"]["reasoning"]["effort"]
+                    self.assertIn(profile.get("thinkingOptionId", efforts[0]), efforts, name)
+                # Plan and Review must not edit; Review is a second opinion, so not Build's model.
+                self.assertEqual({"plan"}, {profiles[name]["modeId"] for name in ("plan", "review")})
+                self.assertNotEqual(profiles["build"]["model"], profiles["review"]["model"])
+        private = json.loads(self.resource("private", "ConfigMap", "paseo-private-config")["data"]["paseo.json"])
+        self.assertEqual({"opencode"}, {p["provider"] for p in private["daemon"]["agentProfiles"]})
+        # No agent in private starts or prompts another one (the assistant is a provider there).
+        self.assertEqual({"disabledTools": ["create_agent", "send_agent_prompt"]},
+                         private["agents"]["providers"]["opencode"]["paseoTools"])
+
     def test_general_has_no_direct_kubernetes_credentials_or_grants(self):
         values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]
         self.assertIs(False, values["defaultPodOptions"]["automountServiceAccountToken"])

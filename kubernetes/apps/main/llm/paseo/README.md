@@ -44,6 +44,33 @@ mounted read-only at `/etc/paseo/config`:
 - `paseo.json`: merged into `~/.paseo/config.json`, where Paseo also keeps its
   own state. Our keys win; everything else is kept.
 
+## Profiles
+
+A profile is a saved provider, model and mode with a "when to use" note. You
+pick one in the model picker; an agent that delegates reads the notes
+(`list_profiles`) and launches the worker that fits. Both workshops declare the
+same three in `paseo.json` (`daemon.agentProfiles`):
+
+| Profile | For                                             | General                      | Private                            |
+| ------- | ----------------------------------------------- | ---------------------------- | ---------------------------------- |
+| Plan    | Hard design or debugging questions; no edits    | Claude Code, Opus, plan mode | OpenCode, Mistral Large, plan mode |
+| Build   | A well-specified change                         | OpenCode, Mistral Large      | OpenCode, Mistral Large            |
+| Review  | An independent read of a diff or plan; no edits | OpenCode, GLM, plan mode     | OpenCode, GLM, plan mode           |
+
+Plan mode is the read-only one in both agents.
+
+- Review runs on a different model family from Plan and Build, so it does not
+  share their blind spots.
+- The list is an array, and the merge replaces an array whole: a profile made
+  in the app is gone at the next pod start. Add it here.
+- In general, agents can act on the notes: Paseo's tools are injected there (an
+  app setting, **Settings → host → Agents → Enable Paseo tools**). In private
+  they are not, and OpenCode's `create_agent` and `send_agent_prompt` stay
+  disabled, so no agent there starts or prompts another one, the assistant
+  included. The profiles are for you to pick.
+- Paseo's own skills (`/paseo-advisor`, `/paseo-committee`, `/paseo-handoff`)
+  read the same notes before they choose a worker.
+
 Provisioning is the `tools` init container, on the app's image: `mise bootstrap
 --from` the dotfiles repo into `~/.dotfiles`, an `emptyDir` cloned fresh at every
 start and read-only in the app container. mise itself is the `ghcr.io/jdx/mise`

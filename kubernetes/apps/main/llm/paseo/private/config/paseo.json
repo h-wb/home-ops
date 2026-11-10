@@ -1,4 +1,34 @@
 {
+  "daemon": {
+    "agentProfiles": [
+      {
+        "id": "plan",
+        "name": "Plan",
+        "provider": "opencode",
+        "model": "litellm/mistral/mistral-large-4",
+        "modeId": "plan",
+        "thinkingOptionId": "high",
+        "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits."
+      },
+      {
+        "id": "build",
+        "name": "Build",
+        "provider": "opencode",
+        "model": "litellm/mistral/mistral-large-4",
+        "modeId": "build",
+        "notes": "A well-specified change: the goal, the files and the check to pass are already known. Not for open questions."
+      },
+      {
+        "id": "review",
+        "name": "Review",
+        "provider": "opencode",
+        "model": "litellm/mistral/zai-glm-5-3",
+        "modeId": "plan",
+        "thinkingOptionId": "high",
+        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles."
+      }
+    ]
+  },
   "agents": {
     "resumeOnStartup": true,
     "providers": {
