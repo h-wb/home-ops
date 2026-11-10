@@ -50,16 +50,24 @@ flowchart LR
     M["Private memory<br/>Memini"]:::private
     G["General memory<br/>Memini"]:::general
     TG["Telegram<br/>messaging app"]:::outside
+    GW["General workshop<br/>Paseo"]:::general
+    PW["Private workshop<br/>Paseo"]:::private
     A -->|"own key: Mistral models only"| L
     L --> MI
     A -->|"no key; writes ask first"| T
     A -->|"own client key, by plugin"| M
     A -->|"read-only key, lookups only"| G
     A -->|"bot token; allow-listed users only"| TG
+    A -->|"daemon password; every start asks"| GW
+    A -->|"daemon password; every start asks"| PW
 ```
 
 </details>
 
+- Workshops: it can look at either daemon's profiles, workspaces and agents
+  freely, and start an agent or send one a prompt after you approve that one
+  call. The prompt is on the approval card. Nothing else of the daemon is
+  registered: no terminal, no browser, no schedules.
 - Telegram: the assistant polls Telegram's API, so nothing connects in, and
   that API is the only internet destination its network rules allow. It
   answers the user IDs on its allow list and ignores anyone else. A write's

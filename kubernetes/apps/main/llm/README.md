@@ -50,7 +50,8 @@ The workstation keys reach the workstations through Proton Pass
 litellm key is consumed directly: its CR lives beside the pods, so the operator
 writes the Secret into the agents namespace and the helmrelease binds it by name.
 
-The assistant's messaging credentials are their own item, `hermes`:
+The assistant also reads `PASEO_PASSWORD` from both workshop items, to start
+agents there. The assistant's messaging credentials are their own item, `hermes`:
 `TELEGRAM_BOT_TOKEN` (from BotFather), `TELEGRAM_ALLOWED_USERS` (the numeric
 user IDs it answers, comma-separated) and `TELEGRAM_HOME_CHANNEL` (the chat its
 routines deliver to; your own user ID for a direct chat).

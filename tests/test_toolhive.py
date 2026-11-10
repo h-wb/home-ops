@@ -131,6 +131,12 @@ class HermesIsPrivateOnly(unittest.TestCase):
                                              input=built, capture_output=True, text=True,
                                              timeout=60, check=True).stdout)
 
+    def docs_config(self):
+        config = next(d for d in self.docs if d["kind"] == "ConfigMap"
+                      and d["metadata"]["name"] == "hermes-config-private")["data"]["config.yaml"]
+        return json.loads(subprocess.run(["yq", "-o=json", "-I=0", ".", "-"], input=config, capture_output=True,
+                                         text=True, timeout=60, check=True).stdout)
+
     def test_one_release_labelled_on_its_pods(self):
         # The NetworkPolicies select pods; a controller label never reaches them.
         releases = [d for d in self.docs if d["kind"] == "HelmRelease"]
@@ -162,7 +168,7 @@ class HermesIsPrivateOnly(unittest.TestCase):
         reach = {(next(iter(peer["podSelector"]["matchLabels"].values())), port["port"])
                  for rule in policy["egress"] for peer in rule["to"] for port in rule["ports"]}
         self.assertEqual({("kube-dns", 53), ("litellm", 4000), ("memini", 8080), ("memini-code", 8080),
-                          ("mcp-assistant", 4483)}, reach)
+                          ("mcp-assistant", 4483), ("paseo", 6767), ("paseo-private", 6767)}, reach)
         cilium = [d["spec"] for d in self.docs if d["kind"] == "CiliumNetworkPolicy"]
         self.assertEqual(1, len(cilium))
         self.assertEqual({"app.kubernetes.io/name": "hermes-private", "assistant.scope": "private"},
@@ -172,6 +178,35 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertEqual(["toEndpoints", "toPorts"], sorted(dns))
         self.assertEqual({"toFQDNs": [{"matchName": "api.telegram.org"}],
                           "toPorts": [{"ports": [{"port": "443", "protocol": "TCP"}]}]}, internet)
+
+    def test_workshop_handoffs_ask_every_time_and_bring_no_shell(self):
+        # The daemons serve terminals, a browser and schedules too. The assistant registers
+        # only lookups, and the two tools that start work, which must ask on every call.
+        config = self.docs_config()["mcp_servers"]
+        lookups = ["list_profiles", "list_workspaces", "list_agents", "get_agent_status", "get_agent_activity"]
+        for scope, host in (("general", "paseo"), ("private", "paseo-private")):
+            with self.subTest(scope=scope):
+                status, start = config[f"{scope}_workshop_status"], config[f"{scope}_workshop"]
+                url = f"http://{host}.llm.svc.cluster.local:6767/mcp/agents"
+                self.assertEqual([url, url], [status["url"], start["url"]])
+                self.assertEqual(lookups, status["tools"]["include"])
+                self.assertEqual(["create_agent", "send_agent_prompt"], start["tools"]["include"])
+                self.assertEqual("untrusted", start["trust"])
+                # Over the chat's limit from the first call: the answer covers one call, no "always".
+                self.assertEqual({"create_agent", "send_agent_prompt"}, set(start["tool_costs"]))
+                for cost in start["tool_costs"].values():
+                    self.assertGreater(cost["credits"], start["spend_limit"])
+                self.assertGreater(start["spend_limit"], 0)
+                for server in (status, start):
+                    self.assertEqual(f"Bearer $${{PASEO_{scope.upper()}_PASSWORD}}", server["headers"]["Authorization"])
+        release = next(d for d in self.docs if d["kind"] == "HelmRelease")
+        env = release["spec"]["values"]["controllers"]["main"]["containers"]["hermes"]["env"]
+        for scope in ("GENERAL", "PRIVATE"):
+            self.assertEqual({"name": "hermes-workshops", "key": f"PASEO_{scope}_PASSWORD"},
+                             env[f"PASEO_{scope}_PASSWORD"]["valueFrom"]["secretKeyRef"])
+        ks = (ROOT / "kubernetes/apps/main/llm/paseo/ks.yaml").read_text()
+        for host in ("paseo.llm.svc.cluster.local", "paseo-private.llm.svc.cluster.local"):
+            self.assertIn("," + host + "\n", ks)  # the daemon refuses a Host it does not know
 
     def test_telegram_polls_and_answers_only_the_allowed_users(self):
         release = next(d for d in self.docs if d["kind"] == "HelmRelease")

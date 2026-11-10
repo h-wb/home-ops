@@ -101,6 +101,17 @@ spec:
                     name: memini-code-secret
                     key: hermes
               MEMINI_NAMESPACE: hugo
+              # The workshop daemons (config.yaml, the four workshop servers).
+              PASEO_GENERAL_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermes-workshops
+                    key: PASEO_GENERAL_PASSWORD
+              PASEO_PRIVATE_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermes-workshops
+                    key: PASEO_PRIVATE_PASSWORD
             resources:
               requests:
                 cpu: 50m
@@ -121,6 +132,13 @@ spec:
         globalMounts:
           - path: /data/hermes/plugins/memini
             subPath: memini
+            readOnly: true
+      soul:
+        type: configMap
+        name: hermes-soul
+        globalMounts:
+          - path: /data/hermes/SOUL.md
+            subPath: SOUL.md
             readOnly: true
       # Paseo's entry point: `python /opt/hermes-acp/shim.py` (maps Paseo's cwd).
       acp-shim:

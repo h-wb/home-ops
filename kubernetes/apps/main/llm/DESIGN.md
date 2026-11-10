@@ -266,6 +266,10 @@ A new harness or machine picks a scope; it does not get its own config.
 - Pasted text is not covered: don't paste private data into a general agent.
 - The private workshop has a shell, private data and open internet, so an agent
   tricked there could send data out. Whether that stays is an open decision.
+- The approval card for a hand-off shows the first 1200 characters of the
+  prompt. A longer prompt is cut off on your screen, not in what is sent.
+- The assistant holds both workshop daemons' passwords. Its config registers
+  seven of their tools; the daemons themselves would accept the rest.
 - Someone with cluster or Bitwarden admin rights in the general scope can reach
   private workloads. The boundary guards normal workflows, not an administrator.
 
@@ -307,6 +311,7 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-09 | The briefing covers open homelab tasks                                                       |
 | 2026-11-09 | "Scope" is the only term (not tier or segment)                                               |
 | 2026-11-10 | The messaging apps are Telegram and iMessage                                                 |
+| 2026-11-10 | The assistant starts agents in either workshop; every start asks, one call at a time         |
 
 ## Open
 
@@ -359,7 +364,8 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
    repos, write private ones), repo bootstrap enabled.
 4. Job tools: Prefect's read-only tool server plus one small tool that starts
    an allowed deployment. First jobs: the location repo's.
-5. Assistant → general workshop daemon, behind approval.
+5. Done: the assistant starts agents in either workshop. Every start asks,
+   with the prompt on the approval card.
 6. Remove the workshop → assistant chat bridge (exec, ACP shim, exec RBAC,
    projected token) once the messaging app is in daily use.
 7. Skills: the general folder in dotfiles and agent profiles in the workshops;

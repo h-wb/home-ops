@@ -24,7 +24,8 @@ spec:
       KOPIUR_SCHEDULE: 38 4 * * *
       PASEO_DATA_SCOPE: general
       PASEO_CREDENTIAL_ITEM: paseo-general
-      PASEO_HOSTNAMES: paseo-general.${SECRET_DOMAIN},paseo.${SECRET_DOMAIN}
+      # The last one is the in-cluster name, which the assistant calls.
+      PASEO_HOSTNAMES: paseo-general.${SECRET_DOMAIN},paseo.${SECRET_DOMAIN},paseo.llm.svc.cluster.local
       PASEO_SERVICE_DOMAIN: svc
   prune: true
   retryInterval: 1m
@@ -57,7 +58,7 @@ spec:
       KOPIUR_SCHEDULE: 48 4 * * *
       PASEO_DATA_SCOPE: private
       PASEO_CREDENTIAL_ITEM: paseo-private
-      PASEO_HOSTNAMES: paseo-private.${SECRET_DOMAIN}
+      PASEO_HOSTNAMES: paseo-private.${SECRET_DOMAIN},paseo-private.llm.svc.cluster.local
       PASEO_SERVICE_DOMAIN: svc-private
   prune: true
   retryInterval: 1m

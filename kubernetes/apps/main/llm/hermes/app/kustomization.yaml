@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# The release mounts the config and the ACP shim by literal name (kustomize cannot
+# The release mounts the config, the instructions and the ACP shim by literal name (kustomize cannot
 # rewrite references inside HelmRelease values); changes roll via Reloader.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
@@ -18,6 +18,12 @@ configMapGenerator:
       disableNameSuffixHash: true
     files:
       - config.yaml=./config.yaml
+  # Standing instructions, mounted over the one in the home volume.
+  - name: hermes-soul
+    options:
+      disableNameSuffixHash: true
+    files:
+      - SOUL.md=./SOUL.md
   - name: hermes-acp-shim
     options:
       disableNameSuffixHash: true

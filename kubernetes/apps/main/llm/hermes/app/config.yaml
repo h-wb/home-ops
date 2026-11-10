@@ -67,3 +67,58 @@ mcp_servers:
       include: [memory_recall, memory_briefing, memory_get, memory_list, memory_history]
       resources: false
       prompts: false
+  # The workshops (llm/paseo): where coding work goes. Each daemon appears twice,
+  # because its tools carry no read-only mark and trust is set per server: the
+  # `_status` entry has the lookups and runs freely, the other has the two tools
+  # that start work and asks. The daemon serves many more tools (terminals, a
+  # browser, schedules); only the ones listed are registered, so still no shell.
+  #
+  # Starting work asks every time, with no "always": each call costs more than
+  # the chat's limit, and an answer to an over-limit call covers that call only.
+  # The prompt is on the approval card (its first 1200 characters).
+  general_workshop_status:
+    url: http://paseo.llm.svc.cluster.local:6767/mcp/agents
+    headers:
+      Authorization: Bearer $${PASEO_GENERAL_PASSWORD}
+    tools:
+      include: [list_profiles, list_workspaces, list_agents, get_agent_status, get_agent_activity]
+      resources: false
+      prompts: false
+  general_workshop:
+    url: http://paseo.llm.svc.cluster.local:6767/mcp/agents
+    headers:
+      Authorization: Bearer $${PASEO_GENERAL_PASSWORD}
+    trust: untrusted
+    tool_costs:
+      create_agent: &general-handoff
+        credits: 2
+        note: the prompt leaves the private side, read it first
+      send_agent_prompt: *general-handoff
+    spend_limit: 1
+    tools:
+      include: [create_agent, send_agent_prompt]
+      resources: false
+      prompts: false
+  private_workshop_status:
+    url: http://paseo-private.llm.svc.cluster.local:6767/mcp/agents
+    headers:
+      Authorization: Bearer $${PASEO_PRIVATE_PASSWORD}
+    tools:
+      include: [list_profiles, list_workspaces, list_agents, get_agent_status, get_agent_activity]
+      resources: false
+      prompts: false
+  private_workshop:
+    url: http://paseo-private.llm.svc.cluster.local:6767/mcp/agents
+    headers:
+      Authorization: Bearer $${PASEO_PRIVATE_PASSWORD}
+    trust: untrusted
+    tool_costs:
+      create_agent: &private-handoff
+        credits: 2
+        note: it starts an agent with a shell on private data
+      send_agent_prompt: *private-handoff
+    spend_limit: 1
+    tools:
+      include: [create_agent, send_agent_prompt]
+      resources: false
+      prompts: false

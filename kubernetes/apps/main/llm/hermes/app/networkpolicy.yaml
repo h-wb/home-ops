@@ -1,8 +1,8 @@
 ---
 # Hermes may reach DNS, LiteLLM (its key picks the models), both Memini stores (the
-# general one read-only) and its own ToolHive gateway; of the internet, Telegram's
-# API only (the second policy). Nothing may connect to it (Paseo uses the API
-# server's exec, not the pod network).
+# general one read-only), its own ToolHive gateway and the two workshop daemons;
+# of the internet, Telegram's API only (the second policy). Nothing may connect to
+# it (Paseo uses the API server's exec, not the pod network).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -53,6 +53,17 @@ spec:
               app.kubernetes.io/instance: mcp-assistant
       ports:
         - port: 4483
+          protocol: TCP
+    # The two workshop daemons, to start agents there (config.yaml).
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: paseo
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: paseo-private
+      ports:
+        - port: 6767
           protocol: TCP
 ---
 # The messaging app: Telegram's Bot API, by name, on 443. A NetworkPolicy cannot

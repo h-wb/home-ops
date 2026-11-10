@@ -131,9 +131,9 @@ Each job is a named tool with fixed inputs, so the assistant cannot improvise a 
 
 ## D. A coding job for the general workshop
 
-Status: planned
+Status: works today
 
-You ask for a code change. The assistant writes the prompt, you read it, and only then does it leave the private side.
+You ask for a code change. The assistant writes the prompt, you read it on the approval card, and only then does it leave the private side.
 
 ![Flow D: A coding job for the general workshop](./img/flow-d.svg)
 
@@ -152,14 +152,14 @@ sequenceDiagram
         participant G as General workshop
         participant X as Homelab
     end
-    Y-->>H: fix this bug
+    Y->>H: fix this bug
     Note over H: drafts the prompt
-    H-->>Y: shows the prompt
-    Y-->>H: approve
-    H-->>G: start an agent, with the approved prompt
-    Note over G: a coding agent works<br/>in its own worktree
-    G-->>H: result
-    H-->>Y: done, with the link
+    H->>Y: asks, showing the prompt
+    Y->>H: approve
+    H->>G: start an agent, with the approved prompt
+    Note over G: a coding agent works<br/>in the repo's workspace
+    G->>H: status, when asked
+    H->>Y: where it stands
 ```
 
 </details>
@@ -167,7 +167,9 @@ sequenceDiagram
 Step 5 is the only arrow in the whole design that carries something from private to general.
 
 - Why it is safe: The prompt is the one thing that crosses, and you read it first. The result comes back freely.
-- What it costs: One extra tap for every coding request made through the assistant. To skip it, start the agent yourself, as in flow E.
+- What it costs: One tap for every prompt sent through the assistant, with no way to approve for good. The card shows the first 1200 characters; a longer prompt is cut off on your screen. To skip all this, start the agent yourself, as in flow E.
+
+The same hand-off works into the private workshop, for work that needs your data. Nothing crosses a boundary there, but it starts an agent with a shell, so it asks every time too.
 
 ## E. You, directly
 
