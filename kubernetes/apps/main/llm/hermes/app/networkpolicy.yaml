@@ -1,7 +1,8 @@
 ---
 # Hermes may reach DNS, LiteLLM (its key picks the models), both Memini stores (the
-# general one read-only) and its own ToolHive gateway; nothing else, and nothing may connect to it (Paseo
-# uses the API server's exec, not the pod network).
+# general one read-only) and its own ToolHive gateway; of the internet, Telegram's
+# API only (the second policy). Nothing may connect to it (Paseo uses the API
+# server's exec, not the pod network).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -53,3 +54,35 @@ spec:
       ports:
         - port: 4483
           protocol: TCP
+---
+# The messaging app: Telegram's Bot API, by name, on 443. A NetworkPolicy cannot
+# name a host, so this one is Cilium's; Cilium allows what either policy allows,
+# so it adds to the list above and widens nothing else. The DNS rule is what lets
+# Cilium see the lookup and learn the name's addresses.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: hermes-private-telegram
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: hermes-private
+      assistant.scope: private
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            k8s:io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: api.telegram.org
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

@@ -54,8 +54,28 @@ spec:
               HTTP_PROXY: http://127.0.0.1:9
               https_proxy: http://127.0.0.1:9
               http_proxy: http://127.0.0.1:9
-              NO_PROXY: .svc.cluster.local,.svc,localhost,127.0.0.1
-              no_proxy: .svc.cluster.local,.svc,localhost,127.0.0.1
+              NO_PROXY: &no-proxy .svc.cluster.local,.svc,localhost,127.0.0.1,api.telegram.org
+              no_proxy: *no-proxy
+              # Telegram, by long polling: nothing connects in. Its fallback transport
+              # dials bare IPs and public DNS-over-HTTPS, which the egress rule
+              # (networkpolicy.yaml) does not allow, so it stays off.
+              HERMES_TELEGRAM_DISABLE_FALLBACK_IPS: "true"
+              TELEGRAM_BOT_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermes-messaging
+                    key: TELEGRAM_BOT_TOKEN
+              # Anyone else who writes to the bot is ignored.
+              TELEGRAM_ALLOWED_USERS:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermes-messaging
+                    key: TELEGRAM_ALLOWED_USERS
+              TELEGRAM_HOME_CHANNEL:
+                valueFrom:
+                  secretKeyRef:
+                    name: hermes-messaging
+                    key: TELEGRAM_HOME_CHANNEL
               LITELLM_API_KEY:
                 valueFrom:
                   secretKeyRef:

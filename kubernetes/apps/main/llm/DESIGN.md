@@ -46,16 +46,16 @@ agents get the full tool catalogue.
 
 ## Roles
 
-| Role          | What it does                                                   | Today      |
-| ------------- | -------------------------------------------------------------- | ---------- |
-| Assistant     | Talks to you, remembers, runs routines, decides who does work  | Hermes     |
-| Workshop      | Where agents with a shell work on repos; one per scope         | Paseo      |
-| Model gateway | The only path to any model; each client's key lists its models | LiteLLM    |
-| Tool gateway  | One catalogue of tools, served through one gateway per scope   | ToolHive   |
-| Memory        | What agents remember between sessions; one store per scope     | Memini     |
-| Job runner    | Runs a named job with fixed inputs on real data                | Prefect    |
-| Task board    | The one place tasks live, whoever created them                 | Not chosen |
-| Messaging app | How you reach the assistant                                    | Not chosen |
+| Role          | What it does                                                   | Today                   |
+| ------------- | -------------------------------------------------------------- | ----------------------- |
+| Assistant     | Talks to you, remembers, runs routines, decides who does work  | Hermes                  |
+| Workshop      | Where agents with a shell work on repos; one per scope         | Paseo                   |
+| Model gateway | The only path to any model; each client's key lists its models | LiteLLM                 |
+| Tool gateway  | One catalogue of tools, served through one gateway per scope   | ToolHive                |
+| Memory        | What agents remember between sessions; one store per scope     | Memini                  |
+| Job runner    | Runs a named job with fixed inputs on real data                | Prefect                 |
+| Task board    | The one place tasks live, whoever created them                 | Not chosen              |
+| Messaging app | How you reach the assistant                                    | Telegram; iMessage next |
 
 ## One assistant, one workshop per scope
 
@@ -160,10 +160,11 @@ Each flow is drawn step by step in [docs/flows.md](./docs/flows.md). How every
 agent is connected today, and where that differs from this design, is in
 [docs/wiring.md](./docs/wiring.md).
 
-**Talk.** Messaging app → assistant. The app is not chosen yet; Hermes supports
-Telegram, Signal, Matrix and others. Whatever the assistant writes there is
-private data, so prefer an end-to-end encrypted one (Telegram bot chats are
-not).
+**Talk.** Messaging app → assistant. Telegram first, iMessage next. The
+assistant answers only the accounts on its allow list; on Telegram it polls for
+messages, so nothing connects in to it. Whatever it writes there is private
+data: iMessage is end-to-end encrypted, Telegram bot chats are not, so
+Telegram's servers can read them.
 
 **Routine.** The assistant's scheduler runs a versioned job (prompt plus
 skills), reads through the private tool gateway, and delivers to the messaging
@@ -305,12 +306,12 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-09 | Repos hold code, services hold data                                                          |
 | 2026-11-09 | The briefing covers open homelab tasks                                                       |
 | 2026-11-09 | "Scope" is the only term (not tier or segment)                                               |
+| 2026-11-10 | The messaging apps are Telegram and iMessage                                                 |
 
 ## Open
 
 To decide:
 
-- Which messaging app: Telegram or Signal.
 - Whether the private workshop keeps open internet or gets an allowlist.
 - Task board. Proposal: the assistant's built-in board (Hermes Kanban). It is
   already part of the assistant, has a web view, takes cards from chat, and
@@ -335,8 +336,8 @@ To verify:
 - General GitHub credentials (the general workshop's token, the general tool
   gateway's GitHub tool, the workstation's login) cannot read repos that hold
   private data.
-- The approval prompt for a write reaches you: today in the workshop's chat
-  window, later in the messaging app.
+- The approval prompt for a write reaches you in the messaging app. On Telegram
+  it is a message with buttons: once, this chat, always, deny.
 - Hermes Kanban fits as a task board: cards nobody is assigned to stay put, and
   its automatic splitting of new cards can be turned off.
 - Scheduled jobs can be created from versioned definitions at deploy time
@@ -349,8 +350,9 @@ To verify:
 Done (2026-11-09): the general Hermes removed; both workshops moved into the
 `llm` namespace as `llm/paseo`; the old `agents` namespace deleted.
 
-1. The assistant: the messaging app (credential, one egress rule), then its
-   scheduler, skills and sub-agents switched back on. Still no shell.
+1. The assistant: Telegram is wired (a bot credential, and one egress rule to
+   Telegram's API only). Next iMessage, then its scheduler, skills and
+   sub-agents switched back on. Still no shell.
 2. First routine: the daily briefing. Needs mail and calendar tools, which the
    catalogue does not have yet.
 3. The private workshop as a real workshop: a GitHub credential (read general

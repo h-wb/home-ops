@@ -25,6 +25,8 @@ memory:
   user_profile_enabled: false
 approvals:
   mode: manual
+# Anyone not on a platform's allow list gets no answer, not even a pairing code.
+unauthorized_dm_behavior: ignore
 security:
   redact_secrets: true
 agent:

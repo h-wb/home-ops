@@ -31,9 +31,10 @@ servers are defined once, in dotfiles (`conf.d/ai/`), and rendered per scope.
 
 ## The assistant
 
-Hermes, in its own pod, private scope. Its network rule allows the
-destinations below and DNS, nothing else. The private workshop reaches it
-through an exec bridge, which goes once the messaging app is in use.
+Hermes, in its own pod, private scope. Its network rules allow the
+destinations below and DNS, nothing else. You reach it in the messaging app.
+The private workshop can also open a chat into it through an exec bridge,
+which goes once the messaging app is in daily use.
 
 ![Wiring: The assistant](./img/wiring-the-assistant.svg)
 
@@ -48,15 +49,22 @@ flowchart LR
     T["Assistant's tool gateway<br/>every tool, real names"]:::private
     M["Private memory<br/>Memini"]:::private
     G["General memory<br/>Memini"]:::general
+    TG["Telegram<br/>messaging app"]:::outside
     A -->|"own key: Mistral models only"| L
     L --> MI
     A -->|"no key; writes ask first"| T
     A -->|"own client key, by plugin"| M
     A -->|"read-only key, lookups only"| G
+    A -->|"bot token; allow-listed users only"| TG
 ```
 
 </details>
 
+- Telegram: the assistant polls Telegram's API, so nothing connects in, and
+  that API is the only internet destination its network rules allow. It
+  answers the user IDs on its allow list and ignores anyone else. A write's
+  approval arrives as a message with buttons. Bot chats are not end-to-end
+  encrypted.
 - Key: `hermes-private`, three Mistral models.
 - Its gateway serves the private catalogue without the search step: Hermes
   searches tools itself, and a call to any tool not marked read-only waits for

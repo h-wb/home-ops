@@ -20,7 +20,7 @@ commit both.
 
 ## A. Ask the assistant
 
-Status: partly today
+Status: works today
 
 You ask the assistant something about your life or your homelab, and it answers from what it can reach.
 
@@ -41,17 +41,17 @@ sequenceDiagram
         participant G as General workshop
         participant X as Homelab
     end
-    Y-->>H: a question
+    Y->>H: a question
     T->>H: reads what it needs
-    H-->>Y: the answer
+    H->>Y: the answer
 ```
 
 </details>
 
-Today the same conversation runs through the private workshop, which opens a chat into the assistant. The messaging app replaces that window.
+You write in the messaging app: Telegram today, iMessage next. The private workshop can still open a chat into the assistant; that window goes once the messaging app is in daily use.
 
-- Why it is safe: Nothing leaves the private side.
-- What it costs: Answers are as good as the trusted models. A private question never falls back to the others.
+- Why it is safe: Nothing crosses to the general side, and the assistant answers only the accounts on its allow list.
+- What it costs: Answers are as good as the trusted models. A private question never falls back to the others. What you and the assistant write passes through the messaging service: Telegram can read its bot chats, iMessage is end-to-end encrypted.
 
 ## B. Morning briefing
 

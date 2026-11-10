@@ -147,6 +147,43 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertIn("MEMINI_GENERAL_URL: *general-memory", release)
         self.assertIn("key: MEMINI_GENERAL_API_KEY", release)
 
+    def test_egress_is_the_named_services_and_telegram(self):
+        # The pod holds private data: everything it may reach is listed here.
+        policy = next(d for d in self.docs if d["kind"] == "NetworkPolicy")["spec"]
+        self.assertEqual(["Ingress", "Egress"], policy["policyTypes"])
+        self.assertNotIn("ingress", policy)
+        reach = {(next(iter(peer["podSelector"]["matchLabels"].values())), port["port"])
+                 for rule in policy["egress"] for peer in rule["to"] for port in rule["ports"]}
+        self.assertEqual({("kube-dns", 53), ("litellm", 4000), ("memini", 8080), ("memini-code", 8080),
+                          ("mcp-assistant", 4483)}, reach)
+        cilium = [d["spec"] for d in self.docs if d["kind"] == "CiliumNetworkPolicy"]
+        self.assertEqual(1, len(cilium))
+        self.assertEqual({"app.kubernetes.io/name": "hermes-private", "assistant.scope": "private"},
+                         cilium[0]["endpointSelector"]["matchLabels"])
+        self.assertNotIn("ingress", cilium[0])
+        dns, internet = cilium[0]["egress"]
+        self.assertEqual(["toEndpoints", "toPorts"], sorted(dns))
+        self.assertEqual({"toFQDNs": [{"matchName": "api.telegram.org"}],
+                          "toPorts": [{"ports": [{"port": "443", "protocol": "TCP"}]}]}, internet)
+
+    def test_telegram_polls_and_answers_only_the_allowed_users(self):
+        release = next(d for d in self.docs if d["kind"] == "HelmRelease")
+        env = release["spec"]["values"]["controllers"]["main"]["containers"]["hermes"]["env"]
+        # No webhook, so nothing connects in; no allow-all; no bare-IP fallback.
+        self.assertFalse({"TELEGRAM_WEBHOOK_URL", "TELEGRAM_ALLOW_ALL_USERS", "TELEGRAM_FALLBACK_IPS"} & set(env))
+        self.assertEqual("true", env["HERMES_TELEGRAM_DISABLE_FALLBACK_IPS"])
+        self.assertEqual("http://127.0.0.1:9", env["HTTPS_PROXY"])
+        for name in ("NO_PROXY", "no_proxy"):
+            self.assertEqual(".svc.cluster.local,.svc,localhost,127.0.0.1,api.telegram.org", env[name])
+        fields = ("TELEGRAM_BOT_TOKEN", "TELEGRAM_ALLOWED_USERS", "TELEGRAM_HOME_CHANNEL")
+        for field in fields:
+            self.assertEqual({"name": "hermes-messaging", "key": field}, env[field]["valueFrom"]["secretKeyRef"])
+        secret = next(d for d in self.docs if d["kind"] == "ExternalSecret")["spec"]
+        self.assertEqual({f: "{{ .%s }}" % f for f in fields}, secret["target"]["template"]["data"])
+        self.assertEqual([{"extract": {"key": "hermes"}}], secret["dataFrom"])
+        config = (ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml").read_text()
+        self.assertIn("\nunauthorized_dm_behavior: ignore\n", config)
+
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
         keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]
         self.assertEqual(["hermes-private"], [k["metadata"]["name"] for k in keys])

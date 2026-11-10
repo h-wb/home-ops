@@ -363,7 +363,7 @@ def system_map():
     for y, a, b in ((84, "You", "your devices"), (236, "Places", "one scope each"),
                     (418, "Models", "one gateway"), (477, "Tools", "one catalogue"), (536, "Memory", "a store per scope")):
         o += [t(24, y, a, "d-text d-strong", "start"), t(24, y + 16, b, "d-text d-small d-muted", "start")]
-    o.append(box(192, 62, 140, 44, "you", [("Messaging app", "d-strong")], planned=True))
+    o.append(box(192, 62, 140, 44, "you", [("Messaging app", "d-strong")]))
     o.append(box(432, 62, 484, 44, "you", [("Workshop app · one app, two hosts", "d-strong")]))
     o.append(box(192, 176, 140, 116, "private", [("Assistant", "d-strong"), ("talks, remembers,", "d-small"),
                                                  ("runs routines", "d-small"), ("no shell", "d-small d-muted")]))
@@ -371,7 +371,7 @@ def system_map():
                                                  ("private repos", "d-small d-muted"), ("yours, directly", "d-small d-muted")]))
     o.append(box(667, 176, 210, 116, "general", [("General workshop", "d-strong"), ("agents with a shell", "d-small"),
                                                  ("code repos", "d-small d-muted"), ("no private data", "d-small d-muted")]))
-    o += [arrow([(262, 106), (262, 168)], "planned"), t(270, 128, "talk", "d-text d-small", "start"),
+    o += [arrow([(262, 106), (262, 168)]), t(270, 128, "talk", "d-text d-small", "start"),
           arrow([(494, 106), (494, 168)]), t(502, 128, "watch, steer", "d-text d-small", "start"),
           arrow([(772, 106), (772, 168)]), t(780, 128, "watch, steer", "d-text d-small", "start"),
           arrow([(432, 234), (340, 234)]), t(386, 252, "chat bridge,", "d-text d-small d-muted"),
