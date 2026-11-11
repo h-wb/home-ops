@@ -11,7 +11,6 @@ resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
   - ./networkpolicy.yaml
-  - ./bluebubbles-network.yaml
   - ./rbac.yaml
   - ./virtualkey.yaml
 configMapGenerator:

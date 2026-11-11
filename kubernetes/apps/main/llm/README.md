@@ -8,7 +8,7 @@ What is deployed. The rest of the documentation:
 | [docs/flows.md](./docs/flows.md)       | How work moves, one diagram per flow                                  |
 | [docs/wiring.md](./docs/wiring.md)     | How each agent connects today, and where that differs from the design |
 | [paseo/README.md](./paseo/README.md)   | The two workshops: pods, config, credentials, volumes                 |
-| [hermes/README.md](./hermes/README.md) | The assistant: messaging, credentials and the iMessage callback       |
+| [hermes/README.md](./hermes/README.md) | The assistant: messaging, dashboard, credentials and Matrix setup     |
 
 `docs/build.py` draws the documents' diagrams (`docs/img/`) from the Mermaid text
 folded under each one, and the same drawings as one published page. Change a flow
@@ -52,13 +52,8 @@ litellm key is consumed directly: its CR lives beside the pods, so the operator
 writes the Secret into the agents namespace and the helmrelease binds it by name.
 
 The assistant also reads `PASEO_PASSWORD` from both workshop items, to start
-agents there. The assistant's messaging credentials are their own item, `hermes`:
-`TELEGRAM_BOT_TOKEN` (from BotFather), `TELEGRAM_ALLOWED_USERS` (the numeric
-user IDs it answers, comma-separated) and `TELEGRAM_HOME_CHANNEL` (the chat its
-routines deliver to; your own user ID for a direct chat).
-BlueBubbles uses the same item, with separate generated Secrets for its
-credentials and egress hostname. See [Hermes messaging](./hermes/README.md#messaging)
-for the fields and one-time callback registration; routine delivery stays on Telegram.
+agents there. The assistant's messaging and dashboard credentials are their own
+item, `hermes`; its fields are listed in [Hermes credentials](./hermes/README.md#credentials).
 
 ## Where things live
 

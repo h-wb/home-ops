@@ -1,0 +1,130 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+# Matrix homeserver for the assistant (llm/hermes), reached from Beeper over federation.
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: continuwuity
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    controllers:
+      continuwuity:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              repository: ghcr.io/continuwuity/continuwuity
+              tag: v26.9.3@sha256:a177e08ab62e3d5bc60e4b8cea0a2ea9d18d4cb2bf8a6138cb0392a423c575a8
+            env:
+              CONTINUWUITY_SERVER_NAME: ${SECRET_DOMAIN}
+              CONTINUWUITY_ADDRESS:
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              CONTINUWUITY_PORT: &port 8080
+              CONTINUWUITY_DATABASE_PATH: /data
+              CONTINUWUITY_WELL_KNOWN__CLIENT: https://matrix.${SECRET_DOMAIN}
+              CONTINUWUITY_WELL_KNOWN__SERVER: matrix.${SECRET_DOMAIN}:443
+              CONTINUWUITY_NEW_USER_DISPLAYNAME_SUFFIX: ""
+              CONTINUWUITY_ALLOW_ENCRYPTION: "true"
+              CONTINUWUITY_ALLOW_FEDERATION: "true"
+              # Federate with Beeper only; widen this to talk to other servers.
+              CONTINUWUITY_FORBIDDEN_REMOTE_SERVER_NAMES: '[".*"]'
+              CONTINUWUITY_ALLOWED_REMOTE_SERVER_NAMES: '["(^|\\.)beeper\\.com$"]'
+              # matrix.org is the default key notary, and the line above forbids it.
+              CONTINUWUITY_TRUSTED_SERVERS: "[]"
+              CONTINUWUITY_REQUIRE_AUTH_FOR_PROFILE_REQUESTS: "true"
+              CONTINUWUITY_ALLOW_PUBLIC_ROOM_DIRECTORY_OVER_FEDERATION: "false"
+              CONTINUWUITY_LOCKDOWN_PUBLIC_ROOM_DIRECTORY: "true"
+              CONTINUWUITY_ALLOW_LEGACY_MEDIA: "false"
+              CONTINUWUITY_IP_LOOKUP_STRATEGY: "1"
+            envFrom:
+              - secretRef:
+                  name: continuwuity-secret
+                  optional: true
+            probes:
+              liveness: &probes
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /_matrix/federation/v1/version
+                    port: *port
+                  periodSeconds: 10
+                  timeoutSeconds: 3
+                  failureThreshold: 3
+              readiness: *probes
+              startup:
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /_matrix/federation/v1/version
+                    port: *port
+                  periodSeconds: 5
+                  failureThreshold: 30
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+            resources:
+              requests:
+                cpu: 20m
+                memory: 256Mi
+              limits:
+                memory: 1Gi
+    service:
+      app:
+        controller: continuwuity
+        ports:
+          http:
+            port: *port
+    route:
+      app:
+        hostnames:
+          - "matrix.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+        rules:
+          - backendRefs:
+              - identifier: app
+                port: *port
+      # Delegation on the bare domain, so accounts read @name:${SECRET_DOMAIN}.
+      well-known:
+        hostnames:
+          - "${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /.well-known/matrix/
+            backendRefs:
+              - identifier: app
+                port: *port
+    persistence:
+      data:
+        existingClaim: continuwuity
+        globalMounts:
+          - path: /data
+      tmp:
+        type: emptyDir

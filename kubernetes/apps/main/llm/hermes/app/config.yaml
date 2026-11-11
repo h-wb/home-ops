@@ -54,11 +54,11 @@ command_allowlist:
   - "mcp:tools/ticktick_add_comment"
 # Anyone not on a platform's allow list gets no answer, not even a pairing code.
 unauthorized_dm_behavior: ignore
-platforms:
-  bluebubbles:
-    extra:
-      require_mention: true
-      send_read_receipts: false
+# Reached through envoy-internal; forwarded headers are trusted from pod addresses only.
+dashboard:
+  public_url: https://hermes.${SECRET_DOMAIN}
+  trusted_proxies:
+    - 10.42.0.0/16
 security:
   redact_secrets: true
 agent:
