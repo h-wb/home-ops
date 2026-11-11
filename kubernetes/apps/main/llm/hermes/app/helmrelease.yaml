@@ -88,6 +88,8 @@ spec:
               MATRIX_E2EE_MODE: required
               MATRIX_SESSION_SCOPE: room
               MATRIX_AUTO_THREAD: "false"
+              # Both owner accounts share these rooms; no mention needed.
+              MATRIX_FREE_RESPONSE_ROOMS: "!FexZaBh-eQiat5oii_FGHLsYDKXqQyvPzjMjB7v3r-M,!3dmUEKOCGyxKDoa5oWfcUsXKZvjeJc0HveM5qMst_5c,!ItM4p755gEiFEDp5cWnKjMEYLU1WBrdMWIvJoTIX6w4"
               # Default delivery: encrypted Inbox in the Hermes Space.
               MATRIX_HOME_ROOM: "!FexZaBh-eQiat5oii_FGHLsYDKXqQyvPzjMjB7v3r-M"
               HERMES_DASHBOARD_BASIC_AUTH_USERNAME: hermes

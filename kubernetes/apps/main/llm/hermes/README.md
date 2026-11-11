@@ -82,6 +82,11 @@ The bot's crypto store lives on Hermes's data volume
 (`platforms/matrix/store/`). Losing it means a new token (a new device); old
 messages stay unreadable to the bot.
 
+Inbox, Chat and Homelab are free-response rooms (`MATRIX_FREE_RESPONSE_ROOMS`):
+Hermes answers allowed senders without an @mention, even with both your local
+and Beeper accounts joined. Other group rooms still require a mention. New
+assistant rooms must be added to that room-ID list explicitly.
+
 ## Dashboard
 
 `https://hermes.<domain>` on `envoy-internal`: LAN and tailnet only,
