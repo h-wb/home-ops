@@ -78,6 +78,13 @@ matrix.org) also needs its server added to `CONTINUWUITY_ALLOWED_REMOTE_SERVER_N
 A new device reads only messages sent after it joined, unless it is verified with
 the recovery key.
 
+### Voice and images
+
+Encrypted attachments are decrypted in the pod. Voice notes are transcribed by
+Voxtral through the internal LiteLLM proxy with automatic language detection;
+images are analyzed to text by Mistral Large 4 through the same proxy. Answers
+are text. The audio/image content is sent to Mistral's API to process it.
+
 The bot's crypto store lives on Hermes's data volume
 (`platforms/matrix/store/`). Losing it means a new token (a new device); old
 messages stay unreadable to the bot.

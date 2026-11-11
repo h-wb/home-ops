@@ -116,3 +116,20 @@ spec:
     mode: chat
     supportsVision: true
     supportsFunctionCalling: true
+---
+# Voice notes: Voxtral transcription on Mistral's API, same trust boundary as the chat models.
+apiVersion: litellm.home-operations.com/v1alpha1
+kind: LiteLLMModel
+metadata:
+  name: mistral-voxtral-mini
+spec:
+  modelName: mistral/voxtral-mini-latest
+  proxyRef: litellm
+  params:
+    model: mistral/voxtral-mini-latest
+    apiBase: https://api.mistral.ai/v1
+    apiKeyRef:
+      name: litellm-secret
+      key: MISTRAL_API_KEY
+  info:
+    mode: audio_transcription

@@ -11,6 +11,17 @@ providers:
   litellm:
     base_url: http://litellm.llm.svc.cluster.local:4000/v1
     api_key: $${LITELLM_API_KEY}
+# "openai" is the wire protocol only; the model and URL are Mistral behind LiteLLM. Empty language = auto-detect.
+stt:
+  enabled: true
+  provider: openai
+  language: ""
+  echo_transcripts: true
+  openai:
+    model: mistral/voxtral-mini-latest
+    base_url: http://litellm.llm.svc.cluster.local:4000/v1
+    api_key: $${LITELLM_API_KEY}
+    language: ""
 auxiliary:
   compression:
     provider: litellm
@@ -21,6 +32,14 @@ auxiliary:
   approval:
     provider: litellm
     model: mistral/mistral-small-latest
+  # Images are analyzed to text by Large 4, so the chat model never gets raw image bytes.
+  vision:
+    provider: litellm
+    model: mistral/mistral-large-4
+    base_url: http://litellm.llm.svc.cluster.local:4000/v1
+    api_key: $${LITELLM_API_KEY}
+voice:
+  auto_tts: false
 memory:
   provider: memini
   memory_enabled: false
@@ -70,6 +89,7 @@ dashboard:
 security:
   redact_secrets: true
 agent:
+  image_input_mode: text
   disabled_toolsets:
     - cronjob # routines come from versioned definitions, not the agent
     - catalog
