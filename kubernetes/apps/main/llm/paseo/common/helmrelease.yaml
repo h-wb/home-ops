@@ -208,7 +208,7 @@ spec:
         type: image
         image:
           repository: ghcr.io/jdx/mise
-          tag: 2026.11.2-debian
+          tag: 2026.11.6-debian
         advancedMounts:
           ${APP}:
             tools: &mise
