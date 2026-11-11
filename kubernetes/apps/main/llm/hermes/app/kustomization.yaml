@@ -34,6 +34,7 @@ configMapGenerator:
     options:
       disableNameSuffixHash: true
     files:
+      - alert-triage.md=./routines/alert-triage/SKILL.md
       - daily-briefing.md=./routines/daily-briefing/SKILL.md
       - midday-nudge.md=./routines/midday-nudge/SKILL.md
       - evening-checkin.md=./routines/evening-checkin/SKILL.md
