@@ -31,13 +31,14 @@ spec:
               repository: ghcr.io/continuwuity/continuwuity
               tag: v26.9.3@sha256:a177e08ab62e3d5bc60e4b8cea0a2ea9d18d4cb2bf8a6138cb0392a423c575a8
             env:
-              CONTINUWUITY_SERVER_NAME: ${SECRET_DOMAIN}
+              CONTINUWUITY_SERVER_NAME: matrix.${SECRET_DOMAIN}
               CONTINUWUITY_ADDRESS:
                 valueFrom:
                   fieldRef:
                     fieldPath: status.podIP
               CONTINUWUITY_PORT: &port 8080
-              CONTINUWUITY_DATABASE_PATH: /data
+              # Not /data: that holds an unused first database made under another server name.
+              CONTINUWUITY_DATABASE_PATH: /data/db
               CONTINUWUITY_WELL_KNOWN__CLIENT: https://matrix.${SECRET_DOMAIN}
               CONTINUWUITY_WELL_KNOWN__SERVER: matrix.${SECRET_DOMAIN}:443
               CONTINUWUITY_NEW_USER_DISPLAYNAME_SUFFIX: ""
@@ -104,21 +105,6 @@ spec:
             namespace: network
         rules:
           - backendRefs:
-              - identifier: app
-                port: *port
-      # Delegation on the bare domain, so accounts read @name:${SECRET_DOMAIN}.
-      well-known:
-        hostnames:
-          - "${SECRET_DOMAIN}"
-        parentRefs:
-          - name: envoy-external
-            namespace: network
-        rules:
-          - matches:
-              - path:
-                  type: PathPrefix
-                  value: /.well-known/matrix/
-            backendRefs:
               - identifier: app
                 port: *port
     persistence:

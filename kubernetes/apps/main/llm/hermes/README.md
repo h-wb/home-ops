@@ -15,13 +15,13 @@ The assistant of the [design](../DESIGN.md), running as `hermes-private-0` in
 ## Messaging
 
 - **Telegram**: long polling; nothing connects in. Routines deliver here for now.
-- **Matrix**: the bot `@hermes:<domain>` on our own homeserver,
+- **Matrix**: the bot `@hermes:matrix.<domain>` on our own homeserver,
   [Continuwuity](../../default/continuwuity/) in `default`, reached in-cluster.
   End-to-end encrypted (`MATRIX_E2EE_MODE=required`), one conversation per
   room. You talk to it from Beeper (a Beeper account is a Matrix account).
 
-The homeserver is public (`matrix.<domain>`, plus `/.well-known/matrix/` on the
-bare domain) because Beeper's server reaches it over federation. It federates
+The homeserver is public on `matrix.<domain>`, which is also its server name,
+because Beeper's server reaches it over federation. It federates
 with `beeper.com` only, and registration is closed unless a token is set.
 
 ### Matrix setup
@@ -47,11 +47,11 @@ with `beeper.com` only, and registration is closed unless a token is set.
 
 5. Add the Matrix fields below to the Bitwarden item `hermes`.
 6. In Beeper Desktop or Android (iOS cannot start Matrix chats), start a chat
-   with `@hermes:<domain>`. Hermes accepts the invite; expect a reply to a
+   with `@hermes:matrix.<domain>`. Hermes accepts the invite; expect a reply to a
    message. The chat then shows on every Beeper device.
 
 If Beeper cannot reach the bot, check federation at
-<https://federationtester.matrix.org> with the bare domain.
+<https://federationtester.matrix.org> with `matrix.<domain>`.
 
 The bot's crypto store lives on Hermes's data volume
 (`platforms/matrix/store/`). Losing it means a new token (a new device); old
