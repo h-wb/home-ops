@@ -76,7 +76,8 @@ class ToolHiveScopes(unittest.TestCase):
 
     def test_general_gateway_never_lists_private_data(self):
         # Cloud models sit behind general; private's gateway serves everything.
-        private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "metabase", "homeassistant", "ticktick"}
+        private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "dawarich-ops", "metabase", "homeassistant",
+                   "ticktick"}
         aggregation = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]
         self.assertEqual("deny", aggregation["defaultToolVisibility"])
         self.assertFalse({t["workload"] for t in aggregation["tools"]} & private)
@@ -87,6 +88,51 @@ class ToolHiveScopes(unittest.TestCase):
         self.assertIn("\n  remoteUrl: https://mcp.ticktick.com\n", entry)
         self.assertIn('authorization: "Bearer {{ .TICKTICK_API_TOKEN }}"', (server / "externalsecret.yaml").read_text())
         self.assertIn("mcp-servers/ticktick\n", (ROOT / "kubernetes/apps/main/llm/toolhive/ks.yaml").read_text())
+
+    def test_dawarich_ops_entry_reuses_the_dawarich_header(self):
+        # One user API key: the ops entry mounts the secret mcp-dawarich owns.
+        entry = yaml_of(ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/dawarich-ops/mcpserverentry.yaml")["spec"]
+        self.assertEqual("http://dawarich-ops.default.svc.cluster.local:3100/mcp", entry["remoteUrl"])
+        self.assertEqual([{"headerName": "Authorization",
+                           "valueSecretRef": {"name": "toolhive-dawarich", "key": "authorization"}}],
+                         entry["headerForward"]["addHeadersFromSecret"])
+        self.assertEqual({"name": "mcp-tools"}, entry["groupRef"])
+        server = ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/dawarich-ops"
+        self.assertFalse((server / "externalsecret.yaml").exists())
+        ks = json.loads(subprocess.run(["yq", "eval-all", "-o=json", "-I=0", "[.]",
+                                        str(ROOT / "kubernetes/apps/main/llm/toolhive/ks.yaml")],
+                                       capture_output=True, text=True, timeout=60, check=True).stdout)
+        spec = next(d for d in ks if d["metadata"]["name"] == "mcp-dawarich-ops")["spec"]
+        self.assertEqual("./kubernetes/apps/main/llm/toolhive/mcp-servers/dawarich-ops", spec["path"])
+        self.assertIn({"name": "dawarich-ops", "namespace": "default"}, spec["dependsOn"])
+        self.assertIn({"name": "mcp-dawarich", "namespace": "llm"}, spec["dependsOn"])
+
+    def test_dawarich_ops_admits_only_the_gateways_and_the_prefect_worker(self):
+        # It holds the user's API key and writes: nothing else may reach its port.
+        built = subprocess.run(["kustomize", "build", "kubernetes/apps/main/default/dawarich/ops"], cwd=ROOT,
+                               capture_output=True, text=True, timeout=60, check=True).stdout
+        docs = json.loads(subprocess.run(["yq", "eval-all", "-o=json", "-I=0", "[.]", "-"], input=built,
+                                         capture_output=True, text=True, timeout=60, check=True).stdout)
+        policy = next(d for d in docs if d["kind"] == "NetworkPolicy")["spec"]
+        self.assertEqual({"app.kubernetes.io/name": "dawarich-ops", "app.kubernetes.io/instance": "dawarich-ops",
+                          "app.kubernetes.io/controller": "dawarich-ops"}, policy["podSelector"]["matchLabels"])
+        self.assertEqual(["Ingress"], policy["policyTypes"])
+        gateways = {"namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "llm"}},
+                    "podSelector": {"matchExpressions": [{"key": "app.kubernetes.io/instance", "operator": "In",
+                                                          "values": ["mcp-private", "mcp-assistant",
+                                                                     "mcp-general"]}]}}
+        worker = {"namespaceSelector": {"matchLabels": {"kubernetes.io/metadata.name": "automation"}},
+                  "podSelector": {"matchLabels": {"app.kubernetes.io/name": "prefect",
+                                                  "app.kubernetes.io/controller": "worker"}}}
+        self.assertEqual([{"from": [gateways, worker], "ports": [{"port": 3100, "protocol": "TCP"}]}],
+                         policy["ingress"])
+        # The policy selects the pod the HelmRelease makes, and the gateway's URL is its Service.
+        release = next(d for d in docs if d["kind"] == "HelmRelease")
+        self.assertEqual("dawarich-ops", release["metadata"]["name"])
+        values = release["spec"]["values"]
+        self.assertEqual(["dawarich-ops"], list(values["controllers"]))
+        self.assertEqual({"controller": "dawarich-ops", "ports": {"http": {"port": 3100}}}, values["service"]["app"])
+        self.assertNotIn("route", values)
 
     def test_envoy_takes_one_key_per_external_client_and_scope(self):
         # Bitwarden fields are <SCOPE>_<HOLDER>; the Envoy client is the holder.

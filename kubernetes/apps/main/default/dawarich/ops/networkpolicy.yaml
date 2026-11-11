@@ -1,0 +1,36 @@
+---
+# dawarich-ops takes the user's API key and writes to Dawarich, so who may reach
+# its MCP port is the boundary: the three ToolHive gateways (general only
+# health-checks it, it lists none of its tools) and the Prefect local-pool worker.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dawarich-ops
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: dawarich-ops
+      app.kubernetes.io/instance: dawarich-ops
+      app.kubernetes.io/controller: dawarich-ops
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: llm
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/instance
+                operator: In
+                values: [mcp-private, mcp-assistant, mcp-general]
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: automation
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prefect
+              app.kubernetes.io/controller: worker
+      ports:
+        - port: 3100
+          protocol: TCP

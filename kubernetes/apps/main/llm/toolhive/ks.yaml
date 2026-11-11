@@ -261,6 +261,37 @@ spec:
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
+  name: &app mcp-dawarich-ops
+  namespace: &namespace llm
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  dependsOn:
+    - name: toolhive-config
+      namespace: llm
+    - name: mcp-dawarich
+      namespace: llm
+    - name: dawarich-ops
+      namespace: default
+  interval: 30m
+  path: ./kubernetes/apps/main/llm/toolhive/mcp-servers/dawarich-ops
+  postBuild:
+    substitute:
+      APP: *app
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
   name: &app mcp-anki
   namespace: &namespace llm
 spec:
