@@ -66,9 +66,7 @@ spec:
                   httpGet:
                     path: /_matrix/federation/v1/version
                     port: *port
-                  periodSeconds: 10
                   timeoutSeconds: 3
-                  failureThreshold: 3
               readiness: *probes
               startup:
                 enabled: true
@@ -110,7 +108,5 @@ spec:
     persistence:
       data:
         existingClaim: continuwuity
-        globalMounts:
-          - path: /data
       tmp:
         type: emptyDir
