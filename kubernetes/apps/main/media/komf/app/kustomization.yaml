@@ -7,14 +7,10 @@ resources:
   - ./helmrelease.yaml
   - ./httproute.yaml
   - ./httproutefilter.yaml
-  - ./naming-cronjob.yaml
 configMapGenerator:
   - name: komf-configmap
     files:
       - ./config/application.yml
-  - name: komga-titles
-    files:
-      - ./scripts/komga_titles.py
 generatorOptions:
   disableNameSuffixHash: true
   annotations:
