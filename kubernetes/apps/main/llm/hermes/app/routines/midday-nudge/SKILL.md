@@ -17,8 +17,10 @@ Call these tools by their exact names with `tool_call`.
 1. `mcp__tools__ticktick_list_undone_tasks_by_time_query` with
    `query_command: "today"` and `client_timezone: "America/Toronto"`: what is
    still open today.
-2. The same tool with `query_command: "last7day"`: what is overdue. Drop any
-   that step 1 already returned.
+2. `mcp__tools__ticktick_filter_tasks` with `filter: {status: [0]}` and
+   `client_timezone: "America/Toronto"`: every open task. Keep those with a
+   `dueDate` before today, however old: what is overdue. Drop any that step 1
+   already returned.
 
 If nothing is open today and nothing is overdue, reply with only `[SILENT]`.
 

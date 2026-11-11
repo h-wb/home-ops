@@ -88,9 +88,12 @@ flowchart LR
   front matter has a schedule gets a job when the pod starts, on Toronto time,
   delivered to Telegram: the briefing at 07:00, a nudge at 12:30, a check-in
   at 20:30, and reminders every half hour from 08:00 to 21:30, silent when
-  nothing is coming up. A routine's message joins the chat, so you can answer it; the
-  `task-followup` skill then completes or moves the tasks and notes each
-  postponement as a comment on the task.
+  nothing is coming up. The briefing and check-in see every overdue task, not
+  only the last week; the briefing also offers one old undated task a day, and
+  the check-in suggests a list for each inbox task. A routine's message joins
+  the chat, so you can answer it; the `task-followup` skill then completes,
+  moves, drops or files the tasks and notes each postponement as a comment on
+  the task.
 - A scheduled run has nobody to ask, so a call that needs a yes is refused.
   The TickTick task writes approved for good need none, so a scheduled run
   could make them; the routines are written to read only, which is an
