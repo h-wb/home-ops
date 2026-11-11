@@ -84,7 +84,8 @@ spec:
               HTTP_PROXY: http://127.0.0.1:9
               https_proxy: http://127.0.0.1:9
               http_proxy: http://127.0.0.1:9
-              NO_PROXY: &no-proxy .svc.cluster.local,.svc,localhost,127.0.0.1,api.telegram.org
+              # $(BLUEBUBBLES_HOST) expands from the network Secret in envFrom below.
+              NO_PROXY: &no-proxy .svc.cluster.local,.svc,localhost,127.0.0.1,api.telegram.org,$(BLUEBUBBLES_HOST)
               no_proxy: *no-proxy
               # Telegram, by long polling: nothing connects in. Its fallback transport
               # dials bare IPs and public DNS-over-HTTPS, which the egress rule
@@ -106,6 +107,10 @@ spec:
                   secretKeyRef:
                     name: hermes-messaging
                     key: TELEGRAM_HOME_CHANNEL
+              # The public HTTPS callback is registered manually (../README.md).
+              BLUEBUBBLES_WEBHOOK_HOST: 0.0.0.0
+              BLUEBUBBLES_WEBHOOK_PORT: "8645"
+              BLUEBUBBLES_ALLOW_ALL_USERS: "false"
               LITELLM_API_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -135,12 +140,43 @@ spec:
                   secretKeyRef:
                     name: hermes-workshops
                     key: PASEO_PRIVATE_PASSWORD
+            # Missing BlueBubbles secrets must not block Telegram.
+            envFrom:
+              - secretRef:
+                  name: hermes-bluebubbles
+                  optional: true
+              - secretRef:
+                  name: hermes-bluebubbles-network
+                  optional: true
             resources:
               requests:
                 cpu: 50m
                 memory: 512Mi
               limits:
                 memory: 1536Mi
+    service:
+      main:
+        controller: main
+        ports:
+          webhook:
+            port: 8645
+    route:
+      bluebubbles:
+        hostnames:
+          - "hermes.${SECRET_DOMAIN}"
+        parentRefs:
+          - name: envoy-external
+            namespace: network
+            sectionName: https
+        rules:
+          - matches:
+              - path:
+                  type: Exact
+                  value: /bluebubbles-webhook
+                method: POST
+            backendRefs:
+              - identifier: main
+                port: 8645
     persistence:
       # The managed config, read-only: wins over anything the agent writes.
       config:

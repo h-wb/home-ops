@@ -10,6 +10,15 @@ spec:
       prometheus:
         compression:
           type: Gzip
+    accessLog:
+      settings:
+        # BlueBubbles authenticates via a query parameter; never log that callback.
+        - matches:
+            - "request.url_path != '/bluebubbles-webhook'"
+          sinks:
+            - type: File
+              file:
+                path: /dev/stdout
   shutdown:
     drainTimeout: 180s
   logging:

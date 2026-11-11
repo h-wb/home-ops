@@ -2,12 +2,13 @@
 
 What is deployed. The rest of the documentation:
 
-| Document                             | What it holds                                                         |
-| ------------------------------------ | --------------------------------------------------------------------- |
-| [DESIGN.md](./DESIGN.md)             | The target: the rule, roles, decisions, what is left to do            |
-| [docs/flows.md](./docs/flows.md)     | How work moves, one diagram per flow                                  |
-| [docs/wiring.md](./docs/wiring.md)   | How each agent connects today, and where that differs from the design |
-| [paseo/README.md](./paseo/README.md) | The two workshops: pods, config, credentials, volumes                 |
+| Document                               | What it holds                                                         |
+| -------------------------------------- | --------------------------------------------------------------------- |
+| [DESIGN.md](./DESIGN.md)               | The target: the rule, roles, decisions, what is left to do            |
+| [docs/flows.md](./docs/flows.md)       | How work moves, one diagram per flow                                  |
+| [docs/wiring.md](./docs/wiring.md)     | How each agent connects today, and where that differs from the design |
+| [paseo/README.md](./paseo/README.md)   | The two workshops: pods, config, credentials, volumes                 |
+| [hermes/README.md](./hermes/README.md) | The assistant: messaging, credentials and the iMessage callback       |
 
 `docs/build.py` draws the documents' diagrams (`docs/img/`) from the Mermaid text
 folded under each one, and the same drawings as one published page. Change a flow
@@ -55,6 +56,9 @@ agents there. The assistant's messaging credentials are their own item, `hermes`
 `TELEGRAM_BOT_TOKEN` (from BotFather), `TELEGRAM_ALLOWED_USERS` (the numeric
 user IDs it answers, comma-separated) and `TELEGRAM_HOME_CHANNEL` (the chat its
 routines deliver to; your own user ID for a direct chat).
+BlueBubbles uses the same item, with separate generated Secrets for its
+credentials and egress hostname. See [Hermes messaging](./hermes/README.md#messaging)
+for the fields and one-time callback registration; routine delivery stays on Telegram.
 
 ## Where things live
 

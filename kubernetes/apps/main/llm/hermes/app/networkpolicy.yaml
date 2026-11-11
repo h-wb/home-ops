@@ -1,8 +1,9 @@
 ---
 # Hermes may reach DNS, LiteLLM (its key picks the models), both Memini stores (the
 # general one read-only), its own ToolHive gateway and the two workshop daemons;
-# of the internet, Telegram's API only (the second policy). Nothing may connect to
-# it (Paseo uses the API server's exec, not the pod network).
+# of the internet, Telegram's API (Cilium policy below) and the Mac's BlueBubbles
+# server (nested KS hermes-bluebubbles-network). Only envoy-external may connect
+# to it, on the webhook port.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -15,6 +16,17 @@ spec:
   policyTypes:
     - Ingress
     - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: network
+          podSelector:
+            matchLabels:
+              gateway.envoyproxy.io/owning-gateway-name: envoy-external
+      ports:
+        - port: 8645
+          protocol: TCP
   egress:
     - to:
         - namespaceSelector:
