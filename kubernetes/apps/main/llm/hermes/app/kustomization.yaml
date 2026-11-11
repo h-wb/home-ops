@@ -41,6 +41,7 @@ configMapGenerator:
       - task-reminders.md=./routines/task-reminders/SKILL.md
       - task-followup.md=./routines/task-followup/SKILL.md
       - weekly-review.md=./routines/weekly-review/SKILL.md
+      - location-review.md=./routines/location-review/SKILL.md
       - vault-notes.md=./routines/vault-notes/SKILL.md
       - system-docs.md=./routines/system-docs/SKILL.md
       - sync.sh=./routines/sync.sh
