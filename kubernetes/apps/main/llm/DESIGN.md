@@ -46,16 +46,16 @@ agents get the full tool catalogue.
 
 ## Roles
 
-| Role          | What it does                                                   | Today                   |
-| ------------- | -------------------------------------------------------------- | ----------------------- |
-| Assistant     | Talks to you, remembers, runs routines, decides who does work  | Hermes                  |
-| Workshop      | Where agents with a shell work on repos; one per scope         | Paseo                   |
-| Model gateway | The only path to any model; each client's key lists its models | LiteLLM                 |
-| Tool gateway  | One catalogue of tools, served through one gateway per scope   | ToolHive                |
-| Memory        | What agents remember between sessions; one store per scope     | Memini                  |
-| Job runner    | Runs a named job with fixed inputs on real data                | Prefect                 |
-| Task board    | The one place tasks live, whoever created them                 | Not chosen              |
-| Messaging app | How you reach the assistant                                    | Telegram; iMessage next |
+| Role          | What it does                                                   | Today                 |
+| ------------- | -------------------------------------------------------------- | --------------------- |
+| Assistant     | Talks to you, remembers, runs routines, decides who does work  | Hermes                |
+| Workshop      | Where agents with a shell work on repos; one per scope         | Paseo                 |
+| Model gateway | The only path to any model; each client's key lists its models | LiteLLM               |
+| Tool gateway  | One catalogue of tools, served through one gateway per scope   | ToolHive              |
+| Memory        | What agents remember between sessions; one store per scope     | Memini                |
+| Job runner    | Runs a named job with fixed inputs on real data                | Prefect               |
+| Task board    | The one place tasks live, whoever created them                 | Not chosen            |
+| Messaging app | How you reach the assistant                                    | Telegram; Matrix next |
 
 ## One assistant, one workshop per scope
 
@@ -199,11 +199,14 @@ Each flow is drawn step by step in [docs/flows.md](./docs/flows.md). How every
 agent is connected today, and where that differs from this design, is in
 [docs/wiring.md](./docs/wiring.md).
 
-**Talk.** Messaging app → assistant. Telegram first, iMessage next. The
-assistant answers only the accounts on its allow list; on Telegram it polls for
-messages, so nothing connects in to it. Whatever it writes there is private
-data: iMessage is end-to-end encrypted, Telegram bot chats are not, so
-Telegram's servers can read them.
+**Talk.** Messaging app → assistant. Telegram first, Matrix next: the bot is
+on our own homeserver, which federates with Beeper's only, and you talk to it
+from Beeper (a Beeper account is a Matrix account). The assistant answers only
+the accounts on its allow list; nothing on the internet connects to its pod.
+Whatever it writes there is private data: the Matrix chat is end-to-end
+encrypted, Telegram bot chats are not, so Telegram's servers can read them. Its
+dashboard (and the iOS apps that use it) is a third way in, on the LAN and
+tailnet only.
 
 **Routine.** The assistant's scheduler runs a versioned job (prompt plus
 skills), reads through the private tool gateway, and delivers to the messaging
@@ -322,6 +325,9 @@ A new harness or machine picks a scope; it does not get its own config.
   prompt. A longer prompt is cut off on your screen, not in what is sent.
 - The assistant holds both workshop daemons' passwords. Its config registers
   seven of their tools; the daemons themselves would accept the rest.
+- The assistant's dashboard password is an admin login: it edits the
+  assistant's own settings, though the managed config still wins. It is reached
+  only from the LAN and tailnet.
 - Orchestration is an instruction, not a lock: nothing stops the orchestrator
   from doing all the work itself on the strong model.
 - Someone with cluster or Bitwarden admin rights in the general scope can reach
@@ -372,6 +378,9 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-10 | In the general workshop the strongest model orchestrates; cheaper ones read, build, review   |
 | 2026-11-11 | The assistant writes in the vault: Notes/, AI/, Archives/ only, every write asks             |
 | 2026-11-11 | A weekly review on Sunday at 18:00, read-only like the other routines                        |
+| 2026-11-11 | Matrix replaces iMessage: a second Apple ID and an always-awake Mac were too much            |
+| 2026-11-11 | The Matrix homeserver is our own (Continuwuity), federating with Beeper only                 |
+| 2026-11-11 | The assistant's dashboard is reachable on the LAN and tailnet, behind a password             |
 
 ## Open
 
@@ -387,12 +396,8 @@ To decide:
   connect Memini as a plain MCP server and drop both.
 - Adopt the community `paseo-agent-orchestration` skill for the assistant, or
   write a smaller one.
-- iMessage for the assistant, after Telegram. Its adapter talks to a BlueBubbles
-  server on a Mac: it needs that server's address and password, a way in for
-  the server's webhook and one egress rule out. To settle first: whether the
-  edge MacBook runs BlueBubbles or OpenBubbles (which does not fit a pod), and
-  which Apple ID it is signed into. With your own, you would be texting
-  yourself.
+- When Matrix is in daily use: move the routines there (one room each, if
+  delivery to a named room works) and retire Telegram.
 
 To verify:
 
@@ -419,7 +424,8 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
 1. The assistant: Telegram is wired (a bot credential, and one egress rule to
    Telegram's API only). Its skills and sub-agents are on, and its scheduler
    runs the routines in git; it cannot schedule by itself. Still no shell.
-   Next iMessage.
+   Matrix is wired beside Telegram, on our own homeserver, and its dashboard
+   is on the internal gateway. Next: the Matrix chat from Beeper in daily use.
 2. First routine: the daily briefing, deployed on TickTick's tasks and
    calendar events and the homelab tasks. Next: mail and calendar tools, which
    the catalogue does not have yet.

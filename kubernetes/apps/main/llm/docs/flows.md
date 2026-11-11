@@ -48,10 +48,10 @@ sequenceDiagram
 
 </details>
 
-You write in the messaging app: Telegram today, iMessage next. The private workshop can still open a chat into the assistant; that window goes once the messaging app is in daily use.
+You write in the messaging app: Telegram today, Matrix (from Beeper) next. The dashboard on the LAN and tailnet, and the iOS apps that use it, are another way in. The private workshop can still open a chat into the assistant; that window goes once the messaging app is in daily use.
 
 - Why it is safe: Nothing crosses to the general side, and the assistant answers only the accounts on its allow list.
-- What it costs: Answers are as good as the trusted models. A private question never falls back to the others. What you and the assistant write passes through the messaging service: Telegram can read its bot chats, iMessage is end-to-end encrypted.
+- What it costs: Answers are as good as the trusted models. A private question never falls back to the others. What you and the assistant write passes through the messaging service: Telegram can read its bot chats, the Matrix chat is end-to-end encrypted.
 
 ## B. Morning briefing
 

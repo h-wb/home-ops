@@ -32,9 +32,10 @@ servers are defined once, in dotfiles (`conf.d/ai/`), and rendered per scope.
 ## The assistant
 
 Hermes, in its own pod, private scope. Its network rules allow the
-destinations below and DNS, nothing else. You reach it in the messaging app.
-The private workshop can also open a chat into it through an exec bridge,
-which goes once the messaging app is in daily use.
+destinations below and DNS, nothing else. You reach it in the messaging app,
+or through its dashboard on the internal gateway. The private workshop can
+also open a chat into it through an exec bridge, which goes once the
+messaging app is in daily use.
 
 ![Wiring: The assistant](./img/wiring-the-assistant.svg)
 
@@ -50,6 +51,8 @@ flowchart LR
     M["Private memory<br/>Memini"]:::private
     G["General memory<br/>Memini"]:::general
     TG["Telegram<br/>messaging app"]:::outside
+    MX["Matrix homeserver<br/>Continuwuity, federates with Beeper"]:::private
+    D["Dashboard and iOS apps<br/>LAN and tailnet"]:::private
     GW["General workshop<br/>Paseo"]:::general
     PW["Private workshop<br/>Paseo"]:::private
     A -->|"own key: Mistral models only"| L
@@ -58,6 +61,8 @@ flowchart LR
     A -->|"own client key, by plugin"| M
     A -->|"read-only key, lookups only"| G
     A -->|"bot token; allow-listed users only"| TG
+    A -->|"access token; end-to-end encrypted"| MX
+    D -->|"password; envoy-internal only"| A
     A -->|"daemon password; every start asks"| GW
     A -->|"daemon password; every start asks"| PW
 ```
@@ -73,6 +78,12 @@ flowchart LR
   answers the user IDs on its allow list and ignores anyone else. A write's
   approval arrives as a message with buttons. Bot chats are not end-to-end
   encrypted.
+- Matrix: the bot is on our own homeserver (`default/continuwuity`), reached
+  in-cluster; the homeserver, not the pod, federates with Beeper. It requires
+  end-to-end encryption and answers the Matrix IDs on its allow list;
+  approvals are reactions. Routines still deliver to Telegram.
+- Dashboard: `hermes.<domain>` on `envoy-internal`, password sign-in; the only
+  inbound connection the pod's rules allow. The iOS apps use the same address.
 - Key: `hermes-private`, four models served by Mistral's API: Mistral Medium
   (the default), Small, Large 4 and GLM 5.3. You switch per chat. Small does
   the background jobs; it is too weak to work the tools from a plain request.

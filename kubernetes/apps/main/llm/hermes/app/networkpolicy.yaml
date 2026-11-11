@@ -1,9 +1,9 @@
 ---
 # Hermes may reach DNS, LiteLLM (its key picks the models), both Memini stores (the
-# general one read-only), its own ToolHive gateway and the two workshop daemons;
-# of the internet, Telegram's API (Cilium policy below) and the Mac's BlueBubbles
-# server (nested KS hermes-bluebubbles-network). Only envoy-external may connect
-# to it, on the webhook port.
+# general one read-only), its own ToolHive gateway, the two workshop daemons and
+# the Matrix homeserver; of the internet, Telegram's API only (the second policy).
+# Only envoy-internal may connect to it, on the dashboard port (Paseo uses the API
+# server's exec).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -23,9 +23,9 @@ spec:
               kubernetes.io/metadata.name: network
           podSelector:
             matchLabels:
-              gateway.envoyproxy.io/owning-gateway-name: envoy-external
+              gateway.envoyproxy.io/owning-gateway-name: envoy-internal
       ports:
-        - port: 8645
+        - port: 9119
           protocol: TCP
   egress:
     - to:
@@ -76,6 +76,16 @@ spec:
               app.kubernetes.io/name: paseo-private
       ports:
         - port: 6767
+          protocol: TCP
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: continuwuity
+      ports:
+        - port: 8080
           protocol: TCP
 ---
 # The messaging app: Telegram's Bot API, by name, on 443. A NetworkPolicy cannot
