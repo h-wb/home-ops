@@ -1,0 +1,33 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/source.toolkit.fluxcd.io/gitrepository_v1.json
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: dawarich-regression
+spec:
+  interval: 30m
+  url: https://github.com/h-wb/dawarich-regression
+  ref:
+    branch: main
+  secretRef:
+    name: dawarich-regression-git
+  ignore: |
+    /*
+    !/ops
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+# Builds the ConfigMap dawarich-ops-scripts (no hash suffix) from the repo's ops/.
+# No postBuild: the scripts are shipped as written, nothing is substituted.
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: dawarich-ops-scripts
+spec:
+  targetNamespace: default
+  interval: 30m
+  path: ./ops
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: dawarich-regression
+  wait: false

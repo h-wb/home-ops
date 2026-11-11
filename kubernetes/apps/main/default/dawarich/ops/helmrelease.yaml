@@ -1,0 +1,104 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: &app dawarich-ops
+spec:
+  releaseName: dawarich-ops
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    controllers:
+      dawarich-ops:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image:
+              # Same image as ../app/helmrelease.yaml; Renovate bumps both.
+              repository: docker.io/freikin/dawarich
+              tag: 1.22.0@sha256:b8ee8d9fdff92a9d6ca570f98e0e875624f4bfb24b61363f8246bba124d5849d
+            command: ["bundle", "exec", "ruby", "/ops/server.rb"]
+            env:
+              TIME_ZONE: "Europe/Paris"
+              PHOTON_API_HOST: photon.default.svc.cluster.local:2322
+              PHOTON_API_USE_HTTPS: false
+              SELF_HOSTED: "true"
+              STORE_GEODATA: "true"
+              DISTANCE_UNIT: km
+              REDIS_URL: redis://dawarich-dragonfly.default.svc.cluster.local:6379
+              RAILS_ENV: production
+              DATABASE_NAME: dawarich
+              DATABASE_PORT: 5432
+              DATABASE_HOST: postgres-dawarich-rw.default.svc
+              DATABASE_USERNAME: dawarich
+              DATABASE_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: postgres-dawarich-app
+                    key: password
+              DAWARICH_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: dawarich-ops-secret
+                    key: DAWARICH_API_KEY
+              OPS_PORT: "3100"
+              OPS_SHARED_BACKUPS: /var/app/tmp/shared-backups
+            envFrom:
+              - secretRef:
+                  name: dawarich-secret
+            probes:
+              liveness: &probe
+                enabled: true
+                custom: true
+                spec:
+                  httpGet:
+                    path: /healthz
+                    port: 3100
+              readiness: *probe
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 10m
+                memory: 128Mi
+              limits:
+                memory: 4Gi
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile: { type: RuntimeDefault }
+    service:
+      app:
+        controller: *app
+        ports:
+          http:
+            port: 3100
+    persistence:
+      scripts:
+        type: configMap
+        name: dawarich-ops-scripts
+        globalMounts:
+          - path: /ops
+            readOnly: true
+      shared-backups:
+        enabled: true
+        type: nfs
+        server: ${NFS_ADDR:=temp}
+        path: /mnt/tank/hwe/Documents/data/dawarich/backups
+        globalMounts:
+          - path: /var/app/tmp/shared-backups
+      storage:
+        type: emptyDir
+        globalMounts:
+          - path: /var/app/storage

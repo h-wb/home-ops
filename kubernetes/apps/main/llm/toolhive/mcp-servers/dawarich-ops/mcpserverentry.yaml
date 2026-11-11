@@ -1,0 +1,23 @@
+---
+# dawarich-ops (default/dawarich/ops): write tools for day fixes, place tags and
+# merges, and backups. Each write has a read-only `_check` twin that returns the
+# plan the write needs.
+#
+# Reuses the dawarich entry's header secret (toolhive-dawarich, owned by
+# mcp-dawarich): same user API key, no second copy.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: dawarich-ops
+spec:
+  remoteUrl: http://dawarich-ops.default.svc.cluster.local:3100/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: Authorization
+        valueSecretRef:
+          name: toolhive-dawarich
+          key: authorization
+  groupRef:
+    name: mcp-tools
