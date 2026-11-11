@@ -1,14 +1,18 @@
 ---
 name: alert-triage
 description: Investigate firing Grafana/Alertmanager alerts and report each new one on Telegram. Use when the alert-triage routine runs.
-metadata:
-  schedule: "*/15 * * * *"
-  model: mistral/mistral-large-4
+# Disabled for now: with no schedule below, routines/sync.sh creates no cron
+# job for this routine (and removes the old one on the next pod start). To
+# re-enable, uncomment:
+# metadata:
+#   schedule: "*/15 * * * *"
+#   model: mistral/mistral-large-4
 ---
 
 # Alert triage
 
-Runs every fifteen minutes. Read-only: list what is firing, investigate it, and
+Runs every fifteen minutes when scheduled (disabled for now — no schedule in
+the front matter). Read-only: list what is firing, investigate it, and
 tell the user about each new alert on Telegram. A scheduled run has nobody to
 approve a write (`cron_mode: deny`), so never call a write-capable tool — not
 on the cluster, not on Grafana, not a workshop: spawning a Paseo investigator
