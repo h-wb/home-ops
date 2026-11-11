@@ -36,7 +36,6 @@ spec:
     name: flux-system
     namespace: flux-system
   timeout: 5m
-  wait: false # no flux ks dependents
   postBuild:
     substitute:
       APP: *app

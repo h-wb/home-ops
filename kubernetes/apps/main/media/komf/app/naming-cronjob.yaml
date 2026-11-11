@@ -16,7 +16,6 @@ spec:
       activeDeadlineSeconds: 600
       template:
         spec:
-          restartPolicy: Never
           automountServiceAccountToken: false
           enableServiceLinks: false
           securityContext:

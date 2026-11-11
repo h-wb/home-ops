@@ -31,7 +31,5 @@ endpoints:
 ports:
   - name: s3
     port: 3900
-    protocol: TCP
   - name: api
     port: 3903
-    protocol: TCP

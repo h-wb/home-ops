@@ -37,7 +37,6 @@ spec:
           port: 8080
       matches:
         - path:
-            type: PathPrefix
             value: /settings/ajax/checksetup
       timeouts:
         request: 300s

@@ -35,10 +35,7 @@ spec:
                   httpGet:
                     path: /
                     port: &port 8080
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
                   timeoutSeconds: 5
-                  failureThreshold: 3
               readiness: *probes
             resources:
               requests:
@@ -76,15 +73,11 @@ spec:
     persistence:
       data:
         existingClaim: *app
-        globalMounts:
-          - path: /data
       music:
         enabled: true
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/hwe/Audio/Music
-        globalMounts:
-          - path: /music
       soulseek-downloads:
         # slskd's completed-downloads folder only - never its shares folder.
         # Read-only: MusicGrabber's "move" mode isn't in use, it only copies.

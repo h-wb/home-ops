@@ -47,10 +47,6 @@ spec:
                   httpGet:
                     path: /ping
                     port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
               readiness: *probes
             securityContext:
               allowPrivilegeEscalation: false
@@ -103,5 +99,3 @@ spec:
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/shared
-        globalMounts:
-          - path: /data

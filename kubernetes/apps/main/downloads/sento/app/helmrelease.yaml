@@ -44,10 +44,7 @@ spec:
                   httpGet:
                     path: /api/v1/system/health
                     port: *port
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
                   timeoutSeconds: 5
-                  failureThreshold: 3
               readiness: *probes
             securityContext: &securityContext
               allowPrivilegeEscalation: false
@@ -74,9 +71,7 @@ spec:
                   httpGet:
                     path: /health
                     port: *extensionsPort
-                  periodSeconds: 10
                   timeoutSeconds: 5
-                  failureThreshold: 3
               readiness: *extensionsProbes
               startup:
                 enabled: true
@@ -145,5 +140,3 @@ spec:
               - path: /data
       tmp:
         type: emptyDir
-        globalMounts:
-          - path: /tmp

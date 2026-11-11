@@ -34,7 +34,6 @@ spec:
     name: flux-system
     namespace: flux-system
   timeout: 10m
-  wait: false
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -67,4 +66,3 @@ spec:
     name: flux-system
     namespace: flux-system
   timeout: 10m
-  wait: false

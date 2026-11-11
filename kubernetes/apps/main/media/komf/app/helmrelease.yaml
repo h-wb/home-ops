@@ -51,8 +51,6 @@ spec:
       config:
         enabled: true
         existingClaim: *app
-        globalMounts:
-          - path: /config
       configmap:
         enabled: true
         type: configMap

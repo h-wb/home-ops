@@ -58,7 +58,6 @@ spec:
                     path: /hosting/capabilities
                     port: *port
                   failureThreshold: 30
-                  periodSeconds: 10
     service:
       app:
         controller: *app

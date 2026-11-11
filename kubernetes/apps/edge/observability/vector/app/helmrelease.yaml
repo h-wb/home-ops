@@ -99,4 +99,3 @@ spec:
         ports:
           talos-log:
             port: 6050
-            protocol: TCP

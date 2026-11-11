@@ -56,10 +56,6 @@ spec:
                     path: /status
                     port: &port 8443
                     scheme: HTTPS
-                  initialDelaySeconds: 0
-                  periodSeconds: 10
-                  timeoutSeconds: 1
-                  failureThreshold: 3
               readiness: *probe
             resources:
               requests:

@@ -141,5 +141,3 @@ spec:
       scripts:
         type: configMap
         identifier: vault-scripts
-        globalMounts:
-          - path: /scripts

@@ -79,8 +79,6 @@ spec:
       # is on NFS below, so this stays small.
       config:
         existingClaim: *app
-        globalMounts:
-          - path: /config
       vault:
         type: nfs
         server: ${NFS_ADDR:=temp}

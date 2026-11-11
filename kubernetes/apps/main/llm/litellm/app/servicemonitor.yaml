@@ -19,6 +19,5 @@ spec:
     - app.kubernetes.io/name
   endpoints:
     - port: http
-      path: /metrics
       interval: 30s
       scrapeTimeout: 10s
