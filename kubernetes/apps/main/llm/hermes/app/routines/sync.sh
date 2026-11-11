@@ -46,7 +46,7 @@ for file in "$src"/*.md; do
   [ -n "$schedule" ] || continue
   $hermes cron remove "$name" >/dev/null 2>&1
   $hermes cron create "$schedule" "Run the $name routine." --name "$name" --skill "$name" \
-    --timezone "$zone" --deliver telegram --provider litellm --model "$model" || failed=1
+    --timezone "$zone" --deliver matrix --provider litellm --model "$model" || failed=1
   echo "$name" >> "$mine"
 done
 

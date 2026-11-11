@@ -54,6 +54,10 @@ command_allowlist:
   - "mcp:tools/ticktick_add_comment"
 # Anyone not on a platform's allow list gets no answer, not even a pairing code.
 unauthorized_dm_behavior: ignore
+# Explicitly disable even if old credentials remain on the data volume.
+platforms:
+  telegram:
+    enabled: false
 # Adapters connect directly: Matrix applies the pod's closed HTTP(S)_PROXY without
 # checking NO_PROXY. The egress policy still decides where they may go.
 gateway:
