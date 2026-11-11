@@ -18,21 +18,24 @@ The assistant of the [design](../DESIGN.md), running as `hermes-private-0` in
 - **Matrix**: the bot `@hermes:matrix.<domain>` on our own homeserver,
   [Continuwuity](../../default/continuwuity/) in `default`, reached in-cluster.
   End-to-end encrypted (`MATRIX_E2EE_MODE=required`), one conversation per
-  room. You talk to it from Beeper (a Beeper account is a Matrix account).
+  room. You talk to it from Beeper (a Beeper account is a Matrix account) or
+  from any Matrix app signed in to an account on our server.
 
 The homeserver is public on `matrix.<domain>`, which is also its server name,
-because Beeper's server reaches it over federation. It federates
-with `beeper.com` only, and registration is closed unless a token is set.
+because Beeper's server reaches it over federation. It federates with
+`beeper.com` only, and registration is closed unless a token is set.
 
 ### Matrix setup
 
-1. Set `REGISTRATION_TOKEN` (any long random string) in a new Bitwarden item
-   `continuwuity`.
-2. In Element web, choose `matrix.<domain>` as the homeserver and register
-   `admin` with the token (the first account is the server admin), then
-   `hermes`. As `hermes`, accept Element's offer to set up recovery and keep the
-   recovery key.
-3. Delete the token field; registration closes.
+1. On a fresh database the server prints a one-time registration token in its
+   log. In Element web, choose `matrix.<domain>` as the homeserver and register
+   `admin` with it; the first account is the server admin and is invited to
+   the Admin Room. (Later, `REGISTRATION_TOKEN` in the Bitwarden item
+   `continuwuity` opens registration again; keep that item as `{}`.)
+2. In the Admin Room: `!admin users create-user hermes`. It replies with a
+   password.
+3. Sign in to Element web as `hermes`, set up recovery (Settings → Encryption)
+   and keep the recovery key.
 4. Log in once more for Hermes's own device. Don't reuse Element's token: two
    clients on one device break its encryption.
 
@@ -43,7 +46,7 @@ with `beeper.com` only, and registration is closed unless a token is set.
      | jq -r .access_token; unset PW
    ```
 
-   Then sign `hermes` out of Element.
+   Then sign `hermes` out of Element, so the account has Hermes's device only.
 
 5. Add the Matrix fields below to the Bitwarden item `hermes`.
 6. In Beeper Desktop or Android (iOS cannot start Matrix chats), start a chat
@@ -52,6 +55,22 @@ with `beeper.com` only, and registration is closed unless a token is set.
 
 If Beeper cannot reach the bot, check federation at
 <https://federationtester.matrix.org> with `matrix.<domain>`.
+
+### Other clients
+
+Any Matrix app works with an account on our server; no federation is involved.
+Element X (iOS) needs simplified sliding sync, which the server supports.
+
+1. In the Admin Room: `!admin users create-user <name>`.
+2. Add `@<name>:matrix.<domain>` to `MATRIX_ALLOWED_USERS` (comma-separated).
+3. Sign in to the app with the server `matrix.<domain>` and start a chat with
+   `@hermes:matrix.<domain>`.
+
+Beeper cannot sign in to this server, so that is a second account and a second
+conversation; Hermes's memory spans both. An account on another server (e.g.
+matrix.org) also needs its server added to `CONTINUWUITY_ALLOWED_REMOTE_SERVER_NAMES`.
+A new device reads only messages sent after it joined, unless it is verified with
+the recovery key.
 
 The bot's crypto store lives on Hermes's data volume
 (`platforms/matrix/store/`). Losing it means a new token (a new device); old
@@ -72,13 +91,13 @@ wins over anything set there.
 All in the Bitwarden item `hermes`. Telegram's three fields are required; the
 rest are optional, and each feature stays off until its fields exist.
 
-| Field                      | Value                                                     |
-| -------------------------- | --------------------------------------------------------- |
-| `TELEGRAM_BOT_TOKEN`       | From BotFather                                            |
-| `TELEGRAM_ALLOWED_USERS`   | Numeric user IDs it answers, comma-separated              |
-| `TELEGRAM_HOME_CHANNEL`    | The chat routines deliver to                              |
-| `MATRIX_ACCESS_TOKEN`      | From step 4; withheld until `MATRIX_ALLOWED_USERS` is set |
-| `MATRIX_ALLOWED_USERS`     | Full Matrix IDs it answers, e.g. `@you:beeper.com`        |
-| `MATRIX_RECOVERY_KEY`      | From step 2; lets the bot verify its own device           |
-| `DASHBOARD_PASSWORD`       | Starts the dashboard                                      |
-| `DASHBOARD_SESSION_SECRET` | Any random string; keeps sign-ins across restarts         |
+| Field                      | Value                                                                                  |
+| -------------------------- | -------------------------------------------------------------------------------------- |
+| `TELEGRAM_BOT_TOKEN`       | From BotFather                                                                         |
+| `TELEGRAM_ALLOWED_USERS`   | Numeric user IDs it answers, comma-separated                                           |
+| `TELEGRAM_HOME_CHANNEL`    | The chat routines deliver to                                                           |
+| `MATRIX_ACCESS_TOKEN`      | From step 4; withheld until `MATRIX_ALLOWED_USERS` is set                              |
+| `MATRIX_ALLOWED_USERS`     | Full Matrix IDs it answers, comma-separated: `@you:beeper.com`, `@you:matrix.<domain>` |
+| `MATRIX_RECOVERY_KEY`      | From step 3; lets the bot verify its own device                                        |
+| `DASHBOARD_PASSWORD`       | Starts the dashboard                                                                   |
+| `DASHBOARD_SESSION_SECRET` | Any random string; keeps sign-ins across restarts                                      |
