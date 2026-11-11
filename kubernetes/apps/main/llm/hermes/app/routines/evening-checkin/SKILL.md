@@ -27,14 +27,20 @@ Call these tools by their exact names with `tool_call`.
    `mcp__tools__ticktick_get_comment` with its `project_id` and `task_id`. A
    comment that starts with `Postponed` gives how many times it was moved. If
    the call is refused or fails, go on without the count.
+4. `mcp__tools__ticktick_list_completed_tasks_by_date` with
+   `search: {startDate: today at 00:00, endDate: now}` and
+   `client_timezone: "America/Toronto"`: what got done today.
 
-If all three lists are empty, write "Everything due today is done." and stop.
+If all three lists of steps 1 and 2 are empty, write the done line and
+"Everything due today is done." and stop.
 
 ## Write
 
 ```
+Done today: <N>.
+
 Did you get to these?
-1. <task>
+1. <task> (focus)
 2. <task> (postponed 2 times)
 
 Still overdue
@@ -45,6 +51,8 @@ Inbox, where do these go?
 5. <task> -> drop
 ```
 
+- The done line comes first. Leave it out when nothing got done: no blame.
+- Focus tasks (priority 5) first, marked `(focus)`.
 - One numbering across all sections, so the user can answer "1 and 3 done,
   2 tomorrow, inbox ok".
 - At most ten tasks in the first two sections, then "and N more". At most five

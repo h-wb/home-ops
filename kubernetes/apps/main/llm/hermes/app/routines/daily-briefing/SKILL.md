@@ -35,6 +35,9 @@ timezone `America/Toronto`, whatever the clock here says.
 4. `mcp__tools__ticktick_query_calendar_events` with
    `client_timezone: "America/Toronto"`, `query.begin` set to today at 00:00
    and `query.end` to tomorrow at 00:00 in that timezone: today's events.
+5. Focus: pick at most three tasks from steps 2 and 3 for today. Tasks due
+   today with a time first, then today's other tasks by priority, then the
+   oldest overdue. Fewer than three when there are fewer.
 
 If a call fails, go on with the others and say which source is missing.
 
@@ -47,19 +50,26 @@ Good morning. <weekday>, <date>.
 
 Today
 - <time> <event>
-- <task>
+1. <task>
 
 Overdue
-- <task> (due <date>)
+2. <task> (due <date>)
 
 Homelab
 - <task title>
 
-Old task: <task> (untouched since <date>). Do it today, give it a date, or drop it?
+Focus: 1, 2. Reply ok, or other numbers.
+
+Old task: 3. <task> (untouched since <date>). Do it today, give it a date, or drop it?
 
 Missing: <source that failed>
 ```
 
+- Number every TickTick task, Today, Overdue and the old task, in one
+  sequence, so the user can answer with numbers. Events and homelab tasks get
+  a dash.
+- The focus line names at most three numbers. Leave it out when there is no
+  task.
 - Events first, by start time, then tasks.
 - Overdue: oldest due date first.
 - One line per item, no notes or descriptions, at most ten per section; then

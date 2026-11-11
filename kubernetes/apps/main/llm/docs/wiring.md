@@ -89,8 +89,9 @@ flowchart LR
   delivered to Telegram: the briefing at 07:00, a nudge at 12:30, a check-in
   at 20:30, and reminders every half hour from 08:00 to 21:30, silent when
   nothing is coming up. The briefing and check-in see every overdue task, not
-  only the last week; the briefing also offers one old undated task a day, and
-  the check-in suggests a list for each inbox task. A routine's message joins
+  only the last week. The briefing proposes up to three focus tasks (high
+  priority once you confirm) and offers one old undated task a day; the
+  check-in opens with what got done and suggests a list for each inbox task. A routine's message joins
   the chat, so you can answer it; the `task-followup` skill then completes,
   moves, drops or files the tasks and notes each postponement as a comment on
   the task.

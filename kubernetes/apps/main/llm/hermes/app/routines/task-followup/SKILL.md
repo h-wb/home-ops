@@ -17,8 +17,8 @@ is Toronto time: set `timeZone: "America/Toronto"` on the task.
 You need each task's `id` and `projectId`. If you do not have them from this
 conversation, call `mcp__tools__ticktick_filter_tasks` with
 `filter: {status: [0]}` and match by title. A number in the user's answer
-refers to the numbered list in the last check-in. If two tasks could match,
-ask which one.
+refers to the numbered list in the message they answer, the briefing or the
+check-in. If two tasks could match, ask which one.
 
 ## Done
 
@@ -57,6 +57,21 @@ status: -1}`.
   and `reminders: ["TRIGGER:-PT15M"]`.
 
 Add the `Postponed` comment in the last two cases as well.
+
+## Today's focus
+
+After the briefing the user confirms its focus ("ok") or names other numbers.
+At most three tasks; if more are named, ask which three.
+
+1. `mcp__tools__ticktick_filter_tasks` with
+   `filter: {status: [0], priority: [5]}`: tasks still marked high from an
+   earlier day.
+2. One `mcp__tools__ticktick_batch_update_tasks` call: `priority: 0` on each
+   task from step 1 that is not picked today, `priority: 5` on each picked
+   task. A picked task with no date also gets `dueDate` today, `isAllDay:
+true`, so it shows in Today.
+
+High priority means today's focus and nothing else.
 
 ## The briefing's old task
 
