@@ -21,7 +21,7 @@ kind: MCPServer
 metadata:
   name: vault-ro
 spec:
-  image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+  image: docker.io/library/node:22-bookworm-slim@sha256:18052396bf1d0c6e0a8c58181b5c1457da19409efbd5032a3f4d86974e74d13c
   transport: stdio
   proxyPort: 8080
   env:
@@ -62,7 +62,7 @@ spec:
         # npm ci is ~1 s / 31 MB (better-sqlite3 has prebuilt binaries): cheap enough
         # to run per backend pod start instead of prebaking a shared install.
         - name: install-seekstone
-          image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+          image: docker.io/library/node:22-bookworm-slim@sha256:18052396bf1d0c6e0a8c58181b5c1457da19409efbd5032a3f4d86974e74d13c
           command: [/bin/sh, -c]
           args:
             - >-
@@ -123,7 +123,7 @@ kind: MCPServer
 metadata:
   name: vault-inbox
 spec:
-  image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+  image: docker.io/library/node:22-bookworm-slim@sha256:18052396bf1d0c6e0a8c58181b5c1457da19409efbd5032a3f4d86974e74d13c
   transport: stdio
   proxyPort: 8080
   env:
@@ -168,7 +168,7 @@ spec:
                   app.kubernetes.io/name: obsidian-vault
       initContainers:
         - name: install-seekstone
-          image: docker.io/library/node:22-bookworm-slim@sha256:5ec23b7c622b00547753bc6ffd78085dd868a68aeb41c8e0a1418f033e13d96d
+          image: docker.io/library/node:22-bookworm-slim@sha256:18052396bf1d0c6e0a8c58181b5c1457da19409efbd5032a3f4d86974e74d13c
           command: [/bin/sh, -c]
           args:
             - >-
