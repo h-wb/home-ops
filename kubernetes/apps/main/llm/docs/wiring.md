@@ -87,8 +87,8 @@ flowchart LR
 - Routines: skills in `hermes/app/routines/`, mounted read-only. One whose
   front matter has a schedule gets a job when the pod starts, on Toronto time,
   delivered to Telegram: the briefing at 07:00, a nudge at 12:30, a check-in
-  at 20:30, and reminders every half hour from 08:00 to 21:30, silent when
-  nothing is coming up. The briefing and check-in see every overdue task, not
+  at 20:30, reminders every half hour from 08:00 to 21:30, silent when
+  nothing is coming up, and a weekly review on Sunday at 18:00. The briefing and check-in see every overdue task, not
   only the last week. The briefing proposes up to three focus tasks (high
   priority once you confirm) and offers one old undated task a day; the
   check-in opens with what got done and suggests a list for each inbox task. A routine's message joins

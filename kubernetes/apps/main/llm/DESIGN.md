@@ -370,6 +370,8 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-10 | The messaging apps are Telegram and iMessage                                                 |
 | 2026-11-10 | The assistant starts agents in either workshop; every start asks, one call at a time         |
 | 2026-11-10 | In the general workshop the strongest model orchestrates; cheaper ones read, build, review   |
+| 2026-11-11 | The assistant writes in the vault: Notes/, AI/, Archives/ only, every write asks             |
+| 2026-11-11 | A weekly review on Sunday at 18:00, read-only like the other routines                        |
 
 ## Open
 

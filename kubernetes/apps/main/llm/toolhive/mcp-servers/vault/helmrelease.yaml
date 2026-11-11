@@ -1,13 +1,13 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 # The Obsidian Sync side of the vault (see kustomization.yaml for the whole picture):
-# Belphemur's obsidian-headless-sync-docker image keeps a pull-only copy of the
+# Belphemur's obsidian-headless-sync-docker image keeps a two-way copy of the
 # vault on the volume the Seekstone servers (seekstone.yaml) serve through
 # toolhive. It wraps the official `ob` CLI with s6 setup (fix uid/gid, ob login,
 # ob sync-setup, then `ob sync --continuous`). The vault sits at /data/vault and
 # the CLI state at /data/state, both on the claim below; the image runs as
 # uid/gid 1000 (PUID/PGID), the uid the Seekstone backends share the volume
-# with. Pull-only: this device downloads and never uploads or deletes.
+# with. The only local writer is vault-inbox (Notes/, AI/, Archives/).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -85,14 +85,12 @@ spec:
               # restarts is what avoids a re-setup and a new device entry.
               VAULT_PATH: /data/vault
               XDG_CONFIG_HOME: /data/state
-              # Pull-only: this device downloads and never uploads or deletes, so
-              # nothing here can change the vault on other devices. Seekstone's
-              # tool state (.seekstone, the inbox instance's audit log) must never
-              # be vault content. The image re-applies these on every start, after
-              # its sync-setup pass: rerunning sync-setup only rewrites the config
-              # (it revalidates the key and password), it does not touch the sync
-              # state, so a pull-only device can never publish local edits either.
-              SYNC_MODE: pull-only
+              # Two-way since 2026-11-11: the assistant's vault writes (vault-inbox,
+              # each one approved in chat) reach every device. Seekstone's tool
+              # state (.seekstone, the inbox instance's audit log) must never be
+              # vault content. The image re-applies these on every start, after
+              # its sync-setup pass; that pass only rewrites the config.
+              SYNC_MODE: bidirectional
               EXCLUDED_FOLDERS: .seekstone
               DEVICE_NAME: llm-headless
             probes:

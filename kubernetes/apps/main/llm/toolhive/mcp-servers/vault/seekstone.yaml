@@ -1,5 +1,5 @@
 # Seekstone over the synced vault, private tier only: a read-only
-# instance and an inbox-write instance, both on the vault volume. Each backend pod
+# instance and a write instance (Notes/, AI/, Archives/), both on the vault volume. Each backend pod
 # installs Seekstone once in an init container, from the lockfiles pinned in git
 # (seekstone/; Renovate bumps them), into an emptyDir — the same generic-image +
 # git-pinned-source pattern as the task boards' `uv run --with`, with a full lockfile
@@ -133,10 +133,10 @@ spec:
       value: /tmp
     - name: SEEKSTONE_CACHE_DIR
       value: /tmp/seekstone
-    # Writes only under inbox/. pull-only sync never uploads them: they stay on this volume
-    # until the vault pod moves to bidirectional mode.
+    # The vault's own folders for notes, model-written notes and finished work; Daily,
+    # References, Clippings and Templates stay read-only. Two-way sync uploads the writes.
     - name: SEEKSTONE_WRITE_PATHS
-      value: inbox/**
+      value: Notes/**,AI/**,Archives/**
     # No undo journal: it would live in <vault>/.seekstone and could end up synced.
     - name: SEEKSTONE_HISTORY
       value: "0"

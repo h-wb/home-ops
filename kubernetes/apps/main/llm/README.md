@@ -65,20 +65,25 @@ for the fields and one-time callback registration; routine delivery stays on Tel
 One place for each kind of thing. A skill is a folder with a `SKILL.md` (the
 Agent Skills format), kept in git, so every agent here can read it.
 
-| What                                  | Where                         | Who reads it                                          |
-| ------------------------------------- | ----------------------------- | ----------------------------------------------------- |
-| A habit true on every machine         | dotfiles, `conf.d/ai/skills/` | Every agent; a Job copies the folder to the assistant |
-| Facts about one repo                  | That repo's `AGENTS.md`       | Whoever opens the repo                                |
-| A procedure for one repo              | That repo's `.agents/skills/` | Whoever opens the repo                                |
-| The assistant's routines and skills   | `hermes/app/routines/`        | The assistant                                         |
-| The assistant's standing instructions | `hermes/app/SOUL.md`          | The assistant, in every chat                          |
-| What is deployed, and this table      | This file                     | You; the assistant, through its `system-docs` skill   |
-| Why it is built this way              | `DESIGN.md`, `docs/`          | You; the assistant, through its `system-docs` skill   |
-| Your notes and anything private       | The Obsidian vault            | You; private agents, through the vault tools          |
-| What agents learn as they work        | Memini, one store per scope   | The agents. Nothing to maintain by hand               |
+| What                                  | Where                         | Who reads it                                           |
+| ------------------------------------- | ----------------------------- | ------------------------------------------------------ |
+| A habit true on every machine         | dotfiles, `conf.d/ai/skills/` | Every agent; a Job copies the folder to the assistant  |
+| Facts about one repo                  | That repo's `AGENTS.md`       | Whoever opens the repo                                 |
+| A procedure for one repo              | That repo's `.agents/skills/` | Whoever opens the repo                                 |
+| The assistant's routines and skills   | `hermes/app/routines/`        | The assistant                                          |
+| The assistant's standing instructions | `hermes/app/SOUL.md`          | The assistant, in every chat                           |
+| What is deployed, and this table      | This file                     | You; the assistant, through its `system-docs` skill    |
+| Why it is built this way              | `DESIGN.md`, `docs/`          | You; the assistant, through its `system-docs` skill    |
+| Your notes and anything private       | The Obsidian vault            | You; private agents, through the vault tools           |
+| How to write in the vault             | The vault's own `AGENTS.md`   | Whoever writes there; the assistant, before each write |
+| What agents learn as they work        | Memini, one store per scope   | The agents. Nothing to maintain by hand                |
 
-- Nothing an agent has to follow lives in the vault. It is private, so the
-  general agents could not read it.
+- Nothing a general agent has to follow lives in the vault. It is private, so
+  the general agents could not read it. The vault's `AGENTS.md` only concerns
+  agents that write in the vault, and those are private.
+- The assistant writes in the vault through `vault-inbox`, limited to
+  `Notes/`, `AI/` and `Archives/`; every write asks. The cluster copy syncs
+  two ways, so the writes reach every device.
 - Claude Code reads `.claude/skills` only. dotfiles links the shared skills
   there as well as into `~/.agents/skills`, which Codex and OpenCode read.
 - The assistant has no file tools. It reads these pages from git through the

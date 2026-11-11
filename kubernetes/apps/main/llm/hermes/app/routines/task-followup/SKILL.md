@@ -83,6 +83,31 @@ The morning briefing offers one undated task. The answer:
 - Drop it: `status: -1`.
 - No answer or "not now": change nothing. Tomorrow's briefing offers another.
 
+## The weekly review
+
+Answers to the Sunday review, by number:
+
+- Inbox and overdue items: as in "File the inbox" and "The briefing's old
+  task".
+- Waiting: "done" completes it. "Follow up" removes the `waiting` tag and sets
+  `dueDate` tomorrow, all-day. "Still waiting": nothing.
+- A project's next step: `mcp__tools__ticktick_create_task` with the step as
+  `title`, the parent's `projectId`, `parentId` the parent's id, and the date
+  the user gives (or propose the lightest day, as above). A project with no
+  parent task: create the parent first in the list named by the note's
+  `area`, title = the note's name, content =
+  `obsidian://open?vault=Vault&file=<path without .md, URL-encoded>`; then
+  the step; then set the note's `ticktick` with the `vault-notes` skill.
+- Back to backlog: the `vault-notes` skill sets the project's `status` to
+  `backlog`.
+- An idea: "task" creates it in the list named by the idea's `area`, then
+  `vault-notes` sets the idea's `status` to `archived` and archives it.
+  "project" has `vault-notes` set `categories: ["[[Projects]]"]` and
+  `status: ["backlog"]`. "leave": nothing.
+
+When every answer is handled, the `vault-notes` skill writes
+`AI/<YYYY-MM-DD> Weekly review.md`: one line per item, what was decided.
+
 ## File the inbox
 
 The user accepts the check-in's suggestions ("inbox ok") or gives a list per
