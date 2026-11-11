@@ -17,3 +17,4 @@ spec:
     - mistral/mistral-medium-latest
     - mistral/mistral-large-4
     - mistral/zai-glm-5-3
+    - mistral/voxtral-mini-latest
