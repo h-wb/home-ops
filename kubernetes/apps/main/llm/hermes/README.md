@@ -14,12 +14,18 @@ The assistant of the [design](../DESIGN.md), running as `hermes-private-0` in
 
 ## Messaging
 
-- **Telegram**: long polling; nothing connects in. Routines deliver here for now.
-- **Matrix**: the bot `@hermes:matrix.<domain>` on our own homeserver,
+- **Matrix only** — Telegram is disabled in the managed config
+  (`platforms.telegram.enabled: false` in `app/config.yaml`). The bot
+  `@hermes:matrix.<domain>` on our own homeserver,
   [Continuwuity](../../default/continuwuity/) in `default`, reached in-cluster.
   End-to-end encrypted (`MATRIX_E2EE_MODE=required`), one conversation per
   room. You talk to it from Beeper (a Beeper account is a Matrix account) or
   from any Matrix app signed in to an account on our server.
+- Cron and cross-platform messages (routines, alerts) are delivered to the
+  encrypted **Inbox** room in the bot's Space, pinned as `MATRIX_HOME_ROOM` in
+  the managed pod env (`app/helmrelease.yaml`). The managed value wins; a
+  `!sethome` in chat does not override it. Invite the bot to every room you
+  want to talk in, not just the Space.
 
 The homeserver is public on `matrix.<domain>`, which is also its server name,
 because Beeper's server reaches it over federation. It federates with
@@ -88,16 +94,17 @@ wins over anything set there.
 
 ## Credentials
 
-All in the Bitwarden item `hermes`. Telegram's three fields are required; the
-rest are optional, and each feature stays off until its fields exist.
+All in the Bitwarden item `hermes`. The Matrix fields are needed for messaging;
+the dashboard fields are optional, and each feature stays off until its fields
+exist. The old Telegram fields (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS`,
+`TELEGRAM_HOME_CHANNEL`) are still in the item and in Hermes's chat history,
+but inactive: Telegram is disabled in the managed config and its ExternalSecret
+is gone.
 
 | Field                      | Value                                                                                  |
 | -------------------------- | -------------------------------------------------------------------------------------- |
-| `TELEGRAM_BOT_TOKEN`       | From BotFather                                                                         |
-| `TELEGRAM_ALLOWED_USERS`   | Numeric user IDs it answers, comma-separated                                           |
-| `TELEGRAM_HOME_CHANNEL`    | The chat routines deliver to                                                           |
 | `MATRIX_ACCESS_TOKEN`      | From step 4; withheld until `MATRIX_ALLOWED_USERS` is set                              |
 | `MATRIX_ALLOWED_USERS`     | Full Matrix IDs it answers, comma-separated: `@you:beeper.com`, `@you:matrix.<domain>` |
 | `MATRIX_RECOVERY_KEY`      | From step 3; lets the bot verify its own device                                        |
-| `DASHBOARD_PASSWORD`       | Starts the dashboard                                                                   |
+| `DASHBOARD_PASSWORD`       | Starts the dashboard (optional)                                                        |
 | `DASHBOARD_SESSION_SECRET` | Any random string; keeps sign-ins across restarts                                      |

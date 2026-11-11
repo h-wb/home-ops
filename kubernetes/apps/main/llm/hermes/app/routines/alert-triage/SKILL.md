@@ -1,6 +1,6 @@
 ---
 name: alert-triage
-description: Investigate firing Grafana/Alertmanager alerts and report each new one on Telegram. Use when the alert-triage routine runs.
+description: Investigate firing Grafana/Alertmanager alerts and report each new one in the Matrix Inbox. Use when the alert-triage routine runs.
 # Disabled for now: with no schedule below, routines/sync.sh creates no cron
 # job for this routine (and removes the old one on the next pod start). To
 # re-enable, uncomment:
@@ -13,7 +13,7 @@ description: Investigate firing Grafana/Alertmanager alerts and report each new 
 
 Runs every fifteen minutes when scheduled (disabled for now — no schedule in
 the front matter). Read-only: list what is firing, investigate it, and
-tell the user about each new alert on Telegram. A scheduled run has nobody to
+tell the user about each new alert in the Matrix Inbox. A scheduled run has nobody to
 approve a write (`cron_mode: deny`), so never call a write-capable tool — not
 on the cluster, not on Grafana, not a workshop: spawning a Paseo investigator
 is the user's call, they reply "agent" to the message.
@@ -95,7 +95,8 @@ record that this alert was reported.
 
 ## Write
 
-The run's delivery goes to Telegram. One message per new alert, in this
+The run's delivery goes to the Matrix Inbox room (`--deliver matrix` in
+routines/sync.sh). One message per new alert, in this
 shape, nothing else around it:
 
 ```
