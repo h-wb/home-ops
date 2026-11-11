@@ -143,6 +143,8 @@ class PaseoRendering(unittest.TestCase):
         # An orchestrating agent launches a worker from a profile's provider, model
         # and mode. One the key cannot call only fails at the first prompt, and in
         # private the key is what keeps the work on trusted models.
+        ids = {"general": ["orchestrate", "plan", "explore", "build", "review"],
+               "private": ["plan", "build", "review"]}
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
             with self.subTest(scope=scope):
                 data = self.resource(scope, "ConfigMap", f"{app}-config")["data"]
@@ -151,7 +153,7 @@ class PaseoRendering(unittest.TestCase):
                 enabled = {name for name, provider in paseo["agents"]["providers"].items()
                            if provider.get("enabled")}
                 profiles = {profile["id"]: profile for profile in paseo["daemon"]["agentProfiles"]}
-                self.assertEqual(["plan", "build", "review"], list(profiles))
+                self.assertEqual(ids[scope], list(profiles))
                 for name, profile in profiles.items():
                     self.assertIn(profile["provider"], enabled, name)
                     self.assertTrue(profile["notes"], name)
@@ -164,11 +166,22 @@ class PaseoRendering(unittest.TestCase):
                     self.assertIn(model, key["models"], name)
                     # An OpenCode mode is one of its agents.
                     self.assertIn(profile["modeId"], opencode["agents"], name)
-                    efforts = opencode["providers"]["litellm"]["models"][model]["capabilities"]["reasoning"]["effort"]
-                    self.assertIn(profile.get("thinkingOptionId", efforts[0]), efforts, name)
-                # Plan and Review must not edit; Review is a second opinion, so not Build's model.
-                self.assertEqual({"plan"}, {profiles[name]["modeId"] for name in ("plan", "review")})
+                    entry = opencode["providers"]["litellm"]["models"][model]
+                    # A reasoning variant ("none") is a thinking option too.
+                    options = entry["capabilities"]["reasoning"]["effort"] + [v["id"] for v in entry.get("variants", [])]
+                    self.assertIn(profile.get("thinkingOptionId", options[0]), options, name)
+                # Plan, Explore and Review must not edit; Review is a second opinion, so not Build's model.
+                readers = {"plan", "explore", "review"} & set(profiles)
+                self.assertEqual({"plan"}, {profiles[name]["modeId"] for name in readers})
                 self.assertNotEqual(profiles["build"]["model"], profiles["review"]["model"])
+        data = self.resource("general", "ConfigMap", "paseo-config")["data"]
+        profiles = {p["id"]: p for p in json.loads(data["paseo.json"])["daemon"]["agentProfiles"]}
+        agents = json.loads(data["opencode.json"])["agents"]
+        # The orchestrator starts workers, so it cannot be read-only. Reading on the
+        # builder's model saves nothing, as a profile or as OpenCode's own explorer.
+        self.assertNotEqual("plan", profiles["orchestrate"]["modeId"])
+        self.assertNotEqual(profiles["build"]["model"], profiles["explore"]["model"])
+        self.assertNotEqual(agents["build"]["model"], agents["explorer"]["model"].partition("#")[0])
         private = json.loads(self.resource("private", "ConfigMap", "paseo-private-config")["data"]["paseo.json"])
         self.assertEqual({"opencode"}, {p["provider"] for p in private["daemon"]["agentProfiles"]})
         # No agent in private starts or prompts another one (the assistant is a provider there).

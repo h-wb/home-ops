@@ -48,17 +48,29 @@ mounted read-only at `/etc/paseo/config`:
 
 A profile is a saved provider, model and mode with a "when to use" note. You
 pick one in the model picker; an agent that delegates reads the notes
-(`list_profiles`) and launches the worker that fits. Both workshops declare the
-same three in `paseo.json` (`daemon.agentProfiles`):
+(`list_profiles`) and launches the worker that fits. They are declared in
+`paseo.json` (`daemon.agentProfiles`):
 
-| Profile | For                                             | General                      | Private                            |
-| ------- | ----------------------------------------------- | ---------------------------- | ---------------------------------- |
-| Plan    | Hard design or debugging questions; no edits    | Claude Code, Opus, plan mode | OpenCode, Mistral Large, plan mode |
-| Build   | A well-specified change                         | OpenCode, Mistral Large      | OpenCode, Mistral Large            |
-| Review  | An independent read of a diff or plan; no edits | OpenCode, GLM, plan mode     | OpenCode, GLM, plan mode           |
+| Profile     | For                                                       | General                             | Private                            |
+| ----------- | --------------------------------------------------------- | ----------------------------------- | ---------------------------------- |
+| Orchestrate | A change of more than one step: plans, delegates, decides | Claude Code, Fable, auto mode       | None                               |
+| Plan        | Hard design or debugging questions; no edits              | Claude Code, Opus, plan mode        | OpenCode, Mistral Large, plan mode |
+| Explore     | Where and how is X: paths and line numbers; no edits      | OpenCode, Mistral Medium, plan mode | None                               |
+| Build       | A well-specified change                                   | OpenCode, Mistral Large             | OpenCode, Mistral Large            |
+| Review      | An independent read of a diff or plan; no edits           | OpenCode, GLM, plan mode            | OpenCode, GLM, plan mode           |
 
 Plan mode is the read-only one in both agents.
 
+- Orchestrate is [flow H](../docs/flows.md#h-a-larger-change-orchestrated): the
+  strongest model takes the few turns that plan and decide, and starts Explore,
+  Build and Review for the many turns of reading, editing and checking. The
+  order is the `orchestrate` skill in dotfiles (`conf.d/ai/skills`). A small
+  change does not need it: start Build, or any agent, directly.
+- The Claude subscription carries Orchestrate and Plan only. When its window
+  is used up, OpenCode's `coordinator` mode is the same idea in one agent: GPT
+  Sol, with its own explorer (Mistral Medium) and reviewer (GLM).
+- Private has no Orchestrate or Explore: no agent there starts another, so you
+  pick the profile, and OpenCode's own Plan mode is the cheap reader.
 - Review runs on a different model family from Plan and Build, so it does not
   share their blind spots.
 - The list is an array, and the merge replaces an array whole: a profile made

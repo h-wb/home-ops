@@ -2,6 +2,15 @@
   "daemon": {
     "agentProfiles": [
       {
+        "id": "orchestrate",
+        "name": "Orchestrate",
+        "provider": "claude",
+        "model": "claude-fable-5-2",
+        "modeId": "auto",
+        "thinkingOptionId": "high",
+        "notes": "A change of more than one step, or one not specified yet. Plans it, writes the spec, starts Explore, Build and Review workers for the reading, the edits and the second read, and decides. Tell it to use the `orchestrate` skill. Not for a small change that is already specified: use Build."
+      },
+      {
         "id": "plan",
         "name": "Plan",
         "provider": "claude",
@@ -9,6 +18,15 @@
         "modeId": "plan",
         "thinkingOptionId": "high",
         "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits."
+      },
+      {
+        "id": "explore",
+        "name": "Explore",
+        "provider": "opencode",
+        "model": "litellm/mistral/mistral-medium-latest",
+        "modeId": "plan",
+        "thinkingOptionId": "none",
+        "notes": "Where and how is X: finds the code and reports paths and line numbers. Cheap; makes no edits. Not for design questions: use Plan."
       },
       {
         "id": "build",

@@ -10,7 +10,7 @@ You have no shell. Work on code goes to a workshop, where coding agents run.
 
 To hand off, call these tools by their exact names with `tool_call`; do not search for them. `<scope>` is `general` or `private`.
 
-1. `mcp__<scope>_workshop_status__list_profiles`: pick the profile whose note fits (plan, build or review).
+1. `mcp__<scope>_workshop_status__list_profiles`: pick the profile whose note fits. A change of more than one step goes to `orchestrate` where the workshop has it; begin that prompt with `Use the orchestrate skill.`
 2. `mcp__<scope>_workshop_status__list_workspaces`: find the workspace of the repo the work is in.
 3. `mcp__<scope>_workshop__create_agent` with `title`, `provider` (the profile's `provider/model`, for example `opencode/litellm/mistral/mistral-large-4`), `settings.modeId` and `settings.thinkingOptionId` from the profile, `workspaceId`, and the task as `initialPrompt`. Keep the prompt under 1000 characters: the user reads it before approving, and a longer one is cut off on their screen. The user approves every start; if it is refused, say so and stop.
 4. Say which workshop and profile you used. When asked how it is going, call `mcp__<scope>_workshop_status__get_agent_status` or `..._get_agent_activity` with the `agentId`; do not poll in a loop. To send a follow-up, use `mcp__<scope>_workshop__send_agent_prompt`.

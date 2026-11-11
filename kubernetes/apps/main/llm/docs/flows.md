@@ -280,3 +280,43 @@ Steps 4 and 5 are flow D, shortened.
 
 - Why it is safe: Alerts and tasks are general data, so the assistant may read them. The fix crosses behind the same approval.
 - What it costs: The assistant sees only what monitoring already detects. Urgent alerts keep reaching you the way they do today.
+
+## H. A larger change, orchestrated
+
+Status: planned
+
+A change too large for one agent to do well. The strongest model plans it and decides; cheaper agents do the reading, the building and the review.
+
+![Flow H: A larger change, orchestrated](./img/flow-h.svg)
+
+<details>
+<summary>The same diagram as text</summary>
+
+```mermaid
+sequenceDiagram
+    participant Y as You
+    box Private scope
+        participant H as Assistant
+        participant T as Private tools
+        participant P as Private workshop
+    end
+    box General scope
+        participant G as General workshop
+        participant X as Homelab
+    end
+    Y-->>G: ask for a larger change
+    Note over G: the orchestrator plans<br/>and writes the spec
+    Note over G: cheaper agents read<br/>the code and build
+    Note over G: the check runs
+    Note over G: another model family<br/>reviews the diff
+    Note over G: the orchestrator<br/>decides
+    G-->>X: the change, through git
+    G-->>Y: what changed, and the check's result
+```
+
+</details>
+
+Steps 2 to 6 stay inside the general workshop. The orchestrator starts each worker from a profile, and each one shows in the workshop's app as its sub-agent, where you can watch and steer it. Through the assistant, step 1 is flow D instead: the same approval, and the agent it starts is the orchestrator.
+
+- Why it is safe: Nothing new crosses the scope line. Every agent in the flow is a general agent, on the general workshop's key, tools and memory.
+- What it costs: More tokens in total than one agent would use; the saving is that most of them are cheap ones. A worker starts cold, so a small change is slower this way and the orchestrator does those itself. The private workshop has no such flow: no agent there starts another, so you pick the profiles yourself.

@@ -113,6 +113,45 @@ itself, asks before any call to a tool its server has not marked read-only, and
 lets the read-only ones through. Tools approved
 for good are a list in its managed config, so the list is versioned here.
 
+## A strong model plans, cheaper ones work
+
+A change costs what its agents read, times the turns they take. Reading code,
+editing and running checks take many turns; planning and deciding take few. So
+in a workshop the strongest model does only the second kind, and starts cheaper
+agents for the first:
+
+| Role         | What it does                                        | What it sees                      | Today, general workshop   |
+| ------------ | --------------------------------------------------- | --------------------------------- | ------------------------- |
+| Orchestrator | Plans, writes the spec, starts the others, decides  | The request, reports and the diff | Claude Code, Fable 5.2    |
+| Explorer     | Finds where and how something is done; no edits     | The repo                          | OpenCode, Mistral Medium  |
+| Builder      | Makes the change the spec describes, runs the check | The spec                          | OpenCode, Mistral Large 4 |
+| Reviewer     | Looks for defects in the diff; no edits             | The goal and the diff             | OpenCode, GLM 5.3         |
+
+- **The spec is the hand-off**: the goal, the files, what not to touch, and
+  the check that must pass. A cheaper model goes wrong on an unclear task more
+  than on the edit itself.
+- **The check comes before any review.** Running it costs no tokens.
+- **One more round, then stop.** A builder that fails twice is not asked a
+  third time: the orchestrator finishes the work or asks you.
+- **A small change is not delegated.** A worker starts cold, so the hand-off
+  costs more than the edit.
+- **The reviewer is another model family** than the builder, and reads the
+  diff without the orchestrator's reasoning, so it shares neither's blind
+  spots.
+
+This spends more tokens in total than one agent would. Most of them are cheap
+ones, and the strong model's context stays small, which matters most when the
+strong model is the one on a subscription window.
+
+Today: the roles are agent profiles in the general workshop
+([Paseo environments](./paseo/README.md#profiles)), the order is the
+`orchestrate` skill in the general skills folder, and the whole is drawn as
+flow H. The Claude subscription carries the orchestrator and the Plan profile
+only. ChatGPT's quota is shared with the services that call it, so it stays out
+of this path and serves OpenCode's own coordinator when Claude's window is used
+up. In the private workshop no agent starts another, so there you are the
+orchestrator and pick the profiles yourself.
+
 ## Places
 
 A place is a filesystem, its credentials and its network reach. The boundary is
@@ -248,7 +287,9 @@ Where each of these is today, with paths, is in the
 
 Review and delegation are not skills to write. The workshop ships them
 (a second opinion, a committee of two, a hand-off), and picks who does the work
-from agent profiles: a provider, a model and a note saying when to use it.
+from agent profiles: a provider, a model and a note saying when to use it. The
+one procedure of ours on top is `orchestrate`: when to delegate, what the spec
+holds, the order, and when to stop.
 
 What makes a smaller model succeed, in order of effect:
 
@@ -281,6 +322,8 @@ A new harness or machine picks a scope; it does not get its own config.
   prompt. A longer prompt is cut off on your screen, not in what is sent.
 - The assistant holds both workshop daemons' passwords. Its config registers
   seven of their tools; the daemons themselves would accept the rest.
+- Orchestration is an instruction, not a lock: nothing stops the orchestrator
+  from doing all the work itself on the strong model.
 - Someone with cluster or Bitwarden admin rights in the general scope can reach
   private workloads. The boundary guards normal workflows, not an administrator.
 
@@ -297,6 +340,9 @@ A new harness or machine picks a scope; it does not get its own config.
 - **The assistant as its own workbench** (shell and repo checkouts in its pod).
   Works, but puts a shell next to the agent that reads untrusted mail, and
   gives up the workshop's app for private work.
+- **Codex as a workshop agent.** OpenCode already reaches the same ChatGPT
+  models through the model gateway. Codex would add its own sign-in and a path
+  around the gateway, for the same models on the same quota.
 
 ## Decisions
 
@@ -323,6 +369,7 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-09 | "Scope" is the only term (not tier or segment)                                               |
 | 2026-11-10 | The messaging apps are Telegram and iMessage                                                 |
 | 2026-11-10 | The assistant starts agents in either workshop; every start asks, one call at a time         |
+| 2026-11-10 | In the general workshop the strongest model orchestrates; cheaper ones read, build, review   |
 
 ## Open
 
@@ -358,6 +405,9 @@ To verify:
   its automatic splitting of new cards can be turned off.
 - A scheduled run that tries a write is refused, and a sub-agent's write still
   asks.
+- An orchestrated change is worth it: the builder passes the check without a
+  second round more often than not, and the job draws less of the strong model
+  than doing it alone.
 
 ## Getting there
 
@@ -384,3 +434,5 @@ Done (2026-11-09): the general Hermes removed; both workshops moved into the
    bundled skills kept out.
 8. Task board, then homelab alerts → cards.
 9. Retire the Open WebUI data and legacy hostnames.
+10. Orchestrated changes (flow H): the Orchestrate and Explore profiles and the
+    `orchestrate` skill. Next: run one real change through it.
