@@ -20,7 +20,7 @@ komga:
       overrideExistingCovers: false # if false will upload but not select new cover if another cover already exists
       overrideComicInfo: false # Sento owns archive metadata; Komf only enriches the API.
       postProcessing:
-        seriesTitle: false # komga-titles preserves edition labels from Sento folders.
+        seriesTitle: false
         seriesTitleLanguage: "en" # series title update language. If empty chose first matching title
         fallbackToAltTitle: false # fallback to first alternative tile if series title is not found
         alternativeSeriesTitles: false # use other title types as alternative title option
