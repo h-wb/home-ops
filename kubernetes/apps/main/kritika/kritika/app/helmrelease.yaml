@@ -102,7 +102,6 @@ spec:
         # Every ChatGPT call costs subscription quota (karakeep shares it), and a
         # rebase storm should not drain a week of it.
         reviewsPerDay: 40
-        concurrency: 2
       rules:
         # The gate's minimum, kept here rather than in the repository: files in
         # the repository are read from each pull request's merge base, so a

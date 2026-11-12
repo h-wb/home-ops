@@ -11,6 +11,12 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      # 0.21 image is rootless; /config was written by the old image's uid 911
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 911
+        runAsGroup: 911
     controllers:
       multiscrobbler:
         annotations:
@@ -32,6 +38,8 @@ spec:
               WS_ENABLE: true
               # Pod has no IPv6 route; Spotify AAAA answers caused ENETUNREACH poll failures
               NODE_OPTIONS: --dns-result-order=ipv4first
+              # 0.21 auth would also lock the /api/metrics scrape; internal-only anyway
+              AUTH_MODE: disabled
             envFrom:
               - secretRef:
                   name: multiscrobbler-secret
