@@ -7,5 +7,6 @@ resources:
   - ./externalsecret.yaml
   - ./grafanadashboard.yaml
   - ./helmrelease.yaml
+  - ./networkpolicy.yaml
   - ./scrapeconfig.yaml
   - ./service.yaml

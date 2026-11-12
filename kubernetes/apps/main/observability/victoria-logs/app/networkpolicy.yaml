@@ -1,0 +1,20 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# VictoriaLogs has no login. Its LoadBalancer exists for the edge cluster, which
+# arrives through the network/tailscale pod (userspace mode re-dials from the
+# pod). Cilium runs DSR, so a LAN client keeps its address and is `world`.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: victoria-logs-deny-lan
+spec:
+  endpointSelector:
+    matchLabels:
+      app: server
+      app.kubernetes.io/instance: victoria-logs
+      app.kubernetes.io/name: victoria-logs-single
+  enableDefaultDeny:
+    ingress: false
+  ingressDeny:
+    - fromEntities:
+        - world
