@@ -1,4 +1,18 @@
 {
+  "clients": [
+    {
+      "type": "listenbrainz",
+      "id": "listenbrainz",
+      "name": "listenbrainz",
+      "data": {
+        "token": "[[LISTENBRAINZ_TOKEN]]",
+        "username": "[[LISTENBRAINZ_USER]]"
+      },
+      "options": {
+        "nowPlaying": false
+      }
+    }
+  ],
   "sourceDefaults": {
     "maxPollRetries": 10,
     "maxRequestRetries": 3,
