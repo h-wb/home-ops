@@ -13,6 +13,8 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001

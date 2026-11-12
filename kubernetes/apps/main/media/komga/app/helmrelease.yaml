@@ -11,6 +11,13 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
     controllers:
       komga:
         labels:

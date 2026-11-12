@@ -1,0 +1,41 @@
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: flux-mcp-backup-trigger
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: [kopiur.home-operations.com]
+        apiVersions: ["*"]
+        operations: [CREATE, UPDATE]
+        resources: [snapshots]
+  matchConditions:
+    - name: flux-mcp-only
+      expression: request.userInfo.username == 'system:serviceaccount:llm:flux-mcp'
+  validations:
+    - expression: request.operation == 'CREATE'
+      message: The MCP backup trigger cannot modify existing snapshots.
+    - expression: request.namespace == 'media'
+      message: MCP backup triggers are restricted to the media namespace.
+    - expression: has(object.spec.policyRef) && size(object.spec.policyRef.name) > 0
+      message: A backup must reference an existing SnapshotPolicy.
+    - expression: "!has(object.spec.mover) && !has(object.spec.source) && !has(object.spec.repository) && !has(object.spec.failurePolicy)"
+      message: Mover, source, repository and failure-policy overrides are not allowed.
+    - expression: "!has(object.spec.pin) || object.spec.pin == false"
+      message: Manual backups cannot bypass retention.
+    - expression: "!has(object.spec.deletionPolicy) || object.spec.deletionPolicy == 'Delete'"
+      message: Manual backups must use the normal Delete lifecycle.
+    - expression: "!has(object.metadata.ownerReferences) || size(object.metadata.ownerReferences) == 0"
+      message: Manual backups cannot set owner references.
+    - expression: "!has(object.status)"
+      message: Manual backups cannot supply status.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: flux-mcp-backup-trigger
+spec:
+  policyName: flux-mcp-backup-trigger
+  validationActions: [Deny]

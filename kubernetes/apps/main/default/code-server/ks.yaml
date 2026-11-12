@@ -25,6 +25,8 @@ spec:
       OIDC_DISPLAY_NAME: Code Server
       OIDC_SHORT_USERNAME: "true"
       OIDC_DISABLE_PKCE: "true"
+      # Not `users`: a session here is a shell with the mounted kubeconfig.
+      OIDC_GROUP: admins
   prune: true
   retryInterval: 1m
   sourceRef:

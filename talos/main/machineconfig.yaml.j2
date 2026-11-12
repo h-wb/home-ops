@@ -27,7 +27,8 @@ machine:
         - llm # ToolHive's talos MCP server (os:reader)
         - system-upgrade
       allowedRoles:
-        - os:admin
+        - os:admin # tuppr
+        - os:operator # home-ops-runner: talosctl image pull
         - os:reader
       enabled: true
     {% endif %}
@@ -62,7 +63,7 @@ machine:
   install:
     diskSelector:
       model: Samsung SSD 870
-    image: factory.talos.dev/installer/db8d3cdcb1f738704e1b5f5f2f39c7f36773fed358a41b7073fca2eb1a406bad:v1.14.2
+    image: factory.talos.dev/installer/db8d3cdcb1f738704e1b5f5f2f39c7f36773fed358a41b7073fca2eb1a406bad:v1.14.6
     wipe: false
   kernel:
     modules:
@@ -85,7 +86,7 @@ machine:
       imageMinimumGCAge: 2m
       imageMaximumGCAge: 168h
     # renovate: datasource=docker depName=ghcr.io/siderolabs/kubelet
-    image: ghcr.io/siderolabs/kubelet:v1.37.0
+    image: ghcr.io/siderolabs/kubelet:v1.37.1
     extraMounts:
       - destination: /var/openebs/local
         type: bind
@@ -180,11 +181,11 @@ cluster:
     disablePodSecurityPolicy: true
     extraArgs:
       enable-aggregator-routing: "true"
-    image: registry.k8s.io/kube-apiserver:v1.37.0
+    image: registry.k8s.io/kube-apiserver:v1.37.1
   controllerManager:
     extraArgs:
       bind-address: 0.0.0.0
-    image: registry.k8s.io/kube-controller-manager:v1.37.0
+    image: registry.k8s.io/kube-controller-manager:v1.37.1
   coreDNS:
     disabled: true
   etcd:
@@ -197,7 +198,7 @@ cluster:
       listen-metrics-urls: http://0.0.0.0:2381
   proxy:
     disabled: true
-    image: registry.k8s.io/kube-proxy:v1.37.0
+    image: registry.k8s.io/kube-proxy:v1.37.1
   scheduler:
     config:
       apiVersion: kubescheduler.config.k8s.io/v1
@@ -218,7 +219,7 @@ cluster:
                     whenUnsatisfiable: ScheduleAnyway
     extraArgs:
       bind-address: 0.0.0.0
-    image: registry.k8s.io/kube-scheduler:v1.37.0
+    image: registry.k8s.io/kube-scheduler:v1.37.1
   secretboxEncryptionSecret: {{ ENV['CLUSTER_SECRETBOXENCRYPTIONSECRET'] }}
   serviceAccount:
     key: {{ ENV['CLUSTER_SERVICEACCOUNT_KEY'] }}

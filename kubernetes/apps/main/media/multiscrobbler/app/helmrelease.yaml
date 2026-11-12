@@ -12,11 +12,10 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      # 0.21 image is rootless; /config was written by the old image's uid 911
       securityContext:
         runAsNonRoot: true
-        runAsUser: 911
-        runAsGroup: 911
+        runAsUser: 1000
+        runAsGroup: 1000
     controllers:
       multiscrobbler:
         annotations:
@@ -34,8 +33,8 @@ spec:
               SPOTIFY_REDIRECT_URI: https://multiscrobbler.${SECRET_DOMAIN}/callback
               PLEX_ID: plex
               PLEX_URL: http://plex.media:32400
-              LZ_ID: listenbrainz
               WS_ENABLE: true
+              WS_ID: webscrobbler
               # Pod has no IPv6 route; Spotify AAAA answers caused ENETUNREACH poll failures
               NODE_OPTIONS: --dns-result-order=ipv4first
               # 0.21 auth would also lock the /api/metrics scrape; internal-only anyway

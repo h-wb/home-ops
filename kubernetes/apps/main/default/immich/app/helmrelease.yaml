@@ -14,6 +14,8 @@ spec:
   values:
     defaultPodOptions:
       enableServiceLinks: false
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

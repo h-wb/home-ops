@@ -190,7 +190,6 @@ spec:
         ruleSelectorNilUsesHelmValues: false
         scrapeConfigSelectorNilUsesHelmValues: false
         serviceMonitorSelectorNilUsesHelmValues: false
-        enableAdminAPI: true
         # Receives the edge cluster's remote write (soft dependency for edge:
         # it buffers and retries; exposed on the LAN via service.yaml).
         enableRemoteWriteReceiver: true
