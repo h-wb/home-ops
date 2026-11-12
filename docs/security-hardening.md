@@ -26,11 +26,10 @@ than it should be:
 Tasks:
 
 - [ ] Agents get their own GitHub identity with the Write role, not the admin's
-      (decision pending: machine user or GitHub App).
-- [ ] Its token cannot change workflows or settings (classic: `repo` without
-      `workflow`; App: contents, pull requests, issues only). Replace `GH_TOKEN` in
-      the `paseo-general` item and `GITHUB_TOKEN` in the `toolhive` item, then
-      revoke the old tokens.
+      (agreed 2026-11-12, scheduled for later; a machine user is the plan).
+- [ ] Its token cannot change workflows or settings (classic `repo` without
+      `workflow`). Replace `GH_TOKEN` in the `paseo-general` item and
+      `GITHUB_TOKEN` in the `toolhive` item, then revoke the old tokens.
 - [ ] Ruleset: the admin bypass stays for the human only. Agent pull requests are
       approved by the human, which works once the author is no longer the admin.
 - [ ] kritika approves only the Renovate bot's pull requests
