@@ -11,12 +11,54 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
     controllers:
       komga:
         labels:
           nfsMount: "true"
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          check-library-access:
+            image:
+              repository: docker.io/library/busybox
+              tag: 1.37.0
+            command:
+              - sh
+              - -ec
+              - test -r /data && test -x /data && find /data -maxdepth 2 -type d -exec test -r '{}' \; -print | head -5
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
+          migrate-ownership:
+            image:
+              repository: docker.io/library/busybox
+              tag: 1.37.0
+            command:
+              - sh
+              - -ec
+              - chown -Rh 1000:1000 /migration && stat -c '%u:%g %a %n' /migration
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: [ALL]
+                add: [CHOWN, DAC_READ_SEARCH]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
         containers:
           app:
             image:
@@ -72,10 +114,22 @@ spec:
     persistence:
       config:
         existingClaim: *app
+        advancedMounts:
+          komga:
+            app:
+              - path: /config
+            migrate-ownership:
+              - path: /migration
       media:
         type: nfs
         server: ${NFS_ADDR:=temp}
         path: /mnt/tank/shared
-        globalMounts:
-          - path: /data
-            subPath: Literature
+        advancedMounts:
+          komga:
+            app:
+              - path: /data
+                subPath: Literature
+            check-library-access:
+              - path: /data
+                subPath: Literature
+                readOnly: true
