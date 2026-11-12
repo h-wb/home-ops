@@ -132,7 +132,6 @@
     {
       description: "Auto-merge Grafana dashboards (after the major gate so it wins)",
       matchDatasources: ["custom.grafana-dashboards"],
-      matchUpdateTypes: ["major"],
       addLabels: ["renovate/grafana-dashboard"],
       automerge: true,
       automergeType: "branch",
