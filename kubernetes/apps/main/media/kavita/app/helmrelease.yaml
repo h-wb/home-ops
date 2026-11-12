@@ -37,6 +37,8 @@ spec:
               readOnlyRootFilesystem: true
               capabilities: { drop: ["ALL"] }
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         fsGroup: 1000
         runAsGroup: 1000

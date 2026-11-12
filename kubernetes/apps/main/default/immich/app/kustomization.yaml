@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./horizontalpodautoscaler.yaml
+  - ./networkpolicy.yaml
   - ./pvc.yaml
   # - ./externalsecret.yaml
   - ./resources/configmap.yaml

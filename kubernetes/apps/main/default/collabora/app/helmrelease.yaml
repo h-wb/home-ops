@@ -11,6 +11,9 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
     controllers:
       collabora:
         annotations:

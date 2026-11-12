@@ -97,16 +97,28 @@ Internal gateway, no login at all:
 
 ## Step 4: flat pod network
 
-Only `llm`, `kritika`, the runner and the dragonfly instances have policies. Every
-other pod reaches every Service, so the gateway login protects against outside
-traffic only: code-server, the arr apps (`AUTH__METHOD: External`), Prometheus and
-qBittorrent are open to any compromised pod.
+Only `llm`, `kritika`, the runner, code-server and the dragonfly instances have
+policies. Every other pod reaches every Service, so the gateway login protects
+against outside traffic only: the arr apps (`AUTH__METHOD: External`), Prometheus
+and qBittorrent are open to any compromised pod.
 
-- [ ] Ingress policy for the pods whose only auth is the gateway: from the
-      gateway and their named in-cluster clients.
-- [ ] Egress policy for internet-facing pods that run as root or unhardened
-      (nextcloud, paperless, collabora, komga, neko).
-- [ ] Consider bjw-s' label-driven clusterwide policies as the general shape.
+Scope, after looking at seven reference repos: none of them runs default-deny, and
+their policies sit on runners, AI tool servers and the identity provider. So no
+per-app ingress policies here. Instead the internet-facing apps opt in to an
+egress rule, bjw-s' shape: a pod labelled `policy.home.arpa/egress: internet`
+reaches the internet and cluster DNS only, plus what its own
+`CiliumNetworkPolicy` allows. Unlabelled pods are untouched.
+
+Hubble is off, so a missed dependency fails without a trace beyond the app's own
+logs and `cilium_drop_count_total`. Label an app only once its in-cluster calls
+are known.
+
+- [x] The rule (`kube-system/cilium/netpols`).
+- [x] collabora, komga, kavita, continuwuity, immich.
+- [ ] nextcloud (chart labels, cron pods), paperless (workflow webhooks live in
+      its database: find them first), karakeep, dawarich, romm.
+- [ ] Not candidates: neko (an admin desktop that needs the cluster), overseerr
+      (its job is calling the arr apps), plex (casts to LAN players), gatus.
 
 ## Step 5: supply chain
 
