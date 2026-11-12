@@ -1439,6 +1439,456 @@
           "refId": "A"
         }
       ]
+    },
+    {
+      "collapsed": false,
+      "description": "Counters measure cumulative request volume over the selected range, not unique context or context-window occupancy; a shared consumer (e.g. Paseo General) combines all sessions on that key; Prometheus increase() over short trials is approximate. Absent series mean no observed series in range (unreported), not zero.",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 72
+      },
+      "id": 37,
+      "panels": [],
+      "title": "Context Usage by Consumer/Model",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Reported input/prompt tokens for the selected consumer/model in the range. Counters measure cumulative request volume over the selected range, not unique context or context-window occupancy; a shared consumer (e.g. Paseo General) combines all sessions on that key; Prometheus increase() over short trials is approximate.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 73
+      },
+      "id": 38,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "Input tokens",
+          "refId": "A"
+        }
+      ],
+      "title": "Input Tokens (range)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Reported completion/output tokens in the range. Reasoning tokens (panel below) are a detail subset and are NOT added to this number. Counters measure cumulative request volume over the selected range, not unique context or context-window occupancy; a shared consumer (e.g. Paseo General) combines all sessions on that key; Prometheus increase() over short trials is approximate.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 73
+      },
+      "id": 39,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_output_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "Output tokens",
+          "refId": "A"
+        }
+      ],
+      "title": "Output Tokens (range)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Provider prompt-cache read tokens (litellm_input_cached_tokens_metric_total) in the range. Distinct from LiteLLM RESPONSE-cache hits; not subtracted from input. Absent series mean no observed series in range (unreported), not zero. Counters measure cumulative request volume over the selected range, not unique context or context-window occupancy; a shared consumer (e.g. Paseo General) combines all sessions on that key; Prometheus increase() over short trials is approximate.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 73
+      },
+      "id": 40,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "Cache-read tokens",
+          "refId": "A"
+        }
+      ],
+      "title": "Provider Cache-Read Tokens (range)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Reported reasoning tokens in the range; a detail/subset of output, not added to it. Absent series mean no observed series in range (unreported), not zero. Counters measure cumulative request volume over the selected range, not unique context or context-window occupancy; a shared consumer (e.g. Paseo General) combines all sessions on that key; Prometheus increase() over short trials is approximate.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 73
+      },
+      "id": 41,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_output_reasoning_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "Reasoning tokens",
+          "refId": "A"
+        }
+      ],
+      "title": "Reasoning Tokens (range)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "sum by(model)(increase(input tokens)) / sum by(model)(increase(requests)); models with zero requests in range are filtered out by the > 0 denominator check (no clamp_min distortion). Average reported input per request, not unique context. Absent series mean no observed series in range (unreported), not zero.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 77
+      },
+      "id": 42,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "sortOrder": "descending"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / (sum by (model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) > 0)",
+          "legendFormat": "{{model}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "title": "Input Tokens per Model Request (range)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Request count per consumer/model in the range from litellm_requests_metric_total. Counters measure cumulative request volume over the selected range, not unique context or context-window occupancy; a shared consumer (e.g. Paseo General) combines all sessions on that key; Prometheus increase() over short trials is approximate.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 77
+      },
+      "id": 43,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "sortOrder": "descending"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "{{api_key_alias}} \u2192 {{model}}",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "title": "Model Requests in Range by Consumer/Model",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Provider prompt-cache reads per model (input_cached_tokens; legacy provider_cache_* aliases are the same counters and must not be summed in). Absent series mean no observed series in range (unreported), not zero.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 85
+      },
+      "id": 44,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "sortOrder": "descending"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "{{model}} cache-read",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "title": "Provider Cache-Read Tokens by Model (range)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Provider prompt-cache writes (creations) per model via input_cache_creation_tokens. Absent series mean no observed series in range (unreported), not zero.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 85
+      },
+      "id": 45,
+      "options": {
+        "displayMode": "gradient",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "values": false
+        },
+        "sortOrder": "descending"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (model) (increase(litellm_input_cache_creation_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "{{model}} cache-write",
+          "refId": "A",
+          "instant": true
+        }
+      ],
+      "title": "Provider Cache-Write Tokens by Model (range)",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "LiteLLM RESPONSE-cache (Redis-backed) hit/miss counts in the range \u2014 a separate cache from provider prompt caching above. Absent series mean no observed series in range (unreported), not zero.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 85
+      },
+      "id": 46,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_cache_hits_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "{{api_key_alias}} \u2192 {{model}} hit",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_cache_misses_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "{{api_key_alias}} \u2192 {{model}} miss",
+          "refId": "B"
+        }
+      ],
+      "title": "LiteLLM RESPONSE Cache Hits vs Misses (range)",
+      "type": "timeseries"
     }
   ],
   "templating": {
@@ -1454,6 +1904,56 @@
         "query": "prometheus",
         "refresh": 1,
         "type": "datasource"
+      },
+      {
+        "current": {
+          "text": "Paseo General",
+          "value": "Paseo General"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(litellm_input_tokens_metric_total, api_key_alias)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Consumer",
+        "multi": true,
+        "name": "consumer",
+        "options": [],
+        "query": {
+          "query": "label_values(litellm_input_tokens_metric_total, api_key_alias)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "query"
+      },
+      {
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "${datasource}"
+        },
+        "definition": "label_values(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\"}, model)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Model",
+        "multi": true,
+        "name": "model",
+        "options": [],
+        "query": {
+          "query": "label_values(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\"}, model)",
+          "refId": "PrometheusVariableQueryEditor-VariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "query"
       }
     ]
   },
