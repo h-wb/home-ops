@@ -40,7 +40,7 @@ Tasks:
       session start).
 - [x] Talos API access allows `os:operator` (`talos/main/machineconfig.yaml.j2`).
       Apply the machine config to the control planes before the next box.
-- [ ] Runner's Talos ServiceAccount drops from `os:admin` to `os:operator`.
+- [x] Runner's Talos ServiceAccount drops from `os:admin` to `os:operator`.
       `ImageService/Pull` accepts it (Talos v1.14 `machined.go`). What is left:
       reboot, shutdown, service stop, etcd snapshot (encrypted by secretbox). Gone:
       machine config, kubeconfig, upgrade, reset.

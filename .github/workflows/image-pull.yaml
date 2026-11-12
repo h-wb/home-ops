@@ -69,7 +69,7 @@ jobs:
           path: images.json
 
   pull:
-    # Never run fork code on the in-cluster runner: it holds Talos admin credentials.
+    # Never run fork code on the in-cluster runner: it holds Talos operator credentials.
     if: >-
       ${{
         needs.diff.outputs.images != '[]' &&
