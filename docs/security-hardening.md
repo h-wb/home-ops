@@ -55,11 +55,11 @@ runner's credential.
 
 Internet-facing, `--auth none` behind the gateway login, with a kubeconfig mounted.
 
-- [ ] Gate on `admins`, not `users` (`OIDC_GROUP`).
-- [ ] Add the `auth-gate` gatus probe (also missing for obsidian and prefect).
+- [x] Gate on `admins`, not `users` (`OIDC_GROUP`).
+- [x] Add the `auth-gate` gatus probe (also missing for obsidian and prefect).
 - [ ] Decide: internal gateway only, or keep external.
 - [ ] Find out what the kubeconfig may do and reduce it, or remove it.
-- [ ] NetworkPolicy: only the gateway reaches the pod.
+- [x] NetworkPolicy: only the gateway reaches the pod.
 
 ## Step 3: endpoints that skip the gateway login
 
