@@ -27,7 +27,8 @@ machine:
         - llm # ToolHive's talos MCP server (os:reader)
         - system-upgrade
       allowedRoles:
-        - os:admin
+        - os:admin # tuppr
+        - os:operator # home-ops-runner: talosctl image pull
         - os:reader
       enabled: true
     {% endif %}
