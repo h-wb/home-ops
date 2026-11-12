@@ -12,15 +12,37 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      # 0.21 image is rootless; /config was written by the old image's uid 911
       securityContext:
         runAsNonRoot: true
-        runAsUser: 911
-        runAsGroup: 911
+        runAsUser: 1000
+        runAsGroup: 1000
     controllers:
       multiscrobbler:
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          migrate-ownership:
+            image:
+              repository: docker.io/library/busybox
+              tag: 1.37.0
+            command:
+              - sh
+              - -ec
+              - chown -Rh 1000:1000 /migration && stat -c '%u:%g %a %n' /migration /migration/auth.secret /migration/ms.db
+            securityContext:
+              runAsNonRoot: false
+              runAsUser: 0
+              runAsGroup: 0
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop: [ALL]
+                add: [CHOWN, DAC_READ_SEARCH]
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                memory: 64Mi
         containers:
           app:
             image:
@@ -87,6 +109,12 @@ spec:
     persistence:
       config:
         existingClaim: *app
+        advancedMounts:
+          multiscrobbler:
+            app:
+              - path: /config
+            migrate-ownership:
+              - path: /migration
       config-file:
         type: configMap
         name: multiscrobbler-configmap
