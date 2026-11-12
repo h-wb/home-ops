@@ -1,0 +1,31 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Beyond the internet (policy.home.arpa/egress): the database, the cache and
+# Immich's own controllers (machine learning on 3003).
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: immich
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: immich
+      policy.home.arpa/egress: internet
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: postgres-immich
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: immich-dragonfly
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/instance: immich
