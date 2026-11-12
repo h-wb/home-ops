@@ -9,6 +9,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc/envoy
   path: ./kubernetes/apps/main/downloads/qbittorrent/app
   prune: true
   sourceRef:
@@ -22,5 +23,11 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: downloads
+      APP_NAMESPACE: downloads
+      # The pod CIDR is in AuthSubnetWhitelist and Envoy is a pod, so the route
+      # had no login at all. The arr apps and qui use the Service.
+      OIDC_DISPLAY_NAME: qBittorrent
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_DISABLE_PKCE: "true"
       KOPIUR_SCHEDULE: "20 * * * *"
       KOPIUR_CAPACITY: 2Gi

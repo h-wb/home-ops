@@ -74,18 +74,24 @@ Neither cluster has a Talos host firewall.
 | edge home-assistant    | 192.168.18.77:12321 | code-server sidecar, `--auth none`               |
 | edge mosquitto         | 192.168.18.78:1883  | `allow_anonymous true`                           |
 
-- [ ] Prometheus: admin API off; limit the service to the edge sender
-      (`loadBalancerSourceRanges` or a Cilium policy).
-- [ ] VictoriaLogs and edge Alertmanager: same source limit.
+- [x] Prometheus: admin API off; the LAN is denied by a Cilium policy on the pod.
+      Cilium runs DSR, so LAN clients are `world`, while the edge arrives through
+      the `network/tailscale` pod and stays allowed.
+- [x] VictoriaLogs: same policy.
+- [ ] Any tailnet device that accepts the two routes still reaches both: limit
+      them to the edge node in the Tailscale ACL.
+- [ ] Edge Alertmanager: same source limit (check edge's Cilium mode first).
 - [ ] Edge home-assistant: take 12321 off the service. The pod is
       `hostNetwork`, so also bind code-server to localhost or give it a password.
 - [ ] Mosquitto: password file, anonymous off.
 
 Internal gateway, no login at all:
 
-- [ ] qBittorrent (the pod CIDR is in `AuthSubnetWhitelist`, and Envoy is a pod),
-      slskd (`SLSKD_NO_AUTH`), zigbee2mqtt, edge `hass-code`: add
-      `components/oidc/envoy`. The arr apps and qui use the Services, not the routes.
+- [x] qBittorrent (the pod CIDR is in `AuthSubnetWhitelist`, and Envoy is a pod)
+      and slskd (`SLSKD_NO_AUTH`): `components/oidc/envoy` and an `auth-gate`
+      probe. The arr apps and qui use the Services, not the routes.
+- [ ] zigbee2mqtt and `hass-code` are on edge, which has no kanidm-provision: the
+      client has to be declared on main and its secret carried to edge.
 - [ ] komf, multiscrobbler, garage-webui: no auth settings in the manifests; check
       and gate.
 
