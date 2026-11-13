@@ -148,7 +148,7 @@ spec:
           repository: prompp/prompp
           # v0.7.10 fixes the remote-write timestamp units that inflated the
           # shard calculation (deckhouse/prompp release v0.7.10).
-          tag: 0.8.18
+          tag: 0.8.19
         # The operator needs the upstream API version, not Prom++'s tag.
         version: v2.55.1
         securityContext:
