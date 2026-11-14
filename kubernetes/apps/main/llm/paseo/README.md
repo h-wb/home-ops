@@ -66,6 +66,9 @@ Plan mode is the read-only one in both agents.
   Build and Review for the many turns of reading, editing and checking. The
   order is the `orchestrate` skill in dotfiles (`conf.d/paseo/skills`). A small
   change does not need it: start Build, or any agent, directly.
+- Orchestrate comes in three: Fable for a hard or vague change, Opus for the
+  everyday one (it draws less of the Claude window), and Sol, which is OpenCode's
+  `coordinator` on the ChatGPT subscription.
 - The Claude subscription carries Orchestrate and Plan only. When its window
   is used up, OpenCode's `coordinator` mode is the same idea in one agent: GPT
   Sol, with its own explorer (Mistral Medium) and reviewer (GLM).

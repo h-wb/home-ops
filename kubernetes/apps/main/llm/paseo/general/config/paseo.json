@@ -11,13 +11,30 @@
         "notes": "A change of more than one step, or one not specified yet. Plans it, writes the spec, starts Explore, Build and Review workers for the reading, the edits and the second read, and decides. Tell it to use the `orchestrate` skill. Not for a small change that is already specified: use Build. When the Claude window is used up: OpenCode's `coordinator` mode."
       },
       {
+        "id": "orchestrate-opus",
+        "name": "Orchestrate (Opus)",
+        "provider": "claude",
+        "model": "claude-opus-5-5",
+        "modeId": "auto",
+        "thinkingOptionId": "high",
+        "notes": "The same role as Orchestrate on Opus, which draws less of the Claude window than Fable. The everyday choice for a change of more than one step; keep Fable for one that is hard or still vague. Tell it to use the `orchestrate` skill."
+      },
+      {
+        "id": "orchestrate-sol",
+        "name": "Orchestrate (Sol)",
+        "provider": "opencode",
+        "model": "litellm/chatgpt/gpt-6.1-sol",
+        "modeId": "coordinator",
+        "notes": "The same role on the ChatGPT subscription, for when the Claude window is used up or should be saved. OpenCode's coordinator: it does bounded work itself and uses its own explorer and reviewer, not the Paseo profiles."
+      },
+      {
         "id": "plan",
         "name": "Plan",
         "provider": "claude",
         "model": "claude-opus-5-5",
         "modeId": "plan",
         "thinkingOptionId": "high",
-        "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits. Fallback when the Claude window is used up: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`, thinking `high`."
+        "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits. Fallback when the Claude window is used up: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`."
       },
       {
         "id": "explore",
@@ -43,7 +60,7 @@
         "model": "litellm/mistral/zai-glm-5-3",
         "modeId": "plan",
         "thinkingOptionId": "high",
-        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`, thinking `high`."
+        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`."
       }
     ]
   },
