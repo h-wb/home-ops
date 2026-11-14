@@ -1,0 +1,74 @@
+---
+# The GitHub App bot-tintin is the general pod's GitHub identity. Its three
+# fields live in the Bitwarden item of the same name (JSON: APP_ID,
+# INSTALLATION_ID, PRIVATE_KEY), named after the identity so other consumers
+# can extract them through their own ExternalSecret.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: bot-tintin
+spec:
+  secretStoreRef:
+    name: bitwarden-secrets-manager
+    kind: ClusterSecretStore
+  refreshInterval: 1h
+  target:
+    name: bot-tintin
+    deletionPolicy: Retain
+    template:
+      engineVersion: v2
+      data:
+        APP_ID: "{{ .APP_ID }}"
+        INSTALLATION_ID: "{{ .INSTALLATION_ID }}"
+        PRIVATE_KEY: "{{ .PRIVATE_KEY }}"
+  dataFrom:
+    - extract:
+        key: bot-tintin
+---
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: GithubAccessToken
+metadata:
+  name: bot-tintin
+spec:
+  appIDRef:
+    name: bot-tintin
+    key: APP_ID
+  installIDRef:
+    name: bot-tintin
+    key: INSTALLATION_ID
+  auth:
+    privateKey:
+      secretRef:
+        name: bot-tintin
+        key: PRIVATE_KEY
+  # The explicit permission map keeps minted tokens narrow even if the app is
+  # later granted more (and never workflows: home-ops runs its own runner on PRs).
+  permissions:
+    contents: write
+    pull_requests: write
+    issues: write
+    actions: read
+    checks: read
+    statuses: read
+    metadata: read
+---
+# Installation tokens live 1h, so refresh every 30m to always hold a current
+# one. No secretStoreRef: the GithubAccessToken generator mints the token.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: bot-tintin-token
+spec:
+  refreshInterval: 30m
+  target:
+    name: bot-tintin-token
+    template:
+      engineVersion: v2
+      data:
+        token: "{{ .token }}"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: GithubAccessToken
+          name: bot-tintin

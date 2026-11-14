@@ -4,6 +4,7 @@ resources:
   - ../common
   - networkpolicy.yaml
   - externalsecret.yaml
+  - bot-tintin.yaml
   - virtualkey.yaml
 configMapGenerator:
   - name: ${APP}-config

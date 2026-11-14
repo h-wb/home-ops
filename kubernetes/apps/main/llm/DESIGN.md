@@ -186,6 +186,18 @@ memory).
   private workshop.
 - The private workshop's GitHub credential reads general repos and writes only
   to private ones. General credentials cannot read private repos.
+- The general workshop's GitHub identity is the app `bot-tintin`: Contents, Pull
+  requests and Issues write; Actions, Checks and Statuses read; no Workflows
+  (home-ops runs a self-hosted runner on PRs and holds the Renovate key as a repo
+  secret). external-secrets mints a 1h installation token every 30m into
+  `bot-tintin-token`, mounted at `/var/run/secrets/bot-tintin/token`
+  (`GH_TOKEN_FILE`, which dotfiles' `gh` and `git` prefer); the personal `GH_TOKEN`
+  stays as a temporary fallback until the bot is verified. Workflow-file changes
+  come to you as a PR-comment patch, applied with `land <pr>` from your own
+  environment (workstation or neko; code-server once it has mise and gh), never
+  from the Paseo pod. The app's fields live in the
+  Bitwarden item `bot-tintin` (`APP_ID`, `INSTALLATION_ID`, `PRIVATE_KEY`), named
+  after the identity so other consumers can read it via their own ExternalSecret.
 - A bug that only shows on real data is reproduced in the private workshop.
   What part of it goes to the general side is your call, through the hand-off
   approval.
@@ -403,9 +415,11 @@ To verify:
 
 - The trusted models are good enough: for the briefing, for choosing where work
   goes, and for unattended work in private repos.
-- General GitHub credentials (the general workshop's token, the general tool
-  gateway's GitHub tool, the workstation's login) cannot read repos that hold
-  private data.
+- General GitHub credentials (the general workshop's `bot-tintin` app token, the
+  general tool gateway's GitHub tool, the workstation's login) cannot read repos
+  that hold private data.
+- The `bot-tintin` identity works end to end in the general workshop; then the
+  `GH_TOKEN` fallback in `paseo-agents` can be removed.
 - The approval prompt for a write reaches you in the messaging app. On Telegram
   it is a message with buttons: once, this chat, always, deny.
 - Hermes Kanban fits as a task board: cards nobody is assigned to stay put, and

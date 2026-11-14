@@ -8,6 +8,9 @@ spec:
       ${APP}:
         labels:
           nfsMount: "true"
+        # common's reloader auto would recreate the pod on every token refresh.
+        annotations:
+          secrets.exclude.reloader.stakater.com/reload: bot-tintin-token
         initContainers:
           tools:
             env:
@@ -28,6 +31,9 @@ spec:
                   secretKeyRef:
                     name: paseo-agents
                     key: GH_TOKEN
+              # dotfiles' gh and git prefer the mounted installation token;
+              # GH_TOKEN above stays as the fallback.
+              GH_TOKEN_FILE: /var/run/secrets/bot-tintin/token
               MEMINI_API_KEY:
                 valueFrom:
                   secretKeyRef:
@@ -52,6 +58,20 @@ spec:
           ${APP}:
             app:
               - path: /data
+                readOnly: true
+      # Mount the directory, never subPath: a subPath mount does not refresh
+      # when the Secret changes. optional: the pod starts before the Secret exists.
+      bot-tintin-token:
+        type: custom
+        volumeSpec:
+          secret:
+            secretName: bot-tintin-token
+            optional: true
+            defaultMode: 0440
+        advancedMounts:
+          ${APP}:
+            app:
+              - path: /var/run/secrets/bot-tintin
                 readOnly: true
     route:
       app:
