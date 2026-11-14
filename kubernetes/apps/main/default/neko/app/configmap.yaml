@@ -13,10 +13,17 @@ metadata:
 data:
   # First boot only: clones ~/.dotfiles onto a fresh PVC and hands over. Once
   # applied, the dotfiles' own autostart entry (same filename, so it overrides
-  # this one) runs neko-bootstrap directly. Keep this file dumb.
+  # this one) runs neko-bootstrap directly; the fallback entry below covers that
+  # entry breaking. Keep this file dumb.
   neko-provision: |
     #!/bin/sh
     set -u
+    # --if-broken: the dotfiles' entry hides ours, so when its launcher is
+    # gone nothing provisions a rolled pod. Run the checkout's copy instead.
+    if [ "${1:-}" = "--if-broken" ]; then
+      [ -e "${HOME}/.config/autostart/mise-bootstrap.desktop" ] || exit 0
+      [ -x "${HOME}/.local/bin/neko-bootstrap" ] && exit 0
+    fi
     LOG="${HOME}/.local/state/neko-provision.log"
     mkdir -p "$(dirname "$LOG")"
     exec >>"$LOG" 2>&1
@@ -45,6 +52,18 @@ data:
     Name=mise bootstrap
     Comment=Clone/refresh ~/.dotfiles and provision this container at session start
     Exec=/bin/sh /usr/local/bin/neko-provision
+    Icon=preferences-system
+    Terminal=false
+    StartupNotify=false
+    X-XFCE-Autostart-Override=true
+
+  # A different filename, so the dotfiles' entry cannot hide this one.
+  neko-provision-fallback.desktop: |
+    [Desktop Entry]
+    Type=Application
+    Name=mise bootstrap fallback
+    Comment=Provision anyway when the dotfiles' autostart entry points at a missing launcher
+    Exec=/bin/sh /usr/local/bin/neko-provision --if-broken
     Icon=preferences-system
     Terminal=false
     StartupNotify=false
