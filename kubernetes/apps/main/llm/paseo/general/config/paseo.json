@@ -8,7 +8,7 @@
         "model": "claude-fable-5-2",
         "modeId": "auto",
         "thinkingOptionId": "high",
-        "notes": "A change of more than one step, or one not specified yet. Plans it, writes the spec, starts Explore, Build and Review workers for the reading, the edits and the second read, and decides. Tell it to use the `orchestrate` skill. Not for a small change that is already specified: use Build."
+        "notes": "A change of more than one step, or one not specified yet. Plans it, writes the spec, starts Explore, Build and Review workers for the reading, the edits and the second read, and decides. Tell it to use the `orchestrate` skill. Not for a small change that is already specified: use Build. When the Claude window is used up: OpenCode's `coordinator` mode."
       },
       {
         "id": "plan",
@@ -17,7 +17,7 @@
         "model": "claude-opus-5-5",
         "modeId": "plan",
         "thinkingOptionId": "high",
-        "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits."
+        "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits. Fallback when the Claude window is used up: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`, thinking `high`."
       },
       {
         "id": "explore",
@@ -26,7 +26,7 @@
         "model": "litellm/mistral/mistral-medium-latest",
         "modeId": "plan",
         "thinkingOptionId": "none",
-        "notes": "Where and how is X: finds the code and reports paths and line numbers. Cheap; makes no edits. Not for design questions: use Plan."
+        "notes": "Where and how is X: finds the code and reports paths and line numbers. Cheap; makes no edits. Not for design questions: use Plan. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-terra`, mode `plan`."
       },
       {
         "id": "build",
@@ -34,7 +34,7 @@
         "provider": "opencode",
         "model": "litellm/mistral/mistral-large-4",
         "modeId": "build",
-        "notes": "A well-specified change: the goal, the files and the check to pass are already known. Not for open questions."
+        "notes": "A well-specified change: the goal, the files and the check to pass are already known. Not for open questions. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `build`."
       },
       {
         "id": "review",
@@ -43,7 +43,7 @@
         "model": "litellm/mistral/zai-glm-5-3",
         "modeId": "plan",
         "thinkingOptionId": "high",
-        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles."
+        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`, thinking `high`."
       }
     ]
   },

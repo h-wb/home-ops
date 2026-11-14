@@ -219,6 +219,500 @@
         "x": 0,
         "y": 5
       },
+      "id": 47,
+      "panels": [],
+      "title": "Cost drivers",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Input tokens minus provider cache-read tokens over the range: uncached input = input - cache-read, i.e. the prompt portion actually re-processed.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 6
+      },
+      "id": 48,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) - sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "Uncached input tokens",
+          "refId": "A"
+        }
+      ],
+      "title": "Uncached input tokens",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Share of input tokens served from the provider cache (cache-read / input) over the range. Input tokens include cache-read tokens.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 6
+      },
+      "id": 49,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "Cache-read share",
+          "refId": "A"
+        }
+      ],
+      "title": "Cache-read share",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Average input (prompt) tokens per request over the range - a proxy for average context size per request.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 6
+      },
+      "id": 50,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / sum(increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "legendFormat": "Avg input tokens per request",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg input tokens per request",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "The only real bill: spend is actual money solely for Mistral-hosted models. Claude is a flat subscription (API-price equivalent only) and chatgpt/* has no price (always 0), so excluding claude-* leaves the metered Mistral spend.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 6
+      },
+      "id": 51,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(litellm_spend_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\", model!~\"claude-.*\"}[$__range]))",
+          "legendFormat": "Metered spend (Mistral)",
+          "refId": "A"
+        }
+      ],
+      "title": "Metered spend (Mistral)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Daily input token volume per consumer (api_key_alias) over the range, stacked.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 80,
+            "lineWidth": 0,
+            "spanNulls": false,
+            "stacking": {
+              "mode": "normal"
+            },
+            "drawStyle": "bars"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "id": 52,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "all",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[1d]))",
+          "interval": "1d",
+          "legendFormat": "{{api_key_alias}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Input tokens per day by consumer",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "Average context size per request by model: input token rate divided by request rate.",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      },
+      "id": 53,
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (model) (rate(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__rate_interval])) / sum by (model) (rate(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__rate_interval]))",
+          "legendFormat": "{{model}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg input tokens per request by model",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "description": "One row per consumer (api_key_alias) and model, all counters increased over the range. Sorted by input tokens descending.",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Cache-read %"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "percentunit"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Spend"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "currencyUSD"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 18
+      },
+      "id": 54,
+      "options": {
+        "cellHeight": "sm",
+        "showHeader": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "requests",
+          "refId": "A",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "input",
+          "refId": "B",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) - (sum by (api_key_alias, model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) or sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) * 0)",
+          "instant": true,
+          "legendFormat": "uncached input",
+          "refId": "C",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "(sum by (api_key_alias, model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) or sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) * 0) / sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "cache-read %",
+          "refId": "D",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_output_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "output",
+          "refId": "E",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_output_reasoning_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "reasoning",
+          "refId": "F",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "input per request",
+          "refId": "G",
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (api_key_alias, model) (increase(litellm_spend_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "instant": true,
+          "legendFormat": "spend",
+          "refId": "H",
+          "format": "table"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "merge",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "api_key_alias": 0,
+              "model": 1,
+              "Value #A": 2,
+              "Value #B": 3,
+              "Value #C": 4,
+              "Value #D": 5,
+              "Value #E": 6,
+              "Value #F": 7,
+              "Value #G": 8,
+              "Value #H": 9
+            },
+            "renameByName": {
+              "api_key_alias": "Consumer",
+              "model": "Model",
+              "Value #A": "Requests",
+              "Value #B": "Input",
+              "Value #C": "Uncached input",
+              "Value #D": "Cache-read %",
+              "Value #E": "Output",
+              "Value #F": "Reasoning",
+              "Value #G": "Input per request",
+              "Value #H": "Spend"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "fields": {},
+            "sort": [
+              {
+                "field": "Input",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ],
+      "title": "By consumer and model",
+      "type": "table"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
       "id": 6,
       "panels": [],
       "title": "Per-Model Metrics",
@@ -240,7 +734,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 6
+        "y": 27
       },
       "id": 7,
       "options": {
@@ -280,7 +774,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 6
+        "y": 27
       },
       "id": 8,
       "options": {
@@ -322,7 +816,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 12
+        "y": 33
       },
       "id": 9,
       "options": {
@@ -382,7 +876,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 12
+        "y": 33
       },
       "id": 10,
       "options": {
@@ -423,7 +917,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 39
       },
       "id": 11,
       "panels": [],
@@ -446,7 +940,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 19
+        "y": 40
       },
       "id": 12,
       "options": {
@@ -486,7 +980,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 19
+        "y": 40
       },
       "id": 13,
       "options": {
@@ -528,7 +1022,7 @@
         "h": 5,
         "w": 12,
         "x": 0,
-        "y": 24
+        "y": 45
       },
       "id": 14,
       "options": {
@@ -566,7 +1060,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "Spend per backend model in the selected time range (local models = $0)",
+      "description": "Claude is a flat subscription: this is what the same tokens would cost on the API. chatgpt/* has no price and shows 0. Only Mistral is a real bill.",
       "fieldConfig": {
         "defaults": {
           "currency": "USD",
@@ -578,7 +1072,7 @@
         "h": 5,
         "w": 12,
         "x": 12,
-        "y": 24
+        "y": 45
       },
       "id": 15,
       "options": {
@@ -599,7 +1093,7 @@
           "refId": "A"
         }
       ],
-      "title": "Spend by Model in Range",
+      "title": "API-equivalent cost by model",
       "type": "bargauge"
     },
     {
@@ -608,7 +1102,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 50
       },
       "id": 16,
       "panels": [],
@@ -633,7 +1127,7 @@
         "h": 6,
         "w": 6,
         "x": 0,
-        "y": 30
+        "y": 51
       },
       "id": 23,
       "options": {
@@ -680,7 +1174,7 @@
         "h": 6,
         "w": 18,
         "x": 6,
-        "y": 30
+        "y": 51
       },
       "id": 17,
       "options": {
@@ -722,7 +1216,7 @@
         "h": 6,
         "w": 12,
         "x": 0,
-        "y": 36
+        "y": 57
       },
       "id": 18,
       "options": {
@@ -762,7 +1256,7 @@
         "h": 6,
         "w": 12,
         "x": 12,
-        "y": 36
+        "y": 57
       },
       "id": 19,
       "options": {
@@ -793,7 +1287,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"chatgpt/.*|gpt-.*|codex-.*\"}[$__range])) or vector(0)), \"provider\", \"ChatGPT\", \"\", \"\")",
+          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"anthropic/.*|claude-.*\"}[$__range])) or vector(0)), \"provider\", \"Claude (subscription)\", \"\", \"\")",
           "legendFormat": "{{provider}}",
           "refId": "A"
         },
@@ -802,16 +1296,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"anthropic/.*|claude-.*\"}[$__range])) or vector(0)), \"provider\", \"Claude\", \"\", \"\")",
-          "legendFormat": "{{provider}}",
-          "refId": "I"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"dsv4f|dsv4p|mimo-v2.5|mimo-v2.5-pro|go-gpt-5.6-luna|qwen3.8-max|qwen3.7-plus|go-minimax-m3|mimo-v2-pro|mimo-v2-omni\"}[$__range])) or vector(0)), \"provider\", \"Opencode Go\", \"\", \"\")",
+          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"chatgpt/.*|gpt-.*|codex-.*\"}[$__range])) or vector(0)), \"provider\", \"ChatGPT (subscription)\", \"\", \"\")",
           "legendFormat": "{{provider}}",
           "refId": "B"
         },
@@ -820,7 +1305,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"glm-.*\"}[$__range])) or vector(0)), \"provider\", \"GLM\", \"\", \"\")",
+          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"mistral/.*\"}[$__range])) or vector(0)), \"provider\", \"Mistral (metered)\", \"\", \"\")",
           "legendFormat": "{{provider}}",
           "refId": "C"
         },
@@ -829,45 +1314,9 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"MiniMax.*\"}[$__range])) or vector(0)), \"provider\", \"MiniMax\", \"\", \"\")",
+          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model!~\"anthropic/.*|claude-.*|chatgpt/.*|gpt-.*|codex-.*|mistral/.*\"}[$__range])) or vector(0)), \"provider\", \"Local\", \"\", \"\")",
           "legendFormat": "{{provider}}",
           "refId": "D"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"kimi-.*\"}[$__range])) or vector(0)), \"provider\", \"Kimi\", \"\", \"\")",
-          "legendFormat": "{{provider}}",
-          "refId": "E"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"frontier-pool|reasoning-pool|auto|complexity_router\"}[$__range])) or vector(0)), \"provider\", \"Pools\", \"\", \"\")",
-          "legendFormat": "{{provider}}",
-          "refId": "F"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model=~\"self-hosted|nvidia|nvidia-test|nemotron|vision|muse|summary|reviewer|dsv4f-local|ryzen|memini-embed|memini-rerank|toolhive-embed|llama-.*|mellum2-.*|qwen3\\\\.5-4b\"}[$__range])) or vector(0)), \"provider\", \"Self-hosted\", \"\", \"\")",
-          "legendFormat": "{{provider}}",
-          "refId": "G"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "expr": "label_replace((sum(increase(litellm_total_tokens_metric_total{requested_model!~\"chatgpt/.*|gpt-.*|codex-.*|anthropic/.*|claude-.*|dsv4f|dsv4p|mimo-v2.5|mimo-v2.5-pro|go-gpt-5.6-luna|qwen3.8-max|qwen3.7-plus|go-minimax-m3|mimo-v2-pro|mimo-v2-omni|glm-.*|MiniMax.*|kimi-.*|frontier-pool|reasoning-pool|auto|complexity_router|self-hosted|nvidia|nvidia-test|nemotron|vision|muse|summary|reviewer|dsv4f-local|ryzen|memini-embed|memini-rerank|toolhive-embed|llama-.*|mellum2-.*|qwen3\\\\.5-4b\"}[$__range])) or vector(0)), \"provider\", \"Other\", \"\", \"\")",
-          "legendFormat": "{{provider}}",
-          "refId": "H"
         }
       ],
       "title": "Tokens by Provider (range)",
@@ -879,7 +1328,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 42
+        "y": 63
       },
       "id": 24,
       "panels": [],
@@ -902,7 +1351,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 43
+        "y": 64
       },
       "id": 25,
       "options": {
@@ -949,7 +1398,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 43
+        "y": 64
       },
       "id": 26,
       "options": {
@@ -996,7 +1445,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 43
+        "y": 64
       },
       "id": 27,
       "options": {
@@ -1064,7 +1513,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 43
+        "y": 64
       },
       "id": 28,
       "options": {
@@ -1111,7 +1560,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 47
+        "y": 68
       },
       "id": 29,
       "options": {
@@ -1153,7 +1602,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 47
+        "y": 68
       },
       "id": 30,
       "options": {
@@ -1194,7 +1643,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 55
+        "y": 76
       },
       "id": 31,
       "panels": [],
@@ -1213,7 +1662,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 56
+        "y": 77
       },
       "fieldConfig": {
         "defaults": {
@@ -1262,7 +1711,7 @@
         "h": 8,
         "w": 6,
         "x": 12,
-        "y": 56
+        "y": 77
       },
       "fieldConfig": {
         "defaults": {
@@ -1304,12 +1753,12 @@
       },
       "id": 34,
       "type": "bargauge",
-      "title": "Spend by Key (range)",
+      "title": "API-equivalent cost by key",
       "gridPos": {
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 56
+        "y": 77
       },
       "fieldConfig": {
         "defaults": {
@@ -1342,7 +1791,8 @@
           "instant": true,
           "refId": "A"
         }
-      ]
+      ],
+      "description": "Claude is a flat subscription: this is what the same tokens would cost on the API. chatgpt/* has no price and shows 0. Only Mistral is a real bill."
     },
     {
       "datasource": {
@@ -1356,7 +1806,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 64
+        "y": 85
       },
       "fieldConfig": {
         "defaults": {
@@ -1388,7 +1838,7 @@
             "uid": "${datasource}"
           },
           "expr": "sum by (api_key_alias, model) (rate(litellm_requests_metric_total[5m]))",
-          "legendFormat": "{{api_key_alias}} \u2192 {{model}}",
+          "legendFormat": "{{api_key_alias}} → {{model}}",
           "refId": "A"
         }
       ]
@@ -1405,7 +1855,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 64
+        "y": 85
       },
       "fieldConfig": {
         "defaults": {
@@ -1447,7 +1897,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 72
+        "y": 93
       },
       "id": 37,
       "panels": [],
@@ -1470,7 +1920,7 @@
         "h": 4,
         "w": 6,
         "x": 0,
-        "y": 73
+        "y": 94
       },
       "id": 38,
       "options": {
@@ -1517,7 +1967,7 @@
         "h": 4,
         "w": 6,
         "x": 6,
-        "y": 73
+        "y": 94
       },
       "id": 39,
       "options": {
@@ -1564,7 +2014,7 @@
         "h": 4,
         "w": 6,
         "x": 12,
-        "y": 73
+        "y": 94
       },
       "id": 40,
       "options": {
@@ -1611,7 +2061,7 @@
         "h": 4,
         "w": 6,
         "x": 18,
-        "y": 73
+        "y": 94
       },
       "id": 41,
       "options": {
@@ -1661,7 +2111,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 77
+        "y": 98
       },
       "id": 42,
       "options": {
@@ -1709,7 +2159,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 77
+        "y": 98
       },
       "id": 43,
       "options": {
@@ -1730,7 +2180,7 @@
             "uid": "${datasource}"
           },
           "expr": "sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
-          "legendFormat": "{{api_key_alias}} \u2192 {{model}}",
+          "legendFormat": "{{api_key_alias}} → {{model}}",
           "refId": "A",
           "instant": true
         }
@@ -1757,7 +2207,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 85
+        "y": 106
       },
       "id": 44,
       "options": {
@@ -1805,7 +2255,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 85
+        "y": 106
       },
       "id": 45,
       "options": {
@@ -1839,7 +2289,7 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "description": "LiteLLM RESPONSE-cache (Redis-backed) hit/miss counts in the range \u2014 a separate cache from provider prompt caching above. Absent series mean no observed series in range (unreported), not zero.",
+      "description": "LiteLLM RESPONSE-cache (Redis-backed) hit/miss counts in the range — a separate cache from provider prompt caching above. Absent series mean no observed series in range (unreported), not zero.",
       "fieldConfig": {
         "defaults": {
           "unit": "short",
@@ -1854,7 +2304,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 85
+        "y": 106
       },
       "id": 46,
       "options": {
@@ -1874,7 +2324,7 @@
             "uid": "${datasource}"
           },
           "expr": "sum by (api_key_alias, model) (increase(litellm_cache_hits_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
-          "legendFormat": "{{api_key_alias}} \u2192 {{model}} hit",
+          "legendFormat": "{{api_key_alias}} → {{model}} hit",
           "refId": "A"
         },
         {
@@ -1883,7 +2333,7 @@
             "uid": "${datasource}"
           },
           "expr": "sum by (api_key_alias, model) (increase(litellm_cache_misses_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
-          "legendFormat": "{{api_key_alias}} \u2192 {{model}} miss",
+          "legendFormat": "{{api_key_alias}} → {{model}} miss",
           "refId": "B"
         }
       ],

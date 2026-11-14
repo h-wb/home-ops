@@ -38,6 +38,8 @@ spec:
       # The first session embeds every tool in one request: about a minute for
       # 690 tools on the CPU embedder. Stays under LiteLLM's own 300s.
       embeddingServiceTimeout: 280s
+      # Same reason as on mcp-private: each hit carries its full input schema.
+      maxToolsToReturn: 4
       hybridSearchSemanticRatio: "0.3"
   incomingAuth:
     type: anonymous
