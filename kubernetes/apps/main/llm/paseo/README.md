@@ -64,11 +64,18 @@ Plan mode is the read-only one in both agents.
 - Orchestrate is [flow H](../docs/flows.md#h-a-larger-change-orchestrated): the
   strongest model takes the few turns that plan and decide, and starts Explore,
   Build and Review for the many turns of reading, editing and checking. The
-  order is the `orchestrate` skill in dotfiles (`conf.d/ai/skills`). A small
+  order is the `orchestrate` skill in dotfiles (`conf.d/paseo/skills`). A small
   change does not need it: start Build, or any agent, directly.
+- Orchestrate comes in three: Fable for a hard or vague change, Opus for the
+  everyday one (it draws less of the Claude window), and Sol, which is OpenCode's
+  `coordinator` on the ChatGPT subscription.
 - The Claude subscription carries Orchestrate and Plan only. When its window
   is used up, OpenCode's `coordinator` mode is the same idea in one agent: GPT
   Sol, with its own explorer (Mistral Medium) and reviewer (GLM).
+- Each general profile's note ends with a fallback, a provider, model and mode on
+  the other subscription or API, for when its own is at a limit. The
+  `orchestrate` skill starts the same prompt there once. Private has none: its
+  data stays on Mistral.
 - Private has no Orchestrate or Explore: no agent there starts another, so you
   pick the profile, and OpenCode's own Plan mode is the cheap reader.
 - Review runs on a different model family from Plan and Build, so it does not

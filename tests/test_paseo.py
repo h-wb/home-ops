@@ -143,7 +143,7 @@ class PaseoRendering(unittest.TestCase):
         # An orchestrating agent launches a worker from a profile's provider, model
         # and mode. One the key cannot call only fails at the first prompt, and in
         # private the key is what keeps the work on trusted models.
-        ids = {"general": ["orchestrate", "plan", "explore", "build", "review"],
+        ids = {"general": ["orchestrate", "orchestrate-opus", "orchestrate-sol", "plan", "explore", "build", "review"],
                "private": ["plan", "build", "review"]}
         for scope, app in (("general", "paseo"), ("private", "paseo-private")):
             with self.subTest(scope=scope):
@@ -168,8 +168,11 @@ class PaseoRendering(unittest.TestCase):
                     self.assertIn(profile["modeId"], opencode["agents"], name)
                     entry = opencode["providers"]["litellm"]["models"][model]
                     # A reasoning variant ("none") is a thinking option too.
-                    options = entry["capabilities"]["reasoning"]["effort"] + [v["id"] for v in entry.get("variants", [])]
-                    self.assertIn(profile.get("thinkingOptionId", options[0]), options, name)
+                    # The chatgpt/* entries declare no reasoning: such a profile sets no option.
+                    effort = entry.get("capabilities", {}).get("reasoning", {}).get("effort", [])
+                    options = effort + [v["id"] for v in entry.get("variants", [])]
+                    if options or "thinkingOptionId" in profile:
+                        self.assertIn(profile.get("thinkingOptionId", options[0]), options, name)
                 # Plan, Explore and Review must not edit; Review is a second opinion, so not Build's model.
                 readers = {"plan", "explore", "review"} & set(profiles)
                 self.assertEqual({"plan"}, {profiles[name]["modeId"] for name in readers})

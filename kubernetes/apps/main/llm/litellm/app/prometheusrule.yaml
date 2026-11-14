@@ -34,6 +34,20 @@ spec:
             summary: LiteLLM {{ $labels.requested_model }} failing more than 25% of requests
           labels:
             severity: warning
+        # Metered spend only: Claude's figure is an API-price equivalent of the
+        # subscription and chatgpt/* carries no price, so Mistral is what is left.
+        - alert: LiteLLMMeteredSpendHigh
+          expr: |-
+            sum by (api_key_alias) (
+              increase(litellm_spend_metric_total{model!~"claude-.*"}[24h])
+            ) > 10
+          for: 15m
+          annotations:
+            summary: >-
+              LiteLLM key {{ $labels.api_key_alias }} spent {{ $value | printf "%.2f" }} USD
+              on metered models in 24h
+          labels:
+            severity: warning
         # Live since the luna-max alias gained a router fallback (litellmproxy.yaml).
         - alert: LiteLLMFallbackChainExhausted
           expr: |-
