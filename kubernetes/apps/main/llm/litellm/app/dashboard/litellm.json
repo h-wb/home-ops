@@ -263,7 +263,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) - sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) - sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Uncached input tokens",
           "refId": "A"
         }
@@ -310,7 +310,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) / sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Cache-read share",
           "refId": "A"
         }
@@ -357,7 +357,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / sum(increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) / sum(increase(litellm_requests_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Avg input tokens per request",
           "refId": "A"
         }
@@ -404,7 +404,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_spend_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\", model!~\"claude-.*\"}[$__range]))",
+          "expr": "sum(increase(litellm_spend_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\", model!~\"claude-.*\"}[$__range]))",
           "legendFormat": "Metered spend (Mistral)",
           "refId": "A"
         }
@@ -456,7 +456,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[1d]))",
+          "expr": "sum by (api_key_alias) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[1d]))",
           "interval": "1d",
           "legendFormat": "{{api_key_alias}}",
           "refId": "A"
@@ -499,7 +499,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (model) (rate(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__rate_interval])) / sum by (model) (rate(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__rate_interval]))",
+          "expr": "sum by (model) (rate(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__rate_interval])) / sum by (model) (rate(litellm_requests_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__rate_interval]))",
           "legendFormat": "{{model}}",
           "refId": "A"
         }
@@ -568,7 +568,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "instant": true,
           "legendFormat": "requests",
           "refId": "A",
@@ -579,7 +579,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "instant": true,
           "legendFormat": "input",
           "refId": "B",
@@ -590,7 +590,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) - (sum by (api_key_alias, model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) or sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) * 0)",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) - (sum by (api_key_alias, model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) or sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) * 0)",
           "instant": true,
           "legendFormat": "uncached input",
           "refId": "C",
@@ -601,7 +601,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "(sum by (api_key_alias, model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) or sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) * 0) / sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "(sum by (api_key_alias, model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) or sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) * 0) / sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "instant": true,
           "legendFormat": "cache-read %",
           "refId": "D",
@@ -612,7 +612,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_output_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_output_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "instant": true,
           "legendFormat": "output",
           "refId": "E",
@@ -623,7 +623,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_output_reasoning_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_output_reasoning_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "instant": true,
           "legendFormat": "reasoning",
           "refId": "F",
@@ -634,7 +634,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) / sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "instant": true,
           "legendFormat": "input per request",
           "refId": "G",
@@ -645,7 +645,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_spend_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_spend_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "instant": true,
           "legendFormat": "spend",
           "refId": "H",
@@ -1943,7 +1943,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum(increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Input tokens",
           "refId": "A"
         }
@@ -1990,7 +1990,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_output_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum(increase(litellm_output_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Output tokens",
           "refId": "A"
         }
@@ -2037,7 +2037,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum(increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Cache-read tokens",
           "refId": "A"
         }
@@ -2084,7 +2084,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum(increase(litellm_output_reasoning_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum(increase(litellm_output_reasoning_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "Reasoning tokens",
           "refId": "A"
         }
@@ -2131,7 +2131,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) / (sum by (model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range])) > 0)",
+          "expr": "sum by (model) (increase(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) / (sum by (model) (increase(litellm_requests_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range])) > 0)",
           "legendFormat": "{{model}}",
           "refId": "A",
           "instant": true
@@ -2179,7 +2179,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_requests_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "{{api_key_alias}} → {{model}}",
           "refId": "A",
           "instant": true
@@ -2227,7 +2227,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (model) (increase(litellm_input_cached_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "{{model}} cache-read",
           "refId": "A",
           "instant": true
@@ -2275,7 +2275,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (model) (increase(litellm_input_cache_creation_tokens_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (model) (increase(litellm_input_cache_creation_tokens_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "{{model}} cache-write",
           "refId": "A",
           "instant": true
@@ -2323,7 +2323,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_cache_hits_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_cache_hits_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "{{api_key_alias}} → {{model}} hit",
           "refId": "A"
         },
@@ -2332,7 +2332,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "sum by (api_key_alias, model) (increase(litellm_cache_misses_metric_total{api_key_alias=~\"${consumer:regex}\", model=~\"${model:regex}\"}[$__range]))",
+          "expr": "sum by (api_key_alias, model) (increase(litellm_cache_misses_metric_total{api_key_alias=~\"$consumer\", model=~\"$model\"}[$__range]))",
           "legendFormat": "{{api_key_alias}} → {{model}} miss",
           "refId": "B"
         }
@@ -2389,7 +2389,7 @@
           "type": "prometheus",
           "uid": "${datasource}"
         },
-        "definition": "label_values(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\"}, model)",
+        "definition": "label_values(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\"}, model)",
         "hide": 0,
         "includeAll": true,
         "label": "Model",
@@ -2397,7 +2397,7 @@
         "name": "model",
         "options": [],
         "query": {
-          "query": "label_values(litellm_input_tokens_metric_total{api_key_alias=~\"${consumer:regex}\"}, model)",
+          "query": "label_values(litellm_input_tokens_metric_total{api_key_alias=~\"$consumer\"}, model)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 1,
