@@ -204,6 +204,46 @@ class PaseoRendering(unittest.TestCase):
                                      and subject.get("name") == "paseo"
                                      for subject in doc.get("subjects", [])))
 
+    def test_general_mounts_a_fresh_bot_tintin_installation_token(self):
+        # The generator's permission map stays narrow and never holds workflows.
+        generator = self.resource("general", "GithubAccessToken", "bot-tintin")["spec"]
+        permissions = generator["permissions"]
+        self.assertNotIn("workflows", permissions)
+        self.assertLessEqual(set(permissions.values()), {"read", "write"})
+        self.assertEqual({"contents": "write", "pull_requests": "write", "issues": "write"},
+                         {key: permissions[key] for key in ("contents", "pull_requests", "issues")})
+        # Installation tokens live 1h: the ExternalSecret must refresh under that.
+        token = self.resource("general", "ExternalSecret", "bot-tintin-token")["spec"]
+        self.assertEqual("bot-tintin-token", token["target"]["name"])
+        seconds = {"s": 1, "m": 60, "h": 3600}[token["refreshInterval"][-1]]
+        self.assertLess(int(token["refreshInterval"][:-1]) * seconds, 3600)
+        # The general pod mounts the token Secret as a directory (no subPath, so
+        # it refreshes) and points GH_TOKEN_FILE inside it; GH_TOKEN stays.
+        values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]
+        volume = values["persistence"]["bot-tintin-token"]
+        secret = volume["volumeSpec"]["secret"]
+        self.assertEqual("bot-tintin-token", secret["secretName"])
+        self.assertIs(True, secret["optional"])
+        mounts = volume["advancedMounts"]["paseo"]["app"]
+        self.assertEqual(1, len(mounts))
+        self.assertNotIn("subPath", mounts[0])
+        self.assertTrue(mounts[0]["readOnly"])
+        env = values["controllers"]["paseo"]["containers"]["app"]["env"]
+        self.assertTrue(env["GH_TOKEN_FILE"].startswith(mounts[0]["path"] + "/"), env["GH_TOKEN_FILE"])
+        self.assertEqual("paseo-agents", env["GH_TOKEN"]["valueFrom"]["secretKeyRef"]["name"])
+        # Reloader must not recreate the pod each time a new token is minted.
+        annotations = values["controllers"]["paseo"]["annotations"]
+        self.assertEqual("true", annotations["reloader.stakater.com/auto"])
+        self.assertIn("bot-tintin-token", annotations[
+            "secrets.exclude.reloader.stakater.com/reload"].split(","))
+        # The private scope renders no bot-tintin resource and no mount of it.
+        self.assertFalse(any(doc["metadata"]["name"].startswith("bot-tintin")
+                             for doc in self.rendered["private"]))
+        private = self.resource("private", "HelmRelease", "paseo-private")["spec"]["values"]
+        self.assertNotIn("bot-tintin-token", private["persistence"])
+        self.assertNotIn("GH_TOKEN_FILE",
+                         private["controllers"]["paseo-private"]["containers"]["app"].get("env", {}))
+
     def test_general_network_policy_blocks_direct_control_plane_only(self):
         policy = self.resource("general", "CiliumNetworkPolicy", "paseo-toolhive-only")["spec"]
         self.assertEqual({"app.kubernetes.io/name": "paseo"},
