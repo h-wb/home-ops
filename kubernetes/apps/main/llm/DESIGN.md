@@ -189,10 +189,10 @@ memory).
 - The general workshop's GitHub identity is the app `bot-tintin`: Contents, Pull
   requests and Issues write; Actions, Checks and Statuses read; no Workflows
   (home-ops runs a self-hosted runner on PRs and holds the Renovate key as a repo
-  secret). external-secrets mints a 1h installation token every 30m into
-  `bot-tintin-token`, mounted at `/var/run/secrets/bot-tintin/token`
-  (`GH_TOKEN_FILE`, which dotfiles' `gh` and `git` prefer); the personal `GH_TOKEN`
-  stays as a temporary fallback until the bot is verified. Workflow-file changes
+  secret). external-secrets mints a 1h installation token every 30m into a gh
+  `hosts.yml` mounted at `/var/run/secrets/bot-tintin` (`GH_CONFIG_DIR`). The pod
+  has no `GH_TOKEN`, so there is no fallback to your personal token: without the
+  bot's Secret, gh and git fail instead of acting as you. Workflow-file changes
   come to you as a PR-comment patch, applied with `land <pr>` from your own
   environment (workstation or neko; code-server once it has mise and gh), never
   from the Paseo pod. The app's fields live in the
@@ -419,7 +419,7 @@ To verify:
   general tool gateway's GitHub tool, the workstation's login) cannot read repos
   that hold private data.
 - The `bot-tintin` identity works end to end in the general workshop; then the
-  `GH_TOKEN` fallback in `paseo-agents` can be removed.
+  unused personal `GH_TOKEN` in `paseo-agents` and Bitwarden can be removed.
 - The approval prompt for a write reaches you in the messaging app. On Telegram
   it is a message with buttons: once, this chat, always, deny.
 - Hermes Kanban fits as a task board: cards nobody is assigned to stay put, and
