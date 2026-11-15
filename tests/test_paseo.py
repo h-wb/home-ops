@@ -217,8 +217,14 @@ class PaseoRendering(unittest.TestCase):
         self.assertEqual("bot-tintin-token", token["target"]["name"])
         seconds = {"s": 1, "m": 60, "h": 3600}[token["refreshInterval"][-1]]
         self.assertLess(int(token["refreshInterval"][:-1]) * seconds, 3600)
-        # The general pod mounts the token Secret as a directory (no subPath, so
-        # it refreshes) and points GH_TOKEN_FILE inside it; GH_TOKEN stays.
+        # The token is rendered as gh's hosts.yml, never as a bare value.
+        hosts = token["target"]["template"]["data"]
+        self.assertEqual(["hosts.yml"], list(hosts))
+        self.assertIn("github.com:", hosts["hosts.yml"])
+        self.assertIn("oauth_token: {{ .token }}", hosts["hosts.yml"])
+        # The general pod mounts that Secret as a directory (no subPath, so it
+        # refreshes) and points GH_CONFIG_DIR at it. GH_TOKEN must be gone: gh
+        # prefers it over hosts.yml, so the bot would never be used.
         values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]
         volume = values["persistence"]["bot-tintin-token"]
         secret = volume["volumeSpec"]["secret"]
@@ -228,9 +234,16 @@ class PaseoRendering(unittest.TestCase):
         self.assertEqual(1, len(mounts))
         self.assertNotIn("subPath", mounts[0])
         self.assertTrue(mounts[0]["readOnly"])
-        env = values["controllers"]["paseo"]["containers"]["app"]["env"]
-        self.assertTrue(env["GH_TOKEN_FILE"].startswith(mounts[0]["path"] + "/"), env["GH_TOKEN_FILE"])
-        self.assertEqual("paseo-agents", env["GH_TOKEN"]["valueFrom"]["secretKeyRef"]["name"])
+        controller = values["controllers"]["paseo"]
+        env = controller["containers"]["app"]["env"]
+        self.assertEqual(mounts[0]["path"], env["GH_CONFIG_DIR"])
+        for container in [*controller.get("initContainers", {}).values(),
+                          *controller["containers"].values()]:
+            self.assertNotIn("GH_TOKEN", container.get("env", {}))
+            self.assertNotIn("GITHUB_TOKEN", container.get("env", {}))
+            # paseo-agents still holds the personal GH_TOKEN for rollback.
+            self.assertNotIn("paseo-agents", [ref.get("secretRef", {}).get("name")
+                                              for ref in container.get("envFrom", [])])
         # Reloader must not recreate the pod each time a new token is minted.
         annotations = values["controllers"]["paseo"]["annotations"]
         self.assertEqual("true", annotations["reloader.stakater.com/auto"])
@@ -241,7 +254,7 @@ class PaseoRendering(unittest.TestCase):
                              for doc in self.rendered["private"]))
         private = self.resource("private", "HelmRelease", "paseo-private")["spec"]["values"]
         self.assertNotIn("bot-tintin-token", private["persistence"])
-        self.assertNotIn("GH_TOKEN_FILE",
+        self.assertNotIn("GH_CONFIG_DIR",
                          private["controllers"]["paseo-private"]["containers"]["app"].get("env", {}))
 
     def test_general_network_policy_blocks_direct_control_plane_only(self):

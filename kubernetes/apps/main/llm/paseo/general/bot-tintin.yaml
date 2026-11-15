@@ -54,6 +54,7 @@ spec:
 ---
 # Installation tokens live 1h, so refresh every 30m to always hold a current
 # one. No secretStoreRef: the GithubAccessToken generator mints the token.
+# Rendered as gh's hosts.yml; the pod points GH_CONFIG_DIR at it.
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -65,7 +66,10 @@ spec:
     template:
       engineVersion: v2
       data:
-        token: "{{ .token }}"
+        hosts.yml: |
+          github.com:
+            oauth_token: {{ .token }}
+            git_protocol: https
   dataFrom:
     - sourceRef:
         generatorRef:

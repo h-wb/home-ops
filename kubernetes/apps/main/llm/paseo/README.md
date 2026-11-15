@@ -151,7 +151,9 @@ secret or the cluster CAs.
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
 credentials `GIT_EMAIL`, `PROTON_PASS_TOKEN` and `PASEO_PASSWORD`. Old `KEYSEED`
 (the removed sshd), `MCP_API_KEY` (the pods reach ToolHive without a key) and
-`MISTRAL_API_KEY` (every model call goes through LiteLLM) fields are unused. General additionally holds `OPENCODE_API_KEY` and `GH_TOKEN` (the fallback below).
+`MISTRAL_API_KEY` (every model call goes through LiteLLM) fields are unused.
+General additionally holds `OPENCODE_API_KEY` and `GH_TOKEN` (the owner's
+personal token, no longer in the pod; see below).
 The LiteLLM virtual key never passes through Bitwarden: the litellm-operator
 writes its Secret into the pods' own namespace from the `virtualkey.yaml` CR
 beside them, the helmrelease binds it as `LITELLM_API_KEY` and builds Claude
@@ -167,14 +169,20 @@ grant and readable `pass://Automation General/<item>/<field>` references.
 General's GitHub identity is the GitHub App `bot-tintin`: Contents, Pull requests
 and Issues write; Actions, Checks and Statuses read; no Workflows, because
 home-ops runs a self-hosted runner on PRs and holds the Renovate key as a repo
-secret. external-secrets mints a 1h installation token every 30m into the
-`bot-tintin-token` Secret, mounted as a file at `/var/run/secrets/bot-tintin/token`
-(`GH_TOKEN_FILE`; Reloader is told to ignore that Secret, or every refresh would
-recreate the pod); dotfiles makes `gh` and `git` prefer it. The `GH_TOKEN` personal
-token in `paseo-agents` is a temporary fallback until the bot is verified; removing
-it is a later step. Workflow-file changes go to the owner as a PR-comment patch,
-applied with the dotfiles `land <pr>` task from his own environment (workstation
-or neko today; code-server once it gets mise and gh), never from the Paseo pod. The app's three fields live in the Bitwarden item `bot-tintin` (JSON:
+secret. external-secrets mints a 1h installation token every 30m and renders it
+as gh's `hosts.yml` in the `bot-tintin-token` Secret, mounted read-only at
+`/var/run/secrets/bot-tintin` with `GH_CONFIG_DIR` pointing there; git uses it
+through `gh auth git-credential`. Reloader is told to ignore that Secret, or every
+refresh would recreate the pod. `GH_TOKEN` is not set in the pod: gh would prefer
+it. There is no fallback: without the Secret, gh and git fail as not logged in
+rather than act as the owner. The config dir is read-only, so gh commands that
+write config (`gh auth login`, `gh config set`, `gh alias set`) fail there. The
+personal token still sits in the `paseo-agents`
+Secret and the Bitwarden item, unused, until the owner removes it. Workflow-file
+changes go to the owner as a PR-comment patch, applied with the dotfiles `land <pr>`
+task from his own environment (workstation or neko today; code-server once it gets
+mise and gh), never from the Paseo pod. The app's three fields live in the
+Bitwarden item `bot-tintin` (JSON:
 `APP_ID`, `INSTALLATION_ID`, `PRIVATE_KEY`), named after the identity so other
 consumers can read it through their own ExternalSecret.
 
