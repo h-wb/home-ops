@@ -1,8 +1,13 @@
 ---
-# flux-mcp's write grant is for the reconcile tool, which only annotates. Any
-# spec change by it is refused: through apply_kubernetes_manifest an agent
-# could otherwise rewrite a HelmRelease, e.g. add a container to the owner's
-# code-server pod and read his credentials. Costs the suspend/resume tools.
+# flux-mcp's write grant is for the reconcile tool, which only sets the
+# reconcile.fluxcd.io request annotations. Everything else it might write is
+# refused: a spec (an agent could add a container to the owner's code-server
+# pod), labels and other annotations (kustomize.toolkit.fluxcd.io/prune,
+# reconcile, force, ssa and fluxcd.controlplane.io/* change what Flux does),
+# ownerReferences (a dangling one makes the garbage collector delete the
+# object, and a Kustomization's prune then deletes its inventory), finalizers,
+# and status (a GitRepository's status.artifact.url is what gets applied).
+# Costs the suspend/resume tools. tests/test_flux_mcp_guard.py evaluates it.
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
@@ -19,15 +24,35 @@ spec:
           - source.toolkit.fluxcd.io
         apiVersions: ["*"]
         operations: [CREATE, UPDATE]
-        resources: ["*"]
+        # "*" alone does not match subresources such as status.
+        resources: ["*", "*/*"]
   matchConditions:
     - name: flux-mcp-only
       expression: request.userInfo.username == 'system:serviceaccount:llm:flux-mcp'
   validations:
     - expression: request.operation == 'UPDATE'
       message: The Flux MCP cannot create Flux objects.
+    - expression: request.subResource == ''
+      message: The Flux MCP cannot write status or other subresources.
     - expression: "has(object.spec) == has(oldObject.spec) && (!has(object.spec) || object.spec == oldObject.spec)"
       message: The Flux MCP may request a reconcile but not change a spec.
+    - expression: "has(object.metadata.labels) == has(oldObject.metadata.labels) && (!has(object.metadata.labels) || object.metadata.labels == oldObject.metadata.labels)"
+      message: The Flux MCP cannot change labels.
+    - expression: "has(object.metadata.ownerReferences) == has(oldObject.metadata.ownerReferences) && (!has(object.metadata.ownerReferences) || object.metadata.ownerReferences == oldObject.metadata.ownerReferences)"
+      message: The Flux MCP cannot change owner references.
+    - expression: "has(object.metadata.finalizers) == has(oldObject.metadata.finalizers) && (!has(object.metadata.finalizers) || object.metadata.finalizers == oldObject.metadata.finalizers)"
+      message: The Flux MCP cannot change finalizers.
+    - expression: >-
+        !has(object.metadata.annotations) || object.metadata.annotations.all(k,
+        k in ['reconcile.fluxcd.io/requestedAt', 'reconcile.fluxcd.io/forceAt', 'reconcile.fluxcd.io/resetAt'] ||
+        (has(oldObject.metadata.annotations) && k in oldObject.metadata.annotations &&
+        oldObject.metadata.annotations[k] == object.metadata.annotations[k]))
+      message: The Flux MCP may only set the reconcile.fluxcd.io request annotations.
+    - expression: >-
+        !has(oldObject.metadata.annotations) || oldObject.metadata.annotations.all(k,
+        k in ['reconcile.fluxcd.io/requestedAt', 'reconcile.fluxcd.io/forceAt', 'reconcile.fluxcd.io/resetAt'] ||
+        (has(object.metadata.annotations) && k in object.metadata.annotations))
+      message: The Flux MCP cannot remove annotations.
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicyBinding

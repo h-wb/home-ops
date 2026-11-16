@@ -19,7 +19,8 @@ subjects:
     namespace: llm
 ---
 # Writes only to Flux objects, nothing outside the Flux API groups. In effect
-# the reconcile tool only: spec-guard.yaml refuses spec changes (suspend too).
+# the reconcile tool only: spec-guard.yaml refuses every write but its
+# reconcile.fluxcd.io annotations (status, which "*" also grants, included).
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
