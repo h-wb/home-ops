@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
+    - ../../../../../components/dotfiles
     - ../../../../../components/kopiur/backup
     - ../../../../../components/oidc/envoy
   dependsOn: []

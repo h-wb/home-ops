@@ -1,4 +1,4 @@
-"""code-server: the rendered bootstrap hook, run against scratch home directories.
+"""code-server and components/dotfiles: the rendered hook, run against scratch homes.
 
 Run with python3 -B -m unittest discover -s tests -p test_code_server.py.
 """
@@ -11,7 +11,6 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = "kubernetes/apps/main/default/code-server"
-HOME = "/home/coder"
 DOTFILES_URL = "https://github.com/h-wb/dotfiles.git"
 
 
@@ -25,44 +24,57 @@ def run(*args, text=None, env=None, cwd=ROOT):
 class CodeServerHook(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # What Flux does with ks.yaml: the app path plus spec.components, then
+        # strict post-build substitution.
         ks = json.loads(run("yq", "-o=json", "-I=0", ".", f"{APP}/ks.yaml"))
+        app = (ROOT / ks["spec"]["path"]).resolve()
+        with tempfile.TemporaryDirectory() as tmp:
+            Path(tmp, "kustomization.yaml").write_text(json.dumps({
+                "apiVersion": "kustomize.config.k8s.io/v1beta1", "kind": "Kustomization",
+                "resources": [os.path.relpath(app, tmp)],
+                "components": [os.path.relpath((app / c).resolve(), tmp) for c in ks["spec"]["components"]],
+            }))
+            built = run("kustomize", "build", "--load-restrictor=LoadRestrictionsNone", tmp)
         variables = {**ks["spec"]["postBuild"]["substitute"], "SECRET_DOMAIN": "example.com"}
         env = {key: os.environ[key] for key in ("HOME", "PATH") if key in os.environ}
-        built = run("flux", "envsubst", "--strict", text=run("kustomize", "build", f"{APP}/app"),
-                    env={**env, **variables})
-        docs = json.loads(run("yq", "eval-all", "-o=json", "-I=0", "[.]", "-", text=built))
-        cls.docs = {doc["kind"]: doc for doc in docs}
-        controller = cls.docs["HelmRelease"]["spec"]["values"]["controllers"]["code-server"]
-        cls.controller = controller
-        command = controller["initContainers"]["bootstrap"]["command"]
-        assert command[:2] == ["/bin/sh", "-c"], command
-        cls.hook = command[2]
+        built = run("flux", "envsubst", "--strict", text=built, env={**env, **variables})
+        cls.docs = json.loads(run("yq", "eval-all", "-o=json", "-I=0", "[.]", "-", text=built))
+        cls.release = cls.one("HelmRelease", "code-server")
+        cls.controller = cls.release["spec"]["values"]["controllers"]["code-server"]
+        cls.hook = cls.one("ConfigMap", "code-server-dotfiles")["data"]["dotfiles-bootstrap"]
+
+    @classmethod
+    def one(cls, kind, name):
+        return next(d for d in cls.docs if d["kind"] == kind and d["metadata"]["name"] == name)
 
     def setUp(self):
-        temp = tempfile.TemporaryDirectory(prefix="code-server-hook-")
+        temp = tempfile.TemporaryDirectory(prefix="dotfiles-hook-")
         self.addCleanup(temp.cleanup)
         self.tmp = Path(temp.name)
         self.home = self.tmp / "home"
         self.home.mkdir()
-        # The upstream checkout the hook clones: a pod-bootstrap that records each run.
+        # The upstream checkout the hook clones: a pod-bootstrap that records each run and its arguments.
         self.upstream = self.tmp / "dotfiles"
         (self.upstream / "scripts").mkdir(parents=True)
-        (self.upstream / "scripts/pod-bootstrap").write_text('echo run >> "$HOME/bootstrap.runs"\n')
+        self.write_upstream('echo "run $*" >> "$HOME/bootstrap.runs"\n')
+
+    def write_upstream(self, body):
+        (self.upstream / "scripts/pod-bootstrap").write_text(body)
         ident = ["-c", "user.name=t", "-c", "user.email=t@example.test"]
-        for args in (["init", "-q", "-b", "master"], ["add", "."], [*ident, "commit", "-q", "-m", "x"]):
-            run("git", "-C", str(self.upstream), *args)
+        if not (self.upstream / ".git").exists():
+            run("git", "init", "-q", "-b", "master", cwd=self.upstream)
+        run("git", "add", ".", cwd=self.upstream)
+        run("git", *ident, "commit", "-q", "-m", "x", cwd=self.upstream)
 
-    def hook_for(self, url):
+    def run_hook(self, *args, url=None):
         self.assertEqual(self.hook.count(DOTFILES_URL), 1)
-        return self.hook.replace(HOME, str(self.home)).replace(DOTFILES_URL, str(url))
-
-    def run_hook(self, url=None):
-        env = {"HOME": str(self.home), "PATH": os.environ["PATH"]}
-        result = subprocess.run(["/bin/sh", "-c", self.hook_for(url or self.upstream)], env=env,
-                                capture_output=True, text=True, timeout=120)
-        self.assertEqual(result.returncode, 0, result.stderr)  # the editor always starts
+        script = self.tmp / "dotfiles-bootstrap"
+        script.write_text(self.hook.replace(DOTFILES_URL, str(url or self.upstream)))
+        result = subprocess.run(["/bin/sh", str(script), *args], capture_output=True, text=True, timeout=120,
+                                env={"HOME": str(self.home), "PATH": os.environ["PATH"]})
+        self.assertEqual(result.returncode, 0, result.stderr)  # the pod always starts
         runs = self.home / "bootstrap.runs"
-        return result, runs.read_text().count("run") if runs.exists() else 0
+        return result, runs.read_text().splitlines() if runs.exists() else []
 
     def broken(self):
         return sorted(p.name for p in self.home.glob(".dotfiles.broken-*"))
@@ -70,14 +82,14 @@ class CodeServerHook(unittest.TestCase):
     def test_empty_home_clones_and_bootstraps(self):
         _, runs = self.run_hook()
         self.assertTrue((self.home / ".dotfiles/scripts/pod-bootstrap").is_file())
-        self.assertEqual(runs, 1)
+        self.assertEqual(runs, ["run "])
         self.assertEqual(self.broken(), [])
 
     def test_cut_off_clone_is_moved_aside_and_recloned(self):
         (self.home / ".dotfiles/.git").mkdir(parents=True)
         _, runs = self.run_hook()
         self.assertTrue((self.home / ".dotfiles/scripts/pod-bootstrap").is_file())
-        self.assertEqual(runs, 1)
+        self.assertEqual(runs, ["run "])
         self.assertEqual(len(self.broken()), 1)
 
     def test_healthy_checkout_is_used_as_is(self):
@@ -85,24 +97,33 @@ class CodeServerHook(unittest.TestCase):
         (self.home / ".dotfiles/local-work").write_text("uncommitted\n")
         _, runs = self.run_hook(url=self.tmp / "must-not-be-cloned")
         self.assertTrue((self.home / ".dotfiles/local-work").exists())
-        self.assertEqual(runs, 1)
+        self.assertEqual(runs, ["run "])
         self.assertEqual(self.broken(), [])
 
-    def test_failed_clone_still_starts_the_editor(self):
-        result, runs = self.run_hook(url=self.tmp / "missing")
-        self.assertEqual(runs, 0)
-        self.assertFalse((self.home / ".dotfiles").exists())
-        self.assertIn("starting the editor anyway", result.stdout)
-        # The next start tries again.
-        _, runs = self.run_hook()
-        self.assertEqual(runs, 1)
+    def test_arguments_reach_pod_bootstrap(self):
+        # How neko would call it: its options pass through untouched.
+        _, runs = self.run_hook("--pull", "--hold", "/x/.neko-hold", "--log", "neko-bootstrap")
+        self.assertEqual(runs, ["run --pull --hold /x/.neko-hold --log neko-bootstrap"])
 
-    def test_failed_bootstrap_still_starts_the_editor(self):
-        (self.upstream / "scripts/pod-bootstrap").write_text("exit 3\n")
-        run("git", "-C", str(self.upstream), "-c", "user.name=t", "-c", "user.email=t@example.test",
-            "commit", "-q", "-am", "fail")
+    def test_failed_clone_still_starts_the_pod(self):
+        result, runs = self.run_hook(url=self.tmp / "missing")
+        self.assertEqual(runs, [])
+        self.assertFalse((self.home / ".dotfiles").exists())
+        self.assertIn("starting anyway", result.stdout)
+        _, runs = self.run_hook()  # the next start tries again
+        self.assertEqual(runs, ["run "])
+
+    def test_failed_bootstrap_still_starts_the_pod(self):
+        self.write_upstream("exit 3\n")
         result, _ = self.run_hook()
-        self.assertIn("starting the editor anyway", result.stdout)
+        self.assertIn("starting anyway", result.stdout)
+
+    def test_code_server_runs_the_component_hook(self):
+        init = self.controller["initContainers"]["bootstrap"]
+        self.assertEqual(init["command"], ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap"])
+        mount = self.release["spec"]["values"]["persistence"]["dotfiles"]
+        self.assertEqual(mount["name"], "code-server-dotfiles")
+        self.assertEqual(mount["advancedMounts"]["code-server"]["bootstrap"][0]["path"], "/opt/dotfiles")
 
     def test_pod_shape(self):
         app = self.controller["containers"]["app"]
@@ -110,10 +131,9 @@ class CodeServerHook(unittest.TestCase):
         self.assertFalse(any(arg.startswith("/") for arg in app["args"]), app["args"])  # no folder: the dotfiles' repo list
         for container in (app, self.controller["initContainers"]["bootstrap"]):
             self.assertEqual(container["envFrom"], [{"secretRef": {"name": "code-server-secret", "optional": True}}])
-        template = self.docs["ExternalSecret"]["spec"]["target"]["template"]["data"]
+        template = self.one("ExternalSecret", "code-server")["spec"]["target"]["template"]["data"]
         self.assertEqual(list(template), ["PROTON_PASS_TOKEN"])
-        values = self.docs["HelmRelease"]["spec"]["values"]
-        self.assertFalse(values["defaultPodOptions"]["automountServiceAccountToken"])
+        self.assertFalse(self.release["spec"]["values"]["defaultPodOptions"]["automountServiceAccountToken"])
         self.assertEqual(self.controller["strategy"], "Recreate")
 
 
