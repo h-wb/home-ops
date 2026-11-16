@@ -34,6 +34,8 @@ spec:
           # start. pod-bootstrap is called by path in the checkout, never
           # through a link the bootstrap manages, and the editor starts even
           # when it fails (dotfiles doctor `code-server-bootstrap` says why).
+          # A checkout without the script (a cut-off clone) is moved aside and
+          # cloned again. tests/test_code_server.py runs this command.
           bootstrap:
             image: &image
               repository: ghcr.io/coder/code-server
@@ -42,14 +44,20 @@ spec:
               - /bin/sh
               - -c
               - |
-                [ -d /home/coder/.dotfiles/.git ] || timeout 300 git clone --quiet https://github.com/h-wb/dotfiles.git /home/coder/.dotfiles
+                if [ ! -f /home/coder/.dotfiles/scripts/pod-bootstrap ]; then
+                  [ ! -e /home/coder/.dotfiles ] || mv /home/coder/.dotfiles "/home/coder/.dotfiles.broken-$(date +%Y%m%d%H%M%S)"
+                  rm -rf /home/coder/.dotfiles.clone
+                  timeout 300 git clone --quiet https://github.com/h-wb/dotfiles.git /home/coder/.dotfiles.clone &&
+                    mv /home/coder/.dotfiles.clone /home/coder/.dotfiles
+                fi
                 timeout 3300 sh /home/coder/.dotfiles/scripts/pod-bootstrap || echo "pod-bootstrap failed; starting the editor anyway"
             env: &env
               HOME: /home/coder
               TZ: Europe/Paris
-            envFrom: &envFrom
+            envFrom: &envFrom # Optional, like the token in it: the pod starts without it.
               - secretRef:
                   name: code-server-secret
+                  optional: true
             resources:
               requests:
                 cpu: 100m
@@ -68,8 +76,6 @@ spec:
               - 0.0.0.0:8080
               - --disable-telemetry
               - --disable-update-check
-              - --disable-workspace-trust
-              - /home/coder/Repositories/home-ops
             env: *env
             envFrom: *envFrom
             resources:

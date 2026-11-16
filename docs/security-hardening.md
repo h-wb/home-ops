@@ -65,8 +65,12 @@ PVC's kopiur backups.
       by the dotfiles like on his Mac (wider than the old one: both clusters).
 - [ ] Revoke the old kubeconfig credential and delete the `KUBECONFIG` field of
       the BWS item `code-server`.
-- [ ] Protect dotfiles `master` (PR and review, no direct bot pushes): the pod
-      runs it unattended with the owner's credentials.
+- [ ] Before the pod gets the owner's token: protect dotfiles `master` (pull
+      request plus the owner's approval; `bot-tintin` can write to the repo).
+      The pod never pulls, but an empty volume clones `master`, and so does
+      every `git pull` the owner runs there.
+- [x] Workspace trust is on: a checked-out agent branch's `.vscode` tasks and
+      settings ask before they run.
 - [ ] Stop agents rewriting workloads through the Flux MCP (`flux-mcp` may patch
       any HelmRelease, so it could add a container to this pod).
 - [x] NetworkPolicy: only the gateway reaches the pod.
