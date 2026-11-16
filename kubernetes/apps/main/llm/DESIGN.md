@@ -194,7 +194,7 @@ memory).
   has no `GH_TOKEN`, so there is no fallback to your personal token: without the
   bot's Secret, gh and git fail instead of acting as you. Workflow-file changes
   come to you as a PR-comment patch, applied with `land <pr>` from your own
-  environment (workstation or neko; code-server once it has mise and gh), never
+  environment (code-server, workstation or neko), never
   from the Paseo pod. The app's fields live in the
   Bitwarden item `bot-tintin` (`APP_ID`, `INSTALLATION_ID`, `PRIVATE_KEY`), named
   after the identity so other consumers can read it via their own ExternalSecret.

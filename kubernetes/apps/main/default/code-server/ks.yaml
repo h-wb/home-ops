@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
+    - ../../../../../components/dotfiles
     - ../../../../../components/kopiur/backup
     - ../../../../../components/oidc/envoy
   dependsOn: []
@@ -25,7 +26,7 @@ spec:
       OIDC_DISPLAY_NAME: Code Server
       OIDC_SHORT_USERNAME: "true"
       OIDC_DISABLE_PKCE: "true"
-      # Not `users`: a session here is a shell with the mounted kubeconfig.
+      # Not `users`: a session here is a shell with the owner's credentials.
       OIDC_GROUP: admins
   prune: true
   retryInterval: 1m

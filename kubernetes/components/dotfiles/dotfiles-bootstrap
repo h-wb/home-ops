@@ -1,0 +1,21 @@
+#!/bin/sh
+# Bootstrap this pod from the owner's dotfiles: clone them when the script is
+# missing, then run their scripts/pod-bootstrap by path with this script's
+# arguments. Always exits 0: a failed bootstrap must not stop the pod's own
+# program from starting. No braces around variables: Flux substitutes those.
+set -u
+url=https://github.com/h-wb/dotfiles.git
+dir="$HOME/.dotfiles"
+script="$dir/scripts/pod-bootstrap"
+
+if [ ! -f "$script" ]; then
+	# The neko image ships no git; code-server's does.
+	command -v git >/dev/null 2>&1 ||
+		{ sudo -n apt-get update -qq && sudo -n apt-get install -y -qq --no-install-recommends git; }
+	# No script means a cut-off clone (or not a checkout of ours): keep it aside.
+	[ ! -e "$dir" ] || mv "$dir" "$dir.broken-$(date +%Y%m%d%H%M%S)"
+	rm -rf "$dir.clone"
+	timeout 300 git clone --quiet "$url" "$dir.clone" && mv "$dir.clone" "$dir"
+fi
+timeout 3300 sh "$script" "$@" || echo "dotfiles bootstrap did not complete; starting anyway"
+exit 0

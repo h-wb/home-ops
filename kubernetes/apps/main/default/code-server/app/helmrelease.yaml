@@ -6,12 +6,17 @@ metadata:
   name: &app code-server
 spec:
   interval: 1h
+  # Above the init container's own limit: a first bootstrap installs every
+  # tool, and a shorter wait would roll the upgrade back mid-install.
+  timeout: 65m
   chartRef:
     kind: OCIRepository
     name: app-template
   dependsOn: []
   values:
     defaultPodOptions:
+      automountServiceAccountToken: false
+      enableServiceLinks: false
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -20,44 +25,30 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
     controllers:
       code-server:
+        # One pod on the home volume: two bootstraps must never run at once.
+        strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          # The code-server image ships no kubectl, which would leave the
-          # mounted kubeconfig useless. Stage the CLIs into an emptyDir shared
-          # with the app container, mounted on /usr/local/sbin because that is
-          # already on PATH and — unlike /usr/local/bin — empty in the image
-          # (masking it would hide the setuid fixuid the entrypoint needs).
-          tools:
-            image:
-              repository: docker.io/alpine/k8s
-              tag: 1.37.2
-            command:
-              - /bin/sh
-              - -c
-              - cp -f /usr/bin/kubectl /usr/bin/helm /usr/bin/kustomize /usr/bin/jq /usr/bin/yq /usr/local/sbin/
-            resources:
-              requests:
-                cpu: 10m
-                memory: 64Mi
-              limits:
-                memory: 256Mi
-          # Seed the workspace on first boot only; afterwards the clone lives
-          # on the PVC and is managed from inside the editor like any checkout.
-          clone:
+          # At every start, before the editor: components/dotfiles does the rest.
+          bootstrap:
             image: &image
               repository: ghcr.io/coder/code-server
               tag: 4.145.2
-            command:
-              - /bin/sh
-              - -c
-              - test -d /home/coder/home-ops/.git || git clone https://github.com/h-wb/home-ops.git /home/coder/home-ops
+            command: ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap"]
+            env: &env
+              HOME: /home/coder
+              TZ: Europe/Paris
+            envFrom: &envFrom # Optional, like the token in it: the pod starts without it.
+              - secretRef:
+                  name: code-server-secret
+                  optional: true
             resources:
               requests:
-                cpu: 10m
-                memory: 64Mi
-              limits:
+                cpu: 100m
                 memory: 256Mi
+              limits:
+                memory: 2Gi
         containers:
           app:
             image: *image
@@ -70,13 +61,8 @@ spec:
               - 0.0.0.0:8080
               - --disable-telemetry
               - --disable-update-check
-              - --disable-workspace-trust
-              - /home/coder/home-ops
-            env:
-              TZ: Europe/Paris
-              # Kept off ~/.kube so kubectl still has a writable dir there for
-              # its discovery cache (the secret mount is read-only).
-              KUBECONFIG: /var/run/secrets/kubeconfig/config
+            env: *env
+            envFrom: *envFrom
             resources:
               requests:
                 cpu: 100m
@@ -106,28 +92,13 @@ spec:
     persistence:
       home:
         existingClaim: *app
+        globalMounts:
+          - path: /home/coder
+      dotfiles:
+        type: configMap
+        name: code-server-dotfiles
         advancedMounts:
           code-server:
-            clone:
-              - path: /home/coder
-            app:
-              - path: /home/coder
-      tools:
-        type: emptyDir
-        advancedMounts:
-          code-server:
-            tools:
-              - path: /usr/local/sbin
-            app:
-              - path: /usr/local/sbin
-                readOnly: true
-      kubeconfig:
-        type: secret
-        name: code-server-secret
-        # root:1000 — group-readable so uid 1000 can read it, nothing wider.
-        defaultMode: 0440
-        advancedMounts:
-          code-server:
-            app:
-              - path: /var/run/secrets/kubeconfig
+            bootstrap:
+              - path: /opt/dotfiles
                 readOnly: true
