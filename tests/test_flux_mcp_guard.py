@@ -119,7 +119,7 @@ class FluxMcpGuard(unittest.TestCase):
 
     def test_match_covers_subresources(self):
         rules = self.policy["spec"]["matchConstraints"]["resourceRules"]
-        self.assertTrue(all({"*", "*/*"} <= set(rule["resources"]) for rule in rules))
+        self.assertTrue(all(rule["resources"] == ["*/*"] for rule in rules))
 
 
 if __name__ == "__main__":
