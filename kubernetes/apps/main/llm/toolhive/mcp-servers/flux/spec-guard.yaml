@@ -24,8 +24,9 @@ spec:
           - source.toolkit.fluxcd.io
         apiVersions: ["*"]
         operations: [CREATE, UPDATE]
-        # "*" alone does not match subresources such as status.
-        resources: ["*", "*/*"]
+        # "*/*" is every resource and subresource ("*" alone skips status), and
+        # the API server rejects it combined with anything else.
+        resources: ["*/*"]
   matchConditions:
     - name: flux-mcp-only
       expression: request.userInfo.username == 'system:serviceaccount:llm:flux-mcp'
