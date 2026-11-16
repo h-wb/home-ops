@@ -65,4 +65,5 @@ PLIST
 
 [ "${1:-}" = --user ] || system
 agent home-ops.edge-mac.vm 60 vm.sh up
+agent home-ops.edge-mac.apps 60 apps.sh
 agent home-ops.edge-mac.pull 900 pull.sh

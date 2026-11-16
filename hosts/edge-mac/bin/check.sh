@@ -39,7 +39,11 @@ check "macOS updates do not install themselves" no_auto_os_update
 check "Remote Login (ssh) answers" nc -z 127.0.0.1 22
 check "UTM VM '$VM_NAME' is started" vm_started
 check "a USB device matching '$USB_MATCH' is plugged in" usb_present
+for app in $KEEP_OPEN; do
+	check "$app is running" pgrep -xq "$app"
+done
 check "agent home-ops.edge-mac.vm is loaded" loaded home-ops.edge-mac.vm
+check "agent home-ops.edge-mac.apps is loaded" loaded home-ops.edge-mac.apps
 check "agent home-ops.edge-mac.pull is loaded" loaded home-ops.edge-mac.pull
 
 exit "$failed"
