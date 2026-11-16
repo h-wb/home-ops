@@ -5,4 +5,5 @@ kind: Kustomization
 resources:
   - ./backup-trigger-guard.yaml
   - ./rbac.yaml
+  - ./spec-guard.yaml
   - ./mcpserver.yaml
