@@ -180,8 +180,7 @@ write config (`gh auth login`, `gh config set`, `gh alias set`) fail there. The
 personal token still sits in the `paseo-agents`
 Secret and the Bitwarden item, unused, until the owner removes it. Workflow-file
 changes go to the owner as a PR-comment patch, applied with the dotfiles `land <pr>`
-task from his own environment (workstation or neko today; code-server once it gets
-mise and gh), never from the Paseo pod. The app's three fields live in the
+task from his own environment (code-server, workstation or neko), never from the Paseo pod. The app's three fields live in the
 Bitwarden item `bot-tintin` (JSON:
 `APP_ID`, `INSTALLATION_ID`, `PRIVATE_KEY`), named after the identity so other
 consumers can read it through their own ExternalSecret.

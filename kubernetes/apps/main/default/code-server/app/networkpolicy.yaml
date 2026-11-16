@@ -1,6 +1,7 @@
 ---
 # code-server runs with --auth none: the kanidm login is on the HTTPRoute, so the
-# external gateway is the only client that may reach the port.
+# external gateway is the only client that may reach the port. Every other pod,
+# the Paseo agents included, is refused; they only reach the login.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

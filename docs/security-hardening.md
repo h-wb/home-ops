@@ -53,12 +53,22 @@ runner's credential.
 
 ## Step 2: code-server
 
-Internet-facing, `--auth none` behind the gateway login, with a kubeconfig mounted.
+Internet-facing, `--auth none` behind the gateway login. Since 2026-11 it is the
+owner's workstation: the dotfiles provision it, and his credentials (Proton Pass
+session, his main and edge kubeconfigs, `gh` login) live on its PVC and in that
+PVC's kopiur backups.
 
 - [x] Gate on `admins`, not `users` (`OIDC_GROUP`).
 - [x] Add the `auth-gate` gatus probe (also missing for obsidian and prefect).
 - [ ] Decide: internal gateway only, or keep external.
-- [ ] Find out what the kubeconfig may do and reduce it, or remove it.
+- [x] Remove the mounted kubeconfig: the one in use is the owner's own, rendered
+      by the dotfiles like on his Mac (wider than the old one: both clusters).
+- [ ] Revoke the old kubeconfig credential and delete the `KUBECONFIG` field of
+      the BWS item `code-server`.
+- [ ] Protect dotfiles `master` (PR and review, no direct bot pushes): the pod
+      runs it unattended with the owner's credentials.
+- [ ] Stop agents rewriting workloads through the Flux MCP (`flux-mcp` may patch
+      any HelmRelease, so it could add a container to this pod).
 - [x] NetworkPolicy: only the gateway reaches the pod.
 
 ## Step 3: endpoints that skip the gateway login
@@ -203,6 +213,5 @@ a gateway-level default policy.
 ## Not verified
 
 - The edge cluster's live state.
-- What the code-server kubeconfig may do.
 - qBittorrent without login, in a browser.
 - kanidm's live account policy.
