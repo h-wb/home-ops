@@ -1,5 +1,23 @@
 # The edge Mac itself, applied by `mise run //hosts/edge-mac:apply`.
 
+# Pinned GitHub releases; sha256 is the asset's `digest` in the release API.
+# An app already in /Applications is adopted only when identical to the pin,
+# otherwise apply stops before changing anything (README, "First apply").
+[bootstrap.packages."macos-app:utm"]
+version = "5.0.8"
+url = "https://github.com/utmapp/UTM/releases/download/v{{version}}/UTM.dmg"
+sha256 = "7b2d7b2e2a02b3de1757ef19a8f36573e6d9cceae8c8cca0abcbcaa4a852019a"
+artifact = "UTM.app"
+adopt = true
+
+# The asset without `-arm64` is the Intel build.
+[bootstrap.packages."macos-app:bluebubbles"]
+version = "1.9.12"
+url = "https://github.com/BlueBubblesApp/bluebubbles-server/releases/download/v{{version}}/BlueBubbles-{{version}}.dmg"
+sha256 = "6858a914e3d2e7fd40b1ecf5d24ea4789ea0e33af6b3ad2bf1a940e090abff57"
+artifact = "BlueBubbles.app"
+adopt = true
+
 [bootstrap.directories."/usr/local/libexec"]
 [bootstrap.directories."/usr/local/libexec/edge-mac"]
 

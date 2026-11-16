@@ -11,6 +11,7 @@ and no mise of its own. `diff` shows what `apply` would change.
 
 | Piece               | What it does                                                                          |
 | ------------------- | ------------------------------------------------------------------------------------- |
+| packages            | UTM and BlueBubbles, pinned to a GitHub release                                       |
 | agent `edge-vm`     | Every minute: open UTM, start the VM if it is not running, reconnect the dongle after |
 | agent `bluebubbles` | Keeps BlueBubbles open                                                                |
 | `final` hook        | Never sleep (lid closed included); macOS updates do not install themselves            |
@@ -33,6 +34,27 @@ macOS has no API for these without MDM. `check` reports the first two.
    disk cannot be read from Recovery or Target Disk Mode.
 5. BlueBubbles: sign Messages in, grant the app Full Disk Access and
    Accessibility.
-6. After the first `apply`, approve the "control UTM" prompt on the Mac's
+6. Turn off BlueBubbles' own auto-update: the pin here is its only updater.
+7. After the first `apply`, approve the "control UTM" prompt on the Mac's
    screen. `apply` has to run while that user is logged in at the desktop:
    LaunchAgents only load into a live login session.
+
+## First apply
+
+The apps on the Mac were installed by hand. mise takes one over only when it
+is identical to the pinned release; otherwise `apply` stops at the packages
+step with `cannot adopt`, before anything else changes. Either pin the
+installed version instead, or shut the VM down, quit the app and delete it
+from `/Applications`, then apply again. The VMs
+(`~/Library/Containers/com.utmapp.UTM`) and the BlueBubbles data
+(`~/Library/Application Support/bluebubbles-server`) are not in the bundle.
+A replaced app may need its permissions granted again.
+
+## Upgrading an app
+
+Change `version` and `sha256`, then:
+
+- UTM: `ssh edge-mac sh /usr/local/libexec/edge-mac/vm.sh stop`, then `apply`.
+  It reloads the agent, which starts the VM on the new UTM.
+- BlueBubbles: `apply`, then `ssh edge-mac killall BlueBubbles`. The agent
+  reopens it within a minute.
