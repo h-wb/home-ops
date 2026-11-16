@@ -2,7 +2,7 @@
 # Reports what would stop this Mac coming back up unattended. Changes nothing.
 set -u
 
-here=$(cd "$(dirname "$0")/.." && pwd)
+here=$(cd "$(dirname "$0")" && pwd)
 # shellcheck source=/dev/null
 . "$here/config.env"
 utmctl=/Applications/UTM.app/Contents/MacOS/utmctl
@@ -29,6 +29,8 @@ no_auto_os_update() { [ "$(defaults read /Library/Preferences/com.apple.Software
 vm_started() { [ "$("$utmctl" status "$VM_NAME")" = started ]; }
 usb_present() { "$utmctl" usb list | grep -qi -- "$USB_MATCH"; }
 loaded() { launchctl print "gui/$uid/$1"; }
+# The agent is `open -W`, which lives exactly as long as the app.
+running() { launchctl print "gui/$uid/$1" | grep -q "state = running"; }
 }
 
 check "FileVault is off (auto-login needs it)" filevault_off
@@ -39,11 +41,7 @@ check "macOS updates do not install themselves" no_auto_os_update
 check "Remote Login (ssh) answers" nc -z 127.0.0.1 22
 check "UTM VM '$VM_NAME' is started" vm_started
 check "a USB device matching '$USB_MATCH' is plugged in" usb_present
-for app in $KEEP_OPEN; do
-	check "$app is running" pgrep -xq "$app"
-done
-check "agent home-ops.edge-mac.vm is loaded" loaded home-ops.edge-mac.vm
-check "agent home-ops.edge-mac.apps is loaded" loaded home-ops.edge-mac.apps
-check "agent home-ops.edge-mac.pull is loaded" loaded home-ops.edge-mac.pull
+check "agent dev.mise.edge-vm is loaded" loaded dev.mise.edge-vm
+check "BlueBubbles is running under its agent" running dev.mise.bluebubbles
 
 exit "$failed"

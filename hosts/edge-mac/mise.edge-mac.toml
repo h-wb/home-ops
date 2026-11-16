@@ -1,0 +1,47 @@
+# The edge Mac itself, applied by `mise run //hosts/edge-mac:apply`.
+
+[bootstrap.directories."/usr/local/libexec"]
+[bootstrap.directories."/usr/local/libexec/edge-mac"]
+
+[bootstrap.files."/usr/local/libexec/edge-mac/config.env"]
+source = "files/config.env"
+owner = "root"
+group = "wheel"
+
+[bootstrap.files."/usr/local/libexec/edge-mac/vm.sh"]
+source = "files/vm.sh"
+owner = "root"
+group = "wheel"
+
+[bootstrap.files."/usr/local/libexec/edge-mac/check.sh"]
+source = "files/check.sh"
+owner = "root"
+group = "wheel"
+
+# Every minute: start the VM if it is not running (see files/vm.sh).
+[bootstrap.macos.launchd.agents.edge-vm]
+program = "/bin/sh"
+args = ["/usr/local/libexec/edge-mac/vm.sh", "up"]
+run_at_load = true
+start_interval = 60
+stdout_path = "~/Library/Logs/edge-mac.log"
+stderr_path = "~/Library/Logs/edge-mac.log"
+
+# `open -W` returns when the app exits, so launchd reopens it.
+[bootstrap.macos.launchd.agents.bluebubbles]
+program = "/usr/bin/open"
+args = ["-W", "-g", "-j", "-a", "BlueBubbles"]
+keep_alive = true
+throttle_interval = 60
+
+# mise has no power or system-wide settings. One pmset key per call: a key this
+# model lacks must not drop the others.
+[bootstrap.hooks.final]
+description = "Never sleep (lid closed included); macOS updates do not install themselves"
+run = '''
+for setting in "sleep 0" "disksleep 0" "displaysleep 5" "standby 0" "autopoweroff 0" \
+	"powernap 0" "womp 1" "autorestart 1" "disablesleep 1"; do
+	sudo pmset -a $setting || echo "pmset: '$setting' not applied" >&2
+done
+sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
+'''

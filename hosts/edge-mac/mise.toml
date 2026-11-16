@@ -1,20 +1,32 @@
-[env]
-# ssh alias of the Mac, and this directory relative to its home.
-EDGE_MAC_HOST = "edge-mac"
-EDGE_MAC_DIR = "home-ops/hosts/edge-mac"
+# Workstation side. What lands on the Mac is mise.edge-mac.toml, which only
+# loads under MISE_ENV=edge-mac: a plain `mise bootstrap` here changes nothing.
+
+[bootstrap.remote]
+mise_env = ["edge-mac"]
+
+[bootstrap.remote.hosts.edge-mac]
+host = "edge-mac" # ssh alias
+
+[tasks.apply]
+description = "Apply this directory to the edge Mac over ssh (asks for sudo there)"
+dir = "{{config_root}}"
+raw = true # sudo prompts on the Mac
+run = "mise bootstrap remote edge-mac"
+
+[tasks.diff]
+description = "Show what apply would change on the edge Mac"
+dir = "{{config_root}}"
+run = "mise bootstrap remote edge-mac --dry-run"
 
 [tasks.check]
 description = "Report what would stop the edge Mac coming back up unattended"
-run = 'ssh "${EDGE_MAC_HOST}" sh "${EDGE_MAC_DIR}/bin/check.sh"'
-
-[tasks.apply]
-description = "Pull and apply power settings and LaunchAgents on the edge Mac (asks for sudo)"
-run = 'ssh -t "${EDGE_MAC_HOST}" "git -C ${EDGE_MAC_DIR} pull --ff-only && sh ${EDGE_MAC_DIR}/bin/apply.sh"'
+run = "ssh edge-mac sh /usr/local/libexec/edge-mac/check.sh"
 
 [tasks.usb]
 description = "Reconnect the Zigbee dongle to the VM (after a replug)"
-run = 'ssh "${EDGE_MAC_HOST}" sh "${EDGE_MAC_DIR}/bin/vm.sh" usb'
+run = "ssh edge-mac sh /usr/local/libexec/edge-mac/vm.sh usb"
 
 [tasks.reboot]
 description = "Shut the Talos VM down cleanly, then restart the edge Mac (asks for sudo)"
-run = 'ssh -t "${EDGE_MAC_HOST}" "sh ${EDGE_MAC_DIR}/bin/vm.sh stop && sudo shutdown -r now"'
+raw = true # sudo prompts on the Mac
+run = 'ssh -t edge-mac "sh /usr/local/libexec/edge-mac/vm.sh stop && sudo shutdown -r now"'

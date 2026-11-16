@@ -1,12 +1,12 @@
 #!/bin/sh
-# The Talos VM in UTM. `up` is the LaunchAgent body (see apply.sh).
+# The Talos VM in UTM. `up` is the edge-vm LaunchAgent's body.
 set -eu
 
-here=$(cd "$(dirname "$0")/.." && pwd)
+here=$(cd "$(dirname "$0")" && pwd)
 # shellcheck source=/dev/null
 . "$here/config.env"
 utmctl=/Applications/UTM.app/Contents/MacOS/utmctl
-label=home-ops.edge-mac.vm
+label=dev.mise.edge-vm
 
 status() { "$utmctl" status "$VM_NAME" 2>/dev/null || true; }
 
