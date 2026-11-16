@@ -1,0 +1,20 @@
+[env]
+# ssh alias of the Mac, and this directory relative to its home.
+EDGE_MAC_HOST = "edge-mac"
+EDGE_MAC_DIR = "home-ops/hosts/edge-mac"
+
+[tasks.check]
+description = "Report what would stop the edge Mac coming back up unattended"
+run = 'ssh "${EDGE_MAC_HOST}" sh "${EDGE_MAC_DIR}/bin/check.sh"'
+
+[tasks.apply]
+description = "Pull and apply power settings and LaunchAgents on the edge Mac (asks for sudo)"
+run = 'ssh -t "${EDGE_MAC_HOST}" "git -C ${EDGE_MAC_DIR} pull --ff-only && sh ${EDGE_MAC_DIR}/bin/apply.sh"'
+
+[tasks.usb]
+description = "Reconnect the Zigbee dongle to the VM (after a replug)"
+run = 'ssh "${EDGE_MAC_HOST}" sh "${EDGE_MAC_DIR}/bin/vm.sh" usb'
+
+[tasks.reboot]
+description = "Shut the Talos VM down cleanly, then restart the edge Mac (asks for sudo)"
+run = 'ssh -t "${EDGE_MAC_HOST}" "sh ${EDGE_MAC_DIR}/bin/vm.sh stop && sudo shutdown -r now"'

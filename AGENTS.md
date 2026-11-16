@@ -15,6 +15,7 @@ home-ops/
 │   │   └── edge/
 │   └── components/      # reusable kustomize Components consumed by app ks.yaml's
 ├── docker/truenas/      # NAS docker-compose stacks deployed by doco-cd (see its README.md)
+├── hosts/edge-mac/      # the Mac under the edge VM: power settings + LaunchAgents (see its README.md)
 ├── talos/               # Talos Linux machine configs (one dir per cluster)
 ├── bootstrap/           # one-time cluster bootstrap (helmfile.d + mise tasks)
 ├── .mise.toml           # tool versions, env (KUBECONFIG from $CLUSTER), root tasks; monorepo config_roots
@@ -27,7 +28,7 @@ home-ops/
 | Cluster  | Nodes                                                                       | Purpose                                              |
 | -------- | --------------------------------------------------------------------------- | ---------------------------------------------------- |
 | **main** | 3× Talos (tal0s, tal1s, tal2s — all control-plane, NVMe storage, Rook/Ceph) | Production homelab — auth, photos, media, automation |
-| **edge** | 1× node                                                                     | Edge services / lighter workloads                    |
+| **edge** | 1× Talos VM (UTM on an Intel Mac, `hosts/edge-mac/`)                        | Edge services / lighter workloads                    |
 
 Switch clusters by setting `CLUSTER=edge` (or `main`) in the shell or `.mise.toml`. That swaps `KUBECONFIG`, `TALOSCONFIG`, and the apps tree mise sees.
 
@@ -137,7 +138,7 @@ postBuild:
 - **Reconcile a thing**: `flux -n <ns> reconcile kustomization <name>` (use `--force` for `HelmRelease`)
 - **Fetch latest git**: `flux -n flux-system reconcile source git flux-system`
 - **App in trouble**: check `kubectl get hr -n <ns> <app>`, then pod logs, then events.
-- **Mise tasks**: `mise tasks ls --all`. Monorepo config roots (`bootstrap`, `docker/truenas`, `kubernetes`, `talos`) — run as `mise run //bootstrap:default`, `mise run //docker/truenas:garage:bootstrap`, etc.
+- **Mise tasks**: `mise tasks ls --all`. Monorepo config roots (`bootstrap`, `docker/truenas`, `hosts/edge-mac`, `kubernetes`, `talos`) — run as `mise run //bootstrap:default`, `mise run //docker/truenas:garage:bootstrap`, etc.
 - **Stale pod blocking PVC**: usually `kubectl delete pod -n <ns> <pod>` and CNPG/whoever owns it will recreate. For wedged CNPG bootstrap, `kubectl delete pvc -l cnpg.io/cluster=<cluster>` and the operator re-bootstraps.
 
 ## Common pitfalls
