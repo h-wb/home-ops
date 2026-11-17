@@ -41,15 +41,16 @@ reaches it. Written against mise 2026.11.8: an older one ignores
 
 ## ssh
 
-`remote.sh` takes the Mac's address and its ssh key from the Proton Pass item
-`edge-mac` (vault `Automation General`: fields `host` and `username`, and the
-key itself, served by a `pass-cli ssh-agent` for the length of the task). No
-`~/.ssh/config` entry and no key file, on a workstation or a pod.
+The tasks get the Mac from the Proton Pass item `edge-mac` (vault
+`Automation General`): its `destination` field (`user@host`) as the mise secret
+`EDGE_MAC`, and its ssh key from the Proton Pass ssh agent. A workstation
+already runs that agent; on a pod the hidden `ssh:agent` task starts one. No
+`~/.ssh/config` entry and no key file anywhere.
 
-`apply` leaves the Mac's sshd key-only and refuses to run before a key login
-works. On a Mac that does not have the key yet, `ssh:setup` copies it with
-`ssh-copy-id`, the one time the account password is typed over ssh. `sudo` on
-the Mac still asks for the password.
+`apply` leaves the Mac's sshd key-only and depends on `ssh:verify`, so it never
+runs before a key login works. On a Mac that does not have the key yet,
+`ssh:setup` copies it with `ssh-copy-id`, the one time the account password is
+typed over ssh. `sudo` on the Mac still asks for the password.
 
 ## Once, by hand
 
