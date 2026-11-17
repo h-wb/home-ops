@@ -9,15 +9,15 @@ over ssh: `mise run //hosts/edge-mac:apply` packs the directory, stages mise on
 the Mac for the run and applies `mise.edge-mac.toml`. The Mac needs no checkout
 and no mise of its own. `diff` shows what `apply` would change.
 
-| In `mise.edge-mac.toml` | What it does                                                                            |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| packages                | UTM and BlueBubbles, pinned to a GitHub release                                         |
-| macOS defaults          | UTM stays open, keeps the Mac awake and powers the VM down on quit; lock after a minute |
-| agent `edge-vm`         | Every minute: open UTM, start the VM if it is not running, reconnect the dongle after   |
-| agent `bluebubbles`     | Keeps BlueBubbles open                                                                  |
-| sshd drop-in            | Key-only login                                                                          |
-| `final` hook            | Never sleep (lid closed included); macOS updates do not install themselves              |
-| `[doctor.checks]`       | What an unattended boot depends on, with the fix as each check's hint                   |
+| In `mise.edge-mac.toml` | What it does                                                                                                                                              |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| packages                | UTM and BlueBubbles, pinned to a GitHub release                                                                                                           |
+| macOS defaults          | UTM stays open, keeps the Mac awake and powers the VM down on quit; lock after a minute                                                                   |
+| agent `edge-vm`         | Every minute: open UTM, start the VM if it is not running, reconnect the dongle after                                                                     |
+| agent `bluebubbles`     | Keeps BlueBubbles open                                                                                                                                    |
+| sshd drop-in            | Key-only login                                                                                                                                            |
+| `final` hook            | Never sleep (lid closed included); no self-installing macOS updates; a sudoers rule letting admins run `shutdown -r now` without a password, for `reboot` |
+| `[doctor.checks]`       | What an unattended boot depends on, with the fix as each check's hint                                                                                     |
 
 `files/vm.sh` is installed to `/usr/local/libexec/edge-mac`; the VM name and
 the dongle's USB id are `[vars]`. `utmctl` refuses to work over ssh, and a
@@ -66,9 +66,7 @@ macOS has no API for these without MDM. `check` reports the first one.
    Accessibility.
 6. Turn off BlueBubbles' own auto-update: the pin here is its only updater.
 7. After the first `apply`, approve the "control UTM" prompt on the Mac's
-   screen, and the "System Events" one the first time `reboot` runs. Until
-   that one is approved, `reboot` gives up after two minutes and leaves the
-   VM running. `apply` has to run while that user is logged in at the desktop:
+   screen. `apply` has to run while that user is logged in at the desktop:
    LaunchAgents only load into a live login session.
 
 ## First apply

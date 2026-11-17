@@ -87,7 +87,8 @@ args = ["/usr/local/libexec/edge-mac/vm.sh", "stop"]
 stdout_path = "~/Library/Logs/edge-mac.log"
 stderr_path = "~/Library/Logs/edge-mac.log"
 
-# On demand only: `mise run //hosts/edge-mac:reboot` kickstarts it.
+# On demand only: `mise run //hosts/edge-mac:reboot` kickstarts it. It restarts
+# through the one sudoers rule the final hook installs.
 [bootstrap.macos.launchd.agents.edge-reboot]
 program = "/bin/sh"
 args = ["/usr/local/libexec/edge-mac/vm.sh", "reboot"]
@@ -104,13 +105,21 @@ throttle_interval = 60
 # mise has no power or system-wide settings. One pmset key per call: a key this
 # model lacks must not drop the others.
 [bootstrap.hooks.final]
-description = "Never sleep (lid closed included); macOS updates do not install themselves"
+description = "Never sleep (lid closed included); no self-installing macOS updates; passwordless restart"
 run = '''
 for setting in "sleep 0" "disksleep 0" "displaysleep 5" "standby 0" "autopoweroff 0" \
 	"powernap 0" "womp 1" "autorestart 1" "disablesleep 1"; do
 	sudo pmset -a $setting || echo "pmset: '$setting' not applied" >&2
 done
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
+# Lets the edge-reboot agent restart the Mac with no password and no prompt.
+# Through visudo, not [bootstrap.files]: a sudoers file that does not parse
+# takes sudo down with it.
+rule=$(mktemp)
+printf '%s\n' '%admin ALL=(root) NOPASSWD: /sbin/shutdown -r now' >"$rule"
+visudo -cf "$rule" >/dev/null && sudo install -o root -g wheel -m 0440 "$rule" /etc/sudoers.d/edge-mac-reboot ||
+	echo "sudoers rule for reboot not installed" >&2
+rm -f "$rule"
 '''
 
 # ── Checks ──────────────────────────────────────────────────────────────────
@@ -150,6 +159,11 @@ hint = "apply sets it in the final hook; look for 'pmset: ... not applied' in it
 description = "macOS updates do not install themselves"
 run = '[ "$(defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates)" = 0 ]'
 hint = "apply sets it in the final hook"
+
+[doctor.checks.reboot-rule]
+description = "The reboot agent may restart the Mac without a password"
+run = "sudo -n -l /sbin/shutdown -r now"
+hint = "apply installs /etc/sudoers.d/edge-mac-reboot in the final hook"
 
 [doctor.checks.vm]
 description = "The VM is running"

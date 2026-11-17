@@ -63,14 +63,15 @@ request_stop() {
 }
 
 # An agent, not ssh: a detached process does not outlive an ssh session with a
-# terminal, and from the tailnet the route here drops with the VM. Restarting
-# through System Events needs no root, only its Automation prompt approved once.
+# terminal, and from the tailnet the route here drops with the VM. `shutdown`
+# rather than asking System Events: that waits for an unlocked session and any
+# app (FaceTime) can veto it. The sudoers rule comes from the final hook.
 reboot() {
-	# Refused Apple Events must fail here, while the VM is still up.
-	osascript -e 'tell application "System Events" to get name' >/dev/null
+	# Without the rule this must fail here, while the VM is still up.
+	sudo -n -l /sbin/shutdown -r now >/dev/null
 	echo "$(date '+%F %T') restarting: stopping $VM_NAME first"
 	stop
-	osascript -e 'tell application "System Events" to restart' || {
+	sudo -n /sbin/shutdown -r now || {
 		launchctl bootstrap "$domain" "$keepalive"
 		return 1
 	}
