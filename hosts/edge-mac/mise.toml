@@ -1,0 +1,94 @@
+# Workstation side. What lands on the Mac is mise.edge-mac.toml, which only
+# loads under MISE_ENV=edge-mac: a plain `mise bootstrap` here changes nothing.
+#
+# The Mac's address and ssh key are the Proton Pass item `edge-mac` (vault
+# `Automation General`), so the tasks run the same from a workstation or a
+# Paseo pod, with no ~/.ssh/config entry.
+
+[secrets.fnox]
+
+# A workstation already has its Proton Pass agent here; a pod gets a daemon
+# from ssh:agent.
+[env]
+SSH_AUTH_SOCK = "{{ get_env(name='SSH_AUTH_SOCK', default=env.HOME ~ '/.ssh/proton-pass-agent.sock') }}"
+
+# $EDGE_MAC (user@host) is the tasks' one secret. The inventory is not templated,
+# so the target is --host rather than a [bootstrap.remote.hosts] entry (and
+# --remote-env, which [bootstrap.remote] does not pass to a --host target). A
+# var may not hold a $NAME: mise expands those when it loads the config.
+[vars]
+ssh = "ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=10"
+bootstrap = "mise bootstrap remote --remote-env edge-mac --ssh-option StrictHostKeyChecking=accept-new"
+
+[tasks.apply]
+description = "Apply this directory to the edge Mac over ssh (asks for sudo there)"
+depends = [":ssh:verify"]
+secrets = ["EDGE_MAC"]
+raw = true # sudo prompts on the Mac
+run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task"
+
+[tasks.diff]
+description = "Show what apply would change on the edge Mac"
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC"]
+run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task --dry-run"
+
+[tasks.check]
+description = "Report what would stop the edge Mac coming back up unattended"
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC"]
+run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --only task"
+
+# Only kickstarts the agent: the restart itself runs on the Mac (files/vm.sh).
+[tasks.reboot]
+description = "Shut the Talos VM down cleanly, then restart the edge Mac"
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC"]
+run = '''{{ vars.ssh }} "$EDGE_MAC" 'launchctl kickstart "gui/$(id -u)/dev.mise.edge-reboot"' '''
+
+[tasks.ssh]
+description = "Run a command on the edge Mac, or open a shell"
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC"]
+raw = true
+usage = 'arg "[command]" var=#true'
+# usage hands the words over shell-quoted: eval reads them back.
+run = 'eval "{{ vars.ssh }} $EDGE_MAC ${usage_command:-}"'
+
+[tasks."ssh:setup"]
+description = "Install the Proton Pass ssh key on a Mac that does not have it yet (asks for its password)"
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC"]
+raw = true
+run = 'ssh-copy-id -o StrictHostKeyChecking=accept-new "$EDGE_MAC"'
+
+# `apply` turns password login off on the Mac, so it never runs without this.
+[tasks."ssh:verify"]
+description = "Fail unless a key login to the edge Mac works"
+hide = true
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC"]
+run = """
+{{ vars.ssh }} -o BatchMode=yes -o PreferredAuthentications=publickey "$EDGE_MAC" true || {
+	echo 'no key login to the Mac. Unreachable: from the tailnet the route runs through the VM,' >&2
+	echo 'so it has to be running. Key refused: mise run //hosts/edge-mac:ssh:setup' >&2
+	exit 1
+}
+"""
+
+# Leaves an agent that already serves keys alone (a workstation's own).
+[tasks."ssh:agent"]
+description = "Serve the Proton Pass ssh keys on SSH_AUTH_SOCK"
+hide = true
+depends = ["//:pass:login"]
+run = """
+ssh-add -l >/dev/null 2>&1 && exit 0
+pass-cli ssh-agent daemon stop >/dev/null 2>&1 || true
+pass-cli ssh-agent daemon start --socket-path "$SSH_AUTH_SOCK" --vault-name 'Automation General' >/dev/null
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+	ssh-add -l >/dev/null 2>&1 && exit 0
+	sleep 1
+done
+echo 'no ssh key from Proton Pass' >&2
+exit 1
+"""

@@ -26,3 +26,7 @@ CLUSTER_ETCD_CA_CRT = { provider = "protonpass", value = "pass://Machines/talos-
 CLUSTER_ETCD_CA_KEY = { provider = "protonpass", value = "pass://Machines/talos-cluster/etcd-ca-key" }
 CLUSTER_SECRETBOXENCRYPTIONSECRET = { provider = "protonpass", value = "pass://Machines/talos-cluster/secretboxencryptionsecret" }
 CLUSTER_SERVICEACCOUNT_KEY = { provider = "protonpass", value = "pass://Machines/talos-cluster/serviceaccount-key" }
+
+# The Mac under the edge VM (hosts/edge-mac), as user@host; its ssh key is on
+# the same item, in the vault the Paseo pod can read.
+EDGE_MAC = { provider = "protonpass", value = "pass://Automation General/edge-mac/destination" }
