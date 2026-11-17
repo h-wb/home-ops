@@ -3,6 +3,7 @@
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
+# Rendered from [vars] in mise.edge-mac.toml.
 # shellcheck source=/dev/null
 . "$here/config.env"
 utmctl=/Applications/UTM.app/Contents/MacOS/utmctl

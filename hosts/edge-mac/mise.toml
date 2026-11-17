@@ -11,16 +11,17 @@ host = "edge-mac" # ssh alias
 description = "Apply this directory to the edge Mac over ssh (asks for sudo there)"
 dir = "{{config_root}}"
 raw = true # sudo prompts on the Mac
-run = "mise bootstrap remote edge-mac"
+run = "mise bootstrap remote edge-mac --skip task"
 
 [tasks.diff]
 description = "Show what apply would change on the edge Mac"
 dir = "{{config_root}}"
-run = "mise bootstrap remote edge-mac --dry-run"
+run = "mise bootstrap remote edge-mac --skip task --dry-run"
 
 [tasks.check]
 description = "Report what would stop the edge Mac coming back up unattended"
-run = "ssh edge-mac sh /usr/local/libexec/edge-mac/check.sh"
+dir = "{{config_root}}"
+run = "mise bootstrap remote edge-mac --only task"
 
 [tasks.usb]
 description = "Reconnect the Zigbee dongle to the VM (after a replug)"

@@ -1,5 +1,9 @@
 # The edge Mac itself, applied by `mise run //hosts/edge-mac:apply`.
 
+[vars]
+vm_name = "edge" # as shown by `utmctl list`
+usb_match = "ZBT-2" # substring of the device name in `utmctl usb list`
+
 # Pinned GitHub releases; sha256 is the asset's `digest` in the release API.
 # An app already in /Applications is adopted only when identical to the pin,
 # otherwise apply stops before changing anything (README, "First apply").
@@ -21,8 +25,13 @@ adopt = true
 [bootstrap.directories."/usr/local/libexec"]
 [bootstrap.directories."/usr/local/libexec/edge-mac"]
 
+# What files/vm.sh sources.
 [bootstrap.files."/usr/local/libexec/edge-mac/config.env"]
-source = "files/config.env"
+template = true
+content = """
+VM_NAME={{ vars.vm_name }}
+USB_MATCH={{ vars.usb_match }}
+"""
 owner = "root"
 group = "wheel"
 
@@ -31,10 +40,22 @@ source = "files/vm.sh"
 owner = "root"
 group = "wheel"
 
-[bootstrap.files."/usr/local/libexec/edge-mac/check.sh"]
-source = "files/check.sh"
-owner = "root"
-group = "wheel"
+# UTM's own preferences. With the quit policy, a macOS restart or logout powers
+# Talos down instead of saving VM state. Never set NoQuitConfirmation: it makes
+# UTM kill running VMs on quit.
+[bootstrap.settings.macos.defaults."com.utmapp.UTM"]
+KeepRunningAfterLastWindowClosed = true
+PreventIdleSleep = true
+NoUsbPrompt = true
+QuitRunningVirtualMachinesPolicy = 1 # request power down
+
+# Lock the auto-logged-in session after a minute (with "require password
+# immediately", which only System Settings can set).
+[[bootstrap.settings.macos.defaults_entries]]
+domain = "com.apple.screensaver"
+key = "idleTime"
+value = 60
+host = "current"
 
 # Every minute: start the VM if it is not running (see files/vm.sh).
 [bootstrap.macos.launchd.agents.edge-vm]
@@ -63,3 +84,46 @@ for setting in "sleep 0" "disksleep 0" "displaysleep 5" "standby 0" "autopowerof
 done
 sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool false
 '''
+
+# ── Checks ──────────────────────────────────────────────────────────────────
+# `mise run //hosts/edge-mac:check` runs only this task on the Mac.
+[tasks.bootstrap]
+description = "Check what an unattended boot depends on"
+run = "{{ mise_bin }} doctor project"
+
+[doctor.checks.filevault]
+description = "FileVault is off (auto-login needs it)"
+run = "fdesetup status | grep -q 'FileVault is Off'"
+hint = "System Settings → Privacy & Security → FileVault"
+
+[doctor.checks.autologin]
+description = "Auto-login is set to this user"
+run = '[ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser)" = "$(id -un)" ]'
+hint = "System Settings → Users & Groups → Automatically log in as"
+
+[doctor.checks.no-sleep]
+description = "System sleep is off, lid closed included"
+run = '''
+[ "$(pmset -g | awk '$1 == "sleep" { print $2 }')" = 0 ] &&
+	[ "$(pmset -g | awk '$1 == "SleepDisabled" { print $2 }')" = 1 ]
+'''
+hint = "apply sets it in the final hook; look for 'pmset: ... not applied' in its output"
+
+[doctor.checks.os-updates]
+description = "macOS updates do not install themselves"
+run = '[ "$(defaults read /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates)" = 0 ]'
+hint = "apply sets it in the final hook"
+
+[doctor.checks.vm]
+description = "UTM VM '{{ vars.vm_name }}' is started"
+run = '[ "$(/Applications/UTM.app/Contents/MacOS/utmctl status "{{ vars.vm_name }}")" = started ]'
+hint = "the edge-vm agent retries every minute and logs to ~/Library/Logs/edge-mac.log"
+
+[doctor.checks.usb]
+description = "UTM sees a USB device matching '{{ vars.usb_match }}'"
+run = '/Applications/UTM.app/Contents/MacOS/utmctl usb list | grep -qi -- "{{ vars.usb_match }}"'
+
+# The agent is `open -W`, which lives exactly as long as the app.
+[doctor.checks.bluebubbles]
+description = "BlueBubbles is running under its agent"
+run = '''launchctl print "gui/$(id -u)/dev.mise.bluebubbles" | grep -q "state = running"'''
