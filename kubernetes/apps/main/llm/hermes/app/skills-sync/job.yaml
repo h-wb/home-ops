@@ -27,12 +27,10 @@ spec:
             - /bin/sh
             - /scripts/sync.sh
           env:
-            # h-wb/dotfiles origin/master, "feat(ai): shared paseo-workspace-hygiene skill (#22)".
-            # DOTFILES_TAR_SHA256 is the codeload tarball for that ref; bump both together.
+            # The cluster's dotfiles pin (kubernetes/clusters/main/ks.yaml): a
+            # bump changes this spec, and Flux's force recreates the Job.
             - name: DOTFILES_REF
-              value: aee21dd9b0be69afc0a6845f986cd3ea89b2b1ee
-            - name: DOTFILES_TAR_SHA256
-              value: 33c2a0b92cfe65557928b70302db1651d482858e31be8f7e546727ec5820ddb8
+              value: ${DOTFILES_REF}
           resources:
             requests:
               cpu: 10m

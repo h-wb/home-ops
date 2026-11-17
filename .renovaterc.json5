@@ -30,6 +30,18 @@
       ],
       datasourceTemplate: "docker",
     },
+    {
+      customType: "regex",
+      description: "The dotfiles commit every pod bootstraps from",
+      managerFilePatterns: ["/^kubernetes/clusters/main/ks\\.yaml$/"],
+      matchStrings: [
+        '# renovate: dotfiles\\n[ \\t]*DOTFILES_REF: "(?<currentDigest>[0-9a-f]{40})"',
+      ],
+      depNameTemplate: "h-wb/dotfiles",
+      packageNameTemplate: "https://github.com/h-wb/dotfiles",
+      currentValueTemplate: "master",
+      datasourceTemplate: "git-refs",
+    },
   ],
   packageRules: [
     {
@@ -97,6 +109,21 @@
       automergeType: "pr",
       matchUpdateTypes: ["minor", "patch"],
       ignoreTests: false,
+    },
+    {
+      // Every bump rolls neko, code-server and both Paseo pods. One PR collects
+      // master's commits; Renovate itself merges it only at night (not GitHub's
+      // auto-merge, which would merge whenever kritika's approval arrives).
+      // Revert the merge to roll every pod back.
+      description: "The dotfiles pin: one PR, merged between 03:00 and 06:00",
+      matchManagers: ["custom.regex"],
+      matchPackageNames: ["h-wb/dotfiles"],
+      automerge: true,
+      automergeType: "pr",
+      platformAutomerge: false,
+      automergeSchedule: ["* 3-5 * * *"],
+      ignoreTests: false,
+      commitMessageTopic: "dotfiles pin",
     },
     // --- Gates: override the global automerge:true. Kept last so they win. ---
     {
