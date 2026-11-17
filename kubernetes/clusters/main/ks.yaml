@@ -74,7 +74,7 @@ spec:
               # the Paseo pods, Hermes' skills). Renovate bumps it to master's head;
               # revert the bump to roll every pod back.
               # renovate: dotfiles
-              DOTFILES_REF: "2968f5230ff43905a638128ef6c32d3634d866a2"
+              DOTFILES_REF: "df2bf8a1dd82e69ae6953be76e1f97cc3d20e6a2"
             substituteFrom:
               - name: cluster-secrets
                 kind: Secret

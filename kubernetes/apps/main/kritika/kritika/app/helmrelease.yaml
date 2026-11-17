@@ -128,8 +128,8 @@ spec:
             that as important rather than approving unverified. For the
             dotfiles pin (DOTFILES_REF in kubernetes/clusters/main/ks.yaml) the
             changelog is the commit range on h-wb/dotfiles (gh api
-            repos/h-wb/dotfiles/compare/OLD...NEW), and a failed or missing
-            `test` check run on the new commit is blocking.
+            repos/h-wb/dotfiles/compare/OLD...NEW), and it is blocking when
+            the new commit has no check runs or any that did not succeed.
         # The same merge-base caveat for sento: most of its pull requests are
         # agent-authored, so a branch cut before its .kritika.yaml lands would
         # otherwise be approved with no domain rules at all. The longer
