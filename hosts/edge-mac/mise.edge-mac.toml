@@ -87,6 +87,13 @@ args = ["/usr/local/libexec/edge-mac/vm.sh", "stop"]
 stdout_path = "~/Library/Logs/edge-mac.log"
 stderr_path = "~/Library/Logs/edge-mac.log"
 
+# On demand only: `mise run //hosts/edge-mac:reboot` kickstarts it.
+[bootstrap.macos.launchd.agents.edge-reboot]
+program = "/bin/sh"
+args = ["/usr/local/libexec/edge-mac/vm.sh", "reboot"]
+stdout_path = "~/Library/Logs/edge-mac.log"
+stderr_path = "~/Library/Logs/edge-mac.log"
+
 # `open -W` returns when the app exits, so launchd reopens it.
 [bootstrap.macos.launchd.agents.bluebubbles]
 program = "/usr/bin/open"

@@ -1,50 +1,39 @@
-# Workstation side. What lands on the Mac is mise.edge-mac.toml, which only
-# loads under MISE_ENV=edge-mac: a plain `mise bootstrap` here changes nothing.
+# Workstation side: every task is remote.sh, which takes the Mac's address and
+# ssh key from Proton Pass. What lands on the Mac is mise.edge-mac.toml, which
+# only loads under MISE_ENV=edge-mac: a plain `mise bootstrap` here changes
+# nothing.
 
-[bootstrap.remote]
-mise_env = ["edge-mac"]
-
-[bootstrap.remote.hosts.edge-mac]
-host = "edge-mac" # ssh alias
-
-# The Mac's sshd is key-only once applied, so nothing is applied before a key
-# login works: ssh:setup first, and apply refuses without it.
 [tasks."ssh:setup"]
-description = "Install this workstation's ssh keys on the edge Mac (asks for its password once)"
+description = "Install the Proton Pass ssh key on the edge Mac (asks for its password once)"
+depends = ["//:pass:login"]
 raw = true
-run = ["ssh-copy-id edge-mac", { task = ":ssh:verify" }]
-
-[tasks."ssh:verify"]
-description = "Fail unless key login to the edge Mac works"
-hide = true
-run = """
-ssh -o BatchMode=yes -o PreferredAuthentications=publickey edge-mac true ||
-	{ echo 'no key login to edge-mac: run `mise run //hosts/edge-mac:ssh:setup`' >&2; exit 1; }
-"""
+run = "sh remote.sh ssh-setup"
 
 [tasks.apply]
-depends = [":ssh:verify"]
 description = "Apply this directory to the edge Mac over ssh (asks for sudo there)"
-dir = "{{config_root}}"
+depends = ["//:pass:login"]
 raw = true # sudo prompts on the Mac
-run = "mise bootstrap remote edge-mac --skip task"
+run = "sh remote.sh apply"
 
 [tasks.diff]
 description = "Show what apply would change on the edge Mac"
-dir = "{{config_root}}"
-run = "mise bootstrap remote edge-mac --skip task --dry-run"
+depends = ["//:pass:login"]
+run = "sh remote.sh diff"
 
 [tasks.check]
 description = "Report what would stop the edge Mac coming back up unattended"
-dir = "{{config_root}}"
-run = "mise bootstrap remote edge-mac --only task"
+depends = ["//:pass:login"]
+run = "sh remote.sh check"
 
-# From a tailnet client the route to the Mac is the subnet router inside the
-# VM, so the ssh session dies when the VM stops: one sudo starts the sequence
-# detached on the Mac and returns. A failure is in /tmp/edge-mac-reboot.log there.
 [tasks.reboot]
-description = "Shut the Talos VM down cleanly, then restart the edge Mac (asks for sudo)"
-raw = true # sudo prompts on the Mac
-run = """
-ssh -t edge-mac "sudo sh -c 'nohup sh /usr/local/libexec/edge-mac/vm.sh reboot </dev/null >/tmp/edge-mac-reboot.log 2>&1 &'"
-"""
+description = "Shut the Talos VM down cleanly, then restart the edge Mac"
+depends = ["//:pass:login"]
+run = "sh remote.sh reboot"
+
+[tasks.ssh]
+description = "Run a command on the edge Mac, or open a shell"
+depends = ["//:pass:login"]
+raw = true
+usage = 'arg "[command]" var=#true'
+# usage hands the words over shell-quoted: eval reads them back.
+run = 'eval "sh remote.sh ssh ${usage_command:-}"'

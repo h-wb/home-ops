@@ -1,7 +1,7 @@
 #!/bin/sh
 # The Talos VM in UTM. utmctl only works inside the desktop session, never over
-# ssh, so `up` and `stop` are LaunchAgent bodies; `request-stop` and `reboot`
-# are the ssh side.
+# ssh, so `up`, `stop` and `reboot` are LaunchAgent bodies that ssh only
+# kickstarts; `request-stop` is the ssh side of `stop`.
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
@@ -9,10 +9,8 @@ here=$(cd "$(dirname "$0")" && pwd)
 # shellcheck source=/dev/null
 . "$here/config.env"
 utmctl=/Applications/UTM.app/Contents/MacOS/utmctl
-# Under sudo (`reboot`), the agents are the desktop user's.
-uid=$(id -u)
-[ "$uid" != 0 ] || uid=$(stat -f %u /dev/console)
-domain="gui/$uid"
+domain="gui/$(id -u)"
+keepalive="$HOME/Library/LaunchAgents/dev.mise.edge-vm.plist"
 
 status() { "$utmctl" status "$VM_NAME" 2>/dev/null || true; }
 running() { pgrep -qf QEMULauncher; }
@@ -64,9 +62,22 @@ request_stop() {
 	! running || { echo "$VM_NAME is still running: see ~/Library/Logs/edge-mac.log" >&2; return 1; }
 }
 
+# An agent, not ssh: a detached process does not outlive an ssh session with a
+# terminal, and from the tailnet the route here drops with the VM. Restarting
+# through System Events needs no root, only its Automation prompt approved once.
+reboot() {
+	# Refused Apple Events must fail here, while the VM is still up.
+	osascript -e 'tell application "System Events" to get name' >/dev/null
+	echo "$(date '+%F %T') restarting: stopping $VM_NAME first"
+	stop
+	osascript -e 'tell application "System Events" to restart' || {
+		launchctl bootstrap "$domain" "$keepalive"
+		return 1
+	}
+}
+
 case "${1:-}" in
-up | stop) "$1" ;;
+up | stop | reboot) "$1" ;;
 request-stop) request_stop ;;
-reboot) request_stop && shutdown -r now ;;
-*) echo "usage: $0 up|stop|request-stop|reboot" >&2; exit 2 ;;
+*) echo "usage: $0 up|stop|reboot|request-stop" >&2; exit 2 ;;
 esac

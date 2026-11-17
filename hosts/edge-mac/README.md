@@ -20,23 +20,36 @@ and no mise of its own. `diff` shows what `apply` would change.
 | `[doctor.checks]`       | What an unattended boot depends on, with the fix as each check's hint                   |
 
 `files/vm.sh` is installed to `/usr/local/libexec/edge-mac`; the VM name and
-the dongle's USB id are `[vars]`. `utmctl` refuses to work over ssh, so
-everything that drives UTM runs as a LaunchAgent in the desktop session, and
-ssh only kickstarts it.
+the dongle's USB id are `[vars]`. `utmctl` refuses to work over ssh, and a
+detached process does not outlive an ssh session there, so everything that
+drives UTM or restarts the Mac is a LaunchAgent in the desktop session that ssh
+only kickstarts.
 
-Also `mise run //hosts/edge-mac:check | reboot`. `check` runs the doctor checks
-on the Mac; `reboot` stops the VM, then restarts, detached from the ssh session
-(from the tailnet the route to this Mac runs through the VM, and drops with it). All of it goes through the
-ssh alias `edge-mac`, and was written against mise 2026.11.8: an older one
-ignores `[bootstrap.settings.macos]`.
+| Task        | What it does                                                                     |
+| ----------- | -------------------------------------------------------------------------------- |
+| `apply`     | Applies `mise.edge-mac.toml`; asks for sudo on the Mac                           |
+| `diff`      | What `apply` would change                                                        |
+| `check`     | Runs the doctor checks on the Mac                                                |
+| `reboot`    | Stops the VM cleanly, then restarts the Mac; returns at once, allow five minutes |
+| `ssh`       | A shell on the Mac, or `mise run //hosts/edge-mac:ssh -- <command>`              |
+| `ssh:setup` | Installs the ssh key on a Mac that does not have it yet                          |
+
+From the tailnet (a Paseo pod), the route to this Mac is the subnet router
+inside the VM: while the VM is down, only a machine on the Mac's own LAN
+reaches it. Written against mise 2026.11.8: an older one ignores
+`[bootstrap.settings.macos]`.
 
 ## ssh
 
-`apply` leaves the Mac's sshd key-only, so the key goes on first:
-`mise run //hosts/edge-mac:ssh:setup` copies this workstation's keys with
-`ssh-copy-id` (the one time the account password is typed over ssh) and checks
-that a key login works. `apply` runs that check again and refuses without it.
-`sudo` on the Mac still asks for the password.
+`remote.sh` takes the Mac's address and its ssh key from the Proton Pass item
+`edge-mac` (vault `Automation General`: fields `host` and `username`, and the
+key itself, served by a `pass-cli ssh-agent` for the length of the task). No
+`~/.ssh/config` entry and no key file, on a workstation or a pod.
+
+`apply` leaves the Mac's sshd key-only and refuses to run before a key login
+works. On a Mac that does not have the key yet, `ssh:setup` copies it with
+`ssh-copy-id`, the one time the account password is typed over ssh. `sudo` on
+the Mac still asks for the password.
 
 ## Once, by hand
 
@@ -53,7 +66,9 @@ macOS has no API for these without MDM. `check` reports the first one.
    Accessibility.
 6. Turn off BlueBubbles' own auto-update: the pin here is its only updater.
 7. After the first `apply`, approve the "control UTM" prompt on the Mac's
-   screen. `apply` has to run while that user is logged in at the desktop:
+   screen, and the "System Events" one the first time `reboot` runs. Until
+   that one is approved, `reboot` gives up after two minutes and leaves the
+   VM running. `apply` has to run while that user is logged in at the desktop:
    LaunchAgents only load into a live login session.
 
 ## First apply
@@ -76,9 +91,9 @@ redundant.
 
 Change `version` and `sha256`, then:
 
-- UTM: `ssh edge-mac sh /usr/local/libexec/edge-mac/vm.sh request-stop`,
-  `ssh edge-mac killall UTM`, then `apply`. It reloads the agent, which opens
-  the new UTM and starts the VM. From UTM 5 the quit policy in the defaults
+- UTM: `mise run //hosts/edge-mac:ssh -- sh /usr/local/libexec/edge-mac/vm.sh request-stop`,
+  then `-- killall UTM`, then `apply`. It reloads the agent, which opens the
+  new UTM and starts the VM. From UTM 5 the quit policy in the defaults
   applies: a plain macOS restart then powers Talos down by itself.
-- BlueBubbles: `apply`, then `ssh edge-mac killall BlueBubbles`. The agent
-  reopens it within a minute.
+- BlueBubbles: `apply`, then `mise run //hosts/edge-mac:ssh -- killall BlueBubbles`.
+  The agent reopens it within a minute.
