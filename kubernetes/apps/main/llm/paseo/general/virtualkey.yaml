@@ -21,9 +21,9 @@ spec:
   # approval-check slugs like codex-auto-review).
   models:
     - anthropic/*
-    - chatgpt/gpt-6-astra
+    - chatgpt/gpt-6.2-astra
     - chatgpt/gpt-6-luna
-    - chatgpt/gpt-6.1-sol
+    - chatgpt/gpt-6.2-sol
     - chatgpt/gpt-6.1-terra
     - gpt-*
     - codex-*

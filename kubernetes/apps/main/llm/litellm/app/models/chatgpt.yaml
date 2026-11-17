@@ -20,12 +20,12 @@
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
-  name: chatgpt-gpt-6-astra
+  name: chatgpt-gpt-6.2-astra
 spec:
-  modelName: chatgpt/gpt-6-astra
+  modelName: chatgpt/gpt-6.2-astra
   proxyRef: litellm
   params:
-    model: chatgpt/gpt-6-astra
+    model: chatgpt/gpt-6.2-astra
     additional:
       additional_drop_params:
         - temperature
@@ -61,17 +61,17 @@ spec:
     supportsFunctionCalling: true
     supportsPromptCaching: true
 ---
-# GPT-6.1 Sol: near-Astra quality on a far smaller quota draw, the default "heavy"
+# GPT-6.2 Sol: near-Astra quality on a far smaller quota draw, the default "heavy"
 # ChatGPT pick for interactive use. Same 272k cheap ceiling as the other tiers.
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:
-  name: chatgpt-gpt-6.1-sol
+  name: chatgpt-gpt-6.2-sol
 spec:
-  modelName: chatgpt/gpt-6.1-sol
+  modelName: chatgpt/gpt-6.2-sol
   proxyRef: litellm
   params:
-    model: chatgpt/gpt-6.1-sol
+    model: chatgpt/gpt-6.2-sol
     additional:
       additional_drop_params:
         - temperature

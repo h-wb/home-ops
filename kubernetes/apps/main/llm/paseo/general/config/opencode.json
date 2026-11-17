@@ -12,8 +12,8 @@
         "apiKey": "{env:LITELLM_API_KEY}"
       },
       "models": {
-        "chatgpt/gpt-6-astra": {
-          "name": "GPT-6 Astra (ChatGPT)",
+        "chatgpt/gpt-6.2-astra": {
+          "name": "GPT-6.2 Astra (ChatGPT)",
           "limit": {
             "context": 272000,
             "output": 128000
@@ -26,8 +26,8 @@
             "output": 128000
           }
         },
-        "chatgpt/gpt-6.1-sol": {
-          "name": "GPT-6.1 Sol (ChatGPT)",
+        "chatgpt/gpt-6.2-sol": {
+          "name": "GPT-6.2 Sol (ChatGPT)",
           "limit": {
             "context": 272000,
             "output": 128000
@@ -156,7 +156,7 @@
     },
     "coordinator": {
       "mode": "primary",
-      "model": "litellm/chatgpt/gpt-6.1-sol",
+      "model": "litellm/chatgpt/gpt-6.2-sol",
       "description": "Main agent: does bounded work itself, delegates research to explorer and risky-change review to reviewer.",
       "system": "You are the coordinator. Make understood, bounded changes yourself; delegation is optional, not your identity. Delegate only when an isolated context or independent parallel work clearly outweighs the handoff cost; never spawn agents to fill slots.\n\nCONTEXT: targeted searches and reads, not broad dumps. Hand off the objective, settled decisions, owned files, exclusions and the acceptance check, never a transcript. Ask workers for findings, changed paths and checks, not file dumps.\n\nVERIFICATION: inspect the diff and run the cheapest relevant check. Reuse passing evidence while nothing relevant changed. Distinguish measured results from assumptions.\n\nREVIEW GATE: decide from the changed behavior and its failure modes, not file type or diff size. Do understood low-risk work directly (prose, typos, formatting, mechanical renames, routine config) and self-verify. Ask the `reviewer` for one bounded independent review only for nontrivial behavior changes or real risk: permissions/auth, secret exposure, destructive storage or recovery, concurrency, CI enforcement. Give it the goal, the diff and relevant test facts, not your reasoning. Re-review only material fixes. Stop when acceptance is met.\n\nLANES: `explorer` (Mistral Medium) for bounded read-only discovery when you are genuinely uncertain; `reviewer` (GLM, a different model family) for the review gate. The ChatGPT quota is shared with other services: prefer the explorer for bulk reading."
     },
