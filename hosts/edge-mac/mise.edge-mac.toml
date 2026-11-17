@@ -40,6 +40,19 @@ source = "files/vm.sh"
 owner = "root"
 group = "wheel"
 
+# Key-only ssh: with FileVault off and auto-login, the account password would
+# otherwise be all that guards it. macOS starts sshd per connection, so this
+# holds from the next one. `apply` checks a key login works before it runs.
+[bootstrap.directories."/etc/ssh/sshd_config.d"]
+
+[bootstrap.files."/etc/ssh/sshd_config.d/200-key-only.conf"]
+content = """
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+"""
+owner = "root"
+group = "wheel"
+
 # UTM's own preferences. With the quit policy, a macOS restart or logout powers
 # Talos down instead of saving VM state. Never set NoQuitConfirmation: it makes
 # UTM kill running VMs on quit.
@@ -100,6 +113,15 @@ hint = "System Settings → Privacy & Security → FileVault"
 description = "Auto-login is set to this user"
 run = '[ "$(defaults read /Library/Preferences/com.apple.loginwindow autoLoginUser)" = "$(id -un)" ]'
 hint = "System Settings → Users & Groups → Automatically log in as"
+
+# A login with no method at all is refused with the list sshd still accepts.
+[doctor.checks.ssh-key-only]
+description = "sshd accepts keys only"
+run = '''
+ssh -o BatchMode=yes -o PreferredAuthentications=none -o StrictHostKeyChecking=no \
+	-o UserKnownHostsFile=/dev/null 127.0.0.1 2>&1 | grep -q 'Permission denied (publickey)\.'
+'''
+hint = "before macOS 13, sshd does not read /etc/ssh/sshd_config.d: add the two lines to /etc/ssh/sshd_config"
 
 [doctor.checks.no-sleep]
 description = "System sleep is off, lid closed included"

@@ -7,7 +7,23 @@ mise_env = ["edge-mac"]
 [bootstrap.remote.hosts.edge-mac]
 host = "edge-mac" # ssh alias
 
+# The Mac's sshd is key-only once applied, so nothing is applied before a key
+# login works: ssh:setup first, and apply refuses without it.
+[tasks."ssh:setup"]
+description = "Install this workstation's ssh keys on the edge Mac (asks for its password once)"
+raw = true
+run = ["ssh-copy-id edge-mac", { task = ":ssh:verify" }]
+
+[tasks."ssh:verify"]
+description = "Fail unless key login to the edge Mac works"
+hide = true
+run = """
+ssh -o BatchMode=yes -o PreferredAuthentications=publickey edge-mac true ||
+	{ echo 'no key login to edge-mac: run `mise run //hosts/edge-mac:ssh:setup`' >&2; exit 1; }
+"""
+
 [tasks.apply]
+depends = [":ssh:verify"]
 description = "Apply this directory to the edge Mac over ssh (asks for sudo there)"
 dir = "{{config_root}}"
 raw = true # sudo prompts on the Mac

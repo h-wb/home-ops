@@ -15,6 +15,7 @@ and no mise of its own. `diff` shows what `apply` would change.
 | macOS defaults          | UTM stays open, keeps the Mac awake and powers the VM down on quit; lock after a minute |
 | agent `edge-vm`         | Every minute: open UTM, start the VM if it is not running, reconnect the dongle after   |
 | agent `bluebubbles`     | Keeps BlueBubbles open                                                                  |
+| sshd drop-in            | Key-only login                                                                          |
 | `final` hook            | Never sleep (lid closed included); macOS updates do not install themselves              |
 | `[doctor.checks]`       | What an unattended boot depends on, with the fix as each check's hint                   |
 
@@ -27,13 +28,22 @@ the VM before restarting. All of it goes through the ssh alias `edge-mac`, and
 was written against mise 2026.11.8: an older one ignores
 `[bootstrap.settings.macos]`.
 
+## ssh
+
+`apply` leaves the Mac's sshd key-only, so the key goes on first:
+`mise run //hosts/edge-mac:ssh:setup` copies this workstation's keys with
+`ssh-copy-id` (the one time the account password is typed over ssh) and checks
+that a key login works. `apply` runs that check again and refuses without it.
+`sudo` on the Mac still asks for the password.
+
 ## Once, by hand
 
 macOS has no API for these without MDM. `check` reports the first one.
 
 1. FileVault off, then Users & Groups → automatically log in. UTM and
    BlueBubbles are GUI apps, so both only start inside a login session.
-2. Sharing → Remote Login, and Screen Sharing for the prompt below.
+2. Sharing → Remote Login, and Screen Sharing for the prompt below. Then
+   `ssh:setup` from the workstation.
 3. Lock Screen → require password immediately after the screen saver starts.
 4. A firmware password (`sudo firmwarepasswd -setpasswd`), so the unencrypted
    disk cannot be read from Recovery or Target Disk Mode.
