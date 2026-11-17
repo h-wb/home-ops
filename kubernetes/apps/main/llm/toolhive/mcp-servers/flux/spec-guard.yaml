@@ -33,7 +33,8 @@ spec:
   validations:
     - expression: request.operation == 'UPDATE'
       message: The Flux MCP cannot create Flux objects.
-    - expression: request.subResource == ''
+    # The API server omits subResource on a plain write, it does not send ''.
+    - expression: "!has(request.subResource) || request.subResource == ''"
       message: The Flux MCP cannot write status or other subresources.
     - expression: "has(object.spec) == has(oldObject.spec) && (!has(object.spec) || object.spec == oldObject.spec)"
       message: The Flux MCP may request a reconcile but not change a spec.
