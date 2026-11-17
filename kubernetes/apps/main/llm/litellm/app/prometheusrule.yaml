@@ -49,14 +49,20 @@ spec:
           labels:
             severity: warning
         # Live since the luna-max alias gained a router fallback (litellmproxy.yaml).
+        # The labels carry the primary's error, not the fallback's. Look at
+        # litellm_deployment_failure_responses_total for why the fallback failed.
+        # Failures arrive in bursts with quiet hours between them, so
+        # keep_firing_for holds one alert open instead of re-notifying per burst.
         - alert: LiteLLMFallbackChainExhausted
           expr: |-
             sum by (requested_model, exception_status, exception_class) (
-              increase(litellm_deployment_failed_fallbacks_total[15m])
-            ) > 0
+              increase(litellm_deployment_failed_fallbacks_total[1h])
+            ) > 5
+          for: 15m
+          keep_firing_for: 3h
           annotations:
             summary: >-
               LiteLLM {{ $labels.requested_model }} fallback chain exhausted
               ({{ $labels.exception_status }} {{ $labels.exception_class }})
           labels:
-            severity: critical
+            severity: warning
