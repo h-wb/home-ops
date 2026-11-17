@@ -23,7 +23,7 @@
         "id": "orchestrate-sol",
         "name": "Orchestrate (Sol)",
         "provider": "opencode",
-        "model": "litellm/chatgpt/gpt-6.1-sol",
+        "model": "litellm/chatgpt/gpt-6.2-sol",
         "modeId": "coordinator",
         "notes": "The same role on the ChatGPT subscription, for when the Claude window is used up or should be saved. OpenCode's coordinator: it does bounded work itself and uses its own explorer and reviewer, not the Paseo profiles."
       },
@@ -34,7 +34,7 @@
         "model": "claude-opus-5-5",
         "modeId": "plan",
         "thinkingOptionId": "high",
-        "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits. Fallback when the Claude window is used up: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`."
+        "notes": "Hard design or debugging questions: architecture, root causes, comparing approaches. Reads and reports; makes no edits. Fallback when the Claude window is used up: `opencode/litellm/chatgpt/gpt-6.2-sol`, mode `plan`."
       },
       {
         "id": "explore",
@@ -51,7 +51,7 @@
         "provider": "opencode",
         "model": "litellm/mistral/mistral-large-4",
         "modeId": "build",
-        "notes": "A well-specified change: the goal, the files and the check to pass are already known. Not for open questions. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `build`."
+        "notes": "A well-specified change: the goal, the files and the check to pass are already known. Not for open questions. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.2-sol`, mode `build`."
       },
       {
         "id": "review",
@@ -60,7 +60,7 @@
         "model": "litellm/mistral/zai-glm-5-3",
         "modeId": "plan",
         "thinkingOptionId": "high",
-        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-sol`, mode `plan`."
+        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.2-sol`, mode `plan`."
       }
     ]
   },
