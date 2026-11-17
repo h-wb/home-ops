@@ -23,25 +23,36 @@ until ssh-add -L >/dev/null 2>&1; do
 done
 
 trust="StrictHostKeyChecking=accept-new"
+mac_ssh() { ssh -o "$trust" -o ConnectTimeout=10 "$@"; }
 bootstrap() { mise bootstrap remote --host "$mac" --ssh-option "$trust" --remote-env edge-mac "$@"; }
-key_login() { ssh -o "$trust" -o BatchMode=yes -o PreferredAuthentications=publickey "$mac" true; }
+
+# Also what keeps `apply` from turning password login off before a key works.
+case "${1:-}" in
+ssh-setup) ;;
+*)
+	mac_ssh -o BatchMode=yes -o PreferredAuthentications=publickey "$mac" true || {
+		echo "no key login to the Mac. Unreachable: from the tailnet the route runs through" >&2
+		echo "the VM, so it has to be running. Key refused: mise run //hosts/edge-mac:ssh:setup" >&2
+		exit 1
+	}
+	;;
+esac
+
+# shellcheck disable=SC2016  # expands on the Mac
+kickstart_reboot='launchctl kickstart "gui/$(id -u)/dev.mise.edge-reboot"'
 
 case "${1:-}" in
 ssh-setup)
-	ssh-copy-id -o "$trust" "$mac"
-	key_login
+	ssh-copy-id -o "$trust" -o ConnectTimeout=10 "$mac"
+	mac_ssh -o BatchMode=yes -o PreferredAuthentications=publickey "$mac" true
 	;;
-apply)
-	# The Mac's sshd is key-only once applied: never apply without a key login.
-	key_login || { echo "no key login to the Mac: run \`mise run //hosts/edge-mac:ssh:setup\`" >&2; exit 1; }
-	bootstrap --skip task
-	;;
+apply) bootstrap --skip task ;;
 diff) bootstrap --skip task --dry-run ;;
 check) bootstrap --only task ;;
-reboot) ssh -o "$trust" "$mac" 'launchctl kickstart "gui/$(id -u)/dev.mise.edge-reboot"' ;;
+reboot) mac_ssh "$mac" "$kickstart_reboot" ;;
 ssh)
 	shift
-	ssh -o "$trust" "$mac" "$@"
+	mac_ssh "$mac" "$@"
 	;;
 *) echo "usage: $0 ssh-setup|apply|diff|check|reboot|ssh [command]" >&2; exit 2 ;;
 esac
