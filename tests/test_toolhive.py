@@ -331,8 +331,8 @@ class HermesIsPrivateOnly(unittest.TestCase):
 
     def test_dotfiles_skills_are_synced_pinned_and_read_only(self):
         # The shared skills folder in h-wb/dotfiles (conf.d/ai/skills) reaches the pod
-        # the way the Memini plugin does: a Job fetches the repo at a pinned, checksummed
-        # ref into a volume mounted read-only. The pod's egress never sees GitHub.
+        # the way the Memini plugin does: a Job fetches the repo at the cluster's pinned
+        # commit into a volume mounted read-only. The pod's egress never sees GitHub.
         config = yaml_of(ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml")
         self.assertEqual(["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
                          config["skills"]["external_dirs"])
@@ -342,8 +342,8 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertEqual([{"path": "/opt/dotfiles-skills", "readOnly": True}], mount["globalMounts"])
         job = next(d for d in self.docs if d["kind"] == "Job" and d["metadata"]["name"] == "hermes-skills-sync")
         env = {e["name"]: e["value"] for e in job["spec"]["template"]["spec"]["containers"][0]["env"]}
-        self.assertEqual(40, len(env["DOTFILES_REF"]))  # a commit sha
-        self.assertEqual(64, len(env["DOTFILES_TAR_SHA256"]))  # sha256 of the tarball
+        self.assertEqual("${DOTFILES_REF}", env["DOTFILES_REF"])  # the cluster's pin (tests/test_dotfiles.py)
+        self.assertNotIn("DOTFILES_TAR_SHA256", env)
         volumes = {v["name"]: v for v in job["spec"]["template"]["spec"]["volumes"]}
         self.assertEqual("hermes-skills", volumes["skills"]["persistentVolumeClaim"]["claimName"])
         self.assertTrue(volumes["scripts"]["configMap"]["name"].startswith("hermes-skills-sync"))
@@ -352,7 +352,7 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertNotIn("${", script)  # Flux would substitute it
         self.assertIn("codeload.github.com/h-wb/dotfiles", script)
         self.assertIn("conf.d/ai/skills", script)
-        self.assertIn("sha256sum -c", script)
+        self.assertIn("tar.gz/$DOTFILES_REF", script)
         pvc = next(d for d in self.docs if d["kind"] == "PersistentVolumeClaim"
                    and d["metadata"]["name"] == "hermes-skills")
         self.assertEqual(["ReadWriteMany"], pvc["spec"]["accessModes"])

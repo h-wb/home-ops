@@ -28,7 +28,8 @@ spec:
       - kind: Secret
         name: cluster-secrets
   patches:
-    - # Add Kustomization defaults for all child Kustomizations
+    - 
+      # Add Kustomization defaults for all child Kustomizations
       # Level 2 substitution: injected into every child KS's own postBuild.
       # Runs when each child KS processes its app resources (HelmReleases, etc.).
       # Variables here are available inside helmrelease values, httproutes, etc.
@@ -69,6 +70,11 @@ spec:
           postBuild:
             substitute:
               NFS_ADDR: "192.168.1.161"
+              # The h-wb/dotfiles commit every pod bootstraps from (components/dotfiles,
+              # the Paseo pods, Hermes' skills). Renovate bumps it to master's head;
+              # revert the bump to roll every pod back.
+              # renovate: dotfiles
+              DOTFILES_REF: "df2bf8a1dd82e69ae6953be76e1f97cc3d20e6a2"
             substituteFrom:
               - name: cluster-secrets
                 kind: Secret

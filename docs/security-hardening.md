@@ -36,8 +36,9 @@ Tasks:
 - [ ] kritika approves only the Renovate bot's pull requests
       (`pr.bot && pr.author` in `review.approve.when`), so an agent cannot merge on
       an AI approval.
-- [ ] dotfiles: protect `master` the same way (neko re-executes it at every
-      session start).
+- [ ] dotfiles: protect `master` the same way. Renovate auto-merges the
+      cluster's dotfiles pin (`DOTFILES_REF`), so a commit there reaches every
+      pod unattended: do this before that auto-merge runs.
 - [x] Talos API access allows `os:operator` (`talos/main/machineconfig.yaml.j2`).
       Apply the machine config to the control planes before the next box.
 - [ ] Runner's Talos ServiceAccount drops from `os:admin` to `os:operator`.
@@ -67,8 +68,8 @@ PVC's kopiur backups.
       the BWS item `code-server`.
 - [ ] Before the pod gets the owner's token: protect dotfiles `master` (pull
       request plus the owner's approval; `bot-tintin` can write to the repo).
-      The pod never pulls, but an empty volume clones `master`, and so does
-      every `git pull` the owner runs there.
+      Every pod start fetches the pinned commit, which Renovate moves to
+      `master`'s head.
 - [x] Workspace trust is on: a checked-out agent branch's `.vscode` tasks and
       settings ask before they run.
 - [ ] Stop agents rewriting workloads through the Flux MCP (`flux-mcp` may patch

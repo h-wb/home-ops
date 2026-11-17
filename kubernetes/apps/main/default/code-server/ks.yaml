@@ -21,6 +21,7 @@ spec:
     substitute:
       APP: *app
       APP_NAMESPACE: *namespace
+      DOTFILES_ENV: code-server
       KOPIUR_CAPACITY: 20Gi
       KOPIUR_SCHEDULE: "35 4 * * *"
       OIDC_DISPLAY_NAME: Code Server

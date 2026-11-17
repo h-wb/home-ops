@@ -128,7 +128,7 @@ postBuild:
 - App namespace and Flux Kustomization name match the app name.
 - Almost everything is a `HelmRelease`, mostly using bjw-s `app-template` v5.x (shared OCIRepository at `components/common/repos/app-template/`). A few use upstream charts (nextcloud, cloudnative-pg, kube-prometheus-stack, etc.).
 - Reusable Components live at `kubernetes/components/{anubis,cnpg,common,dotfiles,dragonfly,gpu,kopiur,oidc,tailscale,zeroscaler}/`. App ks.yaml's reference them via relative paths.
-- `${SECRET_DOMAIN}`, `${NFS_ADDR}`, `${CLUSTER}` come from cluster-level postBuild substitution.
+- `${SECRET_DOMAIN}`, `${NFS_ADDR}`, `${CLUSTER}` come from cluster-level postBuild substitution. So does `${DOTFILES_REF}`, the one dotfiles commit every pod bootstraps from (Renovate bumps it); a pod declares only its `DOTFILES_ENV` (`components/dotfiles/README.md`).
 - Memory: set **explicit `requests.memory`** lower than `limits.memory`. Kubernetes defaults request=limit if request is omitted, which over-commits the scheduler. (Learned the hard way after `Cluster has overcommitted memory` alert.)
 
 ## Operations
