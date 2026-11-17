@@ -56,7 +56,9 @@ class FluxMcpGuard(unittest.TestCase):
     def evaluate(self, *cases):
         spec = self.policy["spec"]
         payload = {"matchConditions": spec["matchConditions"], "validations": spec["validations"],
-                   "cases": [{"request": {"operation": op, "subResource": sub, "userInfo": {"username": user}},
+                   # Like the API server: no subResource key on a plain write.
+                   "cases": [{"request": {"operation": op, "userInfo": {"username": user},
+                                          **({"subResource": sub} if sub else {})},
                               "object": new, "oldObject": old} for op, sub, user, old, new in cases]}
         result = subprocess.run(["go", "run", "."], cwd=ROOT / "tests/cel", input=json.dumps(payload),
                                 capture_output=True, text=True, timeout=300,
