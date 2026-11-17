@@ -1,21 +1,49 @@
 #!/bin/sh
-# Bootstrap this pod from the owner's dotfiles: clone them when the script is
-# missing, then run their scripts/pod-bootstrap by path with this script's
-# arguments. Always exits 0: a failed bootstrap must not stop the pod's own
-# program from starting. No braces around variables: Flux substitutes those.
+# Bootstrap this pod from the owner's dotfiles: the cluster's pinned commit
+# (DOTFILES_REF, kubernetes/clusters/main/ks.yaml) as the environment this app
+# declares (DOTFILES_ENV, its ks.yaml). Flux substitutes the two; nothing else
+# here uses braces.
+#   fetch  put that commit at ~/.dotfiles, fresh: whatever was there goes,
+#          local edits included (develop in ~/Repositories/dotfiles)
+#   run    its scripts/pod-bootstrap, by path
+#   (none) both
+# Always exits 0: a failed bootstrap must not stop the pod's own program. A
+# failed fetch keeps the previous checkout, and pod-bootstrap reports it stale.
 set -u
-url=https://github.com/h-wb/dotfiles.git
+ref=${DOTFILES_REF}
+env=${DOTFILES_ENV}
 dir="$HOME/.dotfiles"
-script="$dir/scripts/pod-bootstrap"
 
-if [ ! -f "$script" ]; then
-	# The neko image ships no git; code-server's does.
-	command -v git >/dev/null 2>&1 ||
-		{ sudo -n apt-get update -qq && sudo -n apt-get install -y -qq --no-install-recommends git; }
-	# No script means a cut-off clone (or not a checkout of ours): keep it aside.
-	[ ! -e "$dir" ] || mv "$dir" "$dir.broken-$(date +%Y%m%d%H%M%S)"
-	rm -rf "$dir.clone"
-	timeout 300 git clone --quiet "$url" "$dir.clone" && mv "$dir.clone" "$dir"
-fi
-timeout 3300 sh "$script" "$@" || echo "dotfiles bootstrap did not complete; starting anyway"
+fetch() {
+	rm -rf "$dir.new" "$dir.old" "$dir.tar.gz"
+	mkdir -p "$dir.new" &&
+		curl -fsSL --retry 3 --max-time 300 -o "$dir.tar.gz" \
+			"https://codeload.github.com/h-wb/dotfiles/tar.gz/$ref" &&
+		tar -xzf "$dir.tar.gz" -C "$dir.new" --strip-components 1 &&
+		[ -f "$dir.new/scripts/pod-bootstrap" ] &&
+		echo "$ref" >"$dir.new/.pinned-commit" || {
+		rm -rf "$dir.new" "$dir.tar.gz"
+		echo "dotfiles: fetching $ref failed; keeping the checkout already here"
+		return 1
+	}
+	rm -f "$dir.tar.gz"
+	[ ! -e "$dir" ] || mv "$dir" "$dir.old"
+	mv "$dir.new" "$dir" && rm -rf "$dir.old"
+	echo "dotfiles: $ref at $dir"
+}
+
+run() {
+	[ -f "$dir/scripts/pod-bootstrap" ] || { echo "dotfiles: no checkout at $dir; nothing to run"; return 1; }
+	DOTFILES_REF="$ref" timeout 3300 sh "$dir/scripts/pod-bootstrap" "$env" ||
+		echo "dotfiles: bootstrap did not complete; starting anyway"
+}
+
+mode=
+[ $# -eq 0 ] || mode=$1
+case "$mode" in
+fetch) fetch ;;
+run) run ;;
+"") fetch; run ;;
+*) echo "usage: dotfiles-bootstrap [fetch|run]" ;;
+esac
 exit 0

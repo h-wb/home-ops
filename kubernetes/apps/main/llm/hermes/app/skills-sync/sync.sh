@@ -6,8 +6,9 @@
 # only plain $VAR forms.
 set -eu
 base="https://codeload.github.com/h-wb/dotfiles/tar.gz/$DOTFILES_REF"
+# The commit sha names the content; there is no tarball hash to keep in step
+# with a pin Renovate bumps.
 curl -fsSLo /tmp/dotfiles.tar.gz "$base"
-echo "$DOTFILES_TAR_SHA256  /tmp/dotfiles.tar.gz" | sha256sum -c -
 mkdir -p /tmp/dotfiles
 tar -xzf /tmp/dotfiles.tar.gz -C /tmp/dotfiles
 skills="/tmp/dotfiles/dotfiles-$DOTFILES_REF/conf.d/ai/skills"

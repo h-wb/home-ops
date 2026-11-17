@@ -113,7 +113,7 @@ flowchart LR
 - Documentation: its `system-docs` skill lists these pages, and it reads them
   from git through the GitHub tool. It holds no copy.
 - Shared skills: the general skills folder in dotfiles (`conf.d/ai/skills`) is
-  synced by a Job (`hermes/app/skills-sync/`) at a pinned dotfiles commit into
+  synced by a Job (`hermes/app/skills-sync/`) at the cluster's dotfiles pin into
   a volume mounted read-only at `/opt/dotfiles-skills`, listed in
   `skills.external_dirs` next to the routines. The pod itself cannot reach
   GitHub.
