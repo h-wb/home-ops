@@ -1,5 +1,6 @@
 #!/bin/sh
-# The Talos VM in UTM. `up` is the edge-vm LaunchAgent's body.
+# The Talos VM in UTM. utmctl only works inside the desktop session, never over
+# ssh, so `up` and `stop` are LaunchAgent bodies; `request-stop` is the ssh side.
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
@@ -7,9 +8,10 @@ here=$(cd "$(dirname "$0")" && pwd)
 # shellcheck source=/dev/null
 . "$here/config.env"
 utmctl=/Applications/UTM.app/Contents/MacOS/utmctl
-label=dev.mise.edge-vm
+domain="gui/$(id -u)"
 
 status() { "$utmctl" status "$VM_NAME" 2>/dev/null || true; }
+running() { pgrep -qf QEMULauncher; }
 
 wait_for() {
 	want=$1 tries=$2
@@ -21,16 +23,6 @@ wait_for() {
 	return 1
 }
 
-# UTM forgets USB passthrough at every VM start and every replug.
-usb() {
-	devices=$("$utmctl" usb list | grep -i -- "$USB_MATCH" | grep -Eo '[0-9A-Fa-f]{4}:[0-9A-Fa-f]{4}' | sort -u)
-	[ -n "$devices" ] || { echo "no USB device matching '$USB_MATCH'" >&2; return 1; }
-	for device in $devices; do
-		"$utmctl" usb connect "$VM_NAME" "$device"
-		echo "$(date '+%F %T') connected $device to $VM_NAME"
-	done
-}
-
 up() {
 	pgrep -xq UTM || { open -gja UTM; sleep 10; }
 	case "$(status)" in
@@ -39,14 +31,16 @@ up() {
 	"$utmctl" start "$VM_NAME"
 	wait_for started 60 || { echo "$VM_NAME did not start: $(status)" >&2; return 1; }
 	echo "$(date '+%F %T') started $VM_NAME"
+	# UTM reconnects the devices it has saved; this covers the case where it
+	# does not, and fails harmlessly when it already has.
 	sleep 5
-	usb
+	"$utmctl" usb connect "$VM_NAME" "$USB_DEVICE" || true
 }
 
-# Boots out the keep-alive agent first or it would start the VM again; the
-# agent comes back at the next login.
+# Boots out the keep-alive agent first or it would start the VM again; apply
+# or the next login loads it back.
 stop() {
-	launchctl bootout "gui/$(id -u)/$label" 2>/dev/null || true
+	launchctl bootout "$domain/dev.mise.edge-vm" 2>/dev/null || true
 	[ "$(status)" = stopped ] && return 0
 	"$utmctl" stop "$VM_NAME" --request
 	wait_for stopped 90 && return 0
@@ -55,7 +49,19 @@ stop() {
 	wait_for stopped 30
 }
 
+request_stop() {
+	running || return 0
+	launchctl kickstart "$domain/dev.mise.edge-vm-stop"
+	tries=75
+	while running && [ "$tries" -gt 0 ]; do
+		sleep 2
+		tries=$((tries - 1))
+	done
+	! running || { echo "$VM_NAME is still running: see ~/Library/Logs/edge-mac.log" >&2; return 1; }
+}
+
 case "${1:-}" in
-up | usb | stop | status) "$1" ;;
-*) echo "usage: $0 up|usb|stop|status" >&2; exit 2 ;;
+up | stop) "$1" ;;
+request-stop) request_stop ;;
+*) echo "usage: $0 up|stop|request-stop" >&2; exit 2 ;;
 esac

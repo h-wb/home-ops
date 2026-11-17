@@ -1,16 +1,16 @@
 # The edge Mac itself, applied by `mise run //hosts/edge-mac:apply`.
 
 [vars]
-vm_name = "edge" # as shown by `utmctl list`
-usb_match = "ZBT-2" # substring of the device name in `utmctl usb list`
+vm_name = "Talos"
+usb_device = "303A:831A" # the ZBT-2 Zigbee dongle, as VID:PID
 
 # Pinned GitHub releases; sha256 is the asset's `digest` in the release API.
 # An app already in /Applications is adopted only when identical to the pin,
 # otherwise apply stops before changing anything (README, "First apply").
 [bootstrap.packages."macos-app:utm"]
-version = "5.0.8"
+version = "4.7.5"
 url = "https://github.com/utmapp/UTM/releases/download/v{{version}}/UTM.dmg"
-sha256 = "7b2d7b2e2a02b3de1757ef19a8f36573e6d9cceae8c8cca0abcbcaa4a852019a"
+sha256 = "a8435c93cfb5f8bbfeea4b134cfad1ac66b67632b75e438c63b1a8ae043bef0e"
 artifact = "UTM.app"
 adopt = true
 
@@ -30,7 +30,7 @@ adopt = true
 template = true
 content = """
 VM_NAME={{ vars.vm_name }}
-USB_MATCH={{ vars.usb_match }}
+USB_DEVICE={{ vars.usb_device }}
 """
 owner = "root"
 group = "wheel"
@@ -53,9 +53,9 @@ KbdInteractiveAuthentication no
 owner = "root"
 group = "wheel"
 
-# UTM's own preferences. With the quit policy, a macOS restart or logout powers
-# Talos down instead of saving VM state. Never set NoQuitConfirmation: it makes
-# UTM kill running VMs on quit.
+# UTM's own preferences. The quit policy only exists from UTM 5: there, a
+# macOS restart or logout powers Talos down instead of saving VM state. Never
+# set NoQuitConfirmation: it makes UTM kill running VMs on quit.
 [bootstrap.settings.macos.defaults."com.utmapp.UTM"]
 KeepRunningAfterLastWindowClosed = true
 PreventIdleSleep = true
@@ -70,12 +70,20 @@ key = "idleTime"
 value = 60
 host = "current"
 
-# Every minute: start the VM if it is not running (see files/vm.sh).
+# utmctl refuses to work over ssh, so both run in the desktop session. Every
+# minute: start the VM if it is not running.
 [bootstrap.macos.launchd.agents.edge-vm]
 program = "/bin/sh"
 args = ["/usr/local/libexec/edge-mac/vm.sh", "up"]
 run_at_load = true
 start_interval = 60
+stdout_path = "~/Library/Logs/edge-mac.log"
+stderr_path = "~/Library/Logs/edge-mac.log"
+
+# On demand only: `vm.sh request-stop` kickstarts it from ssh.
+[bootstrap.macos.launchd.agents.edge-vm-stop]
+program = "/bin/sh"
+args = ["/usr/local/libexec/edge-mac/vm.sh", "stop"]
 stdout_path = "~/Library/Logs/edge-mac.log"
 stderr_path = "~/Library/Logs/edge-mac.log"
 
@@ -121,7 +129,7 @@ run = '''
 ssh -o BatchMode=yes -o PreferredAuthentications=none -o StrictHostKeyChecking=no \
 	-o UserKnownHostsFile=/dev/null 127.0.0.1 2>&1 | grep -q 'Permission denied (publickey)\.'
 '''
-hint = "before macOS 13, sshd does not read /etc/ssh/sshd_config.d: add the two lines to /etc/ssh/sshd_config"
+hint = "apply installs /etc/ssh/sshd_config.d/200-key-only.conf (read by sshd from macOS 13)"
 
 [doctor.checks.no-sleep]
 description = "System sleep is off, lid closed included"
@@ -137,13 +145,13 @@ run = '[ "$(defaults read /Library/Preferences/com.apple.SoftwareUpdate Automati
 hint = "apply sets it in the final hook"
 
 [doctor.checks.vm]
-description = "UTM VM '{{ vars.vm_name }}' is started"
-run = '[ "$(/Applications/UTM.app/Contents/MacOS/utmctl status "{{ vars.vm_name }}")" = started ]'
+description = "The VM is running"
+run = "pgrep -qf QEMULauncher"
 hint = "the edge-vm agent retries every minute and logs to ~/Library/Logs/edge-mac.log"
 
 [doctor.checks.usb]
-description = "UTM sees a USB device matching '{{ vars.usb_match }}'"
-run = '/Applications/UTM.app/Contents/MacOS/utmctl usb list | grep -qi -- "{{ vars.usb_match }}"'
+description = "The Zigbee dongle is plugged in"
+run = "ioreg -p IOUSB -w0 | grep -q ZBT-2"
 
 # The agent is `open -W`, which lives exactly as long as the app.
 [doctor.checks.bluebubbles]

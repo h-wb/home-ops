@@ -19,14 +19,15 @@ and no mise of its own. `diff` shows what `apply` would change.
 | `final` hook            | Never sleep (lid closed included); macOS updates do not install themselves              |
 | `[doctor.checks]`       | What an unattended boot depends on, with the fix as each check's hint                   |
 
-`files/vm.sh` (`up` for the agent, `usb`, `stop`) is installed to
-`/usr/local/libexec/edge-mac`; its VM name and dongle match are `[vars]`.
+`files/vm.sh` is installed to `/usr/local/libexec/edge-mac`; the VM name and
+the dongle's USB id are `[vars]`. `utmctl` refuses to work over ssh, so
+everything that drives UTM runs as a LaunchAgent in the desktop session, and
+ssh only kickstarts it.
 
-Also `mise run //hosts/edge-mac:check | usb | reboot`. `check` runs the doctor
-checks on the Mac, `usb` reconnects the dongle after a replug, `reboot` stops
-the VM before restarting. All of it goes through the ssh alias `edge-mac`, and
-was written against mise 2026.11.8: an older one ignores
-`[bootstrap.settings.macos]`.
+Also `mise run //hosts/edge-mac:check | reboot`. `check` runs the doctor checks
+on the Mac; `reboot` stops the VM before restarting. All of it goes through the
+ssh alias `edge-mac`, and was written against mise 2026.11.8: an older one
+ignores `[bootstrap.settings.macos]`.
 
 ## ssh
 
@@ -51,25 +52,30 @@ macOS has no API for these without MDM. `check` reports the first one.
    Accessibility.
 6. Turn off BlueBubbles' own auto-update: the pin here is its only updater.
 7. After the first `apply`, approve the "control UTM" prompt on the Mac's
-   screen, and once more when `check` or `usb` first asks over ssh. `apply` has to run while that user is logged in at the desktop:
+   screen. `apply` has to run while that user is logged in at the desktop:
    LaunchAgents only load into a live login session.
 
 ## First apply
 
-The apps on the Mac were installed by hand. mise takes one over only when it
-is identical to the pinned release; otherwise `apply` stops at the packages
-step with `cannot adopt`, before anything else changes. Either pin the
-installed version instead, or shut the VM down, quit the app and delete it
-from `/Applications`, then apply again. The VMs
+The apps on the Mac were installed by hand, and the pins match them (UTM
+4.7.5, BlueBubbles 1.9.12). mise takes an app over only when it is identical
+to the pinned release; otherwise `apply` stops at the packages step with
+`cannot adopt`, before anything else changes. Then shut the VM down, quit the
+app and delete it from `/Applications`, and apply again. The VMs
 (`~/Library/Containers/com.utmapp.UTM`) and the BlueBubbles data
 (`~/Library/Application Support/bluebubbles-server`) are not in the bundle.
 A replaced app may need its permissions granted again.
+
+Amphetamine is what kept this Mac awake before; the `final` hook makes it
+redundant.
 
 ## Upgrading an app
 
 Change `version` and `sha256`, then:
 
-- UTM: `ssh edge-mac sh /usr/local/libexec/edge-mac/vm.sh stop`, then `apply`.
-  It reloads the agent, which starts the VM on the new UTM.
+- UTM: `ssh edge-mac sh /usr/local/libexec/edge-mac/vm.sh request-stop`,
+  `ssh edge-mac killall UTM`, then `apply`. It reloads the agent, which opens
+  the new UTM and starts the VM. From UTM 5 the quit policy in the defaults
+  applies: a plain macOS restart then powers Talos down by itself.
 - BlueBubbles: `apply`, then `ssh edge-mac killall BlueBubbles`. The agent
   reopens it within a minute.

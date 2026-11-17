@@ -39,11 +39,7 @@ description = "Report what would stop the edge Mac coming back up unattended"
 dir = "{{config_root}}"
 run = "mise bootstrap remote edge-mac --only task"
 
-[tasks.usb]
-description = "Reconnect the Zigbee dongle to the VM (after a replug)"
-run = "ssh edge-mac sh /usr/local/libexec/edge-mac/vm.sh usb"
-
 [tasks.reboot]
 description = "Shut the Talos VM down cleanly, then restart the edge Mac (asks for sudo)"
 raw = true # sudo prompts on the Mac
-run = 'ssh -t edge-mac "sh /usr/local/libexec/edge-mac/vm.sh stop && sudo shutdown -r now"'
+run = 'ssh -t edge-mac "sh /usr/local/libexec/edge-mac/vm.sh request-stop && sudo shutdown -r now"'
