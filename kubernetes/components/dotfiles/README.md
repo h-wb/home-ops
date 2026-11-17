@@ -5,8 +5,10 @@ and nothing else about what gets installed or configured:
 
 1. **Which commit**: `DOTFILES_REF`, one value for the cluster, substituted into
    every child Kustomization by `kubernetes/clusters/main/ks.yaml`. Renovate
-   bumps it to the head of the dotfiles' `master` (one PR, merged between 03:00
-   and 06:00 New York time; `.renovaterc.json5`).
+   bumps it to the head of the dotfiles' `master` (one PR, updated before 02:00
+   and merged by Renovate between 03:00 and 06:00 New York time;
+   `.renovaterc.json5`). It must name a commit on a branch: the Paseo pods'
+   `git clone` cannot check out a commit no branch holds.
 2. **Which environment**: `DOTFILES_ENV` in the app's `ks.yaml`, a set from the
    dotfiles' `miserc.toml` `[env_sets]`, optionally followed by layers for this
    pod only (`code-server`, `neko`, `neko,extra-layer`).
@@ -17,8 +19,10 @@ when it runs:
 
 - `sh /opt/dotfiles/dotfiles-bootstrap fetch` downloads that commit's tarball
   and swaps it in at `~/.dotfiles`, fresh at every start. Whatever was there
-  goes, local edits included: develop in `~/Repositories/dotfiles`. A failed
-  download keeps the previous checkout.
+  goes, local edits included: develop in `~/Repositories/dotfiles`. The first
+  git clone found there (the flow before the pin) is kept at
+  `~/.dotfiles.pre-pin` instead, and the doctor check flags it until deleted. A
+  failed download keeps the previous checkout.
 - `... run` runs that checkout's `scripts/pod-bootstrap $DOTFILES_ENV` by path.
 - No argument does both. It always exits 0: the pod's own program starts anyway.
 

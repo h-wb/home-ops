@@ -34,9 +34,11 @@ to a new commit of that repository's `master`. It has no release notes: the comm
 the changelog. Read them with
 `gh api repos/h-wb/dotfiles/compare/<old>...<new> --jq '.commits[].commit.message'` and
 `gh api repos/h-wb/dotfiles/compare/<old>...<new> --jq '.files[].filename'`, and check the
-`test` workflow on the new commit
-(`gh api repos/h-wb/dotfiles/commits/<new>/check-runs --jq '.check_runs[] | [.name, .conclusion]'`).
-Report as **blocking (p0)** a failed or missing `test` run on the new commit, and a change
+CI on the new commit
+(`gh api repos/h-wb/dotfiles/commits/<new>/check-runs --jq '.check_runs[] | [.name, .conclusion]'`:
+one check run per job of its `test` workflow).
+Report as **blocking (p0)** no check runs on the new commit, or any that did not
+conclude `success` (or `skipped`), and a change
 to `scripts/pod-bootstrap`, `miserc.toml` or `[env_sets]` that home-ops' callers
 (`components/dotfiles`, `paseo/common/helmrelease.yaml`) do not match. Having read the
 commits counts as having read the changelog.

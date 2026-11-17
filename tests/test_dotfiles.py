@@ -109,16 +109,30 @@ class Hook(unittest.TestCase):
         self.assertEqual(self.leftovers(), [])
 
     def test_whatever_was_there_is_replaced_fresh(self):
-        # An old git clone, with local work: none of it survives a start.
-        old = self.home / ".dotfiles"
-        (old / ".git").mkdir(parents=True)
-        (old / "local-work").write_text("uncommitted\n")
-        (old / "scripts").mkdir()
-        (old / "scripts/pod-bootstrap").write_text('echo old >> "$HOME/bootstrap.runs"\n')
+        # A checkout from the pin: none of it survives a start, local edits included.
+        self.run_hook()
+        (self.home / ".dotfiles/local-work").write_text("uncommitted\n")
         _, runs = self.run_hook()
-        self.assertEqual(sorted(p.name for p in old.iterdir()), [".pinned-commit", "marker", "scripts"])
+        self.assertEqual(sorted(p.name for p in (self.home / ".dotfiles").iterdir()),
+                         [".pinned-commit", "marker", "scripts"])
         self.assertEqual(runs, [f"run code-server ref={PIN} pinned={PIN}"])
         self.assertEqual(self.leftovers(), [])
+
+    def test_a_clone_from_before_the_pin_is_kept_aside_once(self):
+        # The old flow's git clone may hold unpushed work or a config.local.toml.
+        old = self.home / ".dotfiles"
+        (old / ".git").mkdir(parents=True)
+        (old / "config.local.toml").write_text("[vars]\n")
+        _, runs = self.run_hook()
+        kept = self.home / ".dotfiles.pre-pin"
+        self.assertTrue((kept / "config.local.toml").exists())
+        self.assertEqual(runs, [f"run code-server ref={PIN} pinned={PIN}"])
+        # Only the first one: a later clone is replaced like anything else.
+        (old / ".git").mkdir()
+        self.run_hook()
+        self.assertFalse((old / ".git").exists())
+        self.assertTrue((kept / "config.local.toml").exists())
+        self.assertEqual(self.leftovers(), [".dotfiles.pre-pin"])
 
     def test_failed_fetch_runs_the_previous_checkout_and_says_so(self):
         self.run_hook()
@@ -221,6 +235,16 @@ class Pin(unittest.TestCase):
         self.assertEqual(matches, [PIN])
         self.assertIn('packageNameTemplate: "https://github.com/h-wb/dotfiles"', renovate)
         self.assertIn('datasourceTemplate: "git-refs"', renovate)
+        # The rule that batches it matches the depName: packageName is the URL,
+        # and Renovate's package-name matcher reads only that.
+        dep = re.search(r'depNameTemplate: "([^"]+)"', renovate).group(1)
+        rule = renovate[renovate.index('description: "The dotfiles pin'):]
+        rule = rule[:rule.index("}")]
+        self.assertIn(f'matchDepNames: ["{dep}"]', rule)
+        self.assertNotIn("matchPackageNames", rule)
+        for setting in ("platformAutomerge: false", 'automergeSchedule: ["* 3-5 * * *"]',
+                        'schedule: ["* 0-1 * * *"]'):
+            self.assertIn(setting, rule)
 
     def test_every_consumer_reads_the_pin(self):
         # Nothing else in kubernetes/ names a dotfiles commit or fetches the
@@ -239,7 +263,7 @@ class Pin(unittest.TestCase):
         self.assertIn("dotfiles.git?ref=${DOTFILES_REF}", users["kubernetes/apps/main/llm/paseo/common/helmrelease.yaml"])
         self.assertIn("ref=${DOTFILES_REF}", users["kubernetes/components/dotfiles/dotfiles-bootstrap"])
         job = (ROOT / "kubernetes/apps/main/llm/hermes/app/skills-sync/job.yaml").read_text()
-        self.assertIn("value: ${DOTFILES_REF}", job)
+        self.assertIn('value: "${DOTFILES_REF}"', job)
         for text in [*users.values(), job]:
             self.assertEqual(re.findall(r"\b[0-9a-f]{40}\b", text), [])
 

@@ -30,7 +30,7 @@ spec:
             # The cluster's dotfiles pin (kubernetes/clusters/main/ks.yaml): a
             # bump changes this spec, and Flux's force recreates the Job.
             - name: DOTFILES_REF
-              value: ${DOTFILES_REF}
+              value: "${DOTFILES_REF}"
           resources:
             requests:
               cpu: 10m
