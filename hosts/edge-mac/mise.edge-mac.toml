@@ -70,8 +70,8 @@ key = "idleTime"
 value = 60
 host = "current"
 
-# utmctl refuses to work over ssh, so both run in the desktop session. Every
-# minute: start the VM if it is not running.
+# utmctl refuses to work over ssh, so the three vm.sh agents run in the desktop
+# session. Every minute: start the VM if it is not running.
 [bootstrap.macos.launchd.agents.edge-vm]
 program = "/bin/sh"
 args = ["/usr/local/libexec/edge-mac/vm.sh", "up"]

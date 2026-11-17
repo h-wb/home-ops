@@ -75,8 +75,9 @@ macOS has no API for these without MDM. `check` reports the first one.
 The apps on the Mac were installed by hand, and the pins match them (UTM
 4.7.5, BlueBubbles 1.9.12). mise takes an app over only when it is identical
 to the pinned release; otherwise `apply` stops at the packages step with
-`cannot adopt`, before anything else changes. BlueBubbles does: it updates
-itself from a different archive than the release's `.dmg`. Then quit the app,
+`cannot adopt`, before anything else changes. A BlueBubbles that has updated
+itself always differs: its updater uses another archive than the release's
+`.dmg`. Then quit the app,
 move it out of `/Applications` under a name not ending in `.app`, and apply
 again (for UTM, shut the VM down first). The VMs
 (`~/Library/Containers/com.utmapp.UTM`) and the BlueBubbles data
