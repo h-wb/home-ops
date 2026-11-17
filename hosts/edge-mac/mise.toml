@@ -39,7 +39,12 @@ description = "Report what would stop the edge Mac coming back up unattended"
 dir = "{{config_root}}"
 run = "mise bootstrap remote edge-mac --only task"
 
+# From a tailnet client the route to the Mac is the subnet router inside the
+# VM, so the ssh session dies when the VM stops: sudo is unlocked first, and the
+# rest runs detached on the Mac. A failure is in /tmp/edge-mac-reboot.log there.
 [tasks.reboot]
 description = "Shut the Talos VM down cleanly, then restart the edge Mac (asks for sudo)"
 raw = true # sudo prompts on the Mac
-run = 'ssh -t edge-mac "sh /usr/local/libexec/edge-mac/vm.sh request-stop && sudo shutdown -r now"'
+run = """
+ssh -t edge-mac 'sudo -v && { sudo nohup sh /usr/local/libexec/edge-mac/vm.sh reboot </dev/null >/tmp/edge-mac-reboot.log 2>&1 & }'
+"""

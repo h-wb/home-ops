@@ -25,7 +25,8 @@ everything that drives UTM runs as a LaunchAgent in the desktop session, and
 ssh only kickstarts it.
 
 Also `mise run //hosts/edge-mac:check | reboot`. `check` runs the doctor checks
-on the Mac; `reboot` stops the VM before restarting. All of it goes through the
+on the Mac; `reboot` stops the VM, then restarts, detached from the ssh session
+(from the tailnet the route to this Mac runs through the VM, and drops with it). All of it goes through the
 ssh alias `edge-mac`, and was written against mise 2026.11.8: an older one
 ignores `[bootstrap.settings.macos]`.
 

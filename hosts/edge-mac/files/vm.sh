@@ -1,6 +1,7 @@
 #!/bin/sh
 # The Talos VM in UTM. utmctl only works inside the desktop session, never over
-# ssh, so `up` and `stop` are LaunchAgent bodies; `request-stop` is the ssh side.
+# ssh, so `up` and `stop` are LaunchAgent bodies; `request-stop` and `reboot`
+# are the ssh side.
 set -eu
 
 here=$(cd "$(dirname "$0")" && pwd)
@@ -8,7 +9,10 @@ here=$(cd "$(dirname "$0")" && pwd)
 # shellcheck source=/dev/null
 . "$here/config.env"
 utmctl=/Applications/UTM.app/Contents/MacOS/utmctl
-domain="gui/$(id -u)"
+# Under sudo (`reboot`), the agents are the desktop user's.
+uid=$(id -u)
+[ "$uid" != 0 ] || uid=$(stat -f %u /dev/console)
+domain="gui/$uid"
 
 status() { "$utmctl" status "$VM_NAME" 2>/dev/null || true; }
 running() { pgrep -qf QEMULauncher; }
@@ -63,5 +67,6 @@ request_stop() {
 case "${1:-}" in
 up | stop) "$1" ;;
 request-stop) request_stop ;;
-*) echo "usage: $0 up|stop|request-stop" >&2; exit 2 ;;
+reboot) request_stop && shutdown -r now ;;
+*) echo "usage: $0 up|stop|request-stop|reboot" >&2; exit 2 ;;
 esac
