@@ -90,7 +90,7 @@ stderr_path = "~/Library/Logs/edge-mac.log"
 # `open -W` returns when the app exits, so launchd reopens it.
 [bootstrap.macos.launchd.agents.bluebubbles]
 program = "/usr/bin/open"
-args = ["-W", "-g", "-j", "-a", "BlueBubbles"]
+args = ["-W", "-g", "-j", "-a", "/Applications/BlueBubbles.app"]
 keep_alive = true
 throttle_interval = 60
 
