@@ -54,8 +54,6 @@ spec:
         annotations:
           reloader.stakater.com/auto: "true"
         initContainers:
-          # The pinned dotfiles at ~/.dotfiles before the desktop starts
-          # (components/dotfiles); the session's autostart entry runs them.
           dotfiles:
             image: &image
               repository: ghcr.io/m1k1o/neko/intel-xfce
@@ -199,11 +197,9 @@ spec:
               - path: /etc/coredns/Corefile
                 readOnly: true
                 subPath: Corefile
-      # components/dotfiles. The bootstrap runs inside the session (xfconf needs
-      # its D-Bus, apt and /etc are this container's), so a system autostart
-      # entry starts it; named apart from the old user entry, which the dotfiles
-      # remove. subPath: a whole ConfigMap over /etc/xdg/autostart would hide
-      # XFCE's own entries.
+      # components/dotfiles: fetched by the init container, run by the autostart
+      # entry inside the session (xfconf needs its D-Bus). subPath: a whole
+      # ConfigMap over /etc/xdg/autostart would hide XFCE's own entries.
       dotfiles:
         name: neko-dotfiles
         type: configMap

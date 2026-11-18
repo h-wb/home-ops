@@ -111,11 +111,9 @@
       ignoreTests: false,
     },
     {
-      // Every bump rolls neko, code-server and both Paseo pods. One PR collects
-      // master's commits, updated only before 02:00, so kritika has reviewed the
-      // last push when Renovate itself merges it, only between 03:00 and 06:00
-      // (not GitHub's auto-merge, which merges whenever an approval arrives).
-      // Revert the merge to roll every pod back. depName: packageName is the URL.
+      // Every bump rolls the pods, so Renovate merges it itself, at night:
+      // GitHub's auto-merge would merge whenever kritika's approval arrives.
+      // matchDepNames: the packageName is the URL.
       description: "The dotfiles pin: one PR, updated 00-02, merged 03-06",
       matchDepNames: ["h-wb/dotfiles"],
       automerge: true,

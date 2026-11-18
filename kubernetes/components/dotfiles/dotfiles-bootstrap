@@ -1,15 +1,8 @@
 #!/bin/sh
-# Bootstrap this pod from the owner's dotfiles: the cluster's pinned commit
-# (DOTFILES_REF, kubernetes/clusters/main/ks.yaml) as the environment this app
-# declares (DOTFILES_ENV, its ks.yaml). Flux substitutes the two; nothing else
-# here uses braces.
-#   fetch  put that commit at ~/.dotfiles, fresh: whatever was there goes,
-#          local edits included (develop in ~/Repositories/dotfiles); the
-#          first git clone found there is kept at ~/.dotfiles.pre-pin
-#   run    its scripts/pod-bootstrap, by path
-#   (none) both
-# Always exits 0: a failed bootstrap must not stop the pod's own program. A
-# failed fetch keeps the previous checkout, and pod-bootstrap reports it stale.
+# README.md. `fetch` replaces ~/.dotfiles with the pinned commit, `run` runs its
+# scripts/pod-bootstrap, no argument does both. Always exits 0: a failed
+# bootstrap must not stop the pod's own program. Flux substitutes the two
+# variables below; nothing else here may use braces.
 set -u
 ref=${DOTFILES_REF}
 env=${DOTFILES_ENV}
@@ -24,7 +17,7 @@ fetch() {
 		[ -f "$dir.new/scripts/pod-bootstrap" ] &&
 		echo "$ref" >"$dir.new/.pinned-commit" || {
 		rm -rf "$dir.new" "$dir.tar.gz"
-		echo "dotfiles: fetching $ref failed; keeping the checkout already here"
+		echo "dotfiles: fetch failed for $ref; keeping the checkout already here"
 		return 1
 	}
 	rm -f "$dir.tar.gz"
@@ -42,9 +35,7 @@ run() {
 		echo "dotfiles: bootstrap did not complete; starting anyway"
 }
 
-mode=
-[ $# -eq 0 ] || mode=$1
-case "$mode" in
+case "$*" in
 fetch) fetch ;;
 run) run ;;
 "") fetch; run ;;

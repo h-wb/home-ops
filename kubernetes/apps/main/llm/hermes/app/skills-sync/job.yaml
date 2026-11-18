@@ -27,8 +27,7 @@ spec:
             - /bin/sh
             - /scripts/sync.sh
           env:
-            # The cluster's dotfiles pin (kubernetes/clusters/main/ks.yaml): a
-            # bump changes this spec, and Flux's force recreates the Job.
+            # The cluster's dotfiles pin (kubernetes/clusters/main/ks.yaml).
             - name: DOTFILES_REF
               value: "${DOTFILES_REF}"
           resources:
