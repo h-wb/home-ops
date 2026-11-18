@@ -6,7 +6,7 @@ kind: MCPServer
 metadata:
   name: kubesearch
 spec:
-  image: ghcr.io/rust84/kubesearch-mcp-server:latest@sha256:d662ed85db6cc2a2c01c1c49f679057338a9f4af5afa877ed9530b1f54b3d81f
+  image: ghcr.io/rust84/kubesearch-mcp-server:latest@sha256:e4cb8bd130200990af761221d3644eeb4e3c1f2093ca6a05686d2bae7e3990be
   transport: stdio
   proxyMode: streamable-http
   proxyPort: 8080
