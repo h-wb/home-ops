@@ -31,6 +31,10 @@ spec:
         # Private tier data (vault, personal tasks) never appears in this list: general
         # gets the shared board, private gets the whole catalogue via mcp-private.
         - workload: homelab-tasks
+        # TEMPORARY (2026-11): location-history cleanup from a general Paseo session.
+        # Revert this block once the day fixes are done; dawarich is private-tier data.
+        - workload: dawarich
+        - workload: dawarich-ops
     optimizer:
       embeddingModel: embed
       embeddingProvider: openai
