@@ -5,9 +5,8 @@ and nothing else about what gets installed or configured:
 
 1. **Which commit**: `DOTFILES_REF`, one value for the cluster, substituted into
    every child Kustomization by `kubernetes/clusters/main/ks.yaml`. Renovate
-   bumps it to the head of the dotfiles' `master` (one PR, updated before 02:00
-   and merged by Renovate between 03:00 and 06:00 New York time;
-   `.renovaterc.json5`). It must name a commit on a branch: the Paseo pods'
+   bumps it to the head of the dotfiles' `master`, one PR a night
+   (`.renovaterc.json5`). It must name a commit on a branch: the Paseo pods'
    `git clone` cannot check out a commit no branch holds.
 2. **Which environment**: `DOTFILES_ENV` in the app's `ks.yaml`, a set from the
    dotfiles' `miserc.toml` `[env_sets]`, optionally followed by layers for this

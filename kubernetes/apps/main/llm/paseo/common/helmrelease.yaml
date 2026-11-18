@@ -36,10 +36,7 @@ spec:
             image: &image
               repository: ghcr.io/getpaseo/paseo
               tag: 0.16.1
-            # The dotfiles' two inputs, as components/dotfiles takes them: the
-            # cluster's pinned commit, cloned fresh into the emptyDir at every
-            # start, and the declared environment, saved for the app container.
-            # Like that hook, a failed bootstrap logs one line and the pod starts.
+            # Like components/dotfiles, a failed bootstrap never stops the pod.
             command:
               - /bin/sh
               - -c

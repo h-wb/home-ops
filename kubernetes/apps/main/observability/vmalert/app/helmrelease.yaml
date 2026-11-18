@@ -116,12 +116,11 @@ spec:
               interval: 5m
               rules:
                 - alert: DotfilesBootstrapIncomplete
-                  # components/dotfiles and the Paseo init never stop a pod from
-                  # starting, so a bad pinned commit only shows in these lines.
-                  # neko's in-session run logs to its home volume only
-                  # (~/.local/state/pod-bootstrap.log); its fetch logs here.
+                  # A pod starts whatever its dotfiles bootstrap did, so a bad
+                  # pin only shows in these lines. neko's in-session run logs to
+                  # its home volume, not here.
                   expr: |-
-                    ("dotfiles: bootstrap did not complete" OR "dotfiles: fetching" OR "pod-bootstrap: error" OR "pod-bootstrap: stale") | stats by (kubernetes.pod_namespace, kubernetes.pod_name) count() as hits | filter hits:>0
+                    ("dotfiles: bootstrap did not complete" OR "dotfiles: fetch failed") | stats by (kubernetes.pod_namespace, kubernetes.pod_name) count() as hits | filter hits:>0
                   keep_firing_for: 6h
                   labels:
                     severity: warning

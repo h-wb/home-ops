@@ -2,12 +2,8 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# The hook that bootstraps a pod from the owner's dotfiles: the commit
-# (DOTFILES_REF, cluster-wide) and the environment (DOTFILES_ENV, the app's
-# ks.yaml) are its only inputs. The app decides when it runs by mounting
-# ${APP}-dotfiles at /opt/dotfiles and calling `sh /opt/dotfiles/dotfiles-bootstrap`.
-# The hash-free name keeps that mount stable; Reloader rolls the pod when a new
-# pin changes the ConfigMap.
+# See README.md. No name hash: the app mounts ${APP}-dotfiles by name, and
+# Reloader rolls the pod when a new pin changes it.
 configMapGenerator:
   - name: ${APP}-dotfiles
     files:
