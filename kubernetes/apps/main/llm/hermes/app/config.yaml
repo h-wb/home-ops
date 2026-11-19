@@ -71,6 +71,12 @@ command_allowlist:
   - "mcp:tools/ticktick_move_task"
   - "mcp:tools/ticktick_unassign_task"
   - "mcp:tools/ticktick_add_comment"
+  # The location-review routine's morning pass. It decides for itself what is
+  # safe to write (no question open, routine places, walking legs) and changes
+  # nothing otherwise, so it may run with nobody there to say yes. Both
+  # spellings: the gateway's name has a hyphen, the tool's name here does not.
+  - "mcp:tools/dawarich-ops_day_auto"
+  - "mcp:tools/dawarich_ops_day_auto"
 # Anyone not on a platform's allow list gets no answer, not even a pairing code.
 unauthorized_dm_behavior: ignore
 # Explicitly disable even if old credentials remain on the data volume.
