@@ -28,7 +28,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: v3.4.1
+              tag: v3.4.2
             env:
               IMMICH_WORKERS_INCLUDE: api
               DB_PASSWORD:
@@ -48,7 +48,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-server
-              tag: v3.4.1
+              tag: v3.4.2
             env:
               IMMICH_WORKERS_INCLUDE: null
               IMMICH_WORKERS_EXCLUDE: api
@@ -68,7 +68,7 @@ spec:
           app:
             image:
               repository: ghcr.io/immich-app/immich-machine-learning
-              tag: v3.4.1
+              tag: v3.4.2
             envFrom:
               - configMapRef:
                   name: immich-configmap
