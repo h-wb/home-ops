@@ -24,6 +24,9 @@ spec:
               # Application
               #PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
               PAPERLESS_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
+              # Since 3.5.0, PAPERLESS_URL alone restricts Host to that name, so
+              # in-cluster callers (n8n, paperless-gpt, homepage) need listing.
+              PAPERLESS_ALLOWED_HOSTS: "{{ .Release.Name }}.default,{{ .Release.Name }}.default.svc,{{ .Release.Name }}.default.svc.cluster.local"
               PAPERLESS_PORT: "8000"
               PAPERLESS_TIME_ZONE: Europe/Paris
               PAPERLESS_WEBSERVER_WORKERS: "2"
