@@ -2,7 +2,7 @@ module home-ops/tests/cel
 
 go 1.25
 
-require cel.dev/cel-go v0.33.2
+require cel.dev/cel-go v0.33.4
 
 require (
 	cel.dev/expr v0.25.1 // indirect
