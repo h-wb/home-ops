@@ -34,7 +34,7 @@ spec:
           bootstrap:
             image: &image
               repository: ghcr.io/coder/code-server
-              tag: 4.145.2
+              tag: 4.146.0
             command: ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap"]
             env: &env
               HOME: /home/coder
