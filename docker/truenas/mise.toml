@@ -61,5 +61,28 @@ for bucket in postgresql kopiur; do
     fi
     garage bucket allow --read --write --owner "${bucket}" --key "${key_id}" >/dev/null
 done
+
+# 4. Miroir media (pipelines decision 033): its own key, on its own bucket only.
+#    Skipped until the BWS item `miroir` carries the two fields.
+miroir=$(bws secret list "${BWS_PROJECT_ID}" -o json | jq -er '.[] | select(.key == "miroir") | .value')
+media_id=$(jq -r '.MIROIR_MEDIA_ACCESS_KEY_ID // empty' <<<"${miroir}")
+media_secret=$(jq -r '.MIROIR_MEDIA_SECRET_ACCESS_KEY // empty' <<<"${miroir}")
+if [[ -z "${media_id}" || -z "${media_secret}" ]]; then
+    mise //:log info "No Miroir media key in BWS, skipping its bucket" item miroir
+else
+    if garage key info "${media_id}" &>/dev/null; then
+        mise //:log info "Key already present" key "${media_id}"
+    else
+        garage key import --yes -n miroir_media "${media_id}" "${media_secret}" >/dev/null
+        mise //:log info "Key imported" key "${media_id}"
+    fi
+    if garage bucket info miroir-media &>/dev/null; then
+        mise //:log info "Bucket already present" bucket miroir-media
+    else
+        garage bucket create miroir-media >/dev/null
+        mise //:log info "Bucket created" bucket miroir-media
+    fi
+    garage bucket allow --read --write miroir-media --key "${media_id}" >/dev/null
+fi
 mise //:log info "Garage bootstrap complete"
 '''

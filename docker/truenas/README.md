@@ -45,3 +45,19 @@ mise run //docker/truenas:garage:bootstrap
 It assigns the layout, imports the key consumers already use (BWS
 `postgresql-bucket`) and creates the `postgresql` and `kopiur` buckets.
 Safe to re-run: every step skips what already exists.
+
+**Miroir media** (screenshots and other files that warehouse rows point at): the
+same task creates the `miroir-media` bucket and imports a key that can read and
+write that bucket only, once the BWS item `miroir` has
+`MIROIR_MEDIA_ACCESS_KEY_ID` (`GK` + 24 hex characters) and
+`MIROIR_MEDIA_SECRET_ACCESS_KEY` (64 hex characters):
+
+```sh
+printf 'GK%s\n' "$(openssl rand -hex 12)"   # key id
+openssl rand -hex 32                        # secret
+```
+
+The Miroir server reads the same two fields from its environment
+(`miroir-secret`). These objects are private screen captures and are stored
+unencrypted in `data/`, so they are part of the offsite copy above: check that
+copy is encrypted before uploading any.
