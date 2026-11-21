@@ -1,0 +1,55 @@
+---
+# The timeline (pipelines decision 040) reads the warehouse as its own role on
+# postgres-metabase: login only, no rights by default. The timeline's dbt package
+# grants it USAGE on its schema and SELECT on its tables; the server also opens
+# every session read-only with a statement time limit.
+apiVersion: postgresql.cnpg.io/v1
+kind: DatabaseRole
+metadata:
+  name: miroir-timeline
+spec:
+  cluster:
+    name: postgres-metabase
+  name: miroir_timeline
+  login: true
+  # The server's pool holds at most 4 connections.
+  connectionLimit: 6
+  passwordSecret:
+    name: miroir-timeline-reader
+  databaseRoleReclaimPolicy: retain
+---
+# Letters and digits only, so the password needs no escaping inside a URI.
+apiVersion: generators.external-secrets.io/v1alpha1
+kind: Password
+metadata:
+  name: miroir-timeline-password
+spec:
+  length: 32
+  digits: 8
+  symbols: 0
+  noUpper: false
+  allowRepeat: true
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/external-secrets.io/externalsecret_v1.json
+# Generated once and never rotated (CreatedOnce); the DatabaseRole sets the role's
+# password from this Secret, so regenerating it after a loss heals on its own.
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: &name miroir-timeline-reader
+spec:
+  refreshPolicy: CreatedOnce
+  target:
+    name: *name
+    template:
+      type: kubernetes.io/basic-auth
+      engineVersion: v2
+      data:
+        username: miroir_timeline
+        password: "{{ .password }}"
+  dataFrom:
+    - sourceRef:
+        generatorRef:
+          apiVersion: generators.external-secrets.io/v1alpha1
+          kind: Password
+          name: miroir-timeline-password

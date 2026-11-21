@@ -50,6 +50,18 @@ spec:
                 valueFrom: { secretKeyRef: { name: postgres-miroir-app, key: username } }
               MIROIR_METADATA__PASSWORD:
                 valueFrom: { secretKeyRef: { name: postgres-miroir-app, key: password } }
+              # The timeline's read-only view of the warehouse (postgres-metabase),
+              # as the role from timeline-reader.yaml. An older image ignores these.
+              MIROIR_TIMELINE_DATABASE__HOST:
+                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: host } }
+              MIROIR_TIMELINE_DATABASE__PORT:
+                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: port } }
+              MIROIR_TIMELINE_DATABASE__DATABASE:
+                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: dbname } }
+              MIROIR_TIMELINE_DATABASE__USERNAME:
+                valueFrom: { secretKeyRef: { name: miroir-timeline-reader, key: username } }
+              MIROIR_TIMELINE_DATABASE__PASSWORD:
+                valueFrom: { secretKeyRef: { name: miroir-timeline-reader, key: password } }
               # Execution settings (pool, flow-run image, namespace) live in
               # miroir.json. Only the worker-visible config path is environmental.
               PREFECT_API_URL: "http://prefect.automation:4200/api"

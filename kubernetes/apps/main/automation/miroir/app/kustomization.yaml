@@ -7,3 +7,4 @@ kind: Kustomization
 resources:
   - ./helmrelease.yaml
   - ./prometheusrule.yaml
+  - ./timeline-reader.yaml
