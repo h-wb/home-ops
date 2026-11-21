@@ -1,0 +1,44 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
+# What the collectors on the machines report after each run (pipelines
+# decision 039, docs/observability.md there). One sample per connection.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: miroir
+spec:
+  groups:
+    - name: miroir.rules
+      rules:
+        # A collector that reaches Miroir but cannot do its work. A machine that
+        # is asleep or away reports nothing, so this does not fire for it.
+        - alert: MiroirCollectorFailing
+          expr: miroir_collector_consecutive_failures > 2
+          for: 10m
+          annotations:
+            summary: >-
+              {{ $labels.connection }}: {{ $value }} failed collector runs in a row
+              (the connection page in Miroir says at which step and why)
+          labels:
+            severity: warning
+        # A source that stops understanding what it reads still runs fine: text
+        # it could not read, or a database layout changed by a system update.
+        - alert: MiroirCollectorSourceChanged
+          expr: |-
+            max_over_time(miroir_collector_last_count{part="rows", name=~"unreadable|layout_changed"}[1h]) > 0
+          annotations:
+            summary: >-
+              {{ $labels.connection }}: {{ $labels.name }} is {{ $value }} in the last
+              collector run (an application update may have changed its files)
+          labels:
+            severity: warning
+        # Laptops sleep and travel, so silence is normal for days. Tighten per
+        # connection (a `connection="..."` matcher) for a machine that is always on.
+        - alert: MiroirCollectorSilent
+          expr: time() - miroir_collector_last_report_timestamp_seconds > 3 * 86400
+          for: 1h
+          annotations:
+            summary: >-
+              No collector report for {{ $labels.connection }} in three days
+          labels:
+            severity: warning
