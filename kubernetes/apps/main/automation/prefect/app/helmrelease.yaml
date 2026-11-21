@@ -88,7 +88,7 @@ spec:
           pool:
             image: &miroir-image
               repository: ghcr.io/h-wb/pipelines
-              tag: sha-e112a395ecfc2c372e4e69530f9ce26a5d2d7bdc
+              tag: sha-536ac475301cf0936204fe42668a1738d101e33c
             command:
               - /app/.venv/bin/python
               - -m

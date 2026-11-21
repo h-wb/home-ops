@@ -19,7 +19,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/h-wb/pipelines
-              tag: sha-e112a395ecfc2c372e4e69530f9ce26a5d2d7bdc
+              tag: sha-536ac475301cf0936204fe42668a1738d101e33c
             # Absolute interpreter path: no PATH lookup for the console script
             # (mutable-tag stale caches once made runc miss it on one node).
             command:
@@ -55,8 +55,9 @@ spec:
               PREFECT_API_URL: "http://prefect.automation:4200/api"
               MIROIR_PREFECT_CONFIG_PATH: /miroir/data/miroir/miroir.json
               MIROIR_ARTIFACT_DIR: /miroir/data/miroir/artifacts
-            # miroir-secret: MIROIR_SECRET_KEY (built-in connection secrets)
-            # and MIROIR_API_TOKEN (the UI/API bearer), from Bitwarden via the
+            # miroir-secret: MIROIR_SECRET_KEY (built-in connection secrets),
+            # MIROIR_API_TOKEN (the UI/API bearer) and MIROIR_METRICS_TOKEN
+            # (opens /metrics to the scraper only), from Bitwarden via the
             # `miroir` ExternalSecret. prefect-secret: the Prefect API auth
             # string — the server submits flow runs like the worker does.
             envFrom:
@@ -77,6 +78,19 @@ spec:
         ports:
           http:
             port: 8765
+    # /metrics answers only to MIROIR_METRICS_TOKEN, never to the admin token.
+    serviceMonitor:
+      server:
+        service:
+          identifier: server
+        endpoints:
+          - port: http
+            path: /metrics
+            interval: 1m
+            authorization:
+              credentials:
+                name: miroir-secret
+                key: MIROIR_METRICS_TOKEN
     route:
       app:
         hostnames:
