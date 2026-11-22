@@ -3,24 +3,15 @@
 [vars]
 vm_name = "Talos"
 usb_device = "303A:831A" # the ZBT-2 Zigbee dongle, as VID:PID
-# A release tag of h-wb/pipelines; the same pin as the laptops' in dotfiles.
 collector_version = "collector-v0.3.0"
-# The main cluster's gateways, reached through the WireGuard tunnel: Miroir is
-# on the internal one, its media bucket on the external one.
 miroir_address = "192.168.1.202"
 bucket_address = "192.168.1.201"
-# The tunnel's name in the WireGuard app: the imported file's name.
 tunnel = "wg-main"
-# The App Store's command line, as the Intel .pkg of a GitHub release; sha256
-# is the asset's `digest` in the release API.
 mas_version = "7.0.0"
 mas_sha256 = "9bca1de1fb6ea19c9e0b9d7b7c85249020c9ed65a9d434c2ef40896a2f3395f9"
-wireguard_app = "1451685025" # WireGuard's id in the App Store
-# Where the `secrets` task leaves the domain, which is not in git.
+wireguard_app = "1451685025"
 collector_zone = "cat ~/.config/miroir-collector/zone 2>/dev/null || true"
 
-# Only used during apply, to install the collector; nothing at run time needs
-# mise or uv.
 [tools]
 uv = "0.13.9"
 
@@ -90,20 +81,10 @@ key = "idleTime"
 value = 60
 host = "current"
 
-# ── WireGuard to the main site ──────────────────────────────────────────────
-# Miroir is only served on the main site's LAN. This Mac reaches it the way
-# the MacBook does when away: a split WireGuard tunnel to that site, with this
-# Mac's own peer. The tunnel's configuration comes from Proton Pass through
-# the `secrets` task, the app from the App Store through the hook below, and
-# the agent keeps the tunnel up. Only the one-time import is by hand (README).
 [bootstrap.directories."~/.config/wireguard"]
 mode = "0700"
 
-# WireGuard for macOS only exists in the App Store. mise's own `mas:` packages
-# need `mas` on PATH, which an ssh session's does not include, and its `brew:`
-# packages skip Intel Macs, so this installs both: the pinned mas, then the
-# app. It needs this Mac signed in to the App Store; without that it says so
-# and apply carries on. Nothing runs once the app is there.
+# Remote bootstrap needs to install mas before it can use it over SSH.
 [bootstrap.hooks.post-packages]
 description = "Install WireGuard from the App Store"
 run = '''
@@ -122,8 +103,6 @@ mas install {{ vars.wireguard_app }} || mas get {{ vars.wireguard_app }} ||
 	echo "WireGuard not installed: sign in to the App Store on the Mac's screen, then apply again" >&2
 '''
 
-# Every minute, and at login: a no-op while the tunnel is connected. scutil
-# drives the tunnel's network extension, so the app need not be open.
 [bootstrap.macos.launchd.agents.wireguard]
 program = "/usr/sbin/scutil"
 args = ["--nc", "start", "{{ vars.tunnel }}"]
@@ -133,12 +112,6 @@ process_type = "Background"
 stdout_path = "~/Library/Logs/edge-mac.log"
 stderr_path = "~/Library/Logs/edge-mac.log"
 
-# ── Miroir collector ────────────────────────────────────────────────────────
-# Reads this Mac's Messages database and delivers what is new to Miroir, every
-# minute (README, "Miroir collector"). The domain and the delivery token are
-# not in git: `mise run //hosts/edge-mac:secrets` writes them to
-# ~/.config/miroir-collector/{zone,token}, and the templates below read the
-# first. Run it before apply.
 [bootstrap.directories."~/.config/miroir-collector"]
 mode = "0700"
 
@@ -160,9 +133,7 @@ content = """
 }
 """
 
-# Miroir and its bucket are not in this site's DNS, and pointing the whole
-# zone at the main site's resolver would make every lookup in it depend on the
-# tunnel. Two names are enough.
+# Resolve these two names without changing the Mac's DNS.
 [bootstrap.files."/etc/hosts"]
 id = "miroir"
 template = true
@@ -173,8 +144,6 @@ block = """
 {{ vars.bucket_address }} s3.{{ exec(command=vars.collector_zone) | trim }}
 """
 
-# uv brings its own Python 3.12 (macOS 13 ships 3.9) and leaves the program at
-# ~/.local/bin/miroir-collector. Reinstalls only when the pin changes.
 [bootstrap.hooks.post-tools]
 description = "Install the pinned Miroir collector"
 run = '''
@@ -184,10 +153,7 @@ have="collector-v$("$HOME/.local/bin/miroir-collector" --version 2>/dev/null | a
 	"git+https://github.com/h-wb/pipelines@$want#subdirectory=collector"
 '''
 
-# One pass, then it exits; a pass with nothing new takes a fraction of a
-# second. The shell only reads the token: it execs the collector, so the
-# process that opens the Messages database is the collector's own Python (the
-# one to give Full Disk Access).
+# Grant Full Disk Access to the collector's Python, not /bin/sh.
 [bootstrap.macos.launchd.agents.miroir-collector]
 program = "/bin/sh"
 args = [
@@ -337,8 +303,7 @@ description = "The main site's gateway answers through the tunnel"
 run = "nc -z -G 5 192.168.1.202 443"
 hint = "scutil --nc status wg-main; the wireguard agent retries every minute and logs to ~/Library/Logs/edge-mac.log"
 
-# Without a token Miroir answers 401; anything else means the tunnel or
-# /etc/hosts is in the way.
+# A 401 confirms the unauthenticated request reached Miroir.
 [doctor.checks.collector-route]
 description = "Miroir answers by name"
 run = '''
@@ -347,9 +312,7 @@ run = '''
 '''
 hint = "the tunnel (check above), then the miroir block in /etc/hosts"
 
-# The collector exits 0 after a pass that delivered or found nothing new.
 [doctor.checks.collector-run]
 description = "The collector's last pass succeeded"
 run = '''launchctl print "gui/$(id -u)/dev.mise.miroir-collector" | grep -q "last exit code = 0"'''
 hint = "~/Library/Logs/miroir-collector.log; a first run needs Full Disk Access for the collector's Python (README)"
-

@@ -46,20 +46,12 @@ depends = [":ssh:agent"]
 secrets = ["EDGE_MAC"]
 run = '''{{ vars.ssh }} "$EDGE_MAC" 'launchctl kickstart "gui/$(id -u)/dev.mise.edge-reboot"' '''
 
-# What the Mac needs that is not in git, from Proton Pass to files only that
-# user can read: the domain and the delivery token for the collector, and the
-# WireGuard tunnel's configuration. They travel on the connection's standard
-# input, never on a command line.
-#
-# The tunnel must be a split one. A `DNS` line would send every lookup on the
-# Mac through it, and a catch-all route would carry the Mac's own traffic away
-# from its LAN, on a machine that is only reached through that LAN: both are
-# refused here, before anything is sent.
 [tasks.secrets]
-description = "Put the domain, the Messages delivery token and the WireGuard configuration on the edge Mac"
+description = "Provision the collector and WireGuard secrets on the edge Mac"
 depends = [":ssh:agent"]
 secrets = ["EDGE_MAC", "SECRET_DOMAIN", "MIROIR_TOKEN_MESSAGES", "EDGE_MAC_WG_CONF"]
 run = '''
+# Keep DNS and the default route on the edge Mac's LAN.
 if printf '%s\n' "$EDGE_MAC_WG_CONF" | grep -Eiq '^[[:space:]]*DNS[[:space:]]*='; then
 	echo 'the WireGuard configuration has a DNS line: remove it (README, "WireGuard")' >&2
 	exit 1
