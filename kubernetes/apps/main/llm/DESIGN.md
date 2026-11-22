@@ -8,6 +8,10 @@ to change to get there.
 The design is written in roles. Product and model names appear as the current
 choice for a role, for reference; swapping one does not change the design.
 
+How the assistant comes to know what you are doing, and how it decides when to
+speak, is a design of its own: [Awareness](./docs/awareness.md). The data it
+would read is the [data warehouse](../automation/miroir/README.md).
+
 ![The map: three places in two scopes, sharing a model gateway, a tool catalogue and a memory store per scope](./docs/img/map.svg)
 
 ## The rule

@@ -2,13 +2,14 @@
 
 What is deployed. The rest of the documentation:
 
-| Document                               | What it holds                                                         |
-| -------------------------------------- | --------------------------------------------------------------------- |
-| [DESIGN.md](./DESIGN.md)               | The target: the rule, roles, decisions, what is left to do            |
-| [docs/flows.md](./docs/flows.md)       | How work moves, one diagram per flow                                  |
-| [docs/wiring.md](./docs/wiring.md)     | How each agent connects today, and where that differs from the design |
-| [paseo/README.md](./paseo/README.md)   | The two workshops: pods, config, credentials, volumes                 |
-| [hermes/README.md](./hermes/README.md) | The assistant: messaging, dashboard, credentials and Matrix setup     |
+| Document                                 | What it holds                                                          |
+| ---------------------------------------- | ---------------------------------------------------------------------- |
+| [DESIGN.md](./DESIGN.md)                 | The target: the rule, roles, decisions, what is left to do             |
+| [docs/flows.md](./docs/flows.md)         | How work moves, one diagram per flow                                   |
+| [docs/wiring.md](./docs/wiring.md)       | How each agent connects today, and where that differs from the design  |
+| [docs/awareness.md](./docs/awareness.md) | How the assistant comes to know what you are doing, and when it speaks |
+| [paseo/README.md](./paseo/README.md)     | The two workshops: pods, config, credentials, volumes                  |
+| [hermes/README.md](./hermes/README.md)   | The assistant: messaging, dashboard, credentials and Matrix setup      |
 
 `docs/build.py` draws the documents' diagrams (`docs/img/`) from the Mermaid text
 folded under each one, and the same drawings as one published page. Change a flow
