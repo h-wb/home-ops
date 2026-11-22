@@ -1,6 +1,6 @@
 ---
 name: weekly-review
-description: Send the weekly review (wins, inbox, overdue, waiting, each active project's next step, the next seven days, one idea from the vault). Use when the weekly-review routine runs or when asked for the weekly review.
+description: Send the weekly review and suggest stale tasks to park in Someday. Use when the weekly-review routine runs or when asked for the weekly review.
 metadata:
   schedule: "0 18 * * 0"
   model: mistral/mistral-large-4
@@ -41,6 +41,23 @@ found, search for the part after `mcp__tools__`. The timezone is
    `modified` first. Take the one whose position, counted from 0, is this
    week's number modulo how many there are.
 
+7. Parking candidates, so old tasks do not pile up. Use
+   `mcp__tools__ticktick_list_projects` to resolve a unique personal Someday
+   list and the personal source lists (Admin, Health, Growth, Homelab, Life).
+   Never use a shared list as source or destination. A task from step 2
+   qualifies only when all of these hold:
+   - it is in one of those source lists, not Inbox, Build or Someday;
+   - it has no `dueDate`, `startDate`, recurrence, reminders or assignee;
+   - it has no `parentId` or subtasks and is not linked as an active project
+     in step 4;
+   - its `priority` is not 5 and it is not tagged `waiting`;
+   - its `modifiedTime` is known and more than 30 days ago.
+
+   Use the task and list detail queries if the summary results omit fields
+   needed for these checks. Suggest at most three, oldest `modifiedTime`
+   first. If a required lookup fails or eligibility cannot be checked, omit
+   those suggestions. Never move anything from this routine.
+
 If a call fails, go on with the others and say which source is missing.
 
 ## Write
@@ -71,18 +88,22 @@ Next seven days
 One idea
 6. <idea> (seed since <date>): task, project, or leave it?
 
-Answer with numbers, for example "1 ok, 2 drop, 5 book flights Friday, 6 leave".
+Could park in Someday
+7. <task> (from <list>, untouched since <date>)
+
+Answer with numbers, for example "1 ok, 2 drop, 5 book flights Friday, 6 leave, park 7".
 ```
 
 - Number only the items that need an answer, in one sequence. Done tasks,
   the vault inbox line and the next seven days get a dash.
 - Done this week: the count, then at most five titles, the most recent first.
-- For each inbox task, suggest a list as the evening check-in does: Admin,
-  Health, Growth, Homelab, Life, or `drop`.
+- Use the evening check-in's rules for Inbox suggestions.
 - A project with a `url` and no `ticktick` keeps its steps in a repo: write
   "<project>: steps in the repo", without a number.
 - More than three active projects: add "More than three active: which goes
   back to backlog?" as its own numbered item.
+- Parking candidates need no answer. Nothing moves without "park" and the
+  number in reply to this review.
 - At most ten items per section, then "and N more". Leave empty sections out.
 - Nothing else: no advice, no summary.
 

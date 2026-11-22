@@ -81,7 +81,7 @@ flowchart LR
 - Matrix: the bot is on our own homeserver (`default/continuwuity`), reached
   in-cluster; the homeserver, not the pod, federates with Beeper. It requires
   end-to-end encryption and answers the Matrix IDs on its allow list;
-  approvals are reactions. Routines still deliver to Telegram.
+  approvals are reactions. Routines also deliver to Matrix.
 - Dashboard: `hermes.<domain>` on `envoy-internal`, password sign-in; the only
   inbound connection the pod's rules allow. The iOS apps use the same address.
 - Key: `hermes-private`, four models served by Mistral's API: Mistral Medium
@@ -97,19 +97,24 @@ flowchart LR
   workshops' one. General memory it can only read.
 - Routines: skills in `hermes/app/routines/`, mounted read-only. One whose
   front matter has a schedule gets a job when the pod starts, on Toronto time,
-  delivered to Telegram: the briefing at 07:00, a nudge at 12:30, a check-in
+  delivered to Matrix: the briefing at 07:00, a nudge at 12:30, a check-in
   at 20:30, reminders every half hour from 08:00 to 21:30, silent when
   nothing is coming up, and a weekly review on Sunday at 18:00. The briefing and check-in see every overdue task, not
-  only the last week. The briefing proposes up to three focus tasks (high
-  priority once you confirm) and offers one old undated task a day; the
-  check-in opens with what got done and suggests a list for each inbox task. A routine's message joins
-  the chat, so you can answer it; the `task-followup` skill then completes,
+  only the last week. The briefing proposes up to three focus tasks, each
+  with a first step of ten minutes or less. Confirming sets priority without
+  adding a date, so the last confirmed focus is visible even if nothing is
+  due. The weekly review suggests up to three stale tasks to park in
+  `Someday`; only an explicit reply moves them. The check-in opens with what
+  got done and suggests a destination for each inbox task it shows. A
+  routine's message joins the chat so you can answer it; `task-followup` completes,
   moves, drops or files the tasks and notes each postponement as a comment on
   the task.
 - A scheduled run has nobody to ask, so a call that needs a yes is refused.
   The TickTick task writes approved for good need none, so a scheduled run
   could make them; the routines are written to read only, which is an
   instruction and not a lock.
+- [TickTick setup](ticktick.md) covers the personal filters, quiet Build
+  handoffs and the iCloud planner.
 - Documentation: its `system-docs` skill lists these pages, and it reads them
   from git through the GitHub tool. It holds no copy.
 - Shared skills: the general skills folder in dotfiles (`conf.d/ai/skills`) is

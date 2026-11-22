@@ -23,6 +23,10 @@ Call these tools by their exact names with `tool_call`.
    - Overdue: a `dueDate` before today, however old. Drop any that step 1
      already returned.
    - Inbox: a `projectId` that starts with `inbox`.
+   - Undated focus: priority 5 with neither a `dueDate` nor a `startDate` in
+     Admin, Health, Growth, Homelab or Life, and not tagged `waiting`.
+     Resolve those list ids with `mcp__tools__ticktick_list_projects`; skip
+     undated focus if lookup fails. Do not duplicate a task from step 1.
 3. For each task of steps 1 and 2 that has a due date, at most ten:
    `mcp__tools__ticktick_get_comment` with its `project_id` and `task_id`. A
    comment that starts with `Postponed` gives how many times it was moved. If
@@ -31,7 +35,7 @@ Call these tools by their exact names with `tool_call`.
    `search: {startDate: today at 00:00, endDate: now}` and
    `client_timezone: "America/Toronto"`: what got done today.
 
-If all three lists of steps 1 and 2 are empty, write the done line and
+If all four lists of steps 1 and 2 are empty, write the done line and
 "Everything due today is done." and stop.
 
 ## Write
@@ -52,14 +56,18 @@ Inbox, where do these go?
 ```
 
 - The done line comes first. Leave it out when nothing got done: no blame.
-- Focus tasks (priority 5) first, marked `(focus)`.
+- Include undated focus under "Did you get to these?". Focus tasks first,
+  marked `(focus)`.
 - One numbering across all sections, so the user can answer "1 and 3 done,
   2 tomorrow, inbox ok".
 - At most ten tasks in the first two sections, then "and N more". At most five
   inbox tasks.
 - For each inbox task, suggest one list from its title: Admin (money, papers,
   accounts), Health, Growth (learning, work), Homelab (servers, software),
-  Life (home, people, errands, trips). Suggest `drop` for a bare link or
+  Life (home, people, errands, trips). Suggest `Someday` for an undated
+  action worth parking, or Obsidian for an idea with no concrete action.
+  Suggest Karakeep for a saved link with no action. Obsidian and Karakeep
+  suggestions are not file or drop instructions. Suggest `drop` only for
   something already past.
 - For a task postponed three times or more, add on its own line:
   "<task> has slipped <N> times: drop it, make it smaller, or block a time?"

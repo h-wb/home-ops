@@ -19,15 +19,19 @@ Call these tools by their exact names with `tool_call`.
    still open today.
 2. `mcp__tools__ticktick_filter_tasks` with `filter: {status: [0]}` and
    `client_timezone: "America/Toronto"`: every open task. Keep those with a
-   `dueDate` before today, however old: what is overdue. Drop any that step 1
-   already returned.
+   `dueDate` before today for the overdue count. Also keep undated priority-5
+   tasks (no `dueDate`, no `startDate`, not tagged `waiting`) from Admin,
+   Health, Growth, Homelab or Life for the main list. Resolve these ids
+   with `mcp__tools__ticktick_list_projects`; skip undated focus if lookup
+   fails. Drop duplicates from step 1.
 
-If nothing is open today and nothing is overdue, reply with only `[SILENT]`.
+If nothing is open today, in undated focus or overdue, reply with only
+`[SILENT]`.
 
 ## Write
 
 ```
-Still open today
+Still open: today and focus
 - <time if it has one> <task>
 
 Overdue: <N>, oldest: <task> (due <date>)

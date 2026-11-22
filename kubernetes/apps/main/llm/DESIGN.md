@@ -393,6 +393,7 @@ A new harness or machine picks a scope; it does not get its own config.
 | 2026-11-11 | Matrix replaces iMessage: a second Apple ID and an always-awake Mac were too much            |
 | 2026-11-11 | The Matrix homeserver is our own (Continuwuity), federating with Beeper only                 |
 | 2026-11-11 | The assistant's dashboard is reachable on the LAN and tailnet, behind a password             |
+| 2026-11-22 | Focus uses priority, not dates; scheduled routines only suggest what to park in Someday      |
 
 ## Open
 
