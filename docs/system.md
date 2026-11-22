@@ -97,12 +97,26 @@ is described in [awareness](../kubernetes/apps/main/llm/docs/awareness.md).
 
 **The shared task list.** Today your tasks are in your task app, which only the
 assistant can reach, and the build's tasks are in three places: a placeholder
-board, pull requests, and agents' own notes. Proposal: your task app stays the
-one list for everything you do, the build included, in its own list; a narrow
-tool lets general agents read and write that one list and nothing else; the
-placeholder boards go. The rule that decides what may be in that list is the
-[scope rule](../kubernetes/apps/main/llm/DESIGN.md#the-rule): general agents
-read it, so nothing private goes there.
+board, pull requests, and agents' own notes. Proposal (2026-11-22), which
+splits by list and not by tool:
+
+- One app for you: your task app, with your own lists as they are and one
+  list for the build. A narrow tool lets general agents read and write that
+  one list and nothing else, so nothing private goes in it
+  ([the scope rule](../kubernetes/apps/main/llm/DESIGN.md#the-rule)). The
+  placeholder boards go.
+- The build's list holds only what needs you: a decision, a step on a screen,
+  a merge, and the ideas you noted. Work an agent does from start to finish is
+  not a task of yours: it lives in its pull request, and reaches the list only
+  as one item when it needs you.
+- Nothing in the build's list has a date or a reminder unless you give it one,
+  so it never shows in your day and never notifies. It comes up in the weekly
+  review, as one summary: what moved, what waits for you, what is next.
+- The whole picture is this page, not the list: three things in "now", the
+  milestones, and what is parked.
+
+Later: a task you write for an agent is picked up from that list, worked, and
+comes back done or waiting for you.
 
 **One place to read and write.** The pages are spread over three repos, and
 your notes are in the vault. Your idea (2026-11-22): Obsidian is where the
