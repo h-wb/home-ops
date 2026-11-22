@@ -20,6 +20,7 @@ and no mise of its own. `diff` shows what `apply` would change.
 | agent `miroir-collector` | Every minute: send new messages and attachments to Miroir ([below](#miroir-collector))                                                                    |
 | agent `wireguard`        | Every minute: bring the tunnel to the main site up if it is down                                                                                          |
 | `/etc/hosts` block       | Miroir's and its bucket's names, pointed at the main site's gateways                                                                                      |
+| `post-packages` hook     | Installs WireGuard from the App Store, with the pinned `mas`                                                                                              |
 | `post-tools` hook        | Installs the pinned `miroir-collector` with a Python of its own                                                                                           |
 | sshd drop-in             | Key-only login                                                                                                                                            |
 | `final` hook             | Never sleep (lid closed included); no self-installing macOS updates; a sudoers rule letting admins run `shutdown -r now` without a password, for `reboot` |
@@ -76,10 +77,11 @@ macOS has no API for these without MDM. `check` reports the first one.
 7. After the first `apply`, approve the "control UTM" prompt on the Mac's
    screen. `apply` has to run while that user is logged in at the desktop:
    LaunchAgents only load into a live login session.
-8. WireGuard, for the tunnel to the main site ([below](#wireguard)): install it
-   from the App Store, then "Import tunnel(s) from file", Cmd-Shift-G,
+8. WireGuard, for the tunnel to the main site ([below](#wireguard)). Sign in to
+   the App Store once, so `apply` can install the app. After the `apply` that
+   installed it: open WireGuard, "Import tunnel(s) from file", Cmd-Shift-G,
    `~/.config/wireguard/wg-main.conf` (the `secrets` task puts it there), and
-   allow the VPN configuration. After that the `wireguard` agent keeps the
+   allow the VPN configuration. From then on the `wireguard` agent keeps the
    tunnel up; "On-Demand" in the app is not needed.
 9. Full Disk Access for the collector's Python, so it may read the Messages
    database: Privacy & Security → Full Disk Access → `+`, then Cmd-Shift-G and
@@ -130,10 +132,12 @@ a split tunnel, and the `secrets` task refuses one that is not:
 On the WireGuard server, limit that peer to those two addresses on port 443 if
 it can: this Mac's disk is not encrypted, and the key is on it.
 
-The app comes from the App Store and the import is one click on the Mac's
-screen ("Once, by hand"); neither can be scripted. Everything else is applied:
-the configuration file, the agent that runs `scutil --nc start wg-main` every
-minute and at login, and three checks. To change the peer: update the item,
+Everything but one click is applied: the app, installed from the App Store
+by a hook (it puts the pinned `mas` in `/usr/local/bin` first, and needs this
+Mac signed in to the App Store), the configuration file, the agent that runs
+`scutil --nc start wg-main` every minute and at login, and four checks. The
+import into the app is on the Mac's screen ("Once, by hand"): macOS asks there
+whether the app may add a VPN configuration. To change the peer: update the item,
 run `secrets`, then remove the tunnel in the app and import the file again.
 
 ## Miroir collector
@@ -163,11 +167,12 @@ configuration. First time, in this order:
    `~/.config/miroir-collector/zone` and `token` and
    `~/.config/wireguard/wg-main.conf` on the Mac, readable by that user only.
    The token can only add data to that one connection.
-3. WireGuard: install and import, as in "Once, by hand".
-4. `apply`. It renders the collector's configuration and the `/etc/hosts`
-   block from the domain, installs the collector and loads the two agents.
-5. Full Disk Access, as in "Once, by hand".
-6. `check`, a minute later: the `secrets`, `wireguard` and `collector` checks.
+3. `apply`. It installs WireGuard and the collector, renders the collector's
+   configuration and the `/etc/hosts` block from the domain, and loads the two
+   agents.
+4. On the Mac's screen: import the tunnel and give the collector Full Disk
+   Access, as in "Once, by hand".
+5. `check`, a minute later: the `secrets`, `wireguard` and `collector` checks.
 
 To watch it: `~/Library/Logs/miroir-collector.log` on the Mac (one line per
 pass, never content), and the `messages` connection's page in Miroir, where
