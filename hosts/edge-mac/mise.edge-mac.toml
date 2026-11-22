@@ -7,13 +7,14 @@ collector_version = "collector-v0.3.0"
 miroir_address = "192.168.1.202"
 bucket_address = "192.168.1.201"
 tunnel = "wg-main"
-mas_version = "7.0.0"
-mas_sha256 = "9bca1de1fb6ea19c9e0b9d7b7c85249020c9ed65a9d434c2ef40896a2f3395f9"
-wireguard_app = "1451685025"
 collector_zone = "cat ~/.config/miroir-collector/zone 2>/dev/null || true"
 
 [tools]
+mas = "6.0.1" # Standalone binary; 7.x needs jq on macOS 13.
 uv = "0.13.9"
+
+[bootstrap.packages]
+"mas:1451685025" = "latest" # WireGuard
 
 # Pinned GitHub releases; sha256 is the asset's `digest` in the release API.
 # An app already in /Applications is adopted only when identical to the pin,
@@ -83,25 +84,6 @@ host = "current"
 
 [bootstrap.directories."~/.config/wireguard"]
 mode = "0700"
-
-# Remote bootstrap needs to install mas before it can use it over SSH.
-[bootstrap.hooks.post-packages]
-description = "Install WireGuard from the App Store"
-run = '''
-[ -d /Applications/WireGuard.app ] && exit 0
-PATH="/usr/local/bin:$PATH"
-if [ "$(mas version 2>/dev/null)" != "{{ vars.mas_version }}" ]; then
-	dir=$(mktemp -d)
-	curl -fsSL -o "$dir/mas.pkg" \
-		"https://github.com/mas-cli/mas/releases/download/v{{ vars.mas_version }}/mas-{{ vars.mas_version }}-x86_64.pkg"
-	echo "{{ vars.mas_sha256 }}  $dir/mas.pkg" | shasum -a 256 -c - >/dev/null
-	sudo installer -pkg "$dir/mas.pkg" -target / >/dev/null
-	rm -rf "$dir"
-fi
-# `install` for an app this account already has, `get` for one it never had.
-mas install {{ vars.wireguard_app }} || mas get {{ vars.wireguard_app }} ||
-	echo "WireGuard not installed: sign in to the App Store on the Mac's screen, then apply again" >&2
-'''
 
 [bootstrap.macos.launchd.agents.wireguard]
 program = "/usr/sbin/scutil"
@@ -291,7 +273,7 @@ hint = "mise run //hosts/edge-mac:secrets from a workstation, then apply"
 [doctor.checks.wireguard-app]
 description = "WireGuard is installed"
 run = "[ -d /Applications/WireGuard.app ]"
-hint = "sign in to the App Store on the Mac's screen, then apply: the post-packages hook installs it"
+hint = "sign in to the App Store and claim WireGuard, then rerun apply (see README)"
 
 [doctor.checks.wireguard-tunnel]
 description = "The WireGuard tunnel is imported"

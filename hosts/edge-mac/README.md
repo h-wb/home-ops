@@ -101,8 +101,10 @@ new messages and locally stored attachments to Miroir every minute.
    `PersistentKeepalive = 25`. Omit `DNS` and default routes so the Mac stays
    reachable on the edge LAN. If supported, restrict the peer to HTTPS on
    those two addresses on the WireGuard server.
-2. Sign in to the App Store on the Mac. From a workstation, run
-   `mise run //hosts/edge-mac:secrets`, then `mise run //hosts/edge-mac:apply`.
+2. Sign in to the App Store on the Mac and claim WireGuard if the account
+   hasn't already. From a workstation, run `mise run //hosts/edge-mac:secrets`,
+   then `mise run //hosts/edge-mac:apply`. If `apply` skips WireGuard because
+   `mas` isn't installed yet, rerun it: mise installs tools after packages.
 3. In WireGuard, import `~/.config/wireguard/wg-main.conf` and allow the VPN
    configuration. When rotating the peer, rerun `secrets` and reimport it.
 4. On the Mac, open Privacy & Security → Full Disk Access. Add the collector's
