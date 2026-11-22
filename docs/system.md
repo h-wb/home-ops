@@ -32,23 +32,23 @@ the others, with its own blocks in the calendar.
 
 ## The parts
 
-| Part          | What it does                                                   | State                                        | Its page                                                                 |
-| ------------- | -------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------ |
-| Model gateway | The only path to any model; each client's key lists its models | Works                                        | [llm](../kubernetes/apps/main/llm/README.md)                             |
-| Tool gateways | One catalogue of tools, served per scope                       | Works                                        | [llm](../kubernetes/apps/main/llm/README.md)                             |
-| Memory        | What agents remember between sessions, one store per scope     | Works                                        | [llm](../kubernetes/apps/main/llm/README.md)                             |
-| Workshops     | Where agents with a shell work on repos, one per scope         | Works                                        | [paseo](../kubernetes/apps/main/llm/paseo/README.md)                     |
-| Assistant     | Talks to you, runs routines, acts through named tools          | Works, on a clock                            | [hermes](../kubernetes/apps/main/llm/hermes/README.md)                   |
-| Awareness     | How the assistant knows what is going on and when to speak     | Designed, not built                          | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
-| Warehouse     | Every source mirrored into one database, for good              | Works                                        | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
-| Collectors    | On a device: read local sources, mask, deliver                 | Works on the MacBook; edge Mac being set up  | [edge-mac](../hosts/edge-mac/README.md), dotfiles                        |
-| Dashboards    | One collection per source                                      | Works                                        | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
-| Timeline      | Look back at a day: screen, browser, later conversations       | Data and API work; pages being built         | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
-| Tasks         | The one list of what is to do, for you and for the build       | Yours works; no shared one for the build yet | [Open](#open)                                                            |
-| Calendar      | The plan: what happens when, and what time is free             | Events are read; the plan is not in it yet   | [awareness](../kubernetes/apps/main/llm/docs/awareness.md#getting-there) |
-| Notes         | Your own notes, private                                        | Works                                        | [llm](../kubernetes/apps/main/llm/README.md#where-things-live)           |
-| Location      | Where you were                                                 | Works, in its own service                    | –                                                                        |
-| Home hub      | Home automation; later the live signals                        | Works; no live signals                       | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
+| Part          | What it does                                                   | State                                                       | Its page                                                                 |
+| ------------- | -------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Model gateway | The only path to any model; each client's key lists its models | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md)                             |
+| Tool gateways | One catalogue of tools, served per scope                       | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md)                             |
+| Memory        | What agents remember between sessions, one store per scope     | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md)                             |
+| Workshops     | Where agents with a shell work on repos, one per scope         | Works                                                       | [paseo](../kubernetes/apps/main/llm/paseo/README.md)                     |
+| Assistant     | Talks to you, runs routines, acts through named tools          | Works, on a clock                                           | [hermes](../kubernetes/apps/main/llm/hermes/README.md)                   |
+| Awareness     | How the assistant knows what is going on and when to speak     | Designed, not built                                         | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
+| Warehouse     | Every source mirrored into one database, for good              | Works                                                       | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
+| Collectors    | On a device: read local sources, mask, deliver                 | Works on the MacBook; edge Mac being set up                 | [edge-mac](../hosts/edge-mac/README.md), dotfiles                        |
+| Dashboards    | One collection per source                                      | Works                                                       | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
+| Timeline      | Look back at a day: screen, browser, later conversations       | Data and API work; pages being built                        | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
+| Tasks         | The one list of what is to do, for you and for the build       | Yours works; a Build board exists, agents not connected yet | [Open](#open)                                                            |
+| Calendar      | The plan: what happens when, and what time is free             | Events are read; the plan is not in it yet                  | [awareness](../kubernetes/apps/main/llm/docs/awareness.md#getting-there) |
+| Notes         | Your own notes, private                                        | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md#where-things-live)           |
+| Location      | Where you were                                                 | Works, in its own service                                   | –                                                                        |
+| Home hub      | Home automation; later the live signals                        | Works; no live signals                                      | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
 
 Design and rules behind all of it:
 [DESIGN.md](../kubernetes/apps/main/llm/DESIGN.md). Who may see what is its
