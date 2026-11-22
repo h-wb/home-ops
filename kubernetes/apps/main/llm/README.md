@@ -4,6 +4,7 @@ What is deployed. The rest of the documentation:
 
 | Document                                 | What it holds                                                          |
 | ---------------------------------------- | ---------------------------------------------------------------------- |
+| [The map](../../../../docs/system.md)    | Every part of the system, the plan, what is being worked on now        |
 | [DESIGN.md](./DESIGN.md)                 | The target: the rule, roles, decisions, what is left to do             |
 | [docs/flows.md](./docs/flows.md)         | How work moves, one diagram per flow                                   |
 | [docs/wiring.md](./docs/wiring.md)       | How each agent connects today, and where that differs from the design  |

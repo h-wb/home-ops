@@ -4,7 +4,8 @@ Every service and device you use, mirrored into one Postgres, so the data
 outlives each service's own retention and can be joined across sources. Miroir
 is the program that receives, loads and models it. Its code is in
 [h-wb/pipelines](https://github.com/h-wb/pipelines); this page is what is
-deployed here and how the parts fit across the three repos.
+deployed here and how the parts fit across the three repos. Where it sits in the
+whole system is on [the map](../../../../../docs/system.md).
 
 | Document                                                                                      | What it holds                                                    |
 | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |

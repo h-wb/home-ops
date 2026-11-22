@@ -5,6 +5,9 @@ Target design, worked out from 2026-11-19 to 2026-11-22. It extends
 acts; this one says how the assistant comes to know what you are doing, and how
 it decides when to speak.
 
+Where this sits among the other parts, and what is being worked on now, is
+on [the map](../../../../../docs/system.md).
+
 Most of this page is not built. What exists today is the collecting side: the
 [data warehouse](../../automation/miroir/README.md) and the feeds that fill it.
 Every section says what works and what is planned, and
@@ -29,6 +32,10 @@ The goal, as you stated it:
   with you, proposing changes.
 - **Telling it something costs nothing.** A sentence to the phone, the watch or
   the chat is enough.
+- **It serves the plan, its own building included.** The point is time spent
+  well and being present, not a system to tend. Every project, this one too,
+  has its blocks in the calendar; the assistant plans around them and says
+  when one has run over.
 
 Today every message the assistant starts by itself is clock-driven: a briefing,
 a midday nudge, an evening check-in, a weekly review and a reminder poll. Nothing
@@ -492,9 +499,13 @@ Next, in order:
 1. **Spine.** The Now room and a room per routine, with a daily budget for
    Now, starting at three; exact-time reminders sent without a model; the
    snapshot (`now`) from tasks, calendar, place and the Mac's state.
-2. **Mail and calendar.** Tools that read both and write the calendar. The
-   catalogue has neither; today the assistant sees only the calendar events
-   the task service shows it.
+2. **The plan, then mail and calendar tools.** Your part comes first: the
+   things you do every week (workouts, meals, time for each project, this one
+   included) go in the calendar as real blocks. Until they are there, the
+   assistant cannot tell a free hour from one that is spoken for, and has
+   nothing to move a slipped task into. Then tools that read mail and the
+   calendar and write the calendar. The catalogue has neither; today the
+   assistant sees only the calendar events the task service shows it.
 3. **Live path.** Home Assistant's apps on the phone and the Mac (neither is
    installed, so there is no live signal from either yet), the assistant's
    wake-up route, one rule and one kind of prompt ("home, thirty free minutes,

@@ -2,6 +2,10 @@
 
 Home Kubernetes monorepo managed with GitOps. Read this before suggesting changes to the repo.
 
+The personal system that runs on it (assistant, data warehouse, collectors) has one map:
+[docs/system.md](./docs/system.md). Read it before working on any of those parts, and update
+its row for a part you change.
+
 ## Repository layout
 
 ```
