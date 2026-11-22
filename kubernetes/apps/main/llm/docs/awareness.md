@@ -179,7 +179,8 @@ Today: the record side is deployed and described in the
 [warehouse page](../../automation/miroir/README.md). The live side is a design.
 Its hub would be Home Assistant, which already runs (on the edge cluster), is
 already one of the assistant's tool servers, and can hold rules as plain
-automations; its Mac app would add the front app and active-or-idle. Hermes can
+automations. Its apps are on neither the phone nor the Mac yet; the Mac app
+would add the front app and active-or-idle, the phone app place and focus mode. Hermes can
 be woken by a web call, but no such route is configured: the assistant's pod
 accepts nothing but its dashboard, and its scheduler is the only thing that
 starts a run.
@@ -424,8 +425,8 @@ reading source code; only the first three rows have run on real machines.
 | App, window title and URL per capture       | Screencap (masks secrets at capture)         | A trial beside ScreenMemory was proposed, not run |
 | App and window spans, away time             | ActivityWatch                                | Not installed; mostly duplicated by Screencap     |
 | Phone app usage, minutes late               | Apple's usage store on the Mac               | Not built; undocumented, about 28 days kept       |
-| Front app, active or idle, at once          | Home Assistant's Mac app                     | Not installed                                     |
-| Place, focus mode                           | Home Assistant's phone app                   | To check                                          |
+| Front app, active or idle, at once          | Home Assistant's Mac app                     | Not installed; to add                             |
+| Place, focus mode                           | Home Assistant's phone app                   | Not installed; to add                             |
 | Agent work: title, project, needs attention | The workshops' own records                   | The assistant already has the tools to read them  |
 | "When I open this app" on the phone         | Phone automations                            | Reported unreliable; not relied on                |
 
@@ -488,21 +489,33 @@ In progress:
 
 Next, in order:
 
-1. **Spine.** The Now room and a room per routine; exact-time reminders sent
-   without a model; the snapshot (`now`) from tasks, calendar, place and the
-   Mac's state.
-2. **Live path.** The home hub's Mac and phone apps, the assistant's wake-up
-   route, one rule and one kind of prompt ("home, thirty free minutes, here is
-   one task"), and the prompt log from the first prompt on. Run it for two
-   weeks before adding anything.
-3. **Messages on the always-on Mac**, every minute, and the new-message
+1. **Spine.** The Now room and a room per routine, with a daily budget for
+   Now, starting at three; exact-time reminders sent without a model; the
+   snapshot (`now`) from tasks, calendar, place and the Mac's state.
+2. **Mail and calendar.** Tools that read both and write the calendar. The
+   catalogue has neither; today the assistant sees only the calendar events
+   the task service shows it.
+3. **Live path.** Home Assistant's apps on the phone and the Mac (neither is
+   installed, so there is no live signal from either yet), the assistant's
+   wake-up route, one rule and one kind of prompt ("home, thirty free minutes,
+   here is one task"), and the prompt log from the first prompt on. Run it for
+   two weeks before adding anything.
+4. **Messages on the always-on Mac**, every minute, and the new-message
    doorbell.
-4. **Understand jobs**: span summaries and the `day` tool; then open loops from
+5. **Understand jobs**: span summaries and the `day` tool; then open loops from
    messages and mail.
-5. **The log feed**: voice, watch, chat.
-6. **Missed-task detection, the autonomy ladder and calendar writes.**
-7. **System review**: the weekly review proposes changes to its own rules and
+6. **The log feed**: voice, watch, chat.
+7. **Missed-task detection, the autonomy ladder and calendar writes.**
+8. **System review**: the weekly review proposes changes to its own rules and
    to your systems.
+
+Alongside, whenever there is a free week:
+
+- **The Screencap trial.** Run it beside ScreenMemory, unchanged as the
+  control, with no model key and auto-update off. Compare the load on the Mac,
+  whether browser addresses are there, and what its masking caught. If it
+  holds, it replaces ScreenMemory and gives the timeline its skeleton (app,
+  window title, address) from one source.
 
 Later: other chat networks, a contacts source so the same person lines up
 across networks, phone app usage, a decision model if the replay test supports
@@ -512,8 +525,7 @@ one.
 
 To decide:
 
-- The daily budget for the Now room. Proposal: three.
-- Whether Screencap replaces ScreenMemory, after a week side by side.
+- Which mail and calendar providers the tools should reach.
 - Where the gate's rules live: the home hub's automations (proposed) or a small
   service of our own.
 - Whether raw screenshots may go to the trusted provider's API for the spans
@@ -522,11 +534,11 @@ To decide:
 
 To verify:
 
-- The home hub's apps are on the phone and the Mac, and report focus mode and
-  the front app fast enough.
+- Once installed, the home hub's apps report focus mode and the front app fast
+  enough.
 - The assistant's wake-up route works, and a run started by it can deliver to a
   named room.
-- Mail and calendar: which providers, and which tools can read and write them.
+- Three prompts a day in the Now room is the right budget, after two weeks.
 - The trusted models write span summaries and extract open loops well enough.
 
 ## Decisions

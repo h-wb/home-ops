@@ -89,7 +89,8 @@ Agent Skills format), kept in git, so every agent here can read it.
 
 A routine is a skill in `hermes/app/routines/<name>/SKILL.md`. With
 `metadata.schedule` (a cron line, on your clock) and `metadata.model` in its
-front matter it also gets a scheduled job, delivered to Telegram. Without them
+front matter it also gets a scheduled job, delivered to the Inbox room on
+Matrix. Without them
 it is a skill the assistant loads when the task fits.
 
 To add one, write the folder and add its file to the `hermes-routines`
