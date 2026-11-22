@@ -25,9 +25,8 @@ spec:
   postBuild:
     substitute:
       CLUSTER: ${CLUSTER}
-      # Only the VIPs the edge site needs: remote write (.205), log shipping
-      # (.206), and Miroir (.207) with its media bucket (.208) for the edge
-      # Mac's collector. Never the whole LAN: main pods accept routes too, and
-      # a 192.168.1.0/24 route would capture their own LAN traffic into the
+      # Only the two VIPs the edge cluster's remote write and log shipping
+      # need — never the whole LAN: main pods accept routes too, and a
+      # 192.168.1.0/24 route would capture their own LAN traffic into the
       # tailnet. Approve these in the Tailscale admin console.
-      TAILSCALE_ROUTES: "192.168.1.205/32,192.168.1.206/32,192.168.1.207/32,192.168.1.208/32"
+      TAILSCALE_ROUTES: "192.168.1.205/32,192.168.1.206/32"

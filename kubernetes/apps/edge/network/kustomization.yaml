@@ -12,6 +12,5 @@ resources:
   - ./echo-server/ks.yaml
   - ./envoy-gateway/ks.yaml
   - ./k8s-gateway/ks.yaml
-  - ./miroir-relay/ks.yaml
   - ./multus/ks.yaml
   - ./tailscale/ks.yaml

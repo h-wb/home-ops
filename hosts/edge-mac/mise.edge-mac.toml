@@ -5,10 +5,13 @@ vm_name = "Talos"
 usb_device = "303A:831A" # the ZBT-2 Zigbee dongle, as VID:PID
 # A release tag of h-wb/pipelines; the same pin as the laptops' in dotfiles.
 collector_version = "collector-v0.3.0"
-# The edge cluster's internal gateway, which relays Miroir to this LAN
-# (kubernetes/apps/edge/network/miroir-relay).
-edge_gateway = "192.168.18.202"
-# Where collector:secrets leaves the two values that are not in git.
+# The main cluster's gateways, reached through the WireGuard tunnel: Miroir is
+# on the internal one, its media bucket on the external one.
+miroir_address = "192.168.1.202"
+bucket_address = "192.168.1.201"
+# The tunnel's name in the WireGuard app: the imported file's name.
+tunnel = "wg-main"
+# Where the `secrets` task leaves the domain, which is not in git.
 collector_zone = "cat ~/.config/miroir-collector/zone 2>/dev/null || true"
 
 # Only used during apply, to install the collector; nothing at run time needs
@@ -82,10 +85,30 @@ key = "idleTime"
 value = 60
 host = "current"
 
+# ── WireGuard to the main site ──────────────────────────────────────────────
+# Miroir is only served on the main site's LAN. This Mac reaches it the way
+# the MacBook does when away: a split WireGuard tunnel to that site, with this
+# Mac's own peer. The App Store app and the one-time import are by hand
+# (README); the tunnel's configuration comes from Proton Pass through the
+# `secrets` task, and this agent keeps it up.
+[bootstrap.directories."~/.config/wireguard"]
+mode = "0700"
+
+# Every minute, and at login: a no-op while the tunnel is connected. scutil
+# drives the tunnel's network extension, so the app need not be open.
+[bootstrap.macos.launchd.agents.wireguard]
+program = "/usr/sbin/scutil"
+args = ["--nc", "start", "{{ vars.tunnel }}"]
+run_at_load = true
+start_interval = 60
+process_type = "Background"
+stdout_path = "~/Library/Logs/edge-mac.log"
+stderr_path = "~/Library/Logs/edge-mac.log"
+
 # ── Miroir collector ────────────────────────────────────────────────────────
 # Reads this Mac's Messages database and delivers what is new to Miroir, every
-# minute (README, "Miroir collector"). The address and the delivery token are
-# not in git: `mise run //hosts/edge-mac:collector:secrets` writes them to
+# minute (README, "Miroir collector"). The domain and the delivery token are
+# not in git: `mise run //hosts/edge-mac:secrets` writes them to
 # ~/.config/miroir-collector/{zone,token}, and the templates below read the
 # first. Run it before apply.
 [bootstrap.directories."~/.config/miroir-collector"]
@@ -109,15 +132,17 @@ content = """
 }
 """
 
-# Miroir and its bucket are not in this site's DNS. Their names point at the
-# edge cluster's gateway, which holds a certificate for them.
+# Miroir and its bucket are not in this site's DNS, and pointing the whole
+# zone at the main site's resolver would make every lookup in it depend on the
+# tunnel. Two names are enough.
 [bootstrap.files."/etc/hosts"]
 id = "miroir"
 template = true
 owner = "root"
 group = "wheel"
 block = """
-{{ vars.edge_gateway }} miroir.{{ exec(command=vars.collector_zone) | trim }} s3.{{ exec(command=vars.collector_zone) | trim }}
+{{ vars.miroir_address }} miroir.{{ exec(command=vars.collector_zone) | trim }}
+{{ vars.bucket_address }} s3.{{ exec(command=vars.collector_zone) | trim }}
 """
 
 # uv brings its own Python 3.12 (macOS 13 ships 3.9) and leaves the program at
@@ -261,20 +286,33 @@ description = "The Miroir collector is installed"
 run = '"$HOME/.local/bin/miroir-collector" --version'
 hint = "apply installs it in the post-tools hook"
 
-[doctor.checks.collector-secrets]
-description = "The Miroir address and the delivery token are on this Mac"
-run = '[ -s "$HOME/.config/miroir-collector/zone" ] && [ -s "$HOME/.config/miroir-collector/token" ]'
-hint = "mise run //hosts/edge-mac:collector:secrets from a workstation, then apply"
+[doctor.checks.secrets]
+description = "The domain, the delivery token and the tunnel's configuration are on this Mac"
+run = '''
+[ -s "$HOME/.config/miroir-collector/zone" ] && [ -s "$HOME/.config/miroir-collector/token" ] &&
+	[ -s "$HOME/.config/wireguard/wg-main.conf" ]
+'''
+hint = "mise run //hosts/edge-mac:secrets from a workstation, then apply"
 
-# Without a token Miroir answers 401; anything else means the relay, the
-# tailnet or /etc/hosts is in the way.
+[doctor.checks.wireguard-tunnel]
+description = "The WireGuard tunnel is imported"
+run = '''scutil --nc list | grep -q '"wg-main"' '''
+hint = "WireGuard from the App Store, then Import tunnel(s) from file: ~/.config/wireguard/wg-main.conf (README)"
+
+[doctor.checks.wireguard-up]
+description = "The main site's gateway answers through the tunnel"
+run = "nc -z -G 5 192.168.1.202 443"
+hint = "scutil --nc status wg-main; the wireguard agent retries every minute and logs to ~/Library/Logs/edge-mac.log"
+
+# Without a token Miroir answers 401; anything else means the tunnel or
+# /etc/hosts is in the way.
 [doctor.checks.collector-route]
-description = "Miroir answers through the edge cluster's relay"
+description = "Miroir answers by name"
 run = '''
 [ "$(curl -s -o /dev/null -m 10 -w '%{http_code}' -X POST \
 	"https://miroir.$(cat "$HOME/.config/miroir-collector/zone")/api/connections/messages/report")" = 401 ]
 '''
-hint = "the miroir-relay pod on the edge cluster, the routes approved in Tailscale, the miroir block in /etc/hosts"
+hint = "the tunnel (check above), then the miroir block in /etc/hosts"
 
 # The collector exits 0 after a pass that delivered or found nothing new.
 [doctor.checks.collector-run]

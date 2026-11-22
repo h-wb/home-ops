@@ -46,19 +46,36 @@ depends = [":ssh:agent"]
 secrets = ["EDGE_MAC"]
 run = '''{{ vars.ssh }} "$EDGE_MAC" 'launchctl kickstart "gui/$(id -u)/dev.mise.edge-reboot"' '''
 
-# The two values the collector needs that are not in git, from Proton Pass to
-# files only that user can read. They travel on the connection's standard
+# What the Mac needs that is not in git, from Proton Pass to files only that
+# user can read: the domain and the delivery token for the collector, and the
+# WireGuard tunnel's configuration. They travel on the connection's standard
 # input, never on a command line.
-[tasks."collector:secrets"]
-description = "Put the Miroir address and the Messages delivery token on the edge Mac"
+#
+# The tunnel must be a split one. A `DNS` line would send every lookup on the
+# Mac through it, and a catch-all route would carry the Mac's own traffic away
+# from its LAN, on a machine that is only reached through that LAN: both are
+# refused here, before anything is sent.
+[tasks.secrets]
+description = "Put the domain, the Messages delivery token and the WireGuard configuration on the edge Mac"
 depends = [":ssh:agent"]
-secrets = ["EDGE_MAC", "SECRET_DOMAIN", "MIROIR_TOKEN_MESSAGES"]
+secrets = ["EDGE_MAC", "SECRET_DOMAIN", "MIROIR_TOKEN_MESSAGES", "EDGE_MAC_WG_CONF"]
 run = '''
-printf '%s\n%s\n' "$SECRET_DOMAIN" "$MIROIR_TOKEN_MESSAGES" | {{ vars.ssh }} "$EDGE_MAC" '
+if printf '%s\n' "$EDGE_MAC_WG_CONF" | grep -Eiq '^[[:space:]]*DNS[[:space:]]*='; then
+	echo 'the WireGuard configuration has a DNS line: remove it (README, "WireGuard")' >&2
+	exit 1
+fi
+if printf '%s\n' "$EDGE_MAC_WG_CONF" | grep -Ei '^[[:space:]]*AllowedIPs[[:space:]]*=' | grep -Eq '(^|[=,[:space:]])(0\.0\.0\.0|::)/0'; then
+	echo 'the WireGuard configuration routes everything: list only the addresses needed (README, "WireGuard")' >&2
+	exit 1
+fi
+printf '%s\n%s\n%s\n' "$SECRET_DOMAIN" "$MIROIR_TOKEN_MESSAGES" "$EDGE_MAC_WG_CONF" | {{ vars.ssh }} "$EDGE_MAC" '
 	umask 077
-	mkdir -p "$HOME/.config/miroir-collector" && cd "$HOME/.config/miroir-collector" || exit 1
+	mkdir -p "$HOME/.config/miroir-collector" "$HOME/.config/wireguard" || exit 1
 	IFS= read -r zone && IFS= read -r token && [ -n "$zone" ] && [ -n "$token" ] || { echo "nothing received" >&2; exit 1; }
-	printf "%s\n" "$zone" >zone && printf "%s" "$token" >token && echo "address and token written"
+	printf "%s\n" "$zone" >"$HOME/.config/miroir-collector/zone" &&
+		printf "%s" "$token" >"$HOME/.config/miroir-collector/token" &&
+		cat >"$HOME/.config/wireguard/wg-main.conf" &&
+		[ -s "$HOME/.config/wireguard/wg-main.conf" ] && echo "domain, token and tunnel configuration written"
 '
 '''
 
