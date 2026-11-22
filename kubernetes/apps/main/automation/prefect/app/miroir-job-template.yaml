@@ -11,7 +11,10 @@
 # parts, so no database password is duplicated anywhere. The only hand-placed
 # value is the Miroir master key in miroir-secret (owned by the `miroir`
 # ExternalSecret once its Bitwarden item exists). The Kubernetes worker keeps
-# valueFrom entries and merges them with per-deployment env. Applied by the
+# valueFrom entries and merges them with per-deployment env. The media bucket
+# key (also in miroir-secret) lets a flow run read stored files and write their
+# thumbnails (pipelines decision 040); optional, so a missing key only stops
+# thumbnail runs. Applied by the
 # miroir-worker init container on every start: prefect work-pool create ...
 # creates the pool or updates its template.
 apiVersion: v1
@@ -164,6 +167,26 @@ data:
                           "secretKeyRef": {
                             "name": "miroir-secret",
                             "key": "MIROIR_SECRET_KEY"
+                          }
+                        }
+                      },
+                      {
+                        "name": "MIROIR_MEDIA_ACCESS_KEY_ID",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "miroir-secret",
+                            "key": "MIROIR_MEDIA_ACCESS_KEY_ID",
+                            "optional": true
+                          }
+                        }
+                      },
+                      {
+                        "name": "MIROIR_MEDIA_SECRET_ACCESS_KEY",
+                        "valueFrom": {
+                          "secretKeyRef": {
+                            "name": "miroir-secret",
+                            "key": "MIROIR_MEDIA_SECRET_ACCESS_KEY",
+                            "optional": true
                           }
                         }
                       }
