@@ -101,22 +101,29 @@ board, pull requests, and agents' own notes. Proposal (2026-11-22), which
 splits by list and not by tool:
 
 - One app for you: your task app, with your own lists as they are and one
-  list for the build. A narrow tool lets general agents read and write that
-  one list and nothing else, so nothing private goes in it
-  ([the scope rule](../kubernetes/apps/main/llm/DESIGN.md#the-rule)). The
-  placeholder boards go.
+  list per project. The agents get an account of their own in that app, and
+  only the project lists are shared with it. A task is then assigned to you or
+  to the agents, and what the agents can see is decided by the app's own
+  sharing, not by a tool of ours: nothing private is shared, so nothing
+  private is seen ([the scope rule](../kubernetes/apps/main/llm/DESIGN.md#the-rule)).
+  The placeholder boards go.
 - The build's list holds only what needs you: a decision, a step on a screen,
   a merge, and the ideas you noted. Work an agent does from start to finish is
   not a task of yours: it lives in its pull request, and reaches the list only
   as one item when it needs you.
-- Nothing in the build's list has a date or a reminder unless you give it one,
-  so it never shows in your day and never notifies. It comes up in the weekly
+- Nothing in a project list has a date or a reminder unless you give it one,
+  and the list notifies only for what is assigned to you, so it never fills
+  your day. It comes up in the weekly
   review, as one summary: what moved, what waits for you, what is next.
 - The whole picture is this page, not the list: three things in "now", the
   milestones, and what is parked.
 
-Later: a task you write for an agent is picked up from that list, worked, and
-comes back done or waiting for you.
+Later: a task assigned to the agents is picked up from that list, worked, and
+comes back done or assigned to you.
+
+The calendar stays where it is (iCloud), shown inside the task app, where the
+assistant can read it. Fixed things and the blocks for each project are
+events; a block holds a project, not a task. The blocks are the budget.
 
 **One place to read and write.** The pages are spread over three repos, and
 your notes are in the vault. Your idea (2026-11-22): Obsidian is where the
