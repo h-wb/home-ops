@@ -104,14 +104,27 @@ placeholder boards go. The rule that decides what may be in that list is the
 [scope rule](../kubernetes/apps/main/llm/DESIGN.md#the-rule): general agents
 read it, so nothing private goes there.
 
-**One place to read.** The pages are spread over three repos, and your notes
-are in the vault. The idea: the vault becomes the one place to read
-everything. The constraint: the vault is private, and general agents cannot
-read it. Proposal: git stays where system pages are written, and they are
-copied into the vault, read-only, where you read them beside your notes. That
-direction (general to private) is the free one. Notes you write about the
-system stay in the vault; a page that general agents must follow has to live
-in git.
+**One place to read and write.** The pages are spread over three repos, and
+your notes are in the vault. Your idea (2026-11-22): Obsidian is where the
+system's pages are written, and GitHub shows the same pages. Proposal:
+
+- A vault of its own for them, not a folder of your vault. Your vault is
+  private and served to private agents; a public folder inside it is one drag,
+  one embed or one link away from publishing a note. The cost: no links
+  between the two vaults, and each has its own search.
+- That vault is a git repo. Obsidian edits plain Markdown files and GitHub
+  shows them, diagrams included, so there is one copy and no export. You write
+  in Obsidian; agents write through pull requests.
+- What moves there: this page, the designs, the flows, the overview of each
+  part: what you read to understand or run the system. What stays beside the
+  code: what only matters when changing that code, with a link to the vault.
+  The cost: a change to code and to its page becomes two pull requests.
+- Tasks do not go there. A task needs capture from anywhere, a date, a
+  reminder, and to be ticked by an agent without rewriting a page you have
+  open. The plan stays a page; the items live in the task list.
+
+To settle: public or only general (a private repo general agents can read),
+and how the phone edits it (the git plugin, or a sync like your vault's).
 
 **The budget for building.** How many blocks a week, and when.
 
