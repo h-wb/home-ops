@@ -19,7 +19,7 @@ spec:
           app:
             image:
               repository: ghcr.io/cenodude/crosswatch
-              tag: 0.14.7@sha256:3a000701f57b13bf0a24947111202fa4e64dd6b761990e9a468b14d858a7841c
+              tag: 0.14.8@sha256:6a38f351ef0172ea44d02e709f00e4c2347360599c7d4bf42e4fa159d137702c
             env:
               TZ: Europe/Paris
             securityContext:
