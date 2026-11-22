@@ -5,9 +5,10 @@ Zigbee dongle passed through, next to the BlueBubbles server. This directory
 makes the Mac come back on its own after a restart.
 
 It is a [mise bootstrap](https://mise.jdx.dev/bootstrap.html) project pushed
-over ssh: `mise run //hosts/edge-mac:apply` packs the directory, stages mise on
-the Mac for the run and applies `mise.edge-mac.toml`. The Mac needs no checkout
-and no mise of its own. `diff` shows what `apply` would change.
+over ssh: `mise run //hosts/edge-mac:apply` packs the directory and applies
+`mise.edge-mac.toml`. It leaves mise installed for the collector. The Mac
+needs no checkout. `diff` previews configuration changes without checking tool
+installs.
 
 | In `mise.edge-mac.toml` | What it does                                                                                                                                              |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -29,7 +30,7 @@ only kickstarts.
 | Task        | What it does                                                                     |
 | ----------- | -------------------------------------------------------------------------------- |
 | `apply`     | Applies `mise.edge-mac.toml`; asks for sudo on the Mac                           |
-| `diff`      | What `apply` would change                                                        |
+| `diff`      | Configuration changes `apply` would make                                         |
 | `check`     | Runs the doctor checks on the Mac                                                |
 | `reboot`    | Stops the VM cleanly, then restarts the Mac; returns at once, allow five minutes |
 | `ssh`       | A shell on the Mac, or `mise run //hosts/edge-mac:ssh -- <command>`              |
@@ -111,7 +112,7 @@ new messages and locally stored attachments to Miroir every minute.
    Python (not `/bin/sh`) using Cmd-Shift-G and the path printed by:
 
    ```sh
-   mise run //hosts/edge-mac:ssh -- 'python=$(sed -n "1s/^#!//p" "$HOME/.local/bin/miroir-collector"); "$python" -c "import sys; from pathlib import Path; print(Path(sys.executable).resolve())"'
+   mise run //hosts/edge-mac:ssh -- 'collector=$("$HOME/.local/bin/mise" -C "$HOME" which miroir-collector) && "$(dirname "$collector")/../miroir-collector/bin/python" -c "import sys; from pathlib import Path; print(Path(sys.executable).resolve())"'
    ```
 
    Renew the grant if an upgrade changes the resolved Python path.
@@ -119,7 +120,8 @@ new messages and locally stored attachments to Miroir every minute.
 5. After a minute, run `mise run //hosts/edge-mac:check`. For delivery status,
    see the `messages` connection in Miroir or `~/Library/Logs/miroir-collector.log`.
 
-To upgrade the collector, change `collector_version` and rerun `apply`.
+To upgrade the collector, change the pin in `files/collector.toml` and rerun
+`apply`.
 
 ## Upgrading an app
 

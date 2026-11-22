@@ -1,9 +1,10 @@
 # The edge Mac itself, applied by `mise run //hosts/edge-mac:apply`.
 
+include = ["files/collector.toml"]
+
 [vars]
 vm_name = "Talos"
 usb_device = "303A:831A" # the ZBT-2 Zigbee dongle, as VID:PID
-collector_version = "collector-v0.3.0"
 miroir_address = "192.168.1.202"
 bucket_address = "192.168.1.201"
 tunnel = "wg-main"
@@ -11,7 +12,6 @@ collector_zone = "cat ~/.config/miroir-collector/zone 2>/dev/null || true"
 
 [tools]
 mas = "6.0.1" # Standalone binary; 7.x needs jq on macOS 13.
-uv = "0.13.9"
 
 [bootstrap.packages]
 "mas:1451685025" = "latest" # WireGuard
@@ -97,6 +97,11 @@ stderr_path = "~/Library/Logs/edge-mac.log"
 [bootstrap.directories."~/.config/miroir-collector"]
 mode = "0700"
 
+[bootstrap.directories."~/.config/mise/conf.d"]
+
+[bootstrap.files."~/.config/mise/conf.d/miroir-collector.toml"]
+source = "files/collector.toml"
+
 [bootstrap.files."~/.config/miroir-collector/config.json"]
 template = true
 mode = "0600"
@@ -126,22 +131,15 @@ block = """
 {{ vars.bucket_address }} s3.{{ exec(command=vars.collector_zone) | trim }}
 """
 
-[bootstrap.hooks.post-tools]
-description = "Install the pinned Miroir collector"
-run = '''
-want="{{ vars.collector_version }}"
-have="collector-v$("$HOME/.local/bin/miroir-collector" --version 2>/dev/null | awk '{ print $2 }')"
-[ "$have" = "$want" ] || {{ mise_bin }} exec -- uv tool install --quiet --force --python 3.12 \
-	"git+https://github.com/h-wb/pipelines@$want#subdirectory=collector"
-'''
-
 # Grant Full Disk Access to the collector's Python, not /bin/sh.
 [bootstrap.macos.launchd.agents.miroir-collector]
 program = "/bin/sh"
-args = [
-  "-c",
-  '''export MIROIR_TOKEN_MESSAGES="$(cat "$HOME/.config/miroir-collector/token")"; exec "$HOME/.local/bin/miroir-collector" run --config "$HOME/.config/miroir-collector/config.json"''',
-]
+args = ["-c", '''
+collector=$("$HOME/.local/bin/mise" -C "$HOME" which miroir-collector) || exit 1
+MIROIR_TOKEN_MESSAGES=$(cat "$HOME/.config/miroir-collector/token") || exit 1
+export MIROIR_TOKEN_MESSAGES
+exec "$collector" run --config "$HOME/.config/miroir-collector/config.json"
+''']
 run_at_load = true
 start_interval = 60
 process_type = "Background"
@@ -259,8 +257,8 @@ run = '''launchctl print "gui/$(id -u)/dev.mise.bluebubbles" | grep -q "state = 
 
 [doctor.checks.collector]
 description = "The Miroir collector is installed"
-run = '"$HOME/.local/bin/miroir-collector" --version'
-hint = "apply installs it in the post-tools hook"
+run = '''collector=$("$HOME/.local/bin/mise" -C "$HOME" which miroir-collector) && "$collector" --version'''
+hint = "apply installs it with mise"
 
 [doctor.checks.secrets]
 description = "The domain, the delivery token and the tunnel's configuration are on this Mac"

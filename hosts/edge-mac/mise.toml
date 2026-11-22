@@ -25,13 +25,14 @@ description = "Apply this directory to the edge Mac over ssh (asks for sudo ther
 depends = [":ssh:verify"]
 secrets = ["EDGE_MAC"]
 raw = true # sudo prompts on the Mac
-run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task"
+run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task --install-mise"
 
 [tasks.diff]
-description = "Show what apply would change on the edge Mac"
+description = "Preview edge Mac configuration changes (excluding tool installs)"
 depends = [":ssh:agent"]
 secrets = ["EDGE_MAC"]
-run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task --dry-run"
+# mise's dry run still requires pipx's configured uv dependency to be installed.
+run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task,tools --install-mise --dry-run"
 
 [tasks.check]
 description = "Report what would stop the edge Mac coming back up unattended"
