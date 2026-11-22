@@ -46,6 +46,22 @@ depends = [":ssh:agent"]
 secrets = ["EDGE_MAC"]
 run = '''{{ vars.ssh }} "$EDGE_MAC" 'launchctl kickstart "gui/$(id -u)/dev.mise.edge-reboot"' '''
 
+# The two values the collector needs that are not in git, from Proton Pass to
+# files only that user can read. They travel on the connection's standard
+# input, never on a command line.
+[tasks."collector:secrets"]
+description = "Put the Miroir address and the Messages delivery token on the edge Mac"
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC", "SECRET_DOMAIN", "MIROIR_TOKEN_MESSAGES"]
+run = '''
+printf '%s\n%s\n' "$SECRET_DOMAIN" "$MIROIR_TOKEN_MESSAGES" | {{ vars.ssh }} "$EDGE_MAC" '
+	umask 077
+	mkdir -p "$HOME/.config/miroir-collector" && cd "$HOME/.config/miroir-collector" || exit 1
+	IFS= read -r zone && IFS= read -r token && [ -n "$zone" ] && [ -n "$token" ] || { echo "nothing received" >&2; exit 1; }
+	printf "%s\n" "$zone" >zone && printf "%s" "$token" >token && echo "address and token written"
+'
+'''
+
 [tasks.ssh]
 description = "Run a command on the edge Mac, or open a shell"
 depends = [":ssh:agent"]

@@ -1,12 +1,13 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-# Tailscale subnet router for the main cluster: advertises only the two
-# LoadBalancer VIPs the edge cluster needs — prometheus-lb (remote write) and
-# victoria-logs-lb (log shipping). Userspace mode, like the edge cluster's
-# router: Cilium only translates VIPs at the socket layer, so forwarded
-# packets must be re-dialled from real sockets. Not the whole LAN: main pods
-# accept routes too, and a 192.168.1.0/24 route would capture their own LAN
-# traffic into the tailnet.
+# Tailscale subnet router for the main cluster: advertises only the
+# LoadBalancer VIPs the edge site needs — prometheus-lb (remote write),
+# victoria-logs-lb (log shipping), miroir-lb and garage-lb (the edge Mac's
+# collector, through the edge cluster's miroir-relay). Userspace mode, like
+# the edge cluster's router: Cilium only translates VIPs at the socket layer,
+# so forwarded packets must be re-dialled from real sockets. Not the whole
+# LAN: main pods accept routes too, and a 192.168.1.0/24 route would capture
+# their own LAN traffic into the tailnet.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:

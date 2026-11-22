@@ -30,3 +30,7 @@ CLUSTER_SERVICEACCOUNT_KEY = { provider = "protonpass", value = "pass://Machines
 # The Mac under the edge VM (hosts/edge-mac), as user@host; its ssh key is on
 # the same item, in the vault the Paseo pod can read.
 EDGE_MAC = { provider = "protonpass", value = "pass://Automation General/edge-mac/destination" }
+# The delivery token of Miroir's `messages` connection, for the collector on
+# that Mac (hosts/edge-mac, collector:secrets). In `Machines`, so a workstation
+# can read it and a Paseo pod cannot.
+MIROIR_TOKEN_MESSAGES = { provider = "protonpass", value = "pass://Machines/miroir-collector/messages" }

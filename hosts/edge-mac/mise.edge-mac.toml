@@ -3,6 +3,18 @@
 [vars]
 vm_name = "Talos"
 usb_device = "303A:831A" # the ZBT-2 Zigbee dongle, as VID:PID
+# A release tag of h-wb/pipelines; the same pin as the laptops' in dotfiles.
+collector_version = "collector-v0.3.0"
+# The edge cluster's internal gateway, which relays Miroir to this LAN
+# (kubernetes/apps/edge/network/miroir-relay).
+edge_gateway = "192.168.18.202"
+# Where collector:secrets leaves the two values that are not in git.
+collector_zone = "cat ~/.config/miroir-collector/zone 2>/dev/null || true"
+
+# Only used during apply, to install the collector; nothing at run time needs
+# mise or uv.
+[tools]
+uv = "0.13.9"
 
 # Pinned GitHub releases; sha256 is the asset's `digest` in the release API.
 # An app already in /Applications is adopted only when identical to the pin,
@@ -69,6 +81,71 @@ domain = "com.apple.screensaver"
 key = "idleTime"
 value = 60
 host = "current"
+
+# ── Miroir collector ────────────────────────────────────────────────────────
+# Reads this Mac's Messages database and delivers what is new to Miroir, every
+# minute (README, "Miroir collector"). The address and the delivery token are
+# not in git: `mise run //hosts/edge-mac:collector:secrets` writes them to
+# ~/.config/miroir-collector/{zone,token}, and the templates below read the
+# first. Run it before apply.
+[bootstrap.directories."~/.config/miroir-collector"]
+mode = "0700"
+
+[bootstrap.files."~/.config/miroir-collector/config.json"]
+template = true
+mode = "0600"
+content = """
+{
+  "state_dir": "~/Library/Application Support/miroir-collector",
+  "sources": [
+    {
+      "id": "messages",
+      "source": "apple_messages",
+      "receive_url": "https://miroir.{{ exec(command=vars.collector_zone) | trim }}/api/connections/messages/receive",
+      "token_env": "MIROIR_TOKEN_MESSAGES",
+      "options": { "media": true }
+    }
+  ]
+}
+"""
+
+# Miroir and its bucket are not in this site's DNS. Their names point at the
+# edge cluster's gateway, which holds a certificate for them.
+[bootstrap.files."/etc/hosts"]
+id = "miroir"
+template = true
+owner = "root"
+group = "wheel"
+block = """
+{{ vars.edge_gateway }} miroir.{{ exec(command=vars.collector_zone) | trim }} s3.{{ exec(command=vars.collector_zone) | trim }}
+"""
+
+# uv brings its own Python 3.12 (macOS 13 ships 3.9) and leaves the program at
+# ~/.local/bin/miroir-collector. Reinstalls only when the pin changes.
+[bootstrap.hooks.post-tools]
+description = "Install the pinned Miroir collector"
+run = '''
+want="{{ vars.collector_version }}"
+have="collector-v$("$HOME/.local/bin/miroir-collector" --version 2>/dev/null | awk '{ print $2 }')"
+[ "$have" = "$want" ] || {{ mise_bin }} exec -- uv tool install --quiet --force --python 3.12 \
+	"git+https://github.com/h-wb/pipelines@$want#subdirectory=collector"
+'''
+
+# One pass, then it exits; a pass with nothing new takes a fraction of a
+# second. The shell only reads the token: it execs the collector, so the
+# process that opens the Messages database is the collector's own Python (the
+# one to give Full Disk Access).
+[bootstrap.macos.launchd.agents.miroir-collector]
+program = "/bin/sh"
+args = [
+  "-c",
+  '''export MIROIR_TOKEN_MESSAGES="$(cat "$HOME/.config/miroir-collector/token")"; exec "$HOME/.local/bin/miroir-collector" run --config "$HOME/.config/miroir-collector/config.json"''',
+]
+run_at_load = true
+start_interval = 60
+process_type = "Background"
+stdout_path = "~/Library/Logs/miroir-collector.log"
+stderr_path = "~/Library/Logs/miroir-collector.log"
 
 # utmctl refuses to work over ssh, so the three vm.sh agents run in the desktop
 # session. Every minute: start the VM if it is not running.
@@ -178,3 +255,30 @@ run = "ioreg -p IOUSB -w0 | grep -q ZBT-2"
 [doctor.checks.bluebubbles]
 description = "BlueBubbles is running under its agent"
 run = '''launchctl print "gui/$(id -u)/dev.mise.bluebubbles" | grep -q "state = running"'''
+
+[doctor.checks.collector]
+description = "The Miroir collector is installed"
+run = '"$HOME/.local/bin/miroir-collector" --version'
+hint = "apply installs it in the post-tools hook"
+
+[doctor.checks.collector-secrets]
+description = "The Miroir address and the delivery token are on this Mac"
+run = '[ -s "$HOME/.config/miroir-collector/zone" ] && [ -s "$HOME/.config/miroir-collector/token" ]'
+hint = "mise run //hosts/edge-mac:collector:secrets from a workstation, then apply"
+
+# Without a token Miroir answers 401; anything else means the relay, the
+# tailnet or /etc/hosts is in the way.
+[doctor.checks.collector-route]
+description = "Miroir answers through the edge cluster's relay"
+run = '''
+[ "$(curl -s -o /dev/null -m 10 -w '%{http_code}' -X POST \
+	"https://miroir.$(cat "$HOME/.config/miroir-collector/zone")/api/connections/messages/report")" = 401 ]
+'''
+hint = "the miroir-relay pod on the edge cluster, the routes approved in Tailscale, the miroir block in /etc/hosts"
+
+# The collector exits 0 after a pass that delivered or found nothing new.
+[doctor.checks.collector-run]
+description = "The collector's last pass succeeded"
+run = '''launchctl print "gui/$(id -u)/dev.mise.miroir-collector" | grep -q "last exit code = 0"'''
+hint = "~/Library/Logs/miroir-collector.log; a first run needs Full Disk Access for the collector's Python (README)"
+
