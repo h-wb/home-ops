@@ -1,0 +1,111 @@
+---
+# TEMPORARY (2026-11): a read-only view of the vault's Notes/ folder for the general
+# tier, so a general Paseo session can sort the homelab notes into what belongs in
+# this repo and what stays in the vault. The vault is private-tier data and every
+# general agent can call this server while it is listed on mcp-general: remove this
+# file, its line in kustomization.yaml and the mcp-general entry once the review is
+# done. Same pod shape as vault-ro (seekstone.yaml).
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: vault-review
+spec:
+  image: docker.io/library/node:26-bookworm-slim@sha256:5df79989ed685e09f0a98019db4cebfb22fb9df1a53c0161664a011f7ff6b0f1
+  transport: stdio
+  proxyPort: 8080
+  env:
+    - name: SEEKSTONE_VAULT
+      value: /vault
+    - name: HOME
+      value: /tmp
+    - name: SEEKSTONE_CACHE_DIR
+      value: /tmp/seekstone
+    - name: SEEKSTONE_READ_ONLY
+      value: "1"
+    # Everything outside these paths is invisible: not indexed, not listed, not
+    # readable. Daily/, References/, Clippings/, Archives/, AI/ and Templates/ stay out.
+    - name: SEEKSTONE_READ_PATHS
+      value: Notes/**
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 768Mi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # The vault volume is block storage (one node): run beside the vault pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: obsidian-vault
+      initContainers:
+        # npm ci is ~1 s / 31 MB (better-sqlite3 has prebuilt binaries): cheap enough
+        # to run per backend pod start instead of prebaking a shared install.
+        - name: install-seekstone
+          image: docker.io/library/node:26-bookworm-slim@sha256:5df79989ed685e09f0a98019db4cebfb22fb9df1a53c0161664a011f7ff6b0f1
+          command: [/bin/sh, -c]
+          args:
+            - >-
+              cp /src/package.json /src/package-lock.json /tools/ &&
+              cd /tools && npm ci --omit=dev --no-audit --no-fund
+          env:
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: src
+              mountPath: /src
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mcp
+          command:
+            - /tools/node_modules/.bin/seekstone
+          volumeMounts:
+            - name: vault
+              mountPath: /vault
+              subPath: vault
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-vault
+        # Pinned npm sources from the configMapGenerator in ../kustomization.yaml.
+        # The literal name matters: kustomize cannot rewrite references inside CRs,
+        # so the generator disables its hash suffix.
+        - name: src
+          configMap:
+            name: seekstone-src
+        - name: tools
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+  groupRef:
+    name: mcp-tools

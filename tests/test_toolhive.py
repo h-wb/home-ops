@@ -76,8 +76,8 @@ class ToolHiveScopes(unittest.TestCase):
 
     def test_general_gateway_never_lists_private_data(self):
         # Cloud models sit behind general; private's gateway serves everything.
-        private = {"vault-ro", "vault-inbox", "personal-tasks", "dawarich", "dawarich-ops", "metabase", "homeassistant",
-                   "ticktick"}
+        private = {"vault-ro", "vault-inbox", "vault-review", "personal-tasks", "dawarich", "dawarich-ops", "metabase",
+                   "homeassistant", "ticktick"}
         aggregation = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]
         self.assertEqual("deny", aggregation["defaultToolVisibility"])
         self.assertFalse({t["workload"] for t in aggregation["tools"]} & private)
