@@ -7,6 +7,31 @@ other pages and copies nothing from them.
 
 If you change a part, change its row here in the same pull request.
 
+## Picking up the work
+
+For an agent that starts with no context, and for you after a week away.
+
+1. **Read this page**, then the page of the part you will touch (the table
+   below). Each repo's `AGENTS.md` says how to build and check there.
+2. **Read the board**: the Homelab list in the task app. "Doing" is what is in
+   progress, at most three cards. A card is an outcome with its "done when";
+   its steps say who does each. Pull requests named on a card hold the detail.
+3. **Work in a branch and a pull request**, never on `main`. Someone other than
+   the author reviews anything that changes behaviour.
+4. **Do not read private data.** Which agent may see what is
+   [the first rule of the design](../kubernetes/apps/main/llm/DESIGN.md#the-rule).
+   Checks on the warehouse are counts and shapes, never contents.
+5. **Finish by updating the record**: tick your step, assign the next one if it
+   is his, move the card, and change the part's page and its row here. A new
+   idea becomes a card in "Later", not more work now.
+
+What is not on the board or in a page is not known to the next agent. If you
+learned it and it will matter again, write it where the part is documented.
+
+Not there yet: agents cannot read the board on their own. Until their account
+exists, the "Now" list below is the copy to trust, and whoever changes the
+board changes it too.
+
 ## What it is for
 
 A second brain: something that knows what is going on, so you can spend your
