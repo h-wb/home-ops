@@ -135,7 +135,7 @@ flowchart LR
     end
     bucket[(Bucket<br/>originals and thumbnails)]
     raw -->|built after each load| models
-    mo -.->|joined into the timeline| models
+    mo -->|joined into the timeline| models
     bucket -->|recorded by the thumbnail run| mo
     models --> dash[Dashboards]
     models --> tl[Timeline]
@@ -323,17 +323,18 @@ Done:
 - Screen text and screenshots, browser history and messages from the MacBook.
 - Thumbnails for every screenshot.
 - Dashboards in one collection per source, Messages included.
+- The timeline inside Miroir, for screen and browser: a day view with a
+  scrubber, and search over screen text (2026-11-23).
 
 In progress:
 
-- The timeline interface inside Miroir. Its data models, thumbnails and
-  read-only role are deployed; the pages (a day view, a scrubber, search) are
-  being built.
+- Conversations in the timeline: the data first, then attachments, then the
+  pages.
+- Messages from the always-on Mac, every minute.
 
 Next:
 
-- Messages from the always-on Mac, every minute.
-- Conversations in the timeline, then every source on one time axis.
+- Every source on one time axis.
 - A contacts source, so the same person lines up across chat networks.
 - Checks on the data itself: the share of unreadable or skipped rows per
   source, and tests against each new version of the apps the collector reads.

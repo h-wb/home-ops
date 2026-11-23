@@ -280,10 +280,10 @@ sequenceDiagram
     end
     Y->>D: opens a dashboard
     W->>D: analysis tables
-    Y-->>M: opens a day in the timeline
-    W-->>M: the day's frames and events, through a role that can only read
-    B-->>M: thumbnails
-    M-->>Y: the day, with its images
+    Y->>M: opens a day in the timeline
+    W->>M: the day's frames and events, through a role that can only read
+    B->>M: thumbnails
+    M->>Y: the day, with its images
     Y-->>H: when did I last look at this?
     H-->>T: a named read tool
     W-->>T: understood tables
@@ -294,7 +294,7 @@ sequenceDiagram
 | Reader     | Status      | Reads                                                                           |
 | ---------- | ----------- | ------------------------------------------------------------------------------- |
 | Dashboards | Works today | Every analysis; one collection per source                                       |
-| Timeline   | Being built | The `timeline` analysis and thumbnails. The data is deployed; the pages are not |
+| Timeline   | Works today | The `timeline` analysis and thumbnails: screen and browser. Conversations next  |
 | Assistant  | Planned     | Named tools over understood tables: [Awareness](../../../llm/docs/awareness.md) |
 
 - What guarantees it: the timeline's role can read only the timeline's tables
