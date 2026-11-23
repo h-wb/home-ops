@@ -242,27 +242,33 @@ The calendar stays where it is (iCloud), shown inside the task app, where the
 assistant can read it. Fixed things and the blocks for each project are
 events; a block holds a project, not a task. The blocks are the budget.
 
-**One place to read and write.** The pages are spread over three repos, and
-your notes are in the vault. Your idea (2026-11-22): Obsidian is where the
-system's pages are written, and GitHub shows the same pages. Proposal:
+**Where knowledge lives.** Not settled; yours to decide. The worry (yours,
+2026-11-23): more than one place to keep true, and pages about the assistant
+and the homelab already sitting in both the vault and the repos.
 
-- A vault of its own for them, not a folder of your vault. Your vault is
-  private and served to private agents; a public folder inside it is one drag,
-  one embed or one link away from publishing a note. The cost: no links
-  between the two vaults, and each has its own search.
-- That vault is a git repo. Obsidian edits plain Markdown files and GitHub
-  shows them, diagrams included, so there is one copy and no export. You write
-  in Obsidian; agents write through pull requests.
-- What moves there: this page, the designs, the flows, the overview of each
-  part: what you read to understand or run the system. What stays beside the
-  code: what only matters when changing that code, with a link to the vault.
-  The cost: a change to code and to its page becomes two pull requests.
-- Tasks do not go there. A task needs capture from anywhere, a date, a
-  reminder, and to be ticked by an agent without rewriting a page you have
-  open. The plan stays a page; the items live in the task list.
+The proposal as it stands, after looking at what Obsidian supports and what
+people do:
 
-To settle: public or only general (a private repo general agents can read),
-and how the phone edits it (the git plugin, or a sync like your vault's).
+- One test decides where a page goes. **It describes how a system works**: it
+  lives in the repo, next to the code, and agents keep it true in the same pull
+  request as the change. **It describes you** (how you want to use the
+  assistant, your routines, what you are trying to do, what you learned): it
+  lives in your vault, which is private and which the assistant reads.
+- So there is one place you maintain, the vault. The repos' pages are kept by
+  agents; this page is the way in.
+- A thing is written once. The other side links to it, never copies it.
+- Homelab notes in the vault that describe how the homelab works move to
+  `home-ops`, after a pass that removes anything private, because the repo is
+  public. Notes that are yours (ideas, purchases, what you tried) stay.
+- Not done: a vault of its own that is a git repo, a repo cloned or linked
+  inside the vault, or publishing pages out of the vault. Obsidian advises
+  against links to folders outside a vault and its sync does not carry a
+  repo's history, its git plugin is unreliable on a phone, and publishing out
+  of a private vault into public repos is where leaks happen.
+- Later, if you want the system's pages inside the vault for search and
+  offline reading: a job copies them in as plain read-only files. Nobody is
+  known to have run that for long, so it would be a trial.
+- Tasks are not pages: they stay in the task list.
 
 **The budget for building.** Decided on 2026-11-23, to start: three blocks of
 90 minutes a week, as repeating events in the calendar. Outside a block, build
