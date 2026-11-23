@@ -137,7 +137,11 @@ system's pages are written, and GitHub shows the same pages. Proposal:
 To settle: public or only general (a private repo general agents can read),
 and how the phone edits it (the git plugin, or a sync like your vault's).
 
-**The budget for building.** How many blocks a week, and when.
+**The budget for building.** Decided on 2026-11-23, to start: three blocks of
+90 minutes a week, as repeating events in the calendar. Outside a block, build
+work that needs you waits; agents go on with their own steps and assign you
+yours for the next block. Looked at again on 2026-12-07, at the weekly review.
+Still open: which days.
 
 ## Where each kind of thing lives
 
