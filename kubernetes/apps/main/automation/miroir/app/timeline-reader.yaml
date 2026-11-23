@@ -12,8 +12,9 @@ spec:
     name: postgres-metabase
   name: miroir_timeline
   login: true
-  # The server's pool holds at most 4 connections.
-  connectionLimit: 6
+  # A server process holds at most 5: four for queries, one for the image
+  # lookups. A rolling update runs two processes for a moment.
+  connectionLimit: 12
   passwordSecret:
     name: miroir-timeline-reader
   databaseRoleReclaimPolicy: retain
