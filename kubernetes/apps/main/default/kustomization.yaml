@@ -26,4 +26,5 @@ resources:
   - ./neko/ks.yaml
   - ./nextcloud/ks.yaml
   - ./obsidian/ks.yaml
+  - ./orbit/ks.yaml
   - ./smart-life-webapp/ks.yaml
