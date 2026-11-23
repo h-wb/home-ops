@@ -281,6 +281,32 @@ work that needs you waits; agents go on with their own steps and assign you
 yours for the next block. Looked at again on 2026-12-07, at the weekly review.
 Still open: which days.
 
+## Boundaries
+
+Each system knows the next one only through one narrow thing. A fact is
+written on the page of the system that owns it; other pages link to it and do
+not repeat it.
+
+| Between                         | What crosses                                              | So that                                                    |
+| ------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------- |
+| A device or service, and Miroir | A source: one integration, one connection                 | Adding a source changes nothing outside the record         |
+| Miroir, and whatever reads it   | Tables built for reading, with one shape for every source | A dashboard, the timeline or a tool never reads raw tables |
+| The record, and the assistant   | Named read tools (planned), never a database connection   | The assistant asks what happened, not which table holds it |
+| The assistant, and you          | Rooms in the messaging app, and your notes and tasks      | You never need to know how it is built to use it           |
+| The workshop, and the rest      | Pull requests                                             | Nothing changes without a record of it                     |
+
+What adding a source touches, and nothing else:
+
+1. In `pipelines`: the integration and its own page.
+2. On a device source: the collector's settings, in `dotfiles` or under
+   `hosts/`.
+3. In Miroir: a connection, and one row in
+   [the list of sources](../kubernetes/apps/main/automation/miroir/README.md#sources).
+4. To appear in the timeline: one model that gives its rows the common shape.
+
+The assistant's pages change only if the source should also wake it up, which
+is a decision about the assistant, not about the source.
+
 ## Where each kind of thing lives
 
 | Kind                             | Where                                                          |
