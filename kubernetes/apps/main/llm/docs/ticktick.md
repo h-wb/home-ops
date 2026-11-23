@@ -82,6 +82,20 @@ linking iCloud, ask it to check for one known test event before relying on
 the briefing. A TickTick task block appears in TickTick's planner; it is
 not an iCloud event. Keep Apple Calendar as the place to edit iCloud events.
 
+## Chores
+
+Chores live in Life, in a shape that cannot pile up:
+
+| Kind                                 | Shape                                                                      |
+| ------------------------------------ | -------------------------------------------------------------------------- |
+| Tied to a day by the world (bins)    | A repeating task with its date and a reminder                              |
+| Flexible, weekly (cleaning, laundry) | One repeating task holding a checklist, repeating from the completion date |
+| Daily (dishes, tidying)              | A habit, or nothing                                                        |
+
+The weekly task has a block in the calendar. Repeating from the completion
+date means a skipped week leaves one item, not a stack. The weekly review
+already leaves repeating tasks out of what it offers to park.
+
 TickTick's supported API and MCP can query tasks, but do not create these
 saved Filters. Make the filters and account settings in the app; no personal
 password or token needs to be shared with a coding session.
