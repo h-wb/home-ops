@@ -12,18 +12,22 @@ Call `mcp__tools__github_get_file_contents` by its exact name with
 `tool_call`, with `owner: "h-wb"`, `repo` and `path` from this table. A path
 that ends in `/` is a folder: the call lists it.
 
-| Question                                              | Repo     | Path                                            |
-| ----------------------------------------------------- | -------- | ----------------------------------------------- |
-| What is deployed; where skills, docs and notes live   | home-ops | kubernetes/apps/main/llm/README.md              |
-| Why it is built this way: the rule, roles, decisions  | home-ops | kubernetes/apps/main/llm/DESIGN.md              |
-| What is left to do                                    | home-ops | kubernetes/apps/main/llm/DESIGN.md              |
-| How work moves, step by step                          | home-ops | kubernetes/apps/main/llm/docs/flows.md          |
-| How each agent is connected, and its tools and memory | home-ops | kubernetes/apps/main/llm/docs/wiring.md         |
-| The two workshops                                     | home-ops | kubernetes/apps/main/llm/paseo/README.md        |
-| Your own routines and when they run                   | home-ops | kubernetes/apps/main/llm/hermes/app/routines/   |
-| Your own settings                                     | home-ops | kubernetes/apps/main/llm/hermes/app/config.yaml |
-| The homelab as a whole: clusters, conventions         | home-ops | AGENTS.md                                       |
-| The skills every agent shares                         | dotfiles | conf.d/ai/README.md                             |
+| Question                                                     | Repo     | Path                                                 |
+| ------------------------------------------------------------ | -------- | ---------------------------------------------------- |
+| The whole system: its parts, the plan, what is worked on now | home-ops | docs/system.md                                       |
+| What is deployed; where skills, docs and notes live          | home-ops | kubernetes/apps/main/llm/README.md                   |
+| Why it is built this way: the rule, roles, decisions         | home-ops | kubernetes/apps/main/llm/DESIGN.md                   |
+| What is left to do                                           | home-ops | kubernetes/apps/main/llm/DESIGN.md                   |
+| How work moves, step by step                                 | home-ops | kubernetes/apps/main/llm/docs/flows.md               |
+| How each agent is connected, and its tools and memory        | home-ops | kubernetes/apps/main/llm/docs/wiring.md              |
+| How you come to know what is going on; when you speak        | home-ops | kubernetes/apps/main/llm/docs/awareness.md           |
+| The data warehouse: what feeds it, where data lives          | home-ops | kubernetes/apps/main/automation/miroir/README.md     |
+| How data moves into and out of the warehouse                 | home-ops | kubernetes/apps/main/automation/miroir/docs/flows.md |
+| The two workshops                                            | home-ops | kubernetes/apps/main/llm/paseo/README.md             |
+| Your own routines and when they run                          | home-ops | kubernetes/apps/main/llm/hermes/app/routines/        |
+| Your own settings                                            | home-ops | kubernetes/apps/main/llm/hermes/app/config.yaml      |
+| The homelab as a whole: clusters, conventions                | home-ops | AGENTS.md                                            |
+| The skills every agent shares                                | dotfiles | conf.d/ai/README.md                                  |
 
 ## Answer
 

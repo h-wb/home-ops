@@ -50,7 +50,6 @@ flowchart LR
     T["Assistant's tool gateway<br/>every tool, real names"]:::private
     M["Private memory<br/>Memini"]:::private
     G["General memory<br/>Memini"]:::general
-    TG["Telegram<br/>messaging app"]:::outside
     MX["Matrix homeserver<br/>Continuwuity, federates with Beeper"]:::private
     D["Dashboard and iOS apps<br/>LAN and tailnet"]:::private
     GW["General workshop<br/>Paseo"]:::general
@@ -60,7 +59,6 @@ flowchart LR
     A -->|"no key; writes ask first"| T
     A -->|"own client key, by plugin"| M
     A -->|"read-only key, lookups only"| G
-    A -->|"bot token; allow-listed users only"| TG
     A -->|"access token; end-to-end encrypted"| MX
     D -->|"password; envoy-internal only"| A
     A -->|"daemon password; every start asks"| GW
@@ -73,15 +71,12 @@ flowchart LR
   freely, and start an agent or send one a prompt after you approve that one
   call. The prompt is on the approval card. Nothing else of the daemon is
   registered: no terminal, no browser, no schedules.
-- Telegram: the assistant polls Telegram's API, so nothing connects in, and
-  that API is the only internet destination its network rules allow. It
-  answers the user IDs on its allow list and ignores anyone else. A write's
-  approval arrives as a message with buttons. Bot chats are not end-to-end
-  encrypted.
-- Matrix: the bot is on our own homeserver (`default/continuwuity`), reached
-  in-cluster; the homeserver, not the pod, federates with Beeper. It requires
-  end-to-end encryption and answers the Matrix IDs on its allow list;
-  approvals are reactions. Routines still deliver to Telegram.
+- Matrix: the only messaging app. The bot is on our own homeserver
+  (`default/continuwuity`), reached in-cluster; the homeserver, not the pod,
+  federates with Beeper. It requires end-to-end encryption and answers the
+  Matrix IDs on its allow list; approvals are reactions. Routines deliver to
+  the Inbox room. Telegram is switched off, and the pod's network rules allow
+  no destination on the internet.
 - Dashboard: `hermes.<domain>` on `envoy-internal`, password sign-in; the only
   inbound connection the pod's rules allow. The iOS apps use the same address.
 - Key: `hermes-private`, four models served by Mistral's API: Mistral Medium
@@ -97,7 +92,7 @@ flowchart LR
   workshops' one. General memory it can only read.
 - Routines: skills in `hermes/app/routines/`, mounted read-only. One whose
   front matter has a schedule gets a job when the pod starts, on Toronto time,
-  delivered to Telegram: the briefing at 07:00, a nudge at 12:30, a check-in
+  delivered to the Inbox room on Matrix: the briefing at 07:00, a nudge at 12:30, a check-in
   at 20:30, reminders every half hour from 08:00 to 21:30, silent when
   nothing is coming up, and a weekly review on Sunday at 18:00. The briefing and check-in see every overdue task, not
   only the last week. The briefing proposes up to three focus tasks (high
