@@ -18,13 +18,13 @@ not already exist.
 | Assigned to Me | Built-in, Show if not empty                                   | Work someone handed back to you in a shared list        |
 | Waiting        | Optional filter: personal lists AND tag `waiting`             | Weekly review, not a daily list                         |
 
-Select Admin, Health, Growth, Homelab and Life as the personal lists in
-these filters; include Inbox in the **Today** clause if you want dated
-captures in Now. Do not include Build or Someday. If Advanced mode offers
+Select Admin, Health, Growth and Life as the personal lists in these
+filters; include Inbox in the **Today** clause if you want dated captures in
+Now. Do not include Homelab or Someday. If Advanced mode offers
 separate rule groups rather than parentheses, put the list restriction in
 both the High and Today groups. Use **Preview** before saving: an undated
-High task and a dated task due today should both appear; a Build or Someday
-task should not. Keep the built-in Today visible until Now works for you.
+High task and a dated task due today should both appear; a Homelab or
+Someday task should not. Keep the built-in Today visible until Now works for you.
 If the app cannot express the rule, use Today for dates and a separate
 High-priority Focus filter for the personal lists. Hide All and other
 built-in views you do not open.
@@ -36,21 +36,29 @@ review suggests a few stale tasks to park; reply `park <number>` to move one.
 Someday is private and undated. Exclude it from the personal filters and the
 calendar view. The built-in Today only needs the real dates.
 
-## Build handoffs
+## Lists and the vault
 
-Keep the existing **Projects > Build** board (Next, Doing, Done). Keep work
-that needs only agents on the board or in its pull request; assign a card to
-yourself when it needs your input. Do not copy personal tasks or calendar
-data into Build. Leave cards undated and without reminders unless there is a
-real handoff deadline.
+The lists sit in one folder, **Areas**, and each is an `area` of the vault:
+Admin, Health, Growth, Life and Homelab. A project is not a list: it is a
+note in the vault with its area, and a parent task in that area's list.
+Someday and the Inbox stay outside the folder.
+
+## Homelab handoffs
+
+**Areas > Homelab** is a board (Doing, Next, Later, Done) for work on the
+homelab, the assistant and the warehouse. A card is an outcome with its "done
+when"; its steps are subtasks. Keep work that needs only agents on the board
+or in its pull request; assign a card to yourself when it needs your input.
+Do not copy personal tasks or calendar data into Homelab. Leave cards undated
+and without reminders unless there is a real handoff deadline.
 
 1. Create a separate Agents account, starting on the free plan. Invite that
-   account to **Build only** and accept the invite there.
-2. On the main account, edit Build: set **Show in Smart List** and **Reminder**
+   account to **Homelab only** and accept the invite there.
+2. On the main account, edit Homelab: set **Show in Smart List** and **Reminder**
    to **Tasks Assigned to Me**. Separately turn off routine shared-list
    activity notifications (adds, moves, completions).
 3. Before wiring the account to workshop agents, verify using its own login
-   or token that it can see Build and cannot see any of the owner's private
+   or token that it can see Homelab and cannot see any of the owner's private
    lists, tasks or calendars. Test a handoff with a disposable card; confirm
    a card assigned back shows in **Assigned to Me**, not in the personal
    Now filter. Never repurpose the private Hermes account token for agents.

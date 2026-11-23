@@ -21,7 +21,7 @@ Call these tools by their exact names with `tool_call`.
    `client_timezone: "America/Toronto"`: every open task. Keep those with a
    `dueDate` before today for the overdue count. Also keep undated priority-5
    tasks (no `dueDate`, no `startDate`, not tagged `waiting`) from Admin,
-   Health, Growth, Homelab or Life for the main list. Resolve these ids
+   Health, Growth or Life for the main list. Resolve these ids
    with `mcp__tools__ticktick_list_projects`; skip undated focus if lookup
    fails. Drop duplicates from step 1.
 

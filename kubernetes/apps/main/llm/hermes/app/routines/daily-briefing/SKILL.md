@@ -23,8 +23,8 @@ timezone `America/Toronto`, whatever the clock here says.
    `query_command: "today"` and `client_timezone: "America/Toronto"`: tasks
    due today.
 3. `mcp__tools__ticktick_list_projects`: resolve the unique ids of Admin,
-   Health, Growth, Homelab and Life. Only these personal lists supply focus
-   and old task candidates; never guess ids or include Build or Someday.
+   Health, Growth and Life. Only these personal lists supply focus and old
+   task candidates; never guess ids or include Homelab or Someday.
 4. `mcp__tools__ticktick_filter_tasks` with `filter: {status: [0]}` and
    `client_timezone: "America/Toronto"`: every open task, dated or not. From
    this one result:

@@ -24,7 +24,7 @@ Call these tools by their exact names with `tool_call`.
      already returned.
    - Inbox: a `projectId` that starts with `inbox`.
    - Undated focus: priority 5 with neither a `dueDate` nor a `startDate` in
-     Admin, Health, Growth, Homelab or Life, and not tagged `waiting`.
+     Admin, Health, Growth or Life, and not tagged `waiting`.
      Resolve those list ids with `mcp__tools__ticktick_list_projects`; skip
      undated focus if lookup fails. Do not duplicate a task from step 1.
 3. For each task of steps 1 and 2 that has a due date, at most ten:
@@ -63,8 +63,10 @@ Inbox, where do these go?
 - At most ten tasks in the first two sections, then "and N more". At most five
   inbox tasks.
 - For each inbox task, suggest one list from its title: Admin (money, papers,
-  accounts), Health, Growth (learning, work), Homelab (servers, software),
-  Life (home, people, errands, trips). Suggest `Someday` for an undated
+  accounts), Health, Growth (learning, work), Life (home, people, errands,
+  trips). For servers, software or the assistant, suggest `Homelab (shared
+  board)`: "inbox ok" does not file it, the user has to name it. Suggest
+  `Someday` for an undated
   action worth parking, or Obsidian for an idea with no concrete action.
   Suggest Karakeep for a saved link with no action. Obsidian and Karakeep
   suggestions are not file or drop instructions. Suggest `drop` only for

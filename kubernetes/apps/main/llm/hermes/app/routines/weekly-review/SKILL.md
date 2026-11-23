@@ -43,10 +43,10 @@ found, search for the part after `mcp__tools__`. The timezone is
 
 7. Parking candidates, so old tasks do not pile up. Use
    `mcp__tools__ticktick_list_projects` to resolve a unique personal Someday
-   list and the personal source lists (Admin, Health, Growth, Homelab, Life).
+   list and the personal source lists (Admin, Health, Growth, Life).
    Never use a shared list as source or destination. A task from step 2
    qualifies only when all of these hold:
-   - it is in one of those source lists, not Inbox, Build or Someday;
+   - it is in one of those source lists, not Inbox, Homelab or Someday;
    - it has no `dueDate`, `startDate`, recurrence, reminders or assignee;
    - it has no `parentId` or subtasks and is not linked as an active project
      in step 4;

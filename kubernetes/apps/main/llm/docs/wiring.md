@@ -113,7 +113,7 @@ flowchart LR
   The TickTick task writes approved for good need none, so a scheduled run
   could make them; the routines are written to read only, which is an
   instruction and not a lock.
-- [TickTick setup](ticktick.md) covers the personal filters, quiet Build
+- [TickTick setup](ticktick.md) covers the personal filters, quiet Homelab
   handoffs and the iCloud planner.
 - Documentation: its `system-docs` skill lists these pages, and it reads them
   from git through the GitHub tool. It holds no copy.

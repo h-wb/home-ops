@@ -68,7 +68,7 @@ briefing) or names other numbers. Treat numbers as the replacement set; at
 most three tasks. If more are named, ask which three. Don't apply a stale
 briefing's selection to another day.
 
-1. Resolve unique list ids for Admin, Health, Growth, Homelab and Life with
+1. Resolve unique list ids for Admin, Health, Growth and Life with
    `mcp__tools__ticktick_list_projects`, and use
    `mcp__tools__ticktick_filter_tasks` with `filter: {status: [0]}` to check
    that the picks are still open in those lists and not tagged `waiting`, and
@@ -135,8 +135,8 @@ number ("4 Life, 5 Admin").
 2. `mcp__tools__ticktick_move_task` with one `moves` entry per task:
    `{taskId, fromProjectId, toProjectId}`, all in one call.
    For `Someday`, check it is private and skip dated or scheduled tasks.
-   Never infer a move to `Build` from "inbox ok" or from task text. If the
-   user explicitly names Build for an Inbox task, confirm that its contents
+   Never infer a move to `Homelab` from "inbox ok" or from task text. If the
+   user explicitly names Homelab for an Inbox task, confirm that its contents
    are suitable for everyone who has access before moving it.
 3. Mark a task `status: -1` only when the user explicitly says to drop it.
    "Inbox ok" approves filing to TickTick lists only. Leave Obsidian or
