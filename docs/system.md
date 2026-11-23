@@ -103,9 +103,13 @@ for everything you do, split by list and not by tool.
   it is the one list agents will read.
 - Nothing on Homelab has a date or a reminder unless you give it one, so it
   never fills your day. It comes up in the weekly review.
+- A step is assigned to you when it is yours and you can do it now, so
+  "Assigned to Me" in the task app is the short list of what waits for you. A
+  step that ends in "(you)" and is not assigned is yours later. An agent that
+  finishes its step assigns the next one, if that one is yours.
 - Still to do: an account of their own for the agents, with only Homelab shared
-  with it, so that a card is assigned to you or to them and the app's own
-  sharing decides what they see; then the placeholder boards go.
+  with it, so that their steps are assigned to them the same way and the app's
+  own sharing decides what they see; then the placeholder boards go.
 
 The calendar stays where it is (iCloud), shown inside the task app, where the
 assistant can read it. Fixed things and the blocks for each project are
