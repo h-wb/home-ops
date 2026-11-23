@@ -58,6 +58,74 @@ the others, with its own blocks in the calendar.
    here, and the backlog. What an agent keeps only in its own memory does not
    count as written down.
 
+## The whole thing
+
+Three systems, on one platform, around the things that stay yours.
+
+```mermaid
+flowchart LR
+    you([You])
+    subgraph yours[Yours: kept in apps you already use]
+        tasks[Tasks]
+        cal[Calendar]
+        notes[Notes vault]
+    end
+    subgraph record[The record: what happened]
+        col[Collectors on your devices]
+        svc[Services you use]
+        wh[(Warehouse)]
+        look[Dashboards and timeline]
+        col --> wh
+        svc --> wh
+        wh --> look
+    end
+    subgraph assistant[The assistant: talks to you and acts]
+        chat[Messaging app]
+        asst[Assistant]
+        chat <--> asst
+    end
+    subgraph workshop[The workshop: where the rest is built]
+        agents[Coding agents]
+        repos[Repos and pull requests]
+        board[Homelab board]
+        agents --> repos
+        agents -.->|planned: their own account| board
+    end
+    subgraph platform[The platform: one cluster]
+        models[Model gateway]
+        tools[Tool gateways, one per scope]
+        mem[Memory, one store per scope]
+    end
+    you <--> chat
+    you --> look
+    you <--> board
+    asst <--> tasks
+    asst --> cal
+    asst <--> notes
+    asst -.->|planned: named read tools| wh
+    repos -->|deploys| record
+    repos -->|deploys| assistant
+    assistant -->|models, tools, memory| platform
+    workshop -->|models, tools, memory| platform
+```
+
+A solid arrow works today; a dashed arrow is planned.
+
+| System        | What it is                                                          | Start here                                                    | Why it is built this way                                                                                                                            | Where its code is                                |
+| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| The record    | Every source mirrored into one database, and ways to look at it     | [miroir](../kubernetes/apps/main/automation/miroir/README.md) | [flows](../kubernetes/apps/main/automation/miroir/docs/flows.md), [decisions](https://github.com/h-wb/pipelines/blob/main/docs/miroir/decisions.md) | `pipelines`; collectors configured in `dotfiles` |
+| The assistant | Talks to you, runs routines, and will know what is going on         | [hermes](../kubernetes/apps/main/llm/hermes/README.md)        | [awareness](../kubernetes/apps/main/llm/docs/awareness.md), [flows](../kubernetes/apps/main/llm/docs/flows.md)                                      | `home-ops`, under `llm/hermes`                   |
+| The workshop  | Agents with a shell that build the other two, through pull requests | [paseo](../kubernetes/apps/main/llm/paseo/README.md)          | [design](../kubernetes/apps/main/llm/DESIGN.md)                                                                                                     | `home-ops`, under `llm/paseo`                    |
+| The platform  | The cluster, the gateways to models and tools, memory               | [llm](../kubernetes/apps/main/llm/README.md)                  | [design](../kubernetes/apps/main/llm/DESIGN.md), [wiring](../kubernetes/apps/main/llm/docs/wiring.md)                                               | `home-ops`                                       |
+
+What stays yours is not rebuilt here: your tasks, your calendar and your notes
+stay in the apps you use, and the assistant reaches them through tools.
+
+One rule runs through all of it:
+[who may see what](../kubernetes/apps/main/llm/DESIGN.md#the-rule). The record
+and what is yours are private; the workshop that agents like this one work in
+is general, and sees code, counts and shapes only.
+
 ## The parts
 
 | Part          | What it does                                                   | State                                                                            | Its page                                                                 |
