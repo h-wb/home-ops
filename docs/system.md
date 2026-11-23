@@ -257,6 +257,11 @@ people do:
 - So there is one place you maintain, the vault. The repos' pages are kept by
   agents; this page is the way in.
 - A thing is written once. The other side links to it, never copies it.
+- In the vault, one note per system (the assistant, Miroir, the homelab) holds
+  your side: what it is for in your days, how you use it, what you want from
+  it next, what you learned. It links to that system's pages here for how it
+  works. The assistant reads those notes to adapt to you, and reads the pages
+  here to know what it runs on.
 - Homelab notes in the vault that describe how the homelab works move to
   `home-ops`, after a pass that removes anything private, because the repo is
   public. Notes that are yours (ideas, purchases, what you tried) stay.
