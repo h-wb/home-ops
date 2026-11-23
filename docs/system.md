@@ -32,23 +32,23 @@ the others, with its own blocks in the calendar.
 
 ## The parts
 
-| Part          | What it does                                                   | State                                                       | Its page                                                                 |
-| ------------- | -------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Model gateway | The only path to any model; each client's key lists its models | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md)                             |
-| Tool gateways | One catalogue of tools, served per scope                       | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md)                             |
-| Memory        | What agents remember between sessions, one store per scope     | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md)                             |
-| Workshops     | Where agents with a shell work on repos, one per scope         | Works                                                       | [paseo](../kubernetes/apps/main/llm/paseo/README.md)                     |
-| Assistant     | Talks to you, runs routines, acts through named tools          | Works, on a clock                                           | [hermes](../kubernetes/apps/main/llm/hermes/README.md)                   |
-| Awareness     | How the assistant knows what is going on and when to speak     | Designed, not built                                         | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
-| Warehouse     | Every source mirrored into one database, for good              | Works                                                       | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
-| Collectors    | On a device: read local sources, mask, deliver                 | Works on the MacBook; edge Mac being set up                 | [edge-mac](../hosts/edge-mac/README.md), dotfiles                        |
-| Dashboards    | One collection per source                                      | Works                                                       | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
-| Timeline      | Look back at a day: screen, browser, later conversations       | Data and API work; pages being built                        | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
-| Tasks         | The one list of what is to do, for you and for the build       | Yours works; a Build board exists, agents not connected yet | [Open](#open)                                                            |
-| Calendar      | The plan: what happens when, and what time is free             | Events are read; the plan is not in it yet                  | [awareness](../kubernetes/apps/main/llm/docs/awareness.md#getting-there) |
-| Notes         | Your own notes, private                                        | Works                                                       | [llm](../kubernetes/apps/main/llm/README.md#where-things-live)           |
-| Location      | Where you were                                                 | Works, in its own service                                   | –                                                                        |
-| Home hub      | Home automation; later the live signals                        | Works; no live signals                                      | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
+| Part          | What it does                                                   | State                                                                        | Its page                                                                 |
+| ------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Model gateway | The only path to any model; each client's key lists its models | Works                                                                        | [llm](../kubernetes/apps/main/llm/README.md)                             |
+| Tool gateways | One catalogue of tools, served per scope                       | Works                                                                        | [llm](../kubernetes/apps/main/llm/README.md)                             |
+| Memory        | What agents remember between sessions, one store per scope     | Works                                                                        | [llm](../kubernetes/apps/main/llm/README.md)                             |
+| Workshops     | Where agents with a shell work on repos, one per scope         | Works                                                                        | [paseo](../kubernetes/apps/main/llm/paseo/README.md)                     |
+| Assistant     | Talks to you, runs routines, acts through named tools          | Works, on a clock                                                            | [hermes](../kubernetes/apps/main/llm/hermes/README.md)                   |
+| Awareness     | How the assistant knows what is going on and when to speak     | Designed, not built                                                          | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
+| Warehouse     | Every source mirrored into one database, for good              | Works                                                                        | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
+| Collectors    | On a device: read local sources, mask, deliver                 | Works on the MacBook; edge Mac being set up                                  | [edge-mac](../hosts/edge-mac/README.md), dotfiles                        |
+| Dashboards    | One collection per source                                      | Works                                                                        | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
+| Timeline      | Look back at a day: screen, browser, later conversations       | Data and API work; pages being built                                         | [miroir](../kubernetes/apps/main/automation/miroir/README.md)            |
+| Tasks         | The one list of what is to do, for you and for the build       | Works: your lists, and a Build board for the build; agents not connected yet | [Open](#open)                                                            |
+| Calendar      | The plan: what happens when, and what time is free             | Events are read; the plan is not in it yet                                   | [awareness](../kubernetes/apps/main/llm/docs/awareness.md#getting-there) |
+| Notes         | Your own notes, private                                        | Works                                                                        | [llm](../kubernetes/apps/main/llm/README.md#where-things-live)           |
+| Location      | Where you were                                                 | Works, in its own service                                                    | –                                                                        |
+| Home hub      | Home automation; later the live signals                        | Works; no live signals                                                       | [awareness](../kubernetes/apps/main/llm/docs/awareness.md)               |
 
 Design and rules behind all of it:
 [DESIGN.md](../kubernetes/apps/main/llm/DESIGN.md). Who may see what is its
@@ -74,52 +74,36 @@ propose.
 
 ### Now
 
-At most three.
+At most three. They are the "Doing" column of the Build board in the task app,
+each with its steps and who does them.
 
-1. Messages from the edge Mac (milestone 1).
-2. The timeline's pages (milestone 2).
-3. This page, and the two decisions under [Open](#open) (milestone 3).
+1. Conversations in the timeline (milestone 2, extended).
+2. Messages from the edge Mac (milestone 1).
+3. The fix for the timeline's upgrade on PostgreSQL 18.
 
-### Next
+### Next, and later
 
-- Your recurring things and the blocks for each project, in the calendar.
-- The shared task list, and the backlog moved into it.
-- The Now room and a room per routine.
-
-### Later, and deliberately not now
-
-Mail and calendar tools, the live path, summaries of each day, the log by
-voice, the missed-task loop, conversations in the timeline, other chat
-networks, a contacts source, the screen recorder trial, a decision model. Each
-is described in [awareness](../kubernetes/apps/main/llm/docs/awareness.md).
+On the Build board, in its "Next" and "Later" columns, and nowhere else. A new
+idea becomes a card in "Later". What "Later" holds is described in
+[awareness](../kubernetes/apps/main/llm/docs/awareness.md).
 
 ## Open
 
-**The shared task list.** Today your tasks are in your task app, which only the
-assistant can reach, and the build's tasks are in three places: a placeholder
-board, pull requests, and agents' own notes. Proposal (2026-11-22), which
-splits by list and not by tool:
+**The shared task list.** Decided on 2026-11-23: your task app is the one list
+for everything you do, split by list and not by tool.
 
-- One app for you: your task app, with your own lists as they are and one
-  list per project. The agents get an account of their own in that app, and
-  only the project lists are shared with it. A task is then assigned to you or
-  to the agents, and what the agents can see is decided by the app's own
-  sharing, not by a tool of ours: nothing private is shared, so nothing
-  private is seen ([the scope rule](../kubernetes/apps/main/llm/DESIGN.md#the-rule)).
-  The placeholder boards go.
-- The build's list holds only what needs you: a decision, a step on a screen,
-  a merge, and the ideas you noted. Work an agent does from start to finish is
-  not a task of yours: it lives in its pull request, and reaches the list only
-  as one item when it needs you.
-- Nothing in a project list has a date or a reminder unless you give it one,
-  and the list notifies only for what is assigned to you, so it never fills
-  your day. It comes up in the weekly
-  review, as one summary: what moved, what waits for you, what is next.
-- The whole picture is this page, not the list: three things in "now", the
-  milestones, and what is parked.
-
-Later: a task assigned to the agents is picked up from that list, worked, and
-comes back done or assigned to you.
+- Your own lists stay as they are, in a "Life" folder. The build has a board,
+  "Build", in a "Projects" folder: columns Doing, Next, Later, Done. A card is
+  an outcome with its "done when"; its steps are subtasks, each saying who
+  does it. "Someday" holds what you parked.
+- Build holds only the build: nothing private goes on it
+  ([the scope rule](../kubernetes/apps/main/llm/DESIGN.md#the-rule)), because
+  it is the one list agents will read.
+- Nothing on Build has a date or a reminder unless you give it one, so it never
+  fills your day. It comes up in the weekly review.
+- Still to do: an account of their own for the agents, with only Build shared
+  with it, so that a card is assigned to you or to them and the app's own
+  sharing decides what they see; then the placeholder boards go.
 
 The calendar stays where it is (iCloud), shown inside the task app, where the
 assistant can read it. Fixed things and the blocks for each project are
@@ -151,12 +135,12 @@ and how the phone edits it (the git plugin, or a sync like your vault's).
 
 ## Where each kind of thing lives
 
-| Kind                             | Where                                                                 |
-| -------------------------------- | --------------------------------------------------------------------- |
-| What the system is, and the plan | This page                                                             |
-| How a part works                 | That part's page (the table above)                                    |
-| Why it is built this way         | `DESIGN.md`, and the decisions in pipelines                           |
-| What is to do                    | The shared task list, once chosen; until then, "Now" and "Next" above |
-| What happened                    | Pull requests                                                         |
-| Your own notes                   | The vault                                                             |
-| What agents learned as they work | Their memory store; never the only copy of a plan                     |
+| Kind                             | Where                                                       |
+| -------------------------------- | ----------------------------------------------------------- |
+| What the system is, and the plan | This page                                                   |
+| How a part works                 | That part's page (the table above)                          |
+| Why it is built this way         | `DESIGN.md`, and the decisions in pipelines                 |
+| What is to do                    | The task app: your lists, and the Build board for the build |
+| What happened                    | Pull requests                                               |
+| Your own notes                   | The vault                                                   |
+| What agents learned as they work | Their memory store; never the only copy of a plan           |
