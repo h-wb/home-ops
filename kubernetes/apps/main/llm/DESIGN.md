@@ -50,16 +50,16 @@ agents get the full tool catalogue.
 
 ## Roles
 
-| Role          | What it does                                                   | Today      |
-| ------------- | -------------------------------------------------------------- | ---------- |
-| Assistant     | Talks to you, remembers, runs routines, decides who does work  | Hermes     |
-| Workshop      | Where agents with a shell work on repos; one per scope         | Paseo      |
-| Model gateway | The only path to any model; each client's key lists its models | LiteLLM    |
-| Tool gateway  | One catalogue of tools, served through one gateway per scope   | ToolHive   |
-| Memory        | What agents remember between sessions; one store per scope     | Memini     |
-| Job runner    | Runs a named job with fixed inputs on real data                | Prefect    |
-| Task board    | The one place tasks live, whoever created them                 | Not chosen |
-| Messaging app | How you reach the assistant                                    | Matrix     |
+| Role          | What it does                                                   | Today    |
+| ------------- | -------------------------------------------------------------- | -------- |
+| Assistant     | Talks to you, remembers, runs routines, decides who does work  | Hermes   |
+| Workshop      | Where agents with a shell work on repos; one per scope         | Paseo    |
+| Model gateway | The only path to any model; each client's key lists its models | LiteLLM  |
+| Tool gateway  | One catalogue of tools, served through one gateway per scope   | ToolHive |
+| Memory        | What agents remember between sessions; one store per scope     | Memini   |
+| Job runner    | Runs a named job with fixed inputs on real data                | Prefect  |
+| Task board    | The one place tasks live, whoever created them                 | TickTick |
+| Messaging app | How you reach the assistant                                    | Matrix   |
 
 ## One assistant, one workshop per scope
 

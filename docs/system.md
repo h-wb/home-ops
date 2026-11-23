@@ -12,7 +12,10 @@ If you change a part, change its row here in the same pull request.
 For an agent that starts with no context, and for you after a week away.
 
 1. **Read this page**, then the page of the part you will touch (the table
-   below). Each repo's `AGENTS.md` says how to build and check there.
+   below). Each repo's `AGENTS.md` says how to build and check there. The
+   code is in three repos, checked out side by side in a workshop: `home-ops`
+   (this one: what is deployed), `pipelines` (Miroir and the collector) and
+   `dotfiles` (what runs on your own machines).
 2. **Read the board**: the Homelab list in the task app. "Doing" is what is in
    progress, at most three cards. A card is an outcome with its "done when";
    its steps say who does each. Pull requests named on a card hold the detail.
@@ -102,9 +105,40 @@ propose.
 At most three. They are the "Doing" column of the Homelab board in the task app,
 each with its steps and who does them.
 
-1. Conversations in the timeline (milestone 2, extended).
-2. Messages from the edge Mac (milestone 1).
-3. The fix for the timeline's upgrade on PostgreSQL 18.
+As of 2026-11-23:
+
+**1. Conversations in the timeline** (milestone 2, extended). Done when you can
+open a conversation, read it with its attachments in place, and search your
+messages.
+
+- State: the data models are built in
+  [pipelines#52](https://github.com/h-wb/pipelines/pull/52); an independent
+  review found faults that are being fixed there.
+- Next: a second review, then you merge. After it: thumbnails for attachments
+  (agents, not started), then the pages (agents).
+
+**2. Messages from the edge Mac** (milestone 1). Done when a new message
+reaches the warehouse within a couple of minutes, without the laptop.
+
+- State: the setup is written in
+  [home-ops#5139](https://github.com/h-wb/home-ops/pull/5139), being cleaned
+  up. Nothing is installed on the Mac yet.
+- Next: you merge it, then run its `secrets` and `apply` tasks from your
+  workstation, import the tunnel and give the collector Full Disk Access.
+  Agents then check the counts. Last, the laptop stops sending messages
+  (a pull request in dotfiles).
+
+**3. The timeline's upgrade on PostgreSQL 18.** A build that added columns
+failed on the real warehouse and left rows half filled. Done when a build that
+reads everything again succeeds there, and a failed build leaves nothing
+behind.
+
+- State: fixed in
+  [pipelines#51](https://github.com/h-wb/pipelines/pull/51), merged.
+- Next: you merge
+  [home-ops#5169](https://github.com/h-wb/home-ops/pull/5169), which pins the
+  new image, and set the same image for flow runs in Miroir's settings. Agents
+  then check a build.
 
 ### Next, and later
 
