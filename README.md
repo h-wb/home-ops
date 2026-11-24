@@ -56,7 +56,7 @@ My Kubernetes clusters are deployed with [Talos](https://www.talos.dev). The `ma
 - [Envoy Gateway](https://github.com/envoyproxy/gateway): Routes traffic via HTTPRoutes attached to `envoy-internal` or `envoy-external` in the `network` namespace.
 - [Rook-Ceph](https://github.com/rook/rook): Distributed storage (`ceph-block`, `ceph-filesystem` and `ceph-bucket`).
 - [sops](https://github.com/getsops/sops): Encrypts the few secrets committed to Git; the rest come from Bitwarden or Proton Pass.
-- kopiur: Backup and recovery of persistent volume claims using a Kopia repository on Garage S3. CloudNativePG backs up separately via plugin-barman-cloud to [Garage on the NAS](docker/truenas/README.md#garage).
+- kopiur: Backup and recovery of persistent volume claims using a Kopia repository on Garage S3. CloudNativePG backs up separately via plugin-barman-cloud to [Garage on the NAS](docker/truenas/README.md#garage). The whole picture is in [docs/backups.md](docs/backups.md).
 - [Dragonfly](https://github.com/dragonflydb/dragonfly): Redis-compatible cache and key-value store.
 - [Spegel](https://github.com/spegel-org/spegel): Local OCI image cache on each node.
 
