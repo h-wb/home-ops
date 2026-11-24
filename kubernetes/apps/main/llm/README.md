@@ -6,7 +6,7 @@ summary: Records the local model, tool and memory wiring and what deployments mu
 topics:
   - "[[Model gateway]]"
   - "[[Tool gateway]]"
-  - "[[Memory]]"
+  - "[[Agent memory]]"
 created: 2026-10-28T16:04
 ---
 

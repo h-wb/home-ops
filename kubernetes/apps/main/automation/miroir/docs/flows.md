@@ -5,7 +5,7 @@ categories:
 summary: Traces data from delivery or scheduled fetch through loading, analysis, media handling, replay and reading.
 topics:
   - "[[Warehouse]]"
-  - "[[Collector]]"
+  - "[[Device collector]]"
   - "[[Job runner]]"
 created: 2026-11-23T08:25
 ---

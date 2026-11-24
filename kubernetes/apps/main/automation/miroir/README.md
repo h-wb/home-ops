@@ -5,7 +5,7 @@ categories:
 summary: Describes how Miroir connections and analyses fit together and how to deploy and operate the warehouse.
 topics:
   - "[[Warehouse]]"
-  - "[[Collector]]"
+  - "[[Device collector]]"
   - "[[Job runner]]"
 created: 2026-11-23T08:25
 ---

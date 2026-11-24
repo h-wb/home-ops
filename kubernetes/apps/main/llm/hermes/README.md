@@ -5,7 +5,7 @@ categories:
 summary: Describes the Hermes deployment, Matrix integration, dashboard and media processing boundaries.
 topics:
   - "[[Assistant]]"
-  - "[[Messaging]]"
+  - "[[Messaging app]]"
   - "[[Model gateway]]"
 created: 2026-11-11T06:34
 ---

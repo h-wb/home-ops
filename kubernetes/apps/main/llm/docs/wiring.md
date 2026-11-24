@@ -6,7 +6,7 @@ summary: Shows how deployed clients reach models, tools and memory and where the
 topics:
   - "[[Model gateway]]"
   - "[[Tool gateway]]"
-  - "[[Memory]]"
+  - "[[Agent memory]]"
 created: 2026-11-09T22:07
 ---
 

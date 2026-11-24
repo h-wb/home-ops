@@ -5,7 +5,7 @@ categories:
 summary: Explains how to bootstrap, check, reach and upgrade the Mac hosting the edge VM.
 topics:
   - "[[Cluster]]"
-  - "[[Collector]]"
+  - "[[Device collector]]"
 created: 2026-11-16T22:05
 ---
 
