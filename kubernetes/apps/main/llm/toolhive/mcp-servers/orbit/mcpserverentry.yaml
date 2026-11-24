@@ -12,6 +12,7 @@ metadata:
 spec:
   remoteUrl: http://orbit.default.svc.cluster.local:8080/mcp
   transport: streamable-http
+  allowPrivateEndpoint: true
   headerForward:
     addHeadersFromSecret:
       - headerName: Authorization
