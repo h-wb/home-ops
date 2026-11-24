@@ -31,6 +31,9 @@ spec:
         # Private tier data (vault, personal tasks) never appears in this list: general
         # gets the shared board, private gets the whole catalogue via mcp-private.
         - workload: homelab-tasks
+        # The workspace shared with agents: the build board and its pages. The
+        # token decides the workspace (mcp-servers/orbit).
+        - workload: orbit
         # TEMPORARY (2026-11): cross-check of the Miroir imports (browser history,
         # Messages) from a general Paseo session, counts and schema only. Revert
         # this block once the checks are done; the warehouse is private-tier data.
