@@ -22,14 +22,3 @@ spec:
       ports:
         - port: 8080
           protocol: TCP
-    # The tool gateways call Orbit's MCP endpoint with a token (llm/toolhive/mcp-servers/orbit).
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: llm
-          podSelector:
-            matchLabels:
-              app.kubernetes.io/name: virtualmcpserver
-      ports:
-        - port: 8080
-          protocol: TCP

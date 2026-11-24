@@ -81,6 +81,8 @@ spec:
   postBuild:
     substitute:
       APP: *app
+      # The internal gateway's address (network/envoy-gateway/ks.yaml).
+      SVC_GATEWAY_INTERNAL: 192.168.1.202
   prune: true
   retryInterval: 1m
   sourceRef:

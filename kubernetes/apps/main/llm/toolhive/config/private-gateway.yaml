@@ -64,6 +64,12 @@ spec:
       key: password
   podTemplateSpec:
     spec:
+      # Orbit answers only on its public origin, through the internal gateway
+      # (mcp-servers/orbit); that name does not resolve inside the cluster.
+      hostAliases:
+        - ip: ${SVC_GATEWAY_INTERNAL}
+          hostnames:
+            - orbit.${SECRET_DOMAIN}
       containers:
         - name: vmcp
           env:
