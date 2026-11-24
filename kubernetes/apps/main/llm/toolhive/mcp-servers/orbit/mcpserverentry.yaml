@@ -1,0 +1,22 @@
+---
+# Orbit's own MCP endpoint (default/orbit), reached inside the cluster with an API
+# token. An Orbit token belongs to one workspace: this one is for the workspace
+# shared with agents, which holds nothing private, so mcp-general lists it.
+#
+# The gateway pods mount this entry's header secret themselves, so if the secret
+# is missing a gateway fails to start, not just this backend.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: orbit
+spec:
+  remoteUrl: http://orbit.default.svc.cluster.local:8080/mcp
+  transport: streamable-http
+  headerForward:
+    addHeadersFromSecret:
+      - headerName: Authorization
+        valueSecretRef:
+          name: toolhive-orbit
+          key: authorization
+  groupRef:
+    name: mcp-tools
