@@ -13,7 +13,7 @@ created: 2026-11-23T08:25
 # Flows
 
 How data moves into and out of the warehouse. The parts are described in
-[the warehouse page](../README.md); the rules behind each flow are in
+[the deployment page](../README.md); the rules behind each flow are in
 [pipelines' decisions](https://github.com/h-wb/pipelines/blob/main/docs/miroir/decisions.md),
 named here by number.
 
@@ -23,7 +23,6 @@ it uses.
 
 - A solid arrow works today. A dashed arrow is planned.
 - An arrow shows where information moves.
-- GitHub draws these diagrams from the text in the page.
 
 ## A. A device delivers rows
 
