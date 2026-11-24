@@ -15,21 +15,22 @@ created: 2026-11-23T08:25
 
 Miroir mirrors every source into one Postgres, the [warehouse](https://github.com/h-wb/handbook/blob/main/Systems/Warehouse.md). Its code and its own documentation are in [h-wb/pipelines](https://github.com/h-wb/pipelines); this page is what is deployed here and how to operate it.
 
-| Document                                                                                      | What it holds                                                    |
-| --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| [docs/flows.md](./docs/flows.md)                                                              | How data moves, one diagram per flow                             |
-| [pipelines: architecture](https://github.com/h-wb/pipelines/blob/main/docs/architecture.md)   | The parts of the code, the ways data gets in, the words used     |
-| [pipelines: Miroir guide](https://github.com/h-wb/pipelines/blob/main/docs/miroir/README.md)  | Configuration, analyses, interface, API and commands in full     |
-| [pipelines: decisions](https://github.com/h-wb/pipelines/blob/main/docs/miroir/decisions.md)  | Why it is built this way, numbered                               |
-| [pipelines: sources](https://github.com/h-wb/pipelines/tree/main/docs/sources)                | One page per source: tables, keys, what is masked                |
-| [pipelines: observability](https://github.com/h-wb/pipelines/blob/main/docs/observability.md) | What Miroir knows about each connection; metrics                 |
-| dotfiles, `conf.d/macos-miroir-collector/`                                                    | The collector on the MacBook: install, sources, schedule, tokens |
+| Document                                                                                         | What it holds                                                                                 |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| [pipelines: flows](https://github.com/h-wb/pipelines/blob/main/docs/miroir/flows.md)             | How data moves, one diagram per flow                                                          |
+| [pipelines: operations](https://github.com/h-wb/pipelines/blob/main/docs/operations.md)          | Adding a source or an analysis, builds, what to look at when something is wrong               |
+| [pipelines: architecture](https://github.com/h-wb/pipelines/blob/main/docs/architecture.md)      | The parts of the code, the ways data gets in, the words used                                  |
+| [pipelines: Miroir reference](https://github.com/h-wb/pipelines/blob/main/docs/miroir/README.md) | What Miroir is; configuration, runs, analyses, media, timeline and API on the pages beside it |
+| [pipelines: decisions](https://github.com/h-wb/pipelines/blob/main/docs/miroir/decisions.md)     | Why it is built this way, numbered                                                            |
+| [pipelines: sources](https://github.com/h-wb/pipelines/tree/main/docs/sources)                   | One page per source: tables, keys, what is masked                                             |
+| [pipelines: observability](https://github.com/h-wb/pipelines/blob/main/docs/observability.md)    | What Miroir knows about each connection; metrics                                              |
+| dotfiles, `conf.d/macos-miroir-collector/`                                                       | The collector on the MacBook: install, sources, schedule, tokens                              |
 
 A connection is one source feeding the warehouse; an analysis is a dbt package built on connections into schemas of its own; the collector (`miroir-collector`) runs on a device and delivers a local source.
 
 ## The map
 
-A solid arrow works today; a dashed arrow is planned.
+A solid arrow works today. The two dashed arrows are not in place: the always-on Mac's collector (HOMEL-2) and the assistant's read tools (HOMEL-49).
 
 ```mermaid
 flowchart LR
@@ -141,6 +142,8 @@ Pin `sha-` tags only: the registry mirror in the cluster can serve a stale
 Credentials of the services Miroir fetches from are entered in its interface
 and stored encrypted in the metadata database.
 
+To call the API from a workstation, the token is `MIROIR_API_TOKEN` in the Bitwarden item `miroir`: read it with `mise run //docker/truenas:bws`, whose own token comes from Proton Pass through fnox ([secret tools](../../external-secrets/external-secrets/app/README.md#bootstrap-and-local-secret-tools)). Keep it in the process's memory, not in a file. A workshop pod cannot read Kubernetes Secrets.
+
 ### Storage and backups
 
 | What                           | Where                           | Backup                                |
@@ -190,21 +193,6 @@ kubectl -n automation exec deploy/miroir -- /app/.venv/bin/python -m src.cli \
 5. Check that the server is ready, that one load runs on the new image, and
    that `deployments plan` has nothing left to change.
 
-### Add a source on a device
-
-1. Create the connection in the interface; it shows a delivery token once.
-2. Put the token in Proton Pass, as a field of `miroir-collector`.
-3. Add the source to the collector's configuration in dotfiles, with its
-   receiving URL.
-4. Run the collector once with `--max-batches` raised for the history, then let
-   the hourly job carry on.
-
-### Add an analysis
-
-Add it to `analyses` in the configuration with its inputs,
-time zone and parameters; build it; then sync the database schema in Metabase
-so the new tables show.
-
 ### Make thumbnails for files stored earlier
 
 ```sh
@@ -216,10 +204,10 @@ ones again; `--retry failed,unreadable` those two kinds.
 
 ### When something looks wrong
 
-| Symptom                    | Look at                                                                               |
-| -------------------------- | ------------------------------------------------------------------------------------- |
-| A source stopped arriving  | The connection's page (last delivery, last report); the collector's log on the device |
-| A load failed              | The run in Prefect; `refresh` closes runs that ended without an outcome               |
-| A dashboard is stale       | The analysis's page: a failed build leaves the load fine and the analysis stale       |
-| Builds queue but never run | The Prefect concurrency limit `dbt` (one at a time) must exist                        |
-| A device cannot deliver    | It is off the LAN and the VPN; the batch waits in its spool                           |
+What to look at for a source that stopped arriving, a failed load or a stale dashboard is in [pipelines: operations](https://github.com/h-wb/pipelines/blob/main/docs/operations.md#when-something-looks-wrong). On the cluster side:
+
+| Symptom                    | Look at                                                                  |
+| -------------------------- | ------------------------------------------------------------------------ |
+| Builds queue but never run | The Prefect concurrency limit `dbt` (one at a time) must exist           |
+| A device cannot deliver    | `miroir.${SECRET_DOMAIN}` is on `envoy-internal` only: LAN or VPN        |
+| A flow run never starts    | The worker `miroir-worker` in the Prefect app, and its pool `miroir-k8s` |
