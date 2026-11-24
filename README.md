@@ -2,7 +2,7 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Introduces the GitOps checkout and describes the cluster stack and app layout.
+summary: The public face of the repo, with the cluster stack, the layout, the cloud services it relies on and the hardware.
 topics:
   - "[[Cluster]]"
   - "[[NAS]]"
@@ -23,9 +23,9 @@ _... automated via [Flux](https://fluxcd.io), [Renovate](https://github.com/reno
 
 ## Overview
 
-This is a monorepository for my home Kubernets clusters. I try to adhere to Infrastructure as Code (IaC) and Gitops practices using tools like [Ansible](https://www.ansible.com/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate), and [GitHub Actions](https://github.com/features/actions).
+This is a monorepository for my home Kubernetes clusters and NAS. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using tools like [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate), and [GitHub Actions](https://github.com/features/actions).
 
-This was built with the purpose of learning Kubernetes and Gitops while serving my various self-hosted applications.
+This was built with the purpose of learning Kubernetes and GitOps while serving my various self-hosted applications. How it fits with the other repos and systems is in the [handbook](https://github.com/h-wb/handbook); how to work in this repo is in [AGENTS.md](AGENTS.md).
 
 ---
 
@@ -35,7 +35,7 @@ There is a template over at [onedr0p/cluster-template](https://github.com/onedr0
 
 I would recommend looking at [onedr0p/home-ops](https://github.com/onedr0p/home-ops) or [joryirving/home-ops](https://github.com/joryirving/home-ops) for more polished repositories.
 
-You could find this one useful if you're looking for informations about:
+You could find this one useful if you're looking for information about:
 
 - Rook-Ceph
 - OVH (_archived_)
@@ -55,7 +55,7 @@ My Kubernetes clusters are deployed with [Talos](https://www.talos.dev). The `ma
 - [external-secrets](https://github.com/external-secrets/external-secrets/): Managed Kubernetes secrets using [Bitwarden](https://bitwarden.com/).
 - [Envoy Gateway](https://github.com/envoyproxy/gateway): Routes traffic via HTTPRoutes attached to `envoy-internal` or `envoy-external` in the `network` namespace.
 - [Rook-Ceph](https://github.com/rook/rook): Distributed storage (`ceph-block`, `ceph-filesystem` and `ceph-bucket`).
-- [sops](https://github.com/getsops/sops): Managed secrets for Kubernetes and Terraform which are commited to Git.
+- [sops](https://github.com/getsops/sops): Encrypts the few secrets committed to Git; the rest come from Bitwarden or Proton Pass.
 - kopiur: Backup and recovery of persistent volume claims using a Kopia repository on Garage S3. CloudNativePG backs up separately via plugin-barman-cloud to [Garage on the NAS](docker/truenas/README.md#garage).
 - [Dragonfly](https://github.com/dragonflydb/dragonfly): Redis-compatible cache and key-value store.
 - [Spegel](https://github.com/spegel-org/spegel): Local OCI image cache on each node.
@@ -66,7 +66,7 @@ My Kubernetes clusters are deployed with [Talos](https://www.talos.dev). The `ma
 
 The way Flux works for me here is it will recursively search the `kubernetes/apps/${CLUSTER}` folder until it finds the most top level `kustomization.yaml` per directory and then apply all the resources listed in it. That `kustomization.yaml` will generally only have a namespace resource and one or many Flux kustomizations (`ks.yaml`). Under the control of those Flux kustomizations there will be a `HelmRelease` or other resources related to the application which will be applied.
 
-[Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository throught the rules defined in `.github/renovate` looking for dependency updates. When they are found a PR is automatically created. When some PRs are merged Flux applies the changes to my cluster.
+[Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository through the rules in [`.renovaterc.json5`](.renovaterc.json5), looking for dependency updates. When they are found a PR is automatically created. When some PRs are merged Flux applies the changes to my cluster.
 
 ### Directories
 
@@ -107,7 +107,7 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 
 ### Home DNS
 
-[k8s_gateway](https://github.com/ori-edge/k8s_gateway) acts as a single external DNS interface into the cluster to any Kubernetes resources. A home DNS server can be configured to forward DNS queries from a domain to the gateay but as i'm connecting to my clusters remotelym i'm just adding the `k8s_gateway` address as DNS server to my VPN configuration.
+[k8s_gateway](https://github.com/ori-edge/k8s_gateway) acts as a single external DNS interface into the cluster to any Kubernetes resources. A home DNS server can be configured to forward DNS queries from a domain to the gateway, but as I'm connecting to my clusters remotely I'm just adding the `k8s_gateway` address as DNS server to my VPN configuration.
 
 ### Public DNS
 

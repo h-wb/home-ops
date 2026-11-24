@@ -2,7 +2,8 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Explains when the workstation pod bootstrap runs and how it handles failures.
+reviewed: 2026-11-24
+summary: The Component that bootstraps a workstation pod from the dotfiles, when it runs, and how it fails safe.
 topics:
   - "[[Workshop]]"
 created: 2026-11-16T11:13
@@ -25,8 +26,8 @@ options go to `pod-bootstrap`. The hook:
 
 `tests/test_code_server.py` runs it against scratch homes.
 
-| Pod         | Trigger                                                      | Status                                                                                                                                                                                                    |
-| ----------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| code-server | the `bootstrap` init container                               | uses it                                                                                                                                                                                                   |
-| neko        | XFCE autostart (xfconf needs the session D-Bus)              | follow-up: replace its `neko-provision` ConfigMap and both autostart entries with this ConfigMap and one entry running `dotfiles-bootstrap --pull --hold ~/.neko-hold --log neko-bootstrap --timeout 900` |
-| Paseo pods  | native `mise bootstrap --from` in the `tools` init container | stays: no workstation layer, so no secrets session; a fresh read-only `emptyDir` checkout every start; mise pinned by image                                                                               |
+| Pod         | Trigger                                                      | Status                                                                                                                      |
+| ----------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
+| code-server | the `bootstrap` init container                               | uses it                                                                                                                     |
+| neko        | XFCE autostart (xfconf needs the session D-Bus)              | not yet: still its own `neko-provision` ConfigMap and autostart entries                                                     |
+| Paseo pods  | native `mise bootstrap --from` in the `tools` init container | stays: no workstation layer, so no secrets session; a fresh read-only `emptyDir` checkout every start; mise pinned by image |

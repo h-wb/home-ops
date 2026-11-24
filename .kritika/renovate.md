@@ -2,7 +2,8 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Explains how to review a home-ops dependency upgrade before approval can trigger auto-merge.
+reviewed: 2026-11-24
+summary: Kritika's rule for reviewing a Renovate pull request here, whose approval auto-merges it.
 topics:
   - "[[Workshop]]"
   - "[[Cluster]]"
@@ -54,8 +55,8 @@ changed or removed one as **important (p1)**, naming the patch file.
 
 konflate renders the pull request's Flux manifests before and after and reports the
 result on the pull request: one comment per cluster from `bot-dupond[bot]`
-(`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` check
-runs on the head commit (`gh api repos/<owner>/<repo>/commits/<sha>/check-runs`). Use it
+(`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` commit
+statuses on the head commit (`gh api repos/<owner>/<repo>/commits/<sha>/status`). Use it
 to judge blast radius: a bump that rewrites many resources, touches a StatefulSet's volume
 claims or selectors, or changes RBAC deserves a closer read than one that only moves an
 image tag.

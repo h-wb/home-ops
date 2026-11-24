@@ -2,7 +2,8 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Explains how to initialize Orbit and what to retain to restore it.
+reviewed: 2026-11-24
+summary: How to set up Orbit after its first rollout, and what must be kept to restore it.
 topics:
   - "[[Board]]"
 created: 2026-11-23T16:39

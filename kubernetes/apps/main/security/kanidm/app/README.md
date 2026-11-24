@@ -2,7 +2,8 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Explains how to bootstrap and recover Kanidm and provision groups and OAuth clients.
+reviewed: 2026-11-24
+summary: How Kanidm, the cluster's identity provider, is deployed, how apps get an OIDC client from it, and how to recover its admin accounts.
 topics:
   - "[[Cluster]]"
 created: 2026-07-06T16:56
@@ -10,45 +11,53 @@ created: 2026-07-06T16:56
 
 # Kanidm
 
-Cluster identity provider — **replaced Authentik**. Built on `bjw-s/app-template` and adapted to
-home-ops conventions (Bitwarden Secrets Manager, Envoy Gateway, cert-manager, ceph-block).
+The cluster's identity provider, on `bjw-s/app-template` in namespace `security`.
 
-- **Host:** `idm.${SECRET_DOMAIN}` via `envoy-external`.
-- **TLS:** Kanidm terminates its own TLS (mandatory — it won't serve plaintext). cert-manager
-  `Certificate/idm` → secret `idm-tls` mounted at `/certs`. A `BackendTLSPolicy` makes Envoy
-  **re-encrypt** to the HTTPS backend and validate the LE cert (`wellKnownCACertificates: System`).
-- **Storage:** `/data` on the `kanidm` `ceph-block` PVC from the kopiur backup component (2Gi,
-  hourly snapshots, restored automatically on a rebuild). In-app `[online_backup]` dumps land in
-  `/data/backups` and ride along in each snapshot.
-- **Provisioning:** `m00nwtchr/kanidm-provision` runs as a second controller — declarative groups
-  and OAuth2 clients from ConfigMaps labelled `kanidm_config: "1"`, writing generated client
-  secrets back into the target namespace. Shipped at `replicas: 0` until the token existed; now `1`.
+- Host: `idm.${SECRET_DOMAIN}` on `envoy-external`.
+- TLS: Kanidm serves only HTTPS. cert-manager `Certificate/idm` writes `idm-tls`, mounted at `/certs`. A `BackendTLSPolicy` makes Envoy re-encrypt to the backend and validate its certificate (`wellKnownCACertificates: System`).
+- Storage: `/data` on the `kanidm` `ceph-block` PVC from the kopiur backup component (2Gi, hourly snapshots, restored automatically on a rebuild). `[online_backup]` in `server.toml` dumps to `/data/backups` every six hours, keeping 14, and the dumps ride along in each snapshot.
+- Provisioning: [`kanidm-provision`](https://github.com/oddlama/kanidm-provision) runs as a second controller. It applies every ConfigMap in `security` labelled `kanidm_config: "1"` and writes each client's secret into the app's namespace. Groups (`users`, `admins`, `guests`) are in `provisioning/groups.yaml`.
 
-## Bootstrap (one-time — already done; kept for disaster recovery)
+## Give an app an OIDC client
 
-### 1. Recover the built-in admin accounts
+Add a Component to the app's `ks.yaml`:
+
+- `components/oidc`: a Kanidm OAuth2 client for an app that speaks OIDC itself.
+- `components/oidc/envoy`: the same client, plus an Envoy `SecurityPolicy` that puts the login in front of the app's `HTTPRoute`, for an app with no login of its own.
+
+The Component creates a Flux Kustomization `kanidm-${APP}-oidc` in `security`, which renders a ConfigMap of the same name for the provisioner. The provisioner writes the Secret `kanidm-${APP}-oidc` into `${APP_NAMESPACE}`, with the client id and secret under `client-id` and `client-secret` (`OIDC_CLIENT_ID_KEY`, `OIDC_CLIENT_SECRET_KEY` rename them). The issuer is `https://idm.${SECRET_DOMAIN}/oauth2/openid/${APP}`.
+
+The app sets `APP_NAMESPACE` and the `OIDC_*` variables in `postBuild.substitute`. The usual ones are `OIDC_DISPLAY_NAME`, `OIDC_CALLBACK` (default `/oauth2/callback`), `OIDC_SHORT_USERNAME`, `OIDC_DISABLE_PKCE` for clients without PKCE, `OIDC_GROUP` (default `users`) and `OIDC_CLAIM_MAPS`; all of them, with defaults, are in [`components/oidc/base/ks.yaml`](../../../../../components/oidc/base/ks.yaml). Check the callback against the app's real redirect URL before enabling login.
+
+Provisioning cannot set passwords; credentials are self-service.
+
+## Add a person
+
+A person in `users` with a credential can sign in to every client that maps `users`:
+
+```sh
+export KANIDM_URL="https://idm.${SECRET_DOMAIN}"
+kanidm login --name idm_admin
+kanidm person create <user> "<Display Name>" -D idm_admin
+kanidm person update <user> --mail <user>@${SECRET_DOMAIN} -D idm_admin
+kanidm group add-members users <user> -D idm_admin
+kanidm person credential create-reset-token <user> -D idm_admin
+```
+
+Open the printed `/ui/reset?token=…` link to set a password or passkey. Apps that match accounts by email (RomM) need the same address there. The `kanidm` client comes from the root `.mise.toml` on macOS (`cargo:kanidm_tools`); the server image has none.
+
+## Recover the admin accounts
+
+Done once at the first deployment; repeat after losing the admin credentials.
 
 ```sh
 kubectl exec -n security -it statefulset/kanidm -c app -- kanidmd recover-account admin
 kubectl exec -n security -it statefulset/kanidm -c app -- kanidmd recover-account idm_admin
 ```
 
-Each prints a `new_password`. **This is a password to LOG IN with, not a `/ui/reset` token** — use
-it directly. (`/ui/reset` only accepts credential-reset tokens from
-`kanidm person credential create-reset-token`, used later for personal accounts / passkeys.)
+Each prints a `new_password` to log in with directly; it is not a `/ui/reset` token. `admin` manages system settings and OAuth2 clients, `idm_admin` people and groups.
 
-- `admin` — manages system config and OAuth2 resource servers.
-- `idm_admin` — manages people and groups (day-to-day identity admin).
-
-The kanidm **client** CLI (`brew install kanidm`, separate from the distroless server image) needs a
-server URL on every call. Set it once so the cached login token persists:
-
-```sh
-export KANIDM_URL="https://idm.${SECRET_DOMAIN}"
-kanidm login --name idm_admin        # paste the idm_admin new_password
-```
-
-### 2. Create the provision service account + token
+If the provisioner's token is lost, create a new one and store it in the Bitwarden item `kanidm`, field `KANIDM_PROVISION_TOKEN`; `externalsecret.yaml` maps it into `kanidm-provision-token`:
 
 ```sh
 kanidm service-account create kanidm-provision "Kanidm Provision" idm_admins -D idm_admin
@@ -56,65 +65,11 @@ kanidm group add-members idm_admins kanidm-provision -D idm_admin
 kanidm service-account api-token generate --readwrite kanidm-provision provision-token -D idm_admin
 ```
 
-Store the printed token in **Bitwarden Secrets Manager** under key `kanidm`, field
-`KANIDM_PROVISION_TOKEN`. `externalsecret.yaml` (store `bitwarden-secrets-manager`) maps it into
-secret `kanidm-provision-token`. Then set `controllers.provision.replicas: 1` in `helmrelease.yaml`.
-
-## Day-2: managing groups and OAuth2 clients
-
-Once the provision controller is running, **manage everything declaratively** — don't use the CLI.
-Add a ConfigMap under `provisioning/` labelled `kanidm_config: "1"`:
-
-- `provisioning/groups.yaml` — base groups (`users`, `admins`).
-- `provisioning/oauth2.yaml` — OAuth2 clients. One ConfigMap **per target namespace**
-  (`data.targetNamespace` is ConfigMap-level, not per-client — the provisioner overwrites any
-  per-client value, so split by namespace). For each client the provisioner writes secret
-  `kanidm-<name>-oidc` into that namespace with the keys named by `k8s.clientIdKey` /
-  `k8s.clientSecretKey`; the app consumes it via `envFrom`.
-
-Current clients: **`romm`** (media ns) — `OIDC_CLIENT_ID`/`OIDC_CLIENT_SECRET` → `kanidm-romm-oidc`.
-RomM has no PKCE, so the client sets `allowInsecureClientDisablePkce: true`; RomM's env uses
-`OIDC_PROVIDER: pocket-id` (closest standards-pure analog — no kanidm option exists) and userpass
-login stays enabled as a fallback. See the [oddlama/kanidm-provision state schema][schema] for all
-fields.
-
-Provisioning **cannot set user passwords** (credentials are self-service by design). See below.
-
-## Creating a personal login (to actually sign in via OIDC)
-
-An app OIDC client is not a user — you need a person in the `users` group (the group RomM's scope
-map grants) with a credential. The admin creates the person; the user sets their own password:
-
-```sh
-kanidm person create <user> "<Display Name>" -D idm_admin
-kanidm person update <user> --mail <user>@${SECRET_DOMAIN} -D idm_admin   # must match RomM email
-kanidm group add-members users <user> -D idm_admin
-kanidm person credential create-reset-token <user> -D idm_admin          # → /ui/reset?token=… link
-```
-
-Open the printed reset link in a browser to set a password / passkey. That credential is what you
-use at RomM's "Login with OIDC" button. The email must match the account in RomM.
-
 ## Design notes
 
-- **`server.toml`** (ConfigMap → `/data/server.toml`, the image's default path) enables what env
-  vars can't:
-  - `[online_backup]` — SQLite-consistent dumps to `/data/backups` every 6h, keep 14.
-  - `[http_client_address_info]` — trusts `X-Forwarded-For` from the pod CIDR (`10.42.0.0/16`,
-    Cilium native routing) so audit logs / rate-limiting see the real client IP, not the Envoy pod.
-- **`priorityClassName: system-cluster-critical`** — protects the IdP from eviction under memory
-  pressure. (No control-plane pinning / netpol here, unlike the reference — kept minimal to match
-  repo convention; control-planes are already schedulable.)
-- **RBAC** (secrets create/patch, configmaps read) is scoped to the `provision` ServiceAccount
-  only; the internet-facing server pod uses a separate powerless `kanidm` SA.
-- **`/status`** is a public, unauthenticated health endpoint (used by the probes).
-- **LDAP** (`:3636`) is served but not routed externally — no consumers yet.
-- **No metrics/OTEL** — Kanidm exposes no Prometheus `/metrics`; OTLP would need a collector we
-  don't run.
-
-## References
-
-- Deploy + cutover PRs: #3605 (deploy), #3607 (enable provision), #3608 (romm OIDC + remove authentik).
-- Verify each client's redirect URL against the app's real callback before enabling it.
-
-[schema]: https://github.com/oddlama/kanidm-provision#state-schema
+- `server.toml` (ConfigMap at `/data/server.toml`) also trusts `X-Forwarded-For` from the pod network `10.42.0.0/16`, so audit logs and rate limits see the client, not the Envoy pod.
+- `priorityClassName: system-cluster-critical` keeps the identity provider from eviction under memory pressure.
+- The provisioner's ServiceAccount alone may create and patch Secrets and read ConfigMaps; the internet-facing server runs under a separate `kanidm` ServiceAccount with no rights.
+- `/status` is public and unauthenticated; the probes use it.
+- LDAP (`:3636`) is served but not routed outside the cluster; nothing uses it.
+- Kanidm exposes no Prometheus metrics.
