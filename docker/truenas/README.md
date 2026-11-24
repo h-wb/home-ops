@@ -1,3 +1,13 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains how this checkout deploys NAS stacks and how to rebuild the NAS and restore Garage.
+topics:
+  - "[[NAS]]"
+created: 2026-09-26T12:37
+---
+
 # TrueNAS (doco-cd)
 
 Every `NN-name/docker-compose.yaml` here is a stack deployed on the NAS by
@@ -9,6 +19,11 @@ can't read fields out of the JSON-per-app secrets).
 doco-cd (`.doco-cd/compose.main.yaml`) deploys the stacks and updates itself
 (`SELF_UPDATE_ENABLED`). It used to be a main + updater pair; on 2026-10-16 both
 recreated each other in the same poll and left two dead containers.
+
+Stacks such as Plex, Garage and the exporters use `/mnt/ssd-storage/docker/<app>`
+for app data rather than TrueNAS catalog apps. Do not add `# renovate:` comments to
+Compose files: the built-in Compose manager already tracks their images, and the
+generic regex manager would misparse `image:` lines.
 
 ## Rebuild the NAS
 
@@ -22,6 +37,10 @@ recreated each other in the same poll and left two dead containers.
    It deploys everything else, itself included from then on.
 
 ## Garage
+
+The cluster reaches this S3 store at `garage.storage.svc` through a selector-less
+Service pointing to the NAS. The external endpoint is `s3.${SECRET_DOMAIN}`.
+CNPG Barman and kopiur use separate buckets in the same store.
 
 Offsite copy = Cloud Sync task 3 on `/mnt/tank/backup/garage`:
 `data/` (blocks), `snapshots/` (daily metadata snapshots) and `identity/`

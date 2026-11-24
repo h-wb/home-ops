@@ -1,3 +1,13 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Describes how to recover a CNPG database to a specific point, verify recovery and return the app to normal operation.
+topics:
+  - "[[Cluster]]"
+created: 2026-05-28T19:17
+---
+
 # Disaster Recovery: Point-In-Time Recovery (PITR)
 
 Point-In-Time Recovery allows you to restore a PostgreSQL cluster to any specific moment in time, not just the latest backup. This is critical for scenarios like:

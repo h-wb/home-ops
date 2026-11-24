@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Shows how deployed clients reach models, tools and memory and where they differ from the design.
+topics:
+  - "[[Model gateway]]"
+  - "[[Tool gateway]]"
+  - "[[Memory]]"
+created: 2026-11-09T22:07
+---
+
 # Wiring
 
 How each agent is connected today: which path its model calls take, where its

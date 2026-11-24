@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains how the two Paseo environments are configured and how to check their access, credentials and storage.
+topics:
+  - "[[Workshop]]"
+  - "[[Cluster]]"
+  - "[[Tool gateway]]"
+created: 2026-11-03T15:44
+---
+
 # Paseo environments
 
 The workshops of the [assistant design](../DESIGN.md). Two Paseo pods in the

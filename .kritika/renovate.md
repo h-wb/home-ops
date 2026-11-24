@@ -1,3 +1,14 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains how to review a home-ops dependency upgrade before approval can trigger auto-merge.
+topics:
+  - "[[Workshop]]"
+  - "[[Cluster]]"
+created: 2026-10-03T18:04
+---
+
 # Reviewing a Renovate dependency upgrade
 
 This is a Flux GitOps repository for home Kubernetes clusters. A Renovate pull request
@@ -5,6 +16,8 @@ bumps a container image, a Helm chart (HelmRelease / OCIRepository), a GitHub Ac
 tool version. The diff is usually one line, so the review is about what that upgrade does
 to this repository, not about the line itself. An approval lets the pull request
 auto-merge, so do the research before deciding.
+
+[joryirving/home-ops](https://github.com/joryirving/home-ops) is a reference for Renovate and pull request review patterns. Compare effort with value before borrowing a pattern.
 
 ## 1. Identify the upgrade
 

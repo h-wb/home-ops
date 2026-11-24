@@ -1,3 +1,13 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Describes how to create an empty CNPG database and when to switch to restore.
+topics:
+  - "[[Cluster]]"
+created: 2026-05-28T19:17
+---
+
 # CNPG Initdb Component
 
 This component adds the `initdb` bootstrap method to a CNPG cluster — a fresh, empty database.

@@ -1,16 +1,28 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Records the local model, tool and memory wiring and what deployments must preserve.
+topics:
+  - "[[Model gateway]]"
+  - "[[Tool gateway]]"
+  - "[[Memory]]"
+created: 2026-10-28T16:04
+---
+
 # Models, tools and memory
 
 What is deployed. The rest of the documentation:
 
-| Document                                 | What it holds                                                          |
-| ---------------------------------------- | ---------------------------------------------------------------------- |
-| [The map](../../../../docs/system.md)    | Every part of the system, the plan, what is being worked on now        |
-| [DESIGN.md](./DESIGN.md)                 | The target: the rule, roles, decisions, what is left to do             |
-| [docs/flows.md](./docs/flows.md)         | How work moves, one diagram per flow                                   |
-| [docs/wiring.md](./docs/wiring.md)       | How each agent connects today, and where that differs from the design  |
-| [docs/awareness.md](./docs/awareness.md) | How the assistant comes to know what you are doing, and when it speaks |
-| [paseo/README.md](./paseo/README.md)     | The two workshops: pods, config, credentials, volumes                  |
-| [hermes/README.md](./hermes/README.md)   | The assistant: messaging, dashboard, credentials and Matrix setup      |
+| Document                                     | What it holds                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| [Handbook](https://github.com/h-wb/handbook) | Every part of the system, the plan, what is being worked on now        |
+| [DESIGN.md](./DESIGN.md)                     | The target: the rule, roles, decisions, what is left to do             |
+| [docs/flows.md](./docs/flows.md)             | How work moves, one diagram per flow                                   |
+| [docs/wiring.md](./docs/wiring.md)           | How each agent connects today, and where that differs from the design  |
+| [docs/awareness.md](./docs/awareness.md)     | How the assistant comes to know what you are doing, and when it speaks |
+| [paseo/README.md](./paseo/README.md)         | The two workshops: pods, config, credentials, volumes                  |
+| [hermes/README.md](./hermes/README.md)       | The assistant: messaging, dashboard, credentials and Matrix setup      |
 
 `docs/build.py` draws the documents' diagrams (`docs/img/`) from the Mermaid text
 folded under each one, and the same drawings as one published page. Change a flow

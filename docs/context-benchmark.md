@@ -1,3 +1,14 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains what the model gateway dashboard measures and how to compare tool-call context costs across different caches.
+topics:
+  - "[[Model gateway]]"
+  - "[[Tool gateway]]"
+created: 2026-11-12T16:48
+---
+
 # Context usage monitoring
 
 Use the LiteLLM Grafana dashboard's **Context Usage by Consumer/Model** section.

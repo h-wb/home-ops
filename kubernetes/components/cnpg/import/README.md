@@ -1,3 +1,13 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Describes the bootstrap component that seeds a new CNPG database from a live PostgreSQL source.
+topics:
+  - "[[Cluster]]"
+created: 2026-05-28T19:17
+---
+
 # CNPG Import Component
 
 This component adds the `initdb.import` bootstrap method to a CNPG cluster — a fresh cluster that's seeded by `pg_dump | pg_restore` from a live external Postgres source. Used to migrate a database from one Postgres install to another (originally added for the CPGO → CNPG migration in this repo).

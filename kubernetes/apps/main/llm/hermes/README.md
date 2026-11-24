@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Describes the Hermes deployment, Matrix integration, dashboard and media processing boundaries.
+topics:
+  - "[[Assistant]]"
+  - "[[Messaging]]"
+  - "[[Model gateway]]"
+created: 2026-11-11T06:34
+---
+
 # Hermes: the assistant
 
 The assistant of the [design](../DESIGN.md), running as `hermes-private-0` in

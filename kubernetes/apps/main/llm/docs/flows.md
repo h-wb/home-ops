@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Traces assistant and workshop workflows and shows what crosses scope boundaries.
+topics:
+  - "[[Assistant]]"
+  - "[[Workshop]]"
+  - "[[Job runner]]"
+created: 2026-11-09T22:07
+---
+
 # Flows
 
 How work moves, by design ([DESIGN.md](../DESIGN.md)). How each agent is

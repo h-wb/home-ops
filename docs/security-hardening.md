@@ -1,3 +1,14 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Records the home-ops security audit and the work needed to tighten access across deployment and repository boundaries.
+topics:
+  - "[[Cluster]]"
+  - "[[Workshop]]"
+created: 2026-11-12T13:05
+---
+
 # Security hardening plan
 
 Working document from the audit of 2026-11-12 (auth, exposure, privileges, supply

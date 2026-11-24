@@ -1,3 +1,13 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains how to bootstrap and recover Kanidm and provision groups and OAuth clients.
+topics:
+  - "[[Cluster]]"
+created: 2026-07-06T16:56
+---
+
 # Kanidm
 
 Cluster identity provider — **replaced Authentik**. Built on `bjw-s/app-template` and adapted to

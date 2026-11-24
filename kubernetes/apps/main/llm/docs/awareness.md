@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Plans]]"
+summary: Describes how durable records and live signals could help the assistant decide when to speak and learn from the result.
+topics:
+  - "[[Assistant]]"
+  - "[[Warehouse]]"
+  - "[[Home hub]]"
+created: 2026-11-23T08:25
+---
+
 # Awareness: an assistant that knows what is going on
 
 Target design, worked out from 2026-11-19 to 2026-11-22. It extends
@@ -6,7 +18,7 @@ acts; this one says how the assistant comes to know what you are doing, and how
 it decides when to speak.
 
 Where this sits among the other parts, and what is being worked on now, is
-on [the map](../../../../../docs/system.md).
+in [the handbook](https://github.com/h-wb/handbook).
 
 Most of this page is not built. What exists today is the collecting side: the
 [data warehouse](../../automation/miroir/README.md) and the feeds that fill it.
@@ -152,22 +164,24 @@ flowchart LR
 ```
 
 Each feed is declared once, with two answers: who keeps the record, and does the
-assistant need it now.
+assistant need it now. What is connected to the warehouse today, and how often
+it loads, is the warehouse's to say:
+[its sources](../../automation/miroir/README.md#sources).
 
-| Feed                                    | Record kept by             | In the warehouse today         | Live signal                          |
-| --------------------------------------- | -------------------------- | ------------------------------ | ------------------------------------ |
-| Screen text and screenshots (Mac)       | Warehouse                  | Yes, hourly                    | Only "which app is in front"         |
-| Browser history                         | Warehouse                  | Yes, hourly                    | No                                   |
-| Messages (iMessage, SMS)                | Warehouse                  | Yes, hourly; every minute next | A new message arrived                |
-| Other chat networks                     | Warehouse                  | No                             | Later                                |
-| Health                                  | Warehouse                  | Yes, on each export            | No: it plans the day, not the moment |
-| Music, code activity, bike rides        | Warehouse                  | Yes, daily                     | No                                   |
-| Location                                | The location service       | No (the service is the record) | Arrivals and departures              |
-| Tasks and calendar                      | The task service           | No                             | Changes; busy or free                |
-| Phone state (focus, moving, app in use) | Warehouse                  | No                             | Yes                                  |
-| What you tell it (the log)              | Warehouse                  | No                             | Yes                                  |
-| Agent work in the workshops             | The workshop's own records | No                             | Needs your attention                 |
-| Prompts it sent, and what happened next | Warehouse                  | No                             | Time since the last one              |
+| Feed                                    | Record kept by             | Live signal                          |
+| --------------------------------------- | -------------------------- | ------------------------------------ |
+| Screen text and screenshots (Mac)       | Warehouse                  | Only "which app is in front"         |
+| Browser history                         | Warehouse                  | No                                   |
+| Messages (iMessage, SMS)                | Warehouse                  | A new message arrived                |
+| Other chat networks                     | Warehouse                  | Later                                |
+| Health                                  | Warehouse                  | No: it plans the day, not the moment |
+| Music, code activity, bike rides        | Warehouse                  | No                                   |
+| Location                                | The location service       | Arrivals and departures              |
+| Tasks and calendar                      | The task service           | Changes; busy or free                |
+| Phone state (focus, moving, app in use) | Warehouse                  | Yes                                  |
+| What you tell it (the log)              | Warehouse                  | Yes                                  |
+| Agent work in the workshops             | The workshop's own records | Needs your attention                 |
+| Prompts it sent, and what happened next | Warehouse                  | Time since the last one              |
 
 Rules that came out of building the first feeds:
 
@@ -424,7 +438,7 @@ Today: nothing. The warehouse's receiving URL is the door this would use.
 A survey on 2026-11-20 of what can say "what is he doing". Web research plus
 reading source code; only the first three rows have run on real machines.
 
-| Signal                                      | Source                                       | State                                             |
+| Signal                                      | Source                                       | State on 2026-11-20                               |
 | ------------------------------------------- | -------------------------------------------- | ------------------------------------------------- |
 | Text and image of the screen                | ScreenMemory, read by the collector          | Deployed                                          |
 | Pages visited                               | The browser's history, read by the collector | Deployed                                          |
@@ -478,21 +492,10 @@ What screen text can and cannot do, from a three-day test on real data:
 
 Done:
 
-- The warehouse receives from devices, apps and services, and keeps media
-  (2026-11-20 to 2026-11-22). See the
-  [warehouse page](../../automation/miroir/README.md).
-- The device collector, with masking, withholding, re-sends without duplicates
-  and a report after each run.
-- Screen text and screenshots, browser history and messages flow from the
-  MacBook.
-- Deterministic models: screen frames and app sessions per day, conversations
-  and message counts without text, thumbnails for screenshots.
-- Dashboards per source.
-
-In progress:
-
-- The timeline interface inside Miroir: day view, scrubber and search over
-  screen and browser; conversations after that; then every source on one axis.
+- The record: the warehouse receives from devices, apps and services, keeps
+  media, and builds tables to read. What it holds and what is in progress there
+  is on [its page](../../automation/miroir/README.md#state), not repeated
+  here.
 
 Next, in order:
 

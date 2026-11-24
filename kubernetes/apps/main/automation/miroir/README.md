@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Describes how Miroir connections and analyses fit together and how to deploy and operate the warehouse.
+topics:
+  - "[[Warehouse]]"
+  - "[[Collector]]"
+  - "[[Job runner]]"
+created: 2026-11-23T08:25
+---
+
 # Data warehouse (Miroir)
 
 Every service and device you use, mirrored into one Postgres, so the data
@@ -5,7 +17,7 @@ outlives each service's own retention and can be joined across sources. Miroir
 is the program that receives, loads and models it. Its code is in
 [h-wb/pipelines](https://github.com/h-wb/pipelines); this page is what is
 deployed here and how the parts fit across the three repos. Where it sits in the
-whole system is on [the map](../../../../../docs/system.md).
+whole system is on [the handbook](https://github.com/h-wb/handbook).
 
 | Document                                                                                      | What it holds                                                    |
 | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |

@@ -1,3 +1,14 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains how to bootstrap, check, reach and upgrade the Mac hosting the edge VM.
+topics:
+  - "[[Cluster]]"
+  - "[[Collector]]"
+created: 2026-11-16T22:05
+---
+
 # Edge Mac
 
 The Intel Mac that hosts the edge cluster: Talos runs as a UTM VM with the

@@ -1,3 +1,13 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains when the workstation pod bootstrap runs and how it handles failures.
+topics:
+  - "[[Workshop]]"
+created: 2026-11-16T11:13
+---
+
 # dotfiles
 
 Bootstraps a workstation pod (dotfiles layer `pod`) from the owner's dotfiles.

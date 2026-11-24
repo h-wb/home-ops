@@ -1,3 +1,13 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Explains how to initialize Orbit and what to retain to restore it.
+topics:
+  - "[[Board]]"
+created: 2026-11-23T16:39
+---
+
 # Orbit
 
 Orbit runs on the main cluster at `https://orbit.${SECRET_DOMAIN}` (internal

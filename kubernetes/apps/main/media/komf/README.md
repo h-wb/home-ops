@@ -1,3 +1,11 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Describes which metadata Sento provides and how Komga and Komf import and enrich it.
+created: 2026-11-07T23:39
+---
+
 # Sento libraries in Komga
 
 Komga imports ComicInfo from Sento's Volumes and Chapters libraries. Configure

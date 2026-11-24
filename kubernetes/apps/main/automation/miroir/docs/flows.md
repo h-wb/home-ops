@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Traces data from delivery or scheduled fetch through loading, analysis, media handling, replay and reading.
+topics:
+  - "[[Warehouse]]"
+  - "[[Collector]]"
+  - "[[Job runner]]"
+created: 2026-11-23T08:25
+---
+
 # Flows
 
 How data moves into and out of the warehouse. The parts are described in
