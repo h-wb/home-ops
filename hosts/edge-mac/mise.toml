@@ -25,13 +25,14 @@ description = "Apply this directory to the edge Mac over ssh (asks for sudo ther
 depends = [":ssh:verify"]
 secrets = ["EDGE_MAC"]
 raw = true # sudo prompts on the Mac
-run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task"
+run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task --install-mise"
 
 [tasks.diff]
-description = "Show what apply would change on the edge Mac"
+description = "Preview edge Mac configuration changes (excluding tool installs)"
 depends = [":ssh:agent"]
 secrets = ["EDGE_MAC"]
-run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task --dry-run"
+# mise's dry run still requires pipx's configured uv dependency to be installed.
+run = "{{ vars.bootstrap }} --host \"$EDGE_MAC\" --skip task,tools --install-mise --dry-run"
 
 [tasks.check]
 description = "Report what would stop the edge Mac coming back up unattended"
@@ -45,6 +46,31 @@ description = "Shut the Talos VM down cleanly, then restart the edge Mac"
 depends = [":ssh:agent"]
 secrets = ["EDGE_MAC"]
 run = '''{{ vars.ssh }} "$EDGE_MAC" 'launchctl kickstart "gui/$(id -u)/dev.mise.edge-reboot"' '''
+
+[tasks.secrets]
+description = "Provision the collector and WireGuard secrets on the edge Mac"
+depends = [":ssh:agent"]
+secrets = ["EDGE_MAC", "SECRET_DOMAIN", "MIROIR_TOKEN_MESSAGES", "EDGE_MAC_WG_CONF"]
+run = '''
+# Keep DNS and the default route on the edge Mac's LAN.
+if printf '%s\n' "$EDGE_MAC_WG_CONF" | grep -Eiq '^[[:space:]]*DNS[[:space:]]*='; then
+	echo 'the WireGuard configuration has a DNS line: remove it (README, "WireGuard")' >&2
+	exit 1
+fi
+if printf '%s\n' "$EDGE_MAC_WG_CONF" | grep -Ei '^[[:space:]]*AllowedIPs[[:space:]]*=' | grep -Eq '(^|[=,[:space:]])(0\.0\.0\.0|::)/0'; then
+	echo 'the WireGuard configuration routes everything: list only the addresses needed (README, "WireGuard")' >&2
+	exit 1
+fi
+printf '%s\n%s\n%s\n' "$SECRET_DOMAIN" "$MIROIR_TOKEN_MESSAGES" "$EDGE_MAC_WG_CONF" | {{ vars.ssh }} "$EDGE_MAC" '
+	umask 077
+	mkdir -p "$HOME/.config/miroir-collector" "$HOME/.config/wireguard" || exit 1
+	IFS= read -r zone && IFS= read -r token && [ -n "$zone" ] && [ -n "$token" ] || { echo "nothing received" >&2; exit 1; }
+	printf "%s\n" "$zone" >"$HOME/.config/miroir-collector/zone" &&
+		printf "%s" "$token" >"$HOME/.config/miroir-collector/token" &&
+		cat >"$HOME/.config/wireguard/wg-main.conf" &&
+		[ -s "$HOME/.config/wireguard/wg-main.conf" ] && echo "domain, token and tunnel configuration written"
+'
+'''
 
 [tasks.ssh]
 description = "Run a command on the edge Mac, or open a shell"

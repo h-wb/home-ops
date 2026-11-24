@@ -1,8 +1,20 @@
 # The edge Mac itself, applied by `mise run //hosts/edge-mac:apply`.
 
+include = ["files/collector.toml"]
+
 [vars]
 vm_name = "Talos"
 usb_device = "303A:831A" # the ZBT-2 Zigbee dongle, as VID:PID
+miroir_address = "192.168.1.202"
+bucket_address = "192.168.1.201"
+tunnel = "wg-main"
+collector_zone = "cat ~/.config/miroir-collector/zone 2>/dev/null || true"
+
+[tools]
+mas = "6.0.1" # Standalone binary; 7.x needs jq on macOS 13.
+
+[bootstrap.packages]
+"mas:1451685025" = "latest" # WireGuard
 
 # Pinned GitHub releases; sha256 is the asset's `digest` in the release API.
 # An app already in /Applications is adopted only when identical to the pin,
@@ -69,6 +81,70 @@ domain = "com.apple.screensaver"
 key = "idleTime"
 value = 60
 host = "current"
+
+[bootstrap.directories."~/.config/wireguard"]
+mode = "0700"
+
+[bootstrap.macos.launchd.agents.wireguard]
+program = "/usr/sbin/scutil"
+args = ["--nc", "start", "{{ vars.tunnel }}"]
+run_at_load = true
+start_interval = 60
+process_type = "Background"
+stdout_path = "~/Library/Logs/edge-mac.log"
+stderr_path = "~/Library/Logs/edge-mac.log"
+
+[bootstrap.directories."~/.config/miroir-collector"]
+mode = "0700"
+
+[bootstrap.directories."~/.config/mise/conf.d"]
+
+[bootstrap.files."~/.config/mise/conf.d/miroir-collector.toml"]
+source = "files/collector.toml"
+
+[bootstrap.files."~/.config/miroir-collector/config.json"]
+template = true
+mode = "0600"
+content = """
+{
+  "state_dir": "~/Library/Application Support/miroir-collector",
+  "sources": [
+    {
+      "id": "messages",
+      "source": "apple_messages",
+      "receive_url": "https://miroir.{{ exec(command=vars.collector_zone) | trim }}/api/connections/messages/receive",
+      "token_env": "MIROIR_TOKEN_MESSAGES",
+      "options": { "media": true }
+    }
+  ]
+}
+"""
+
+# Resolve these two names without changing the Mac's DNS.
+[bootstrap.files."/etc/hosts"]
+id = "miroir"
+template = true
+owner = "root"
+group = "wheel"
+block = """
+{{ vars.miroir_address }} miroir.{{ exec(command=vars.collector_zone) | trim }}
+{{ vars.bucket_address }} s3.{{ exec(command=vars.collector_zone) | trim }}
+"""
+
+# Grant Full Disk Access to the collector's Python, not /bin/sh.
+[bootstrap.macos.launchd.agents.miroir-collector]
+program = "/bin/sh"
+args = ["-c", '''
+collector=$("$HOME/.local/bin/mise" -C "$HOME" which miroir-collector) || exit 1
+MIROIR_TOKEN_MESSAGES=$(cat "$HOME/.config/miroir-collector/token") || exit 1
+export MIROIR_TOKEN_MESSAGES
+exec "$collector" run --config "$HOME/.config/miroir-collector/config.json"
+''']
+run_at_load = true
+start_interval = 60
+process_type = "Background"
+stdout_path = "~/Library/Logs/miroir-collector.log"
+stderr_path = "~/Library/Logs/miroir-collector.log"
 
 # utmctl refuses to work over ssh, so the three vm.sh agents run in the desktop
 # session. Every minute: start the VM if it is not running.
@@ -178,3 +254,45 @@ run = "ioreg -p IOUSB -w0 | grep -q ZBT-2"
 [doctor.checks.bluebubbles]
 description = "BlueBubbles is running under its agent"
 run = '''launchctl print "gui/$(id -u)/dev.mise.bluebubbles" | grep -q "state = running"'''
+
+[doctor.checks.collector]
+description = "The Miroir collector is installed"
+run = '''collector=$("$HOME/.local/bin/mise" -C "$HOME" which miroir-collector) && "$collector" --version'''
+hint = "apply installs it with mise"
+
+[doctor.checks.secrets]
+description = "The domain, the delivery token and the tunnel's configuration are on this Mac"
+run = '''
+[ -s "$HOME/.config/miroir-collector/zone" ] && [ -s "$HOME/.config/miroir-collector/token" ] &&
+	[ -s "$HOME/.config/wireguard/wg-main.conf" ]
+'''
+hint = "mise run //hosts/edge-mac:secrets from a workstation, then apply"
+
+[doctor.checks.wireguard-app]
+description = "WireGuard is installed"
+run = "[ -d /Applications/WireGuard.app ]"
+hint = "sign in to the App Store and claim WireGuard, then rerun apply (see README)"
+
+[doctor.checks.wireguard-tunnel]
+description = "The WireGuard tunnel is imported"
+run = '''scutil --nc list | grep -q '"wg-main"' '''
+hint = "in WireGuard, Import tunnel(s) from file: ~/.config/wireguard/wg-main.conf (README)"
+
+[doctor.checks.wireguard-up]
+description = "The main site's gateway answers through the tunnel"
+run = "nc -z -G 5 192.168.1.202 443"
+hint = "scutil --nc status wg-main; the wireguard agent retries every minute and logs to ~/Library/Logs/edge-mac.log"
+
+# A 401 confirms the unauthenticated request reached Miroir.
+[doctor.checks.collector-route]
+description = "Miroir answers by name"
+run = '''
+[ "$(curl -s -o /dev/null -m 10 -w '%{http_code}' -X POST \
+	"https://miroir.$(cat "$HOME/.config/miroir-collector/zone")/api/connections/messages/report")" = 401 ]
+'''
+hint = "the tunnel (check above), then the miroir block in /etc/hosts"
+
+[doctor.checks.collector-run]
+description = "The collector's last pass succeeded"
+run = '''launchctl print "gui/$(id -u)/dev.mise.miroir-collector" | grep -q "last exit code = 0"'''
+hint = "~/Library/Logs/miroir-collector.log; a first run needs Full Disk Access for the collector's Python (README)"

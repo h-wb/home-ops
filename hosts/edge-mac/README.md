@@ -5,9 +5,10 @@ Zigbee dongle passed through, next to the BlueBubbles server. This directory
 makes the Mac come back on its own after a restart.
 
 It is a [mise bootstrap](https://mise.jdx.dev/bootstrap.html) project pushed
-over ssh: `mise run //hosts/edge-mac:apply` packs the directory, stages mise on
-the Mac for the run and applies `mise.edge-mac.toml`. The Mac needs no checkout
-and no mise of its own. `diff` shows what `apply` would change.
+over ssh: `mise run //hosts/edge-mac:apply` packs the directory and applies
+`mise.edge-mac.toml`. It leaves mise installed for the collector. The Mac
+needs no checkout. `diff` previews configuration changes without checking tool
+installs.
 
 | In `mise.edge-mac.toml` | What it does                                                                                                                                              |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,6 +16,7 @@ and no mise of its own. `diff` shows what `apply` would change.
 | macOS defaults          | UTM stays open, keeps the Mac awake and powers the VM down on quit; lock after a minute                                                                   |
 | agent `edge-vm`         | Every minute: open UTM, start the VM if it is not running, reconnect the dongle after                                                                     |
 | agent `bluebubbles`     | Keeps BlueBubbles open                                                                                                                                    |
+| Messages collector      | Sends messages and attachments to [Miroir](#miroir-collector) over WireGuard                                                                              |
 | sshd drop-in            | Key-only login                                                                                                                                            |
 | `final` hook            | Never sleep (lid closed included); no self-installing macOS updates; a sudoers rule letting admins run `shutdown -r now` without a password, for `reboot` |
 | `[doctor.checks]`       | What an unattended boot depends on, with the fix as each check's hint                                                                                     |
@@ -28,10 +30,11 @@ only kickstarts.
 | Task        | What it does                                                                     |
 | ----------- | -------------------------------------------------------------------------------- |
 | `apply`     | Applies `mise.edge-mac.toml`; asks for sudo on the Mac                           |
-| `diff`      | What `apply` would change                                                        |
+| `diff`      | Configuration changes `apply` would make                                         |
 | `check`     | Runs the doctor checks on the Mac                                                |
 | `reboot`    | Stops the VM cleanly, then restarts the Mac; returns at once, allow five minutes |
 | `ssh`       | A shell on the Mac, or `mise run //hosts/edge-mac:ssh -- <command>`              |
+| `secrets`   | Provisions the collector and WireGuard secrets; workstation only                 |
 | `ssh:setup` | Installs the ssh key on a Mac that does not have it yet                          |
 
 From the tailnet (a Paseo pod), the route to this Mac is the subnet router
@@ -86,6 +89,39 @@ A replaced app may need its permissions granted again.
 
 Amphetamine is what kept this Mac awake before; the `final` hook makes it
 redundant.
+
+## Miroir collector
+
+The [collector](https://github.com/h-wb/pipelines/tree/main/collector) sends
+new messages and locally stored attachments to Miroir every minute.
+`/etc/hosts` resolves Miroir and its bucket without changing the Mac's DNS.
+
+1. Create a dedicated WireGuard peer. Save its config in the note field of
+   `Machines/wireguard-edge-mac` in Proton Pass. Set
+   `AllowedIPs = 192.168.1.201/32, 192.168.1.202/32` (bucket and Miroir) and
+   `PersistentKeepalive = 25`. Omit `DNS` and default routes so the Mac stays
+   reachable on the edge LAN. If supported, restrict the peer to HTTPS on
+   those two addresses on the WireGuard server.
+2. Sign in to the App Store on the Mac and claim WireGuard if the account
+   hasn't already. From a workstation, run `mise run //hosts/edge-mac:secrets`,
+   then `mise run //hosts/edge-mac:apply`. If `apply` skips WireGuard because
+   `mas` isn't installed yet, rerun it: mise installs tools after packages.
+3. In WireGuard, import `~/.config/wireguard/wg-main.conf` and allow the VPN
+   configuration. When rotating the peer, rerun `secrets` and reimport it.
+4. On the Mac, open Privacy & Security → Full Disk Access. Add the collector's
+   Python (not `/bin/sh`) using Cmd-Shift-G and the path printed by:
+
+   ```sh
+   mise run //hosts/edge-mac:ssh -- 'collector=$("$HOME/.local/bin/mise" -C "$HOME" which miroir-collector) && "$(dirname "$collector")/../miroir-collector/bin/python" -c "import sys; from pathlib import Path; print(Path(sys.executable).resolve())"'
+   ```
+
+   Renew the grant if an upgrade changes the resolved Python path.
+
+5. After a minute, run `mise run //hosts/edge-mac:check`. For delivery status,
+   see the `messages` connection in Miroir or `~/Library/Logs/miroir-collector.log`.
+
+To upgrade the collector, change the pin in `files/collector.toml` and rerun
+`apply`.
 
 ## Upgrading an app
 
