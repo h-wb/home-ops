@@ -94,19 +94,10 @@ holds the data. Flow runs write to both; nothing else writes to the warehouse.
 
 ## Connections
 
-What `miroir.json` configures today (not in git, not checked here). Schedules and the analyses each connection feeds: [pipelines: sources](https://github.com/h-wb/pipelines/tree/main/docs/sources).
+Which connections exist, their schedules and the analyses they feed are configuration, not deployment: `miroir.json` holds them, the interface at `miroir.${SECRET_DOMAIN}` edits it, and no repo keeps a copy. Read them there.
 
-| Connection        | Source                              | How it arrives                                    | Dataset             |
-| ----------------- | ----------------------------------- | ------------------------------------------------- | ------------------- |
-| `listenbrainz`    | Every listen                        | Fetched daily                                     | `listenbrainz_data` |
-| `github`          | Commits, pull requests, issues      | Fetched daily                                     | `github_data`       |
-| `bikeshare`       | Every rental                        | Fetched daily                                     | `bikeshare_data`    |
-| `health`          | Health metrics and workouts         | The phone's export app posts to the receiving URL | `apple_health_data` |
-| `browser_macbook` | Browser history                     | Collector, source `zen_history`, hourly           | Generated           |
-| `screen_macbook`  | Screen text, front app, screenshots | Collector, source `screenmemory`, hourly          | Generated           |
-| `messages`        | Messages, chats, attachments        | Collector, source `apple_messages`, hourly        | Generated           |
-
-Location is not loaded; the location tracker keeps that record.
+- What feeds the warehouse, source by source: the [handbook's map](https://github.com/h-wb/handbook/blob/main/Map.md).
+- How each source is read, its tables and what is masked: [pipelines: sources](https://github.com/h-wb/pipelines/tree/main/docs/sources).
 
 ## Privacy here
 
