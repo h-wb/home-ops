@@ -2,10 +2,11 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Explains how to bootstrap, check, reach and upgrade the Mac hosting the edge VM.
+reviewed: 2026-11-24
+summary: How the Mac that hosts the edge cluster's VM is set up from this directory, reached over ssh, checked and upgraded.
 topics:
   - "[[Cluster]]"
-  - "[[Device collector]]"
+  - "[[Home hub]]"
 created: 2026-11-16T22:05
 ---
 
@@ -20,15 +21,16 @@ over ssh: `mise run //hosts/edge-mac:apply` packs the directory, stages mise on
 the Mac for the run and applies `mise.edge-mac.toml`. The Mac needs no checkout
 and no mise of its own. `diff` shows what `apply` would change.
 
-| In `mise.edge-mac.toml` | What it does                                                                                                                                              |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| packages                | UTM and BlueBubbles, pinned to a GitHub release                                                                                                           |
-| macOS defaults          | UTM stays open, keeps the Mac awake and powers the VM down on quit; lock after a minute                                                                   |
-| agent `edge-vm`         | Every minute: open UTM, start the VM if it is not running, reconnect the dongle after                                                                     |
-| agent `bluebubbles`     | Keeps BlueBubbles open                                                                                                                                    |
-| sshd drop-in            | Key-only login                                                                                                                                            |
-| `final` hook            | Never sleep (lid closed included); no self-installing macOS updates; a sudoers rule letting admins run `shutdown -r now` without a password, for `reboot` |
-| `[doctor.checks]`       | What an unattended boot depends on, with the fix as each check's hint                                                                                     |
+| In `mise.edge-mac.toml`              | What it does                                                                                                                                              |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| packages                             | UTM and BlueBubbles, pinned to a GitHub release                                                                                                           |
+| macOS defaults                       | UTM stays open, keeps the Mac awake and powers the VM down on quit; lock after a minute                                                                   |
+| agent `edge-vm`                      | Every minute: open UTM, start the VM if it is not running, reconnect the dongle after                                                                     |
+| agents `edge-vm-stop`, `edge-reboot` | On demand, kickstarted over ssh: stop the VM cleanly; stop it and restart the Mac                                                                         |
+| agent `bluebubbles`                  | Keeps BlueBubbles open                                                                                                                                    |
+| sshd drop-in                         | Key-only login                                                                                                                                            |
+| `final` hook                         | Never sleep (lid closed included); no self-installing macOS updates; a sudoers rule letting admins run `shutdown -r now` without a password, for `reboot` |
+| `[doctor.checks]`                    | What an unattended boot depends on, with the fix as each check's hint                                                                                     |
 
 `files/vm.sh` is installed to `/usr/local/libexec/edge-mac`; the VM name and
 the dongle's USB id are `[vars]`. `utmctl` refuses to work over ssh, and a

@@ -2,7 +2,8 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Explains how this checkout deploys NAS stacks and how to rebuild the NAS and restore Garage.
+reviewed: 2026-11-24
+summary: How the NAS's Compose stacks are deployed from this repo, how to rebuild the NAS, and how to restore Garage.
 topics:
   - "[[NAS]]"
 created: 2026-09-26T12:37
@@ -17,8 +18,8 @@ Secrets Manager IDs in the stack's `.doco-cd.yaml` (plain values only — doco-c
 can't read fields out of the JSON-per-app secrets).
 
 doco-cd (`.doco-cd/compose.main.yaml`) deploys the stacks and updates itself
-(`SELF_UPDATE_ENABLED`). It used to be a main + updater pair; on 2026-10-16 both
-recreated each other in the same poll and left two dead containers.
+(`SELF_UPDATE_ENABLED`). Keep it one container: a main and updater pair recreated
+each other in the same poll and left both dead.
 
 Stacks such as Plex, Garage and the exporters use `/mnt/ssd-storage/docker/<app>`
 for app data rather than TrueNAS catalog apps. Do not add `# renovate:` comments to
@@ -27,7 +28,7 @@ generic regex manager would misparse `image:` lines.
 
 ## Rebuild the NAS
 
-1. Apps → Settings: choose the `ssd-storage` pool (starts Docker).
+1. Apps → Settings: choose the `ssd-storage` pool (starts Docker). These steps were not checked against the NAS.
 2. Create datasets `ssd-storage/docker/{doco-cd,plex,garage}`.
 3. Create `/mnt/ssd-storage/docker/doco-cd/{data,secrets}` and, in
    `secrets/`, `api_secret` + `webhook_secret` (`openssl rand -hex 32`) and
@@ -38,35 +39,41 @@ generic regex manager would misparse `image:` lines.
 
 ## Garage
 
-The cluster reaches this S3 store at `garage.storage.svc` through a selector-less
-Service pointing to the NAS. The external endpoint is `s3.${SECRET_DOMAIN}`.
+The cluster reaches this S3 store at `garage.storage.svc`, a selector-less
+Service with an EndpointSlice pointing to the NAS
+([`kubernetes/apps/main/storage/garage`](../../kubernetes/apps/main/storage/garage/app/service.yaml)). The external endpoint is `s3.${SECRET_DOMAIN}`.
 CNPG Barman and kopiur use separate buckets in the same store.
 
-Offsite copy = Cloud Sync task 3 on `/mnt/tank/backup/garage`:
+Offsite copy: Cloud Sync task 3 (not checked) on `/mnt/tank/backup/garage`:
 `data/` (blocks), `snapshots/` (daily metadata snapshots) and `identity/`
 (node key + layout; recopy from `/mnt/ssd-storage/docker/garage/meta` after
 any layout change). The live metadata on the SSD is not synced on purpose.
 
-**Restore with contents** (metadata lost, `data/` intact or restored):
+### Restore with contents
+
+Metadata lost, `data/` intact or restored:
 
 1. Stop the stack, empty `/mnt/ssd-storage/docker/garage/meta`.
 2. Copy `identity/*` into it, and the newest `snapshots/<date>/db.lmdb`
    as `meta/db.lmdb/data.mdb`.
 3. Start the stack, then `docker exec garage /garage repair -a --yes blocks`.
 
-**Fresh node** (buckets come back empty — existing Barman/Kopia backups are lost):
-start the stack on empty `meta/` and `data/`, then run
+### Fresh node
+
+Buckets come back empty, and the Barman and Kopia backups in them are lost. Start the stack on empty `meta/` and `data/`, then run
 
 ```sh
 mise run //docker/truenas:garage:bootstrap
 ```
 
-It assigns the layout, imports the key consumers already use (BWS
-`postgresql-bucket`) and creates the `postgresql` and `kopiur` buckets.
+Run it from a workstation: it reaches the NAS over ssh (`NAS_HOST`) and reads
+Bitwarden through fnox. It assigns the layout, imports the key consumers already
+use (BWS `postgresql-bucket`) and creates the `postgresql` and `kopiur` buckets.
 Safe to re-run: every step skips what already exists.
 
-**Miroir media** (screenshots and other files that warehouse rows point at): the
-same task creates the `miroir-media` bucket and imports a key that can read and
+### Miroir media
+
+Screenshots and other files that warehouse rows point at. The same task creates the `miroir-media` bucket and imports a key that can read and
 write that bucket only, once the BWS item `miroir` has
 `MIROIR_MEDIA_ACCESS_KEY_ID` (`GK` + 24 hex characters) and
 `MIROIR_MEDIA_SECRET_ACCESS_KEY` (64 hex characters):
@@ -77,6 +84,6 @@ openssl rand -hex 32                        # secret
 ```
 
 The Miroir server reads the same two fields from its environment
-(`miroir-secret`). These objects are private screen captures and are stored
-unencrypted in `data/`, so they are part of the offsite copy above: check that
-copy is encrypted before uploading any.
+(`miroir-secret`). These objects are private screen captures, stored
+unencrypted in `data/`, so they are in the offsite copy above; whether that copy
+is encrypted is not checked here.
