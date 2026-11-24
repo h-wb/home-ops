@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+reviewed: 2026-11-24
+summary: Kritika's rule for reviewing a Renovate pull request here, whose approval auto-merges it.
+topics:
+  - "[[Workshop]]"
+  - "[[Cluster]]"
+created: 2026-10-03T18:04
+---
+
 # Reviewing a Renovate dependency upgrade
 
 This is a Flux GitOps repository for home Kubernetes clusters. A Renovate pull request
@@ -5,6 +17,8 @@ bumps a container image, a Helm chart (HelmRelease / OCIRepository), a GitHub Ac
 tool version. The diff is usually one line, so the review is about what that upgrade does
 to this repository, not about the line itself. An approval lets the pull request
 auto-merge, so do the research before deciding.
+
+[joryirving/home-ops](https://github.com/joryirving/home-ops) is a reference for Renovate and pull request review patterns. Compare effort with value before borrowing a pattern.
 
 ## 1. Identify the upgrade
 
@@ -41,8 +55,8 @@ changed or removed one as **important (p1)**, naming the patch file.
 
 konflate renders the pull request's Flux manifests before and after and reports the
 result on the pull request: one comment per cluster from `bot-dupond[bot]`
-(`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` check
-runs on the head commit (`gh api repos/<owner>/<repo>/commits/<sha>/check-runs`). Use it
+(`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` commit
+statuses on the head commit (`gh api repos/<owner>/<repo>/commits/<sha>/status`). Use it
 to judge blast radius: a bump that rewrites many resources, touches a StatefulSet's volume
 claims or selectors, or changes RBAC deserves a closer read than one that only moves an
 image tag.

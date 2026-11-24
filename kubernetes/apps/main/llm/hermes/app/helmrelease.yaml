@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-# The assistant (../../DESIGN.md): private scope only. The pod name stays
+# The assistant (../../README.md): private scope only. The pod name stays
 # hermes-private-0, which the Paseo provider execs into (rbac.yaml).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease

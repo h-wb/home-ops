@@ -1,3 +1,14 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: The public face of the repo, with the cluster stack, the layout, the cloud services it relies on and the hardware.
+topics:
+  - "[[Cluster]]"
+  - "[[NAS]]"
+created: 2022-01-24T21:06
+---
+
 <div align="center">
 
 <img src="https://github.com/user-attachments/assets/ff2077be-4375-4ecb-8f17-cb4e47e5e4ae" align="center" width="144px" height="144px"/>
@@ -12,9 +23,9 @@ _... automated via [Flux](https://fluxcd.io), [Renovate](https://github.com/reno
 
 ## Overview
 
-This is a monorepository for my home Kubernets clusters. I try to adhere to Infrastructure as Code (IaC) and Gitops practices using tools like [Ansible](https://www.ansible.com/), [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate), and [GitHub Actions](https://github.com/features/actions).
+This is a monorepository for my home Kubernetes clusters and NAS. I try to adhere to Infrastructure as Code (IaC) and GitOps practices using tools like [Kubernetes](https://kubernetes.io/), [Flux](https://github.com/fluxcd/flux2), [Renovate](https://github.com/renovatebot/renovate), and [GitHub Actions](https://github.com/features/actions).
 
-This was built with the purpose of learning Kubernetes and Gitops while serving my various self-hosted applications.
+This was built with the purpose of learning Kubernetes and GitOps while serving my various self-hosted applications. How it fits with the other repos and systems is in the [handbook](https://github.com/h-wb/handbook); how to work in this repo is in [AGENTS.md](AGENTS.md).
 
 ---
 
@@ -24,36 +35,38 @@ There is a template over at [onedr0p/cluster-template](https://github.com/onedr0
 
 I would recommend looking at [onedr0p/home-ops](https://github.com/onedr0p/home-ops) or [joryirving/home-ops](https://github.com/joryirving/home-ops) for more polished repositories.
 
-You could find this one useful if you're looking for informations about:
+You could find this one useful if you're looking for information about:
 
-- Longhorn
+- Rook-Ceph
 - OVH (_archived_)
 - [Bitwarden Secrets Manager](https://external-secrets.io/latest/provider/bitwarden-secrets-manager/)
 
 ### Installation
 
-My Kubernetes cluster is deployed with [Talos](https://www.talos.dev). This is a semi-hyper-converged cluster - workloads and block storage are sharing the same available resources on my nodes while I have a separate [TrueNAS SCALE](https://www.truenas.com/truenas-scale/) server with ZFS for NFS/SMB shares, bulk file storage and backups.
+My Kubernetes clusters are deployed with [Talos](https://www.talos.dev). The `main` cluster is semi-hyper-converged - workloads and block storage share the same three control-plane nodes with NVMe storage, while I have a separate [TrueNAS SCALE](https://www.truenas.com/truenas-scale/) server with ZFS for NFS/SMB shares, bulk file storage and backups. I run production services like auth, photos, media and automation on `main`, and lighter workloads on `edge`.
 
 ### Core components
 
 - [actions-runner-controller](https://github.com/actions/actions-runner-controller): Self-hosted Github runners.
 - [cert-manager](https://github.com/cert-manager/cert-manager): Creates SSL certificates for services in my cluster.
 - [cilium](https://github.com/cilium/cilium): Internal Kubernetes container networking interface.
-- [cloudflared](https://github.com/cloudflare/cloudflared): Enables Cloudflare secure access to certain ingresses.
-- [external-dns](https://github.com/kubernetes-sigs/external-dns): Automatically syncs ingress DNS records to a DNS provider.
+- [cloudflared](https://github.com/cloudflare/cloudflared): Enables Cloudflare secure access to services through Envoy Gateway.
+- [external-dns](https://github.com/kubernetes-sigs/external-dns): Syncs HTTPRoute DNS records to Cloudflare and k8s_gateway.
 - [external-secrets](https://github.com/external-secrets/external-secrets/): Managed Kubernetes secrets using [Bitwarden](https://bitwarden.com/).
-- [ingress-nginx](https://github.com/kubernetes/ingress-nginx): Kubernetes ingress controller using NGINX as a reverse proxy and load balancer.
-- [longhorn](https://github.com/longhorn/longhorn): Distributed block storage for peristent storage.
-- [sops](https://github.com/getsops/sops): Managed secrets for Kubernetes and Terraform which are commited to Git.
-- [volsync](https://github.com/backube/volsync): Backup and recovery of persistent volume claims.
+- [Envoy Gateway](https://github.com/envoyproxy/gateway): Routes traffic via HTTPRoutes attached to `envoy-internal` or `envoy-external` in the `network` namespace.
+- [Rook-Ceph](https://github.com/rook/rook): Distributed storage (`ceph-block`, `ceph-filesystem` and `ceph-bucket`).
+- [sops](https://github.com/getsops/sops): Encrypts the few secrets committed to Git; the rest come from Bitwarden or Proton Pass.
+- kopiur: Backup and recovery of persistent volume claims using a Kopia repository on Garage S3. CloudNativePG backs up separately via plugin-barman-cloud to [Garage on the NAS](docker/truenas/README.md#garage).
+- [Dragonfly](https://github.com/dragonflydb/dragonfly): Redis-compatible cache and key-value store.
+- [Spegel](https://github.com/spegel-org/spegel): Local OCI image cache on each node.
 
 ### GitOps
 
 [Flux](https://github.com/fluxcd/flux2) watches the clusters in my [kubernetes](./kubernetes/) folder (see Directories below) and makes the changes to my clusters based on the state of my Git repository.
 
-The way Flux works for me here is it will recursively search the `kubernetes/${cluster}/apps` folder until it finds the most top level `kustomization.yaml` per directory and then apply all the resources listed in it. That `kustomization.yaml` will generally only have a namespace resource and one or many Flux kustomizations (`ks.yaml`). Under the control of those Flux kustomizations there will be a `HelmRelease` or other resources related to the application which will be applied.
+The way Flux works for me here is it will recursively search the `kubernetes/apps/${CLUSTER}` folder until it finds the most top level `kustomization.yaml` per directory and then apply all the resources listed in it. That `kustomization.yaml` will generally only have a namespace resource and one or many Flux kustomizations (`ks.yaml`). Under the control of those Flux kustomizations there will be a `HelmRelease` or other resources related to the application which will be applied.
 
-[Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository throught the rules defined in `.github/renovate` looking for dependency updates. When they are found a PR is automatically created. When some PRs are merged Flux applies the changes to my cluster.
+[Renovate](https://github.com/renovatebot/renovate) watches my **entire** repository through the rules in [`.renovaterc.json5`](.renovaterc.json5), looking for dependency updates. When they are found a PR is automatically created. When some PRs are merged Flux applies the changes to my cluster.
 
 ### Directories
 
@@ -61,16 +74,13 @@ This Git repository contains the following directories under [Kubernetes](./kube
 
 ```sh
 📁 kubernetes
-├── 📁 main               # main cluster (based in France)
-│   ├── 📁 apps           # applications
-│   ├── 📁 bootstrap      # bootstrap procedures
-│   ├── 📁 flux            # core flux configuration
-│   └── 📁 templates      # re-useable components
-└── 📁 dev                # dev cluster (based in Canada)
-    ├── 📁 apps           # applications
-    ├── 📁 bootstrap      # bootstrap procedures
-    ├── 📁 flux            # core flux configuration
-    └── 📁 templates      # re-useable components
+├── 📁 apps               # applications by cluster and namespace
+│   ├── 📁 main
+│   └── 📁 edge
+├── 📁 clusters           # Flux entry points
+│   ├── 📁 main
+│   └── 📁 edge
+└── 📁 components         # reusable Kustomize components
 ```
 
 ---
@@ -97,11 +107,11 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 
 ### Home DNS
 
-[k8s_gateway](https://github.com/ori-edge/k8s_gateway) acts as a single external DNS interface into the cluster to any Kubernetes resources. A home DNS server can be configured to forward DNS queries from a domain to the gateay but as i'm connecting to my clusters remotelym i'm just adding the `k8s_gateway` address as DNS server to my VPN configuration.
+[k8s_gateway](https://github.com/ori-edge/k8s_gateway) acts as a single external DNS interface into the cluster to any Kubernetes resources. A home DNS server can be configured to forward DNS queries from a domain to the gateway, but as I'm connecting to my clusters remotely I'm just adding the `k8s_gateway` address as DNS server to my VPN configuration.
 
 ### Public DNS
 
-[external-dns](https://github.com/kubernetes-sigs/external-dns) is deployed in my cluster and configured to sync DNS records to [Cloudflare](https://www.cloudflare.com/). The only ingress this `external-dns` instance looks at to gather DNS records to put in `Cloudflare` are ones that have an ingress class name of `external` and contain an ingress annotation `external-dns.kubernetes.io/target`.
+[external-dns](https://github.com/kubernetes-sigs/external-dns) syncs DNS records to [Cloudflare](https://www.cloudflare.com/) from HTTPRoutes attached to the `envoy-external` Gateway and from `DNSEndpoint` resources.
 
 ---
 
@@ -115,11 +125,9 @@ The alternative solution to these two problems would be to host a Kubernetes clu
 | k8s-2 | Intel NUC12WSHI7 | i7-1260P | 128GB SSD | 500GB NVME | 64GB | Talos | Kubernetes Control-plane |
 | k8s-3 | Intel NUC12WSHI7 | i7-1260P | 128GB SSD | 500GB NVME | 64GB | Talos | Kubernetes Control-plane |
 
-### Dev Kubernetes Cluster
+### Edge Kubernetes Cluster
 
-| Name     | Device    | CPU         | OS Disk  | Data Disk | RAM  | OS      | Purpose                  |
-| -------- | --------- | ----------- | -------- | --------- | ---- | ------- | ------------------------ |
-| hyperv-1 | Gaming PC | Ryzen 3600X | 2TB NVME | -         | 64GB | Hyper-V | Kubernetes Control-plane |
+A single Talos VM runs in UTM on an [Intel Mac](hosts/edge-mac/README.md).
 
 ### Supporting Hardware
 

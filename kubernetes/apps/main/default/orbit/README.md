@@ -1,3 +1,14 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+reviewed: 2026-11-24
+summary: How to set up Orbit after its first rollout, and what must be kept to restore it.
+topics:
+  - "[[Board]]"
+created: 2026-11-23T16:39
+---
+
 # Orbit
 
 Orbit runs on the main cluster at `https://orbit.${SECRET_DOMAIN}` (internal

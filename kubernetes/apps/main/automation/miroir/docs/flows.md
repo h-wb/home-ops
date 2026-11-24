@@ -1,7 +1,19 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+summary: Traces data from delivery or scheduled fetch through loading, analysis, media handling, replay and reading.
+topics:
+  - "[[Warehouse]]"
+  - "[[Device collector]]"
+  - "[[Job runner]]"
+created: 2026-11-23T08:25
+---
+
 # Flows
 
 How data moves into and out of the warehouse. The parts are described in
-[the warehouse page](../README.md); the rules behind each flow are in
+[the deployment page](../README.md); the rules behind each flow are in
 [pipelines' decisions](https://github.com/h-wb/pipelines/blob/main/docs/miroir/decisions.md),
 named here by number.
 
@@ -11,7 +23,6 @@ it uses.
 
 - A solid arrow works today. A dashed arrow is planned.
 - An arrow shows where information moves.
-- GitHub draws these diagrams from the text in the page.
 
 ## A. A device delivers rows
 
@@ -295,10 +306,12 @@ sequenceDiagram
 | ---------- | ----------- | ------------------------------------------------------------------------------- |
 | Dashboards | Works today | Every analysis; one collection per source                                       |
 | Timeline   | Works today | The `timeline` analysis and thumbnails: screen and browser. Conversations next  |
-| Assistant  | Planned     | Named tools over understood tables: [Awareness](../../../llm/docs/awareness.md) |
+| Assistant  | Planned     | Named tools over understood tables: [The aware assistant][aware] (the handbook) |
 
 - What guarantees it: the timeline's role can read only the timeline's tables
   and is cut off after a few seconds. Images are served behind Miroir's login.
   The assistant gets tools, never a database connection.
 - What it costs: a dashboard is as fresh as the last build, not the last
   load.
+
+[aware]: https://github.com/h-wb/handbook/blob/main/Plans/The%20aware%20assistant.md

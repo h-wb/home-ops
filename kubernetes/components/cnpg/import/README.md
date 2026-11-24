@@ -1,76 +1,37 @@
-# CNPG Import Component
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+reviewed: 2026-11-24
+summary: The CNPG bootstrap Component that seeds a new database with a logical dump of a live PostgreSQL, to move an app onto CNPG.
+topics:
+  - "[[Cluster]]"
+created: 2026-05-28T19:17
+---
 
-This component adds the `initdb.import` bootstrap method to a CNPG cluster — a fresh cluster that's seeded by `pg_dump | pg_restore` from a live external Postgres source. Used to migrate a database from one Postgres install to another (originally added for the CPGO → CNPG migration in this repo).
+# CNPG import Component
 
-## What it does
-
-Patches the cluster spec to add:
-
-```yaml
-spec:
-  bootstrap:
-    initdb:
-      database: ${CNPG_DATABASE:=${APP}}
-      owner: ${CNPG_USER:=${APP}}
-      import:
-        type: ${CNPG_IMPORT_TYPE:=microservice}
-        databases:
-          - ${CNPG_DATABASE:=${APP}}
-        source:
-          externalCluster: source
-        pgDumpExtraOptions:
-          - --exclude-extension=pg_stat_statements
-          - --exclude-extension=pgaudit
-          - --exclude-schema=pgbouncer
-  externalClusters:
-    - name: source
-      connectionParameters:
-        host: ${CNPG_IMPORT_HOST:=${APP}-primary}
-        ...
-```
-
-## Usage
-
-Automatically includes:
-
-- `cnpg/base` — Cluster, ObjectStore, Pooler, ScheduledBackup, ExternalSecret
-
-**Do NOT use with:**
-
-- `cnpg/initdb` — uses plain `bootstrap.initdb` instead
-- `cnpg/restore` — uses `bootstrap.recovery` from Barman archive
-
-## When to pick this
-
-- Migrating an app's DB from CPGO (or any other live Postgres) to CNPG. The new CNPG cluster pulls a logical dump of the source on first boot, then runs alongside the source until the app is cut over.
-- After the migration is complete and the first Barman backup has landed, the consuming app should switch its `components` reference to `cnpg/restore` so a torn-down cluster rebuilds from the backup instead of trying to re-import from a source that may no longer exist.
+Adds `bootstrap.initdb.import` to the `Cluster` from [`base`](../README.md): on first boot CloudNativePG runs `pg_dump | pg_restore` from an external cluster named `source`, then the new database runs on its own. No app uses it today; it moved the apps off CrunchyData PGO in 2026-05.
 
 ## Variables
 
-- `CNPG_DATABASE` — Database name (default: `${APP}`)
-- `CNPG_USER` — Database owner username (default: `${APP}`)
-- `CNPG_IMPORT_TYPE` — Import type, `microservice` (single DB) or `monolith` (multi-DB) (default: `microservice`)
-- `CNPG_IMPORT_HOST` — Source Postgres service hostname (default: `${APP}-primary` — the CPGO primary svc)
-- `CNPG_IMPORT_USER` — User to connect to the source as (default: `postgres`)
-- `CNPG_IMPORT_DBNAME` — DB to connect to on the source for the dump (default: `postgres`)
-- `CNPG_IMPORT_PASSWORD_SECRET` — Secret containing the source password (default: `${APP}-pguser-postgres` — CPGO's auto-generated superuser secret)
+| Variable                      | Default                  | Holds                                            |
+| ----------------------------- | ------------------------ | ------------------------------------------------ |
+| `CNPG_IMPORT_HOST`            | `${APP}-primary`         | Source host                                      |
+| `CNPG_IMPORT_USER`            | `postgres`               | Source user                                      |
+| `CNPG_IMPORT_DBNAME`          | `postgres`               | Database to connect to on the source             |
+| `CNPG_IMPORT_PASSWORD_SECRET` | `${APP}-pguser-postgres` | Secret with the source password under `password` |
+| `CNPG_IMPORT_TYPE`            | `microservice`           | `monolith` to import several databases and roles |
 
-## Excluded from the dump
+The defaults are the service and Secret names CrunchyData PGO generated; set all of them for any other source. `CNPG_DATABASE` and `CNPG_USER` name the database that is imported and created.
 
-Things in the CPGO source that would break or be irrelevant on the CNPG destination:
+The dump excludes the `pg_stat_statements` and `pgaudit` extensions and the `pgbouncer` schema, which a CrunchyData source carries and CloudNativePG does not load.
 
-- Extension `pg_stat_statements` — Crunchy preloads this; on CNPG it's not in `shared_preload_libraries` by default
-- Extension `pgaudit` — Crunchy-only
-- Schema `pgbouncer` — CPGO's PgBouncer auth schema, irrelevant on CNPG
+## Cut over
 
-## Generated resources
+1. Stop writes to the source, or be ready to re-import: the import is a snapshot at bootstrap, and later writes to the source are not copied.
+2. Deploy with `cnpg/import` and wait for the `Cluster` to be ready.
+3. Point the app at `postgres-${APP}-app`.
+4. When the first backup has completed, switch the app to `cnpg/restore`, so a recreated `Cluster` does not try to import from a source that is gone.
 
-CNPG creates:
-
-- Database user with secure random password
-- Database owned by that user, populated by `pg_dump | pg_restore` from the source
-- Secret `postgres-${APP}-app` with connection credentials
-
-## Stale-data warning
-
-The import is a one-shot snapshot at cluster bootstrap. Any writes made to the source between the import completing and the app being cut over to the new CNPG cluster are **not** in CNPG. For a clean cutover, either freeze writes to the source before importing, or re-bootstrap the CNPG cluster (delete the `Cluster` CR + PVCs and let Flux recreate) right before flipping the app's DB URL.
+To import again before the cut-over, delete the `Cluster` and its PVCs and let Flux recreate them.

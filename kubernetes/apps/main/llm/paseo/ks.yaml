@@ -1,5 +1,5 @@
 ---
-# The workshops (../DESIGN.md): one Paseo daemon per scope. General keeps the
+# The workshops (../README.md): one Paseo daemon per scope. General keeps the
 # historical name "paseo" (PVC, hostnames, clients).
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
