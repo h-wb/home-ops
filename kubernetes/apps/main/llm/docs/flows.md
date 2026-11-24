@@ -91,37 +91,7 @@ In step 1 the assistant is the one acting: it fetches the homelab task list, so 
 
 ## C. A job on your own data
 
-Status: planned
-
-You ask for work on private data, such as reconciling yesterday's location. The assistant reads what it needs freely, and asks before it changes anything.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Y as You<br/>phone, laptop
-    box rgba(240,170,82,0.18) Private scope
-        participant H as Assistant<br/>trusted models
-        participant T as Private tools<br/>named tools
-        participant P as Private workshop<br/>trusted models
-    end
-    box rgba(120,174,252,0.18) General scope
-        participant G as General workshop<br/>any model
-        participant X as Homelab<br/>monitoring, git host
-    end
-    Y-->>H: reconcile yesterday
-    T-->>H: reads the day
-    H-->>Y: proposes the fix
-    Y-->>H: approve
-    H-->>T: run the fix
-    Note over T: the job runs on<br/>your real data
-    T-->>H: result
-    H-->>Y: done, summary
-```
-
-Each job is a named tool with fixed inputs, so the assistant cannot improvise a command. The private workshop takes no part.
-
-- Why it is safe: Reading stays on the private side. Anything that changes your data is a named tool, and it runs after you say yes.
-- What it costs: A job has to be wrapped as a tool before the assistant can run it. Until then you run it yourself in the private workshop, as in flow E.
+Status: planned, not built. You ask for work on private data, and the assistant runs it as a named tool after you say yes. The design is with its task on the board, HOMEL-56. Until it exists you run such a job yourself in the private workshop, as in flow E.
 
 ## D. A coding job for the general workshop
 
@@ -223,37 +193,7 @@ Code moves from general to private. What you say in step 5 is your call.
 
 ## G. A homelab alert
 
-Status: planned
-
-Monitoring stays the detector. An alert becomes one task, the assistant tells you, and the fix is a coding job like any other.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Y as You<br/>phone, laptop
-    box rgba(240,170,82,0.18) Private scope
-        participant H as Assistant<br/>trusted models
-        participant T as Private tools<br/>named tools
-        participant P as Private workshop<br/>trusted models
-    end
-    box rgba(120,174,252,0.18) General scope
-        participant G as General workshop<br/>any model
-        participant X as Homelab<br/>monitoring, git host
-    end
-    Note over X: alert fires and<br/>becomes one task
-    X-->>H: the assistant reads the open tasks
-    H-->>Y: tells you
-    Y-->>H: fix it, approved
-    rect rgba(192,39,29,0.15)
-        H-->>G: start an agent, with the approved prompt
-    end
-    G-->>X: the fix, through git
-```
-
-Steps 3 and 4 are flow D, shortened. The `alert-triage` routine exists but has no schedule, so it does not run.
-
-- Why it is safe: Alerts and tasks are general data, so the assistant may read them. The fix crosses behind the same approval.
-- What it costs: The assistant sees only what monitoring already detects. Urgent alerts keep reaching you the way they do today.
+Status: planned, not built. An alert becomes one task, the assistant tells you, and the fix is a coding job as in flow D. The design is with its task on the board, HOMEL-58. The `alert-triage` routine exists but has no schedule, so it does not run.
 
 ## H. A larger change, orchestrated
 
