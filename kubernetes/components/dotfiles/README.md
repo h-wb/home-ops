@@ -29,5 +29,5 @@ options go to `pod-bootstrap`. The hook:
 | Pod         | Trigger                                                      | Status                                                                                                                      |
 | ----------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
 | code-server | the `bootstrap` init container                               | uses it                                                                                                                     |
-| neko        | XFCE autostart (xfconf needs the session D-Bus)              | not yet: still its own `neko-provision` ConfigMap and autostart entries                                                     |
+| neko        | XFCE autostart (xfconf needs the session D-Bus)              | does not use it today (HOMEL-66): its own `neko-provision` ConfigMap and autostart entries                                  |
 | Paseo pods  | native `mise bootstrap --from` in the `tools` init container | stays: no workstation layer, so no secrets session; a fresh read-only `emptyDir` checkout every start; mise pinned by image |

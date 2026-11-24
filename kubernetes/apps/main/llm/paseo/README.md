@@ -111,7 +111,7 @@ everywhere. Work on dotfiles in `~/Repositories/dotfiles`. Dotfiles does the
 merge (`conf.d/paseo/mise.paseo-overlay.toml`), and that mount path is the only
 thing the two repos share. Private adds `--skip=repos,task`: it has no GitHub
 credential, and no Proton Pass secrets to log in for. The workstation pods
-(code-server, later neko) use `components/dotfiles` instead; this stays native
+(code-server today) use `components/dotfiles` instead; this stays native
 because there is no secrets session to protect and the checkout is fresh.
 
 The files hold no secrets. Credentials come from ExternalSecrets as environment
