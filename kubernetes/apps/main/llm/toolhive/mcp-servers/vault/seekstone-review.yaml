@@ -23,9 +23,11 @@ spec:
     - name: SEEKSTONE_READ_ONLY
       value: "1"
     # Everything outside these paths is invisible: not indexed, not listed, not
-    # readable. Daily/, References/, Clippings/, Archives/, AI/ and Templates/ stay out.
+    # readable. Notes/, plus the vault's structure (its rules, entry page,
+    # templates and category hubs), to align the handbook's page header with it.
+    # Daily/, References/, Clippings/, Archives/ and AI/ stay out.
     - name: SEEKSTONE_READ_PATHS
-      value: Notes/**
+      value: Notes/**,AGENTS.md,Home.md,Templates/**,Categories/**
   resources:
     requests:
       cpu: 10m
