@@ -36,11 +36,12 @@ Secrets are not in these backups: they live in Bitwarden Secrets Manager and Pro
 ## How it comes back
 
 - An app volume: nothing to do. The Component creates the PVC from a kopiur `Restore`, so when Flux recreates an app its volume is filled from the latest snapshot. With no snapshot it starts empty (`onMissingSnapshot: Continue`), which is what a new app needs.
-- A Postgres cluster on `cnpg/restore`: nothing to do, it recovers from the latest backup when recreated. A cluster on `cnpg/initdb` comes back empty. To go back to a moment in time: [recover a CNPG database](../kubernetes/components/cnpg/RECOVERY.md).
+- A Postgres cluster on `cnpg/restore`: nothing to do, it recovers from the latest backup when recreated. A cluster on `cnpg/initdb` comes back empty (HOMEL-63). To go back to a moment in time: [recover a CNPG database](../kubernetes/components/cnpg/RECOVERY.md).
 - Garage: [restore with contents, or a fresh node](../docker/truenas/README.md#restore-with-contents). On a fresh node the buckets are empty, so the two rows above are lost with it: the offsite copy is what protects them.
 
-## What is not covered here
+## What is not covered today
 
-- The bulk data on the NAS's `tank` pool (media, personal files): this repo does not define its backup.
-- The edge cluster's volumes.
-- One alert exists, `KopiurControllerScaledToZero`. Nothing alerts on a single failed snapshot or a failed database backup.
+- The bulk data on the NAS's `tank` pool (media, personal files), and the details of the offsite copy: this repo does not describe them (HOMEL-93).
+- The edge cluster's volumes are not backed up.
+- A failed snapshot or a failed database backup raises no alert; the one alert, `KopiurControllerScaledToZero`, covers the controller being stopped (HOMEL-92).
+- No restore has been tested with these tools (HOMEL-94).

@@ -30,7 +30,7 @@ generic regex manager would misparse `image:` lines.
 
 Bulk data is on the `tank` pool and reaches the cluster over NFS at `${NFS_ADDR}`. Each app's manifest names the path it mounts: `/mnt/tank/shared` for media and downloads (most apps), and paths under the personal datasets for the few apps that work on personal files. Pods that write there run as uid and gid 1000, so files stay owned by the same account whichever app wrote them.
 
-On the NAS side, from notes of 2025 and 2026 (not checked against the NAS):
+On the NAS side, from notes of 2025 and 2026 (not checked against the NAS, HOMEL-72):
 
 - Each NFS export lists the hosts allowed to mount it: the three cluster nodes, and one workstation over the VPN for the datasets it uses. A new node has to be added to every export, or its pods hang on the mount.
 - Datasets that hold large files use `recordsize=1M`. Not for databases or VM images.
