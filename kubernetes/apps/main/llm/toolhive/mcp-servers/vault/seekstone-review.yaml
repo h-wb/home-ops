@@ -10,7 +10,7 @@ kind: MCPServer
 metadata:
   name: vault-review
 spec:
-  image: docker.io/library/node:26-bookworm-slim@sha256:5df79989ed685e09f0a98019db4cebfb22fb9df1a53c0161664a011f7ff6b0f1
+  image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
   transport: stdio
   proxyPort: 8080
   env:
@@ -56,7 +56,7 @@ spec:
         # npm ci is ~1 s / 31 MB (better-sqlite3 has prebuilt binaries): cheap enough
         # to run per backend pod start instead of prebaking a shared install.
         - name: install-seekstone
-          image: docker.io/library/node:26-bookworm-slim@sha256:5df79989ed685e09f0a98019db4cebfb22fb9df1a53c0161664a011f7ff6b0f1
+          image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
           command: [/bin/sh, -c]
           args:
             - >-
