@@ -39,7 +39,7 @@ The parent strategic-merge patch supplies Helm install and upgrade defaults and 
 
 - Kustomize patch targets use literal names before Flux substitution. Omit `name` and match by group and kind only if that selects the intended resource.
 - `local-hostpath` uses `WaitForFirstConsumer`: if a pod cannot schedule, its PVC stays Pending.
-- Helm values may not overwrite app-generated config on persistent volumes; use the app's own override mechanism. See the [Nextcloud example](kubernetes/components/cnpg/README.md#disaster-recovery).
+- Helm values may not overwrite app-generated config on persistent volumes; use the app's own override mechanism. See the [Nextcloud example](kubernetes/components/cnpg/README.md#when-it-goes-wrong).
 - Do not add `# renovate:` comments to NAS Compose files; the [Compose manager](docker/truenas/README.md) already tracks their images. See [upgrade review](.kritika/renovate.md) before approving Renovate PRs.
 
 When in doubt, mirror the neighbouring app.

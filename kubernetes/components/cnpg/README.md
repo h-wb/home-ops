@@ -2,83 +2,75 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Explains how apps select, configure, connect to and back up their CNPG databases.
+reviewed: 2026-11-24
+summary: How an app gets a CloudNativePG database from these Components, connects to it, tunes it and has it backed up.
 topics:
   - "[[Cluster]]"
 created: 2026-05-28T19:17
 ---
 
-# CloudNative-PG Components
+# CloudNativePG Components
 
-## Overview
+Each app that needs PostgreSQL gets its own CloudNativePG `Cluster` named `postgres-${APP}` in its namespace, built from these Components and backed up to the NAS object store through plugin-barman-cloud. The layout follows [vrozaksen/home-ops](https://github.com/vrozaksen/home-ops).
 
-CloudNative-PG provides Kubernetes-native PostgreSQL clusters with automated backups, replication, and disaster recovery.
-
-These components follow [vrozaksen/home-ops](https://github.com/vrozaksen/home-ops)'s pattern. This repo migrated from CrunchyData PGO to CNPG and plugin-barman-cloud in May 2026.
-
-**Component structure:**
+## Components
 
 ```
-base → initdb  (one-time: create empty DB)
-     → import  (one-time: pg_dump|pg_restore from a live external Postgres)
-     → restore (permanent: restore from Barman backup)
+cnpg/
+├── base/        Cluster, ObjectStore, ScheduledBackup, ExternalSecret (no bootstrap)
+├── initdb/      base + bootstrap an empty database
+├── import/      base + bootstrap from a live PostgreSQL (pg_dump | pg_restore)
+├── restore/     base + bootstrap from the Barman backup
+├── pooler/      opt-in PgBouncer Pooler
+└── extensions/
+    ├── postgis/ CREATE EXTENSION postgis at initdb
+    └── vchord/  VectorChord mounted from an image (PostgreSQL 18)
 ```
 
-- **`base`** — Core cluster + PgBouncer pooler + ObjectStore + ScheduledBackup + ExternalSecret
-- **`initdb`** — Bootstrap patch for new empty databases ⚠️ **Temporary**
-- **`import`** — Bootstrap patch for live import from another Postgres (e.g. CPGO) ⚠️ **Temporary**
-- **`restore`** — Bootstrap patch for restoring from Barman backup ✅ **Production**
-- **`pooler`** — Separate opt-in [PgBouncer Component](pooler/)
+An app references exactly one of `initdb`, `import` or `restore`; each pulls in `base`. The bootstrap section only runs when the `Cluster` is created, so changing it on a running database does nothing until the database is recreated.
 
-## Quick Start
+```mermaid
+flowchart LR
+  N[New app, no data] -->|initdb| B[First backup completes]
+  L[Data in another PostgreSQL] -->|import| B
+  B -->|switch the component| R[restore: steady state]
+  R -->|Cluster deleted or lost| R
+```
 
-### New database (no prior data)
+- New database: deploy with [`initdb`](initdb/README.md), wait for the first backup (`ScheduledBackup` uses `immediate: true`, then `@daily`), then switch to `restore`.
+- Existing data elsewhere: deploy with [`import`](import/README.md), cut the app over, wait for the first backup, then switch to `restore`.
+- Steady state: `restore`. A recreated `Cluster` recovers from the latest backup instead of coming back empty. If no backup exists yet, the `Cluster` fails to bootstrap.
 
-1. Deploy with `../../../../../components/cnpg/initdb`
-2. Wait 24h for first scheduled backup, or trigger a manual `Backup` CR
-3. Switch to `../../../../../components/cnpg/restore` ✅ **Keep permanently**
+Check for a completed backup with `kubectl -n <ns> get backup -l cnpg.io/cluster=postgres-<app>`. To recover to an earlier point in time, see [RECOVERY.md](RECOVERY.md).
 
-### Restore existing database (Barman backup exists)
+## Use it in an app
 
-1. Deploy with `../../../../../components/cnpg/restore` ✅ **Keep permanently**
+In the app's `ks.yaml`:
 
-### Import live from another Postgres (e.g. CPGO migration)
+```yaml
+spec:
+  components:
+    - ../../../../../components/cnpg/restore
+  dependsOn:
+    - name: plugin-barman-cloud
+      namespace: database
+  healthCheckExprs:
+    - apiVersion: postgresql.cnpg.io/v1
+      kind: Cluster
+      failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
+      current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
+  postBuild:
+    substitute:
+      APP: myapp
+```
 
-1. Deploy with `../../../../../components/cnpg/import` — bootstraps via `initdb.import` from `${APP}-primary` (CPGO) by default
-2. Cut the app over to CNPG (point `DATABASE_URL` at `postgres-${APP}-app`)
-3. Once stable and the first backup has landed, switch to `../../../../../components/cnpg/restore` ✅
+`plugin-barman-cloud` depends on the CloudNativePG operator, so the one `dependsOn` covers both. Extensions come after the bootstrap Component: `postgis` patches `bootstrap.initdb` and needs the PostGIS image (`CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis`, `CNPG_VERSION: 18-3-system-trixie`, as in `reitti`); `vchord` keeps the standard image and mounts the extension from `ghcr.io/tensorchord/vchord-scratch` (as in `immich`).
 
-### Why use `restore` permanently?
+Component patches run before Flux substitution, so the `Cluster` is still literally `postgres-${APP}` when they apply. Target it by group and kind.
 
-- ✅ Automatic disaster recovery
-- ✅ Infrastructure as code — recreate = auto-restore
-- ✅ Production safety — always recovers to last good state
+## Connect
 
----
-
-## Prerequisites
-
-**Bitwarden secret:** `postgresql-bucket`
-
-- `AWS_ACCESS_KEY_ID` — Garage access key for the `postgresql` bucket
-- `AWS_SECRET_ACCESS_KEY` — Garage secret key
-
-Extracted into the per-app `${APP}-cnpg-secret` by the base ExternalSecret (only S3 creds; the superuser password is auto-generated by CNPG into `postgres-${APP}-superuser` on demand).
-All app databases use this same Bitwarden item for their S3 backup credentials.
-
----
-
-## Application Connection
-
-**CNPG automatically creates:**
-
-1. User: `${APP}` (overridable via `CNPG_USER`)
-2. Database: `${APP}` (overridable via `CNPG_DATABASE`)
-3. Secret: `postgres-${APP}-app` with auto-generated credentials
-
-The Cluster is named `postgres-${APP}`. From another namespace, use `postgres-${APP}-rw.${NS}.svc` for direct connections.
-
-**Recommended: Use pre-built URI**
+CloudNativePG creates the role and database `${APP}` (override with `CNPG_USER`, `CNPG_DATABASE`) and the Secret `postgres-${APP}-app` with keys `uri`, `jdbc-uri`, `host`, `port`, `dbname`, `username`, `password` and `pgpass`. `host` is `postgres-${APP}-rw`; from another namespace use `postgres-${APP}-rw.<ns>.svc`. Only the `rw` service exists (`CNPG_DISABLED_SERVICES` removes `ro` and `r`).
 
 ```yaml
 env:
@@ -89,228 +81,45 @@ env:
         key: uri
 ```
 
-**Alternative: Individual fields**
+Superuser access is enabled; CloudNativePG generates `postgres-${APP}-superuser`.
 
-```yaml
-env:
-  - name: DB_HOST
-    valueFrom:
-      secretKeyRef:
-        name: postgres-${APP}-app
-        key: host # postgres-${APP}-rw (override to pooler-${APP}-rw for PgBouncer)
-  - name: DB_USER
-    valueFrom:
-      secretKeyRef:
-        name: postgres-${APP}-app
-        key: username
-  - name: DB_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: postgres-${APP}-app
-        key: password
-  # Also available: dbname, port, pgpass, jdbc-uri
-```
+## Pooler
 
----
+No app uses it today. Reference `../../../../../components/cnpg/pooler` beside the bootstrap Component to get a PgBouncer `Pooler` at `pooler-${APP}-rw` (port 5432), then point the app's host at it. The generated Secret still points at `postgres-${APP}-rw`. `CNPG_POOLER_MODE` is `session` by default; `transaction` breaks `SET`, `LISTEN/NOTIFY` and other session features, `statement` also breaks transactions.
 
-## PgBouncer Connection Pooling
+## Backups
 
-The base component creates a `Pooler` per app at `pooler-${APP}-rw`. Apps opt in by overriding `DB_HOST` to that service (or replacing the `host` key in their connection string). Most apps don't need it — direct `postgres-${APP}-rw` is fine for <50 connections.
+The `ObjectStore` writes base backups and WAL to `s3://postgresql/${APP}` on Garage at `https://s3.${SECRET_DOMAIN}` (WAL zstd, data bzip2), kept for `CNPG_RETENTION_POLICY`. The `ExternalSecret` `${APP}-cnpg-secret` takes `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from the Bitwarden item `postgresql-bucket`, shared by every app; the bucket is created by the [Garage bootstrap](../../../docker/truenas/README.md).
 
-**Service endpoints:**
+## Variables
 
-- **Direct PostgreSQL:** `postgres-${APP}-rw` (port 5432) — the `host` key in the generated secret points here
-- **PgBouncer pooler:** `pooler-${APP}-rw` (port 5432)
+Set in the app's `postBuild.substitute`. Defaults are in the manifests.
 
-**Pool modes:**
+| Variable                                                                               | Default                                                   | Notes                                                                                |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `APP`                                                                                  | required                                                  | Names the Cluster, Secrets and backup path                                           |
+| `CNPG_DATABASE`, `CNPG_USER`                                                           | `${APP}`                                                  | Database and owner                                                                   |
+| `CNPG_REPLICAS`                                                                        | `3`                                                       | `2` for small apps. `1` needs `CNPG_BACKUP_TARGET: primary` and no synchronous block |
+| `CNPG_SIZE`                                                                            | `2Gi`                                                     | PVC per instance. `5Gi` for 0.5 to 2 GB of data, `10Gi` above                        |
+| `CNPG_STORAGECLASS`                                                                    | `local-hostpath`                                          |                                                                                      |
+| `CNPG_IMAGE`, `CNPG_VERSION`                                                           | `ghcr.io/cloudnative-pg/postgresql`, `18.1-system-trixie` |                                                                                      |
+| `CNPG_ANTI_AFFINITY`                                                                   | `required`                                                | One instance per node; `preferred` allows colocation                                 |
+| `CNPG_REQUESTS_CPU`, `CNPG_REQUESTS_MEMORY`, `CNPG_LIMITS_MEMORY`                      | `100m`, `256Mi`, `2Gi`                                    |                                                                                      |
+| `CNPG_SYNC_METHOD`, `CNPG_SYNC_NUMBER`, `CNPG_SYNC_DURABILITY`                         | `any`, `1`, `preferred`                                   | Quorum sync; stays writable when standbys are down                                   |
+| `CNPG_RANDOM_PAGE_COST`, `CNPG_EFFECTIVE_IO_CONCURRENCY`                               | `1.1`, `200`                                              | SSD tuning                                                                           |
+| `CNPG_WAL_KEEP_SIZE`, `CNPG_MAX_SLOT_WAL_KEEP`                                         | `1GB`, `2GB`                                              | Replica catch-up                                                                     |
+| `CNPG_BACKUP_TARGET`                                                                   | `prefer-standby`                                          |                                                                                      |
+| `CNPG_RETENTION_POLICY`                                                                | `30d`                                                     |                                                                                      |
+| `CNPG_DISABLED_SERVICES`                                                               | `['ro', 'r']`                                             |                                                                                      |
+| `CNPG_POOLER_MODE`, `CNPG_POOLER_INSTANCES`                                            | `session`, `2`                                            | `pooler` only                                                                        |
+| `CNPG_POOLER_REQUESTS_CPU`, `CNPG_POOLER_REQUESTS_MEMORY`, `CNPG_POOLER_LIMITS_MEMORY` | `10m`, `32Mi`, `64Mi`                                     | `pooler` only                                                                        |
 
-| Mode                | Use Case          | Limitations                             |
-| ------------------- | ----------------- | --------------------------------------- |
-| `session` (default) | Most apps         | None                                    |
-| `transaction`       | Authentik, Django | No SET, LISTEN/NOTIFY, session features |
-| `statement`         | Rare              | No transactions, prepared statements    |
+The `import` variables are in [import/README.md](import/README.md).
 
-**Example: Authentik with transaction-mode pooler**
+## When it goes wrong
 
-```yaml
-# ks.yaml
-components:
-  - ../../../../../components/cnpg/restore
-postBuild:
-  substitute:
-    APP: authentik
-    CNPG_POOLER_MODE: transaction
-```
-
-```yaml
-# helmrelease.yaml — override host to use pooler
-env:
-  - name: DB_HOST
-    value: pooler-authentik-rw # use PgBouncer
-  - name: DB_USER
-    valueFrom:
-      secretKeyRef:
-        name: postgres-authentik-app
-        key: username
-  # ...
-```
-
----
-
-## Configuration Variables
-
-### Required
-
-```yaml
-dependsOn:
-  - name: plugin-barman-cloud
-    namespace: database
-postBuild:
-  substitute:
-    APP: myapp # Required
-```
-
-### Core Settings (with defaults)
-
-```yaml
-CNPG_REPLICAS: "3" # Instances (3 = HA quorum)
-CNPG_SIZE: 2Gi # PVC size (2Gi small, 10Gi large)
-CNPG_STORAGECLASS: local-hostpath
-```
-
-### Image override (PostGIS, vectorchord, …)
-
-```yaml
-CNPG_IMAGE: ghcr.io/cloudnative-pg/postgresql # Override image
-CNPG_VERSION: "18.1-system-trixie" # Override tag
-# For PostGIS:
-# CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis
-# CNPG_VERSION: '17-3.5'
-```
-
-For a PostGIS image override, set `CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis` and `CNPG_VERSION: 18-3-system-trixie` in the app's `postBuild.substitute`; the image override does not need a variant Component.
-
-For image-mounted extensions on PostgreSQL 18, see the [VectorChord Component](extensions/vchord/). Immich uses the standard CNPG image and mounts the extension `.so` files from a separate scratch image with `spec.postgresql.extensions`. Reference that Component alongside `cnpg/restore`. At build time the Cluster name is still the literal `postgres-${APP}`, so prefer targeting group and kind if that selects only the intended resource.
-
-### Import (only for `cnpg/import`)
-
-```yaml
-CNPG_IMPORT_HOST: ${APP}-primary # Source Postgres service
-CNPG_IMPORT_USER: postgres # User to connect as
-CNPG_IMPORT_DBNAME: postgres # DB to connect to
-CNPG_IMPORT_PASSWORD_SECRET: ${APP}-pguser-postgres
-CNPG_IMPORT_TYPE: microservice # or 'monolith' for multi-DB
-```
-
-### PostgreSQL Tuning
-
-```yaml
-CNPG_RANDOM_PAGE_COST: "1.1" # SSD-optimized
-CNPG_EFFECTIVE_IO_CONCURRENCY: "200"
-CNPG_WAL_KEEP_SIZE: 1GB
-CNPG_MAX_SLOT_WAL_KEEP: 2GB
-```
-
-### Resources
-
-```yaml
-CNPG_REQUESTS_CPU: 100m
-CNPG_REQUESTS_MEMORY: 256Mi
-CNPG_LIMITS_MEMORY: 2Gi
-```
-
-### Synchronous Replication
-
-```yaml
-CNPG_SYNC_METHOD: any # 'any' = quorum; remove to disable
-CNPG_SYNC_NUMBER: "1" # Min standby replicas for sync
-CNPG_SYNC_DURABILITY: preferred # Self-healing — stays writable if standbys down
-```
-
-### PgBouncer Pooler
-
-```yaml
-CNPG_POOLER_MODE: session # session, transaction, statement
-CNPG_POOLER_INSTANCES: "2" # Number of pooler pods
-CNPG_POOLER_REQUESTS_CPU: 10m
-CNPG_POOLER_REQUESTS_MEMORY: 32Mi
-CNPG_POOLER_LIMITS_MEMORY: 64Mi
-```
-
-### Backup
-
-```yaml
-CNPG_BACKUP_TARGET: prefer-standby # 'primary' if instances=1
-CNPG_RETENTION_POLICY: 30d
-CNPG_DISABLED_SERVICES: "['ro', 'r']"
-```
-
----
-
-## Health Checks
-
-The `plugin-barman-cloud` dependency also gates on CloudNativePG transitively.
-
-```yaml
-healthCheckExprs:
-  - apiVersion: postgresql.cnpg.io/v1
-    kind: Cluster
-    failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
-    current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
-```
-
----
-
-## Storage Sizing Guide
-
-```yaml
-# Small DBs (<500MB)
-CNPG_SIZE: 2Gi
-
-# Medium DBs (500MB–2GB)
-CNPG_SIZE: 5Gi
-
-# Large DBs (>2GB), e.g. authentik
-CNPG_SIZE: 10Gi
-```
-
----
-
-## Disaster Recovery
-
-For Point-In-Time Recovery (PITR) and advanced disaster recovery procedures, see **[RECOVERY.md](./RECOVERY.md)**.
-
-- Required pod anti-affinity on a three-instance database schedules one instance per node. If a node is full, free memory or explicitly allow colocation with `CNPG_ANTI_AFFINITY: preferred`.
-- If a stale operator-managed pod is blocking a PVC, inspect its events and owner before deleting it with `kubectl delete pod -n <ns> <pod>` and letting the operator recreate it. For a wedged bootstrap, deleting PVCs with `kubectl -n <ns> delete pvc -l cnpg.io/cluster=<cluster>` can trigger re-bootstrap. This destroys storage: verify the namespace and selector, and only proceed for a disposable bootstrap or when recovery is intended and the backup is verified.
-- After changing databases, check the app's persisted configuration. For example, Nextcloud writes `config.php` during initial install; later changes to Helm's `externalDatabase.host` do not rewrite it. Set the override in [the app's `local.config.php` values](../../apps/main/default/nextcloud/app/helmrelease.yaml).
-
----
-
-## FAQ
-
-**Q: Should I keep `restore` or `initdb` permanently?**
-A: **Always use `restore` for production.** Use `initdb` (or `import`) only temporarily, then switch to `restore` after the first backup.
-
-**Q: What if I keep `initdb` permanently?**
-A: If the cluster gets deleted, it recreates EMPTY instead of restoring from backup. Data loss.
-
-**Q: Does `restore` restore on every Flux reconcile?**
-A: No. `bootstrap.recovery` only runs when the cluster is first created. After that, the cluster operates normally.
-
-**Q: What if the backup doesn't exist when using `restore`?**
-A: Cluster fails to start. Use `initdb` or `import` first, wait for a backup, then switch to `restore`.
-
-**Q: Can I change from `initdb`/`import` to `restore` without downtime?**
-A: Yes. Component change only matters when the cluster is recreated. A running cluster is unaffected.
-
-**Q: How do I know when to switch?**
-A: After 24h (daily backup cron), or after triggering a manual `Backup` CR. Check: `kubectl get backup -n <namespace>`
-
----
-
-## High Availability
-
-- ✅ Automatic failover — operator promotes the standby with the lowest lag
-- ✅ Applications use the `-rw` service — auto-updated to new primary
-- ✅ Synchronous replication recommended — minimal overhead, near-zero data loss
-- 📚 [Failure modes docs](https://cloudnative-pg.io/documentation/current/failure_modes/)
+- An instance stays Pending: with three instances and required anti-affinity, each needs its own node. Free memory on the full node, or set `CNPG_ANTI_AFFINITY: preferred`. `local-hostpath` binds the PVC only once the pod schedules.
+- A stale operator-managed pod blocks a PVC: check its events and owner, then `kubectl -n <ns> delete pod <pod>` and let the operator recreate it.
+- A wedged first bootstrap: `kubectl -n <ns> delete pvc -l cnpg.io/cluster=postgres-<app>` makes it bootstrap again. This destroys the data; do it only for a disposable bootstrap, or when you mean to recover and a backup is verified.
+- After moving an app to another database, check the configuration the app wrote to its own volume. Nextcloud writes `config.php` once at install, so later Helm changes to the database host are ignored; the override is in [its `local.config.php` values](../../apps/main/default/nextcloud/app/helmrelease.yaml).
+- Failover: the operator promotes the most advanced standby and moves the `-rw` service to it. See [CloudNativePG failure modes](https://cloudnative-pg.io/documentation/current/failure_modes/).

@@ -2,53 +2,17 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Describes how to create an empty CNPG database and when to switch to restore.
+reviewed: 2026-11-24
+summary: The CNPG bootstrap Component that creates an empty database for a new app, to be replaced by restore after the first backup.
 topics:
   - "[[Cluster]]"
 created: 2026-05-28T19:17
 ---
 
-# CNPG Initdb Component
+# CNPG initdb Component
 
-This component adds the `initdb` bootstrap method to a CNPG cluster — a fresh, empty database.
+Adds `bootstrap.initdb` to the `Cluster` from [`base`](../README.md): an empty database `${CNPG_DATABASE:=${APP}}` owned by `${CNPG_USER:=${APP}}`, with a generated password in `postgres-${APP}-app`. It sets `cnpg.io/skipEmptyWalArchiveCheck` because the backup path may already hold WAL from an earlier cluster of the same name.
 
-## What it does
+Use it for a brand-new app with nothing to import and no backup to recover from. Once the first backup has completed, switch the app's `ks.yaml` to `cnpg/restore`; if the `Cluster` is ever recreated while `initdb` is still referenced, it comes back empty. Reference `extensions/postgis` after this Component if the app needs PostGIS.
 
-Patches the cluster spec to add:
-
-```yaml
-spec:
-  bootstrap:
-    initdb:
-      database: ${CNPG_DATABASE:=${APP}}
-      owner: ${CNPG_USER:=${APP}}
-```
-
-## Usage
-
-Automatically includes:
-
-- `cnpg/base` — Cluster, ObjectStore, Pooler, ScheduledBackup, ExternalSecret
-
-**Do NOT use with:**
-
-- `cnpg/restore` — uses `bootstrap.recovery` instead
-- `cnpg/import` — uses `bootstrap.initdb.import` instead
-
-## When to pick this
-
-- Brand-new app with no existing database to import from and no Barman backup to recover from.
-- Once the first daily backup has landed, switch to `cnpg/restore` so that a torn-down cluster rebuilds from the backup instead of coming back empty.
-
-## Variables
-
-- `CNPG_DATABASE` — Database name (default: `${APP}`)
-- `CNPG_USER` — Database owner username (default: `${APP}`)
-
-## Generated resources
-
-CNPG automatically creates:
-
-- Database user with secure random password
-- Database owned by that user
-- Secret `postgres-${APP}-app` with connection credentials (keys: `uri`, `jdbc-uri`, `username`, `password`, `host`, `port`, `dbname`, `pgpass`)
+Use it with neither `restore` nor `import`. Variables, connection and backups: [CNPG Components](../README.md).
