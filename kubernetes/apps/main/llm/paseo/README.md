@@ -2,6 +2,7 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
+reviewed: 2026-11-24
 summary: Explains how the two Paseo environments are configured and how to check their access, credentials and storage.
 topics:
   - "[[Workshop]]"
@@ -12,7 +13,7 @@ created: 2026-11-03T15:44
 
 # Paseo environments
 
-The workshops of the [assistant design](../DESIGN.md). Two Paseo pods in the
+The [workshops](https://github.com/h-wb/handbook/blob/main/Systems/Workshop.md), one per scope. Two Paseo pods in the
 `llm` namespace, **general** and **private**, with separate homes, credentials
 and agent config. `PASEO_DATA_SCOPE` names the scope; both use dotfiles' `paseo`
 mise class for CLIs, repos and shell only.
@@ -147,8 +148,8 @@ In the pod there is **no kubeconfig**: token automounting is off, Cilium denies 
 API, and `kubernetes/clusters/*/kubeconfig` is gitignored (workstation-only), so the
 `KUBECONFIG` that `.mise.toml` sets points at nothing and bare `kubectl`/`flux`
 fall back to localhost:8080. Run cluster operations through the ToolHive MCP tools
-instead (`kubectl_kubectl_get`, `kubectl_get_custom_resource`, `flux_get_kubernetes_resources`,
-`flux_reconcile_flux_resource`, …) — e.g. reconciling an app is
+instead (`kubectl_kubectl_generic`, `flux_get_kubernetes_resources`,
+`flux_reconcile_flux_resource`, …). Reconciling an app is
 `flux_reconcile_flux_resource(kind=Kustomization, name=<app>, namespace=<ns>, with_source=true)`
 then the same for `kind=HelmRelease`, which replaces
 `mise exec -- flux reconcile ks <app> -n <ns> --with-source` + `flux reconcile hr <app> -n <ns>`
@@ -175,7 +176,7 @@ Code's `x-litellm-api-key` header from it (`$(LITELLM_API_KEY)`), so a rotation
 needs nothing. The
 general pod's agent keys (GH, opencode, memini) come out of
 the `paseo-agents` Secret, whose single ExternalSecret extracts the credential
-and `memini` items together — memini's client key lives once, in the
+and `memini` items together; memini's client key lives once, in the
 `memini` item, read by the server and the pod alike. Proton Pass serves the
 repositories' credentials from the `Automation General` vault, through one vault
 grant and readable `pass://Automation General/<item>/<field>` references.
@@ -194,7 +195,7 @@ write config (`gh auth login`, `gh config set`, `gh alias set`) fail there. The
 personal token still sits in the `paseo-agents`
 Secret and the Bitwarden item, unused, until the owner removes it. Workflow-file
 changes go to the owner as a PR-comment patch, applied with the dotfiles `land <pr>`
-task from his own environment (code-server, workstation or neko), never from the Paseo pod. The app's three fields live in the
+task from the owner's own environment (code-server, workstation or neko), never from the Paseo pod. The app's three fields live in the
 Bitwarden item `bot-tintin` (JSON:
 `APP_ID`, `INSTALLATION_ID`, `PRIVATE_KEY`), named after the identity so other
 consumers can read it through their own ExternalSecret.

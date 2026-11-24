@@ -2,36 +2,36 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-summary: Records the local model, tool and memory wiring and what deployments must preserve.
+reviewed: 2026-11-24
+summary: Records the deployed places, scopes, model, tool and memory wiring, and what deployments must preserve.
 topics:
   - "[[Model gateway]]"
   - "[[Tool gateway]]"
   - "[[Agent memory]]"
+  - "[[Assistant]]"
+  - "[[Workshop]]"
 created: 2026-10-28T16:04
 ---
 
 # Models, tools and memory
 
-What is deployed. The rest of the documentation:
+What is deployed. The rule it enforces, the roles and the decisions behind it are in the
+[handbook](https://github.com/h-wb/handbook): its start page, the system pages and
+[Decisions](https://github.com/h-wb/handbook/tree/main/Decisions). The rest of the documentation here:
 
-| Document                                     | What it holds                                                          |
-| -------------------------------------------- | ---------------------------------------------------------------------- |
-| [Handbook](https://github.com/h-wb/handbook) | Every part of the system, the plan, what is being worked on now        |
-| [DESIGN.md](./DESIGN.md)                     | The target: the rule, roles, decisions, what is left to do             |
-| [docs/flows.md](./docs/flows.md)             | How work moves, one diagram per flow                                   |
-| [docs/wiring.md](./docs/wiring.md)           | How each agent connects today, and where that differs from the design  |
-| [docs/awareness.md](./docs/awareness.md)     | How the assistant comes to know what you are doing, and when it speaks |
-| [paseo/README.md](./paseo/README.md)         | The two workshops: pods, config, credentials, volumes                  |
-| [hermes/README.md](./hermes/README.md)       | The assistant: messaging, dashboard, credentials and Matrix setup      |
+| Document                               | What it holds                                                         |
+| -------------------------------------- | --------------------------------------------------------------------- |
+| [docs/flows.md](./docs/flows.md)       | How work moves, one diagram per flow                                  |
+| [docs/wiring.md](./docs/wiring.md)     | How each agent connects today, and where that differs from the design |
+| [paseo/README.md](./paseo/README.md)   | The two workshops: pods, config, credentials, volumes                 |
+| [hermes/README.md](./hermes/README.md) | The assistant: messaging, dashboard, credentials and Matrix setup     |
 
-`docs/build.py` draws the documents' diagrams (`docs/img/`) from the Mermaid text
-folded under each one, and the same drawings as one published page. Change a flow
-or a connection in the text first, run it, then change the manifests.
-
-Use **general** and **private** as data scopes. General includes operational
-secrets and code; private includes personal notes, location, health and memory.
-Private data only reaches models trusted with it, today direct Mistral and local
-inference; Claude and ChatGPT work on general data only.
+Use general and private as data scopes, as in
+[the handbook's one rule](https://github.com/h-wb/handbook#the-one-rule). General includes
+operational secrets and code; private includes personal notes, location, health and memory.
+Private data only reaches models trusted with it, today those served by Mistral's API (Mistral
+and GLM) and local inference; Claude and ChatGPT work on general data only. Moving a model from
+one list to the other is one change, to the model lists on the keys.
 
 Scopes are enforced per client: each LiteLLM virtual key lists the models it may
 use, each Memini has its own client keys, ToolHive has one gateway per scope, and
@@ -69,6 +69,75 @@ The assistant also reads `PASEO_PASSWORD` from both workshop items, to start
 agents there. The assistant's messaging and dashboard credentials are their own
 item, `hermes`; its fields are listed in [Hermes credentials](./hermes/README.md#credentials).
 
+## Places
+
+A place is a filesystem, its credentials and its network reach. Each has one scope, holds only
+that scope's credentials, and gets that scope's model key, tool gateway and memory store.
+
+```mermaid
+flowchart TB
+    subgraph you[You: your devices]
+        MA[Messaging app]
+        WA[Workshop app<br/>one app, two hosts]
+    end
+    subgraph private[Private scope: trusted models only]
+        subgraph pplaces[Places]
+            AS[Assistant<br/>talks, remembers, runs routines<br/>no shell]
+            PW[Private workshop<br/>agents with a shell<br/>private repos, yours directly]
+        end
+        subgraph pshared[Its side of the shared services]
+            PM[Models<br/>the models you trust with private data]
+            PT[Tools<br/>every tool: notes, tasks, location,<br/>home, cluster, jobs]
+            PS[Memory<br/>private store]
+        end
+    end
+    subgraph general[General scope: any model]
+        subgraph gplaces[Places]
+            GW[General workshop<br/>agents with a shell<br/>code repos, no private data]
+        end
+        subgraph gshared[Its side of the shared services]
+            GM[Models<br/>any model]
+            GT[Tools<br/>cluster, git host,<br/>homelab tasks, media]
+            GS[Memory<br/>general store]
+        end
+    end
+    MA -->|talk| AS
+    WA -->|watch, steer| PW
+    WA -->|watch, steer| GW
+    PW -->|chat bridge, still deployed| AS
+    AS -->|starts agents, asks first| PW
+    AS ==>|starts agents after you approve the prompt| GW
+    pplaces -->|reads freely, asks before a write| pshared
+    gplaces -->|its own key, gateway, store| gshared
+    classDef you fill:#fbfcfd,stroke:#17212b,color:#17212b
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    class MA,WA you
+    class AS,PW,PM,PT,PS private
+    class GW,GM,GT,GS general
+    style private fill:#f8f0e2,stroke:#9a5200
+    style general fill:#eaf1fb,stroke:#1c58b0
+    linkStyle 5 stroke:#c0271d,stroke-width:2px
+```
+
+The thick red arrow is the only path by which anything leaves the private scope: a prompt you
+read first ([flow D](./docs/flows.md#d-a-coding-job-for-the-general-workshop)).
+
+| Place                | Scope   | Who works there         | Network                                                        |
+| -------------------- | ------- | ----------------------- | -------------------------------------------------------------- |
+| `hermes-private` pod | Private | The assistant, no shell | Denied by default; model gateway, tools, memory, Matrix, Paseo |
+| `paseo-private` pod  | Private | Private workshop agents | Open internet                                                  |
+| `paseo` pod          | General | General workshop agents | Open internet, Kubernetes, KubePrism and Talos APIs denied     |
+| Workstation          | Mixed   | Agents of both kinds    | Its own                                                        |
+
+Limits of the boundary:
+
+- The workstation is a mixed place: any agent there can read every repo and note on its disk.
+  Keep private data out of working trees on it.
+- Pasted text is not covered: do not paste private data into a general agent.
+- Someone with cluster or Bitwarden admin rights in the general scope can reach private
+  workloads. The boundary guards normal workflows, not an administrator.
+
 ## Where things live
 
 One place for each kind of thing. A skill is a folder with a `SKILL.md` (the
@@ -82,7 +151,7 @@ Agent Skills format), kept in git, so every agent here can read it.
 | The assistant's routines and skills   | `hermes/app/routines/`        | The assistant                                          |
 | The assistant's standing instructions | `hermes/app/SOUL.md`          | The assistant, in every chat                           |
 | What is deployed, and this table      | This file                     | You; the assistant, through its `system-docs` skill    |
-| Why it is built this way              | `DESIGN.md`, `docs/`          | You; the assistant, through its `system-docs` skill    |
+| Why it is built this way              | The handbook's `Decisions/`   | You; the assistant, through its `system-docs` skill    |
 | Your notes and anything private       | The Obsidian vault            | You; private agents, through the vault tools           |
 | How to write in the vault             | The vault's own `AGENTS.md`   | Whoever writes there; the assistant, before each write |
 | What agents learn as they work        | Memini, one store per scope   | The agents. Nothing to maintain by hand                |
@@ -150,8 +219,7 @@ and generated credentials remain `memini-code` (general) and `memini` (private).
 Scoped Service aliases point at these existing instances and their UI hostnames
 are scoped. No memory database or client key is recreated for naming consistency.
 Memini keys do not restrict readable namespaces: keep the stores separate and use
-namespaces only to organize projects/agents within each. General Paseo initially
-reuses the existing general `codex` credential for all its agents.
+namespaces only to organize projects/agents within each.
 
 ToolHive's gateways are named for their scope (`mcp-general`, `mcp-private`,
 `mcp-assistant`); they hold no data, so they were renamed outright. The old
@@ -168,10 +236,8 @@ access paths. The tool servers answer only ToolHive's own pods, so the gateways 
 
 ## Open WebUI retirement
 
-Verify the current PostgreSQL and uploaded-file backups before rollout.
-Paseo is the interactive interface. Open WebUI's HelmRelease, app route, stateless
-Dragonfly instance and LiteLLM grants are removed. `open-webui/ks.yaml` remains a
-**data retention** Kustomization: PostgreSQL, uploaded files, encryption key, OIDC
-identity and backups remain managed. Do not remove it until intentionally retiring
-the data. The former app manifests and presets are deleted; Git history retains
-their previous definitions.
+Paseo is the interactive interface. Open WebUI's HelmRelease, app route, stateless Dragonfly
+instance, LiteLLM grants, app manifests and presets are removed; Git history keeps them.
+`open-webui/ks.yaml` remains a data retention Kustomization: its PostgreSQL cluster, uploaded
+files, encryption key, OIDC identity and backups stay managed. Do not remove it until the data
+is retired on purpose.

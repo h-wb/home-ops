@@ -23,7 +23,7 @@ whole system is on [the handbook](https://github.com/h-wb/handbook).
 | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | This page                                                                                     | The parts, the sources, where data lives, how to operate it      |
 | [docs/flows.md](./docs/flows.md)                                                              | How data moves, one diagram per flow                             |
-| [Awareness](../../llm/docs/awareness.md)                                                      | How the assistant is meant to use the warehouse                  |
+| [The aware assistant][aware]                                                                  | How the assistant is meant to use the warehouse                  |
 | [pipelines: architecture](https://github.com/h-wb/pipelines/blob/main/docs/architecture.md)   | The parts of the code and who may import whom                    |
 | [pipelines: Miroir guide](https://github.com/h-wb/pipelines/blob/main/docs/miroir/README.md)  | Configuration, interface, API and commands in full               |
 | [pipelines: decisions](https://github.com/h-wb/pipelines/blob/main/docs/miroir/decisions.md)  | Why it is built this way, numbered 001 to 042                    |
@@ -191,7 +191,7 @@ connection it links:
 ## Privacy
 
 The warehouse is private scope as a whole
-([the rule](../../llm/DESIGN.md#the-rule)). Screen text, screenshots and
+([the rule](https://github.com/h-wb/handbook#the-one-rule)). Screen text, screenshots and
 messages are the most private data in the house.
 
 | Line of defence            | What it does                                                                                                                                                                                                  |
@@ -350,6 +350,8 @@ Next:
 - A contacts source, so the same person lines up across chat networks.
 - Checks on the data itself: the share of unreadable or skipped rows per
   source, and tests against each new version of the apps the collector reads.
-- The read tools the assistant needs ([Awareness](../../llm/docs/awareness.md)).
+- The read tools the assistant needs ([The aware assistant][aware]).
 
 Later: other chat networks, the log feed, the live path's history as a source.
+
+[aware]: https://github.com/h-wb/handbook/blob/main/Plans/The%20aware%20assistant.md

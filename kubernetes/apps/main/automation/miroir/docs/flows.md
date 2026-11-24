@@ -307,10 +307,12 @@ sequenceDiagram
 | ---------- | ----------- | ------------------------------------------------------------------------------- |
 | Dashboards | Works today | Every analysis; one collection per source                                       |
 | Timeline   | Works today | The `timeline` analysis and thumbnails: screen and browser. Conversations next  |
-| Assistant  | Planned     | Named tools over understood tables: [Awareness](../../../llm/docs/awareness.md) |
+| Assistant  | Planned     | Named tools over understood tables: [The aware assistant][aware] (the handbook) |
 
 - What guarantees it: the timeline's role can read only the timeline's tables
   and is cut off after a few seconds. Images are served behind Miroir's login.
   The assistant gets tools, never a database connection.
 - What it costs: a dashboard is as fresh as the last build, not the last
   load.
+
+[aware]: https://github.com/h-wb/handbook/blob/main/Plans/The%20aware%20assistant.md
