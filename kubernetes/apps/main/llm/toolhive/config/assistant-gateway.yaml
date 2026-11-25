@@ -24,10 +24,7 @@ spec:
         # read and write every document of the workspace, so only these read-only
         # task tools are listed, by their names before the prefix. ToolHive refuses
         # a call to a tool its filter hides (core.CallTool, v0.68.0).
-        # The writing token's entry, hidden; the read-only one below is listed.
         - workload: orbit
-          excludeAll: true
-        - workload: orbit-ro
           filter:
             - get_task
             - list_tasks
@@ -45,6 +42,12 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
+    # Orbit's read-only token: the board may flow here, never back.
+    backends:
+      orbit:
+        type: externalAuthConfigRef
+        externalAuthConfigRef:
+          name: orbit-read
   telemetryConfigRef:
     name: prometheus
   sessionStorage:

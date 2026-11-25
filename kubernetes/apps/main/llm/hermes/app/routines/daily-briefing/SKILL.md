@@ -18,11 +18,11 @@ found, search for the part after `mcp__tools__`. The day is the user's:
 timezone `America/Toronto`, whatever the clock here says.
 
 1. The board, read-only: three calls.
-   - `mcp__tools__orbit-ro_get_me`: `user.id` is the user's id on the board.
-   - `mcp__tools__orbit-ro_list_task_statuses` with
+   - `mcp__tools__orbit_get_me`: `user.id` is the user's id on the board.
+   - `mcp__tools__orbit_list_task_statuses` with
      `project_id: "01a20b1d-1555-72d7-8277-76cfb9212e3e"`: the id of the
      status named `Todo`.
-   - `mcp__tools__orbit-ro_list_tasks` with that `project_id`,
+   - `mcp__tools__orbit_list_tasks` with that `project_id`,
      `query: "Your step"` and `limit: 100`: the steps written for the user.
      Keep those whose `assignee_ids` holds the user's id and whose
      `status_id` is Todo's. Never list the project without a query: it is

@@ -8,8 +8,10 @@
 # trusted proxy over HTTPS. That name does not resolve inside the cluster, so
 # the gateway pods carry a host alias for it (config/*-gateway.yaml).
 #
-# The gateway pods mount this entry's header secret themselves, so if the secret
-# is missing a gateway fails to start, not just this backend.
+# Which token a gateway sends is its own choice: the entry's `orbit-write`
+# unless the gateway overrides it (the private ones use `orbit-read`,
+# externalauthconfig.yaml). A gateway mounts only the token it uses, so if that
+# field is missing from the secret the gateway fails to start.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServerEntry
 metadata:
@@ -18,11 +20,7 @@ spec:
   remoteUrl: https://orbit.${SECRET_DOMAIN}/mcp
   transport: streamable-http
   allowPrivateEndpoint: true
-  headerForward:
-    addHeadersFromSecret:
-      - headerName: Authorization
-        valueSecretRef:
-          name: toolhive-orbit
-          key: authorization
+  externalAuthConfigRef:
+    name: orbit-write
   groupRef:
     name: mcp-tools

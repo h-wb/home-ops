@@ -22,10 +22,7 @@ spec:
         prefixFormat: "{workload}_"
       tools:
         # The board's read-only task tools only, for the reason on mcp-assistant.
-        # The writing token's entry, hidden; the read-only one below is listed.
         - workload: orbit
-          excludeAll: true
-        - workload: orbit-ro
           filter:
             - get_task
             - list_tasks
@@ -59,6 +56,12 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
+    # Orbit's read-only token: the board may flow here, never back.
+    backends:
+      orbit:
+        type: externalAuthConfigRef
+        externalAuthConfigRef:
+          name: orbit-read
   # Prometheus metrics on the diagnostics port (9464), off the MCP port: the MCP
   # port is anonymous, so metrics get their own port and NetworkPolicy rule.
   telemetryConfigRef:

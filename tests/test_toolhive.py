@@ -102,22 +102,29 @@ class ToolHiveScopes(unittest.TestCase):
                 self.assertNotIn("compositeTools", config)
                 self.assertNotIn("compositeToolRefs", self.resource("VirtualMCPServer", gateway)["spec"])
                 entries = [t for t in config["aggregation"]["tools"] if t["workload"].startswith("orbit")]
-                self.assertEqual([{"workload": "orbit", "excludeAll": True},
-                                  {"workload": "orbit-ro", "filter": read_only}], entries)
+                self.assertEqual([{"workload": "orbit", "filter": read_only}], entries)
+                # Orbit refuses a write: this gateway sends the read-only token.
+                self.assertEqual({"orbit": {"type": "externalAuthConfigRef",
+                                            "externalAuthConfigRef": {"name": "orbit-read"}}},
+                                 self.resource("VirtualMCPServer", gateway)["spec"]["outgoingAuth"]["backends"])
         # The general gateway, the board's own scope, lists all of it.
         general = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]["tools"]
         self.assertIn({"workload": "orbit"}, general)
-        self.assertNotIn("orbit-ro", [t["workload"] for t in general])
-        # Orbit itself refuses a write from there: the private side's entry carries a read token.
+        self.assertNotIn("backends", self.resource("VirtualMCPServer", "mcp-general")["spec"]["outgoingAuth"])
         server = ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/orbit"
-        self.assertIn("{{ .ORBIT_READ_TOKEN }}", (server / "externalsecret-ro.yaml").read_text())
-        self.assertIn("name: toolhive-orbit-ro", (server / "mcpserverentry-ro.yaml").read_text())
+        entry = yaml_of(server / "mcpserverentry.yaml")["spec"]
+        self.assertEqual({"name": "orbit-write"}, entry["externalAuthConfigRef"])
+        self.assertNotIn("headerForward", entry)
+        docs = json.loads(subprocess.run(["yq", "eval-all", "-o=json", "-I=0", "[.]", str(server / "externalauthconfig.yaml")],
+                                         capture_output=True, text=True, timeout=60, check=True).stdout)
+        configs = {d["metadata"]["name"]: d["spec"]["headerInjection"]["valueSecretRef"]["key"] for d in docs}
+        self.assertEqual({"orbit-write": "authorization", "orbit-read": "read-authorization"}, configs)
+        self.assertIn('read-authorization: "Bearer {{ .ORBIT_READ_TOKEN }}"', (server / "externalsecret.yaml").read_text())
         # The assistant's instructions name no Orbit tool beyond those.
         hermes = ROOT / "kubernetes/apps/main/llm/hermes/app"
         named = set()
         for path in [hermes / "SOUL.md", *sorted((hermes / "routines").glob("*/SKILL.md"))]:
-            named |= set(re.findall(r"orbit-ro_(\w+)", path.read_text()))
-            self.assertNotRegex(path.read_text(), r"orbit_\w", path.name)
+            named |= set(re.findall(r"orbit_(\w+)", path.read_text()))
         self.assertTrue(named)
         self.assertLessEqual(named, set(read_only))
 
