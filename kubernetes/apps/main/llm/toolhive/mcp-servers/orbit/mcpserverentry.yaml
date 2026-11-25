@@ -7,11 +7,6 @@
 # refuses any other host name and any request that did not come through its
 # trusted proxy over HTTPS. That name does not resolve inside the cluster, so
 # the gateway pods carry a host alias for it (config/*-gateway.yaml).
-#
-# Which token a gateway sends is its own choice: the entry's `orbit-write`
-# unless the gateway overrides it (the private ones use `orbit-read`,
-# externalauthconfig.yaml). A gateway mounts only the token it uses, so if that
-# field is missing from the secret the gateway fails to start.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServerEntry
 metadata:

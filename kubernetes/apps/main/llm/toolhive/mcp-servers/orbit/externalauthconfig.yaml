@@ -1,7 +1,4 @@
 ---
-# The two Orbit tokens, as headers a gateway adds. orbit-write can write tasks and
-# pages: the general gateway's. orbit-read can only read tasks: the private
-# gateways', so Orbit itself refuses a write from the private side.
 apiVersion: toolhive.stacklok.dev/v1beta1
 kind: MCPExternalAuthConfig
 metadata:

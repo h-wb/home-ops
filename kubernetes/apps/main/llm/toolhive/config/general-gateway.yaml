@@ -28,10 +28,7 @@ spec:
         - workload: talos
         - workload: anki
         - workload: excel
-        # Private data (vault, personal tasks) never appears in this list.
-        # The workspace shared with agents: the build board and its pages. The
-        # token decides the workspace (mcp-servers/orbit). Here every Orbit tool
-        # is listed; mcp-private and mcp-assistant list its read-only task tools.
+        # No private data in this list.
         - workload: orbit
         # TEMPORARY (2026-11): cross-check of the Miroir imports (browser history,
         # Messages) from a general Paseo session, counts and schema only. Revert

@@ -122,9 +122,6 @@ skills:
   # How much of each skill's description the model sees in the skill index. The
   # default, 60 characters, cuts off the part that says when to use a skill.
   index_desc_limit: 1024
-# The gateway's tools stay out of the prompt: the model searches them and loads a
-# schema on demand, and each call keeps its own approval. On by default; pinned so
-# an upgrade cannot turn it off.
 tools:
   tool_search:
     enabled: "on"

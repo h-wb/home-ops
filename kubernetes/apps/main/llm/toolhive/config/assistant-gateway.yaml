@@ -19,11 +19,7 @@ spec:
       conflictResolutionConfig:
         prefixFormat: "{workload}_"
       tools:
-        # The build board is general and this gateway is private: information may
-        # flow from the board here, never back. Its token can also write tasks and
-        # read and write every document of the workspace, so only these read-only
-        # task tools are listed, by their names before the prefix. ToolHive refuses
-        # a call to a tool its filter hides (core.CallTool, v0.68.0).
+        # Read-only: the board flows here, never back.
         - workload: orbit
           filter:
             - get_task
@@ -42,7 +38,6 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
-    # Orbit's read-only token: the board may flow here, never back.
     backends:
       orbit:
         type: externalAuthConfigRef
