@@ -65,6 +65,8 @@ uv = "latest"
 
 [hooks]
 postinstall = "hk install --mise"
+# Warns, in a shell with `mise activate`, when an admin certificate expires within 30 days.
+enter = "mise run --quiet //talos:certs --warn"
 
 [tasks.lint]
 description = "Check formatting and lint everything with hk"

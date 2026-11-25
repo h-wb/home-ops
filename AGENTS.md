@@ -7,7 +7,7 @@ Private data only reaches trusted models. This repository is public and general:
 ## Layout and cluster selection
 
 - `kubernetes/apps/${CLUSTER}/`: apps by namespace; `kubernetes/clusters/${CLUSTER}/`: Flux entry points; `kubernetes/components/`: reusable Kustomize Components.
-- `talos/`: machine configs; `bootstrap/`: one-time cluster setup (Helmfile and mise); [hosts/edge-mac](hosts/edge-mac/README.md): edge host power settings and LaunchAgents.
+- `talos/`: machine configs and [renewing the admin certificates](docs/admin-certificates.md); `bootstrap/`: one-time cluster setup (Helmfile and mise); [hosts/edge-mac](hosts/edge-mac/README.md): edge host power settings and LaunchAgents.
 - [docker/truenas](docker/truenas/README.md): NAS Compose stacks; doco-cd deploys from `main`, so merging can deploy or remove a stack.
 - [`.mise.toml`](.mise.toml): tool versions, environment and tasks; [bootstrap and secret tools](kubernetes/apps/main/external-secrets/external-secrets/app/README.md#bootstrap-and-local-secret-tools): fnox, Proton Pass, Bitwarden and local `age.key`.
 - See the [README](README.md#kubernetes) for the cluster topology and platform stack.
