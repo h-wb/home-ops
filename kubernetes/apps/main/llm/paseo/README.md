@@ -103,16 +103,20 @@ Plan mode is the read-only one in both agents.
 - Paseo's own skills (`/paseo-advisor`, `/paseo-committee`, `/paseo-handoff`)
   read the same notes before they choose a worker.
 
-Provisioning is the `tools` init container, on the app's image: `mise bootstrap
---from` the dotfiles repo into `~/.dotfiles`, an `emptyDir` cloned fresh at every
-start and read-only in the app container. mise itself is the `ghcr.io/jdx/mise`
+Provisioning is the `tools` init container, on the app's image: `mise -E
+paseo,paseo-overlay bootstrap --from` the dotfiles at the cluster's pinned commit
+(`DOTFILES_REF`, `components/dotfiles/README.md`) into `~/.dotfiles`, an
+`emptyDir` cloned fresh at every start and read-only in the app container;
+`--save-env` keeps the declared environment for the app container. A failed
+bootstrap logs one line and the pod starts. mise itself is the `ghcr.io/jdx/mise`
 image mounted at `/opt/mise` in both containers, so its shims resolve
 everywhere. Work on dotfiles in `~/Repositories/dotfiles`. Dotfiles does the
 merge (`conf.d/paseo/mise.paseo-overlay.toml`), and that mount path is the only
 thing the two repos share. Private adds `--skip=repos,task`: it has no GitHub
 credential, and no Proton Pass secrets to log in for. The workstation pods
-(code-server today) use `components/dotfiles` instead; this stays native
-because there is no secrets session to protect and the checkout is fresh.
+(code-server, neko) use `components/dotfiles`; this stays on mise's own
+`--from` because there is no secrets session to protect, the checkout is
+already fresh and read-only, and mise comes from an image rather than the volume.
 
 The files hold no secrets. Credentials come from ExternalSecrets as environment
 variables and are referenced by name (`{env:LITELLM_API_KEY}` for OpenCode). The

@@ -53,6 +53,24 @@ spec:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          dotfiles:
+            # The neko image has no git; the session's run gets it from apt.
+            image:
+              repository: mirror.gcr.io/alpine/git
+              tag: 2.54.1@sha256:29cff25811f790b9f72fc266bf8009a5a911714c0e03c31c47339c50909d9aef
+            command: ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap", "fetch"]
+            env:
+              HOME: /home/neko
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 256Mi
         containers:
           app:
             image:
@@ -173,11 +191,6 @@ spec:
           - name: envoy-external
             namespace: network
     persistence:
-      # Provisioning entrypoint: a system-wide autostart entry that clones
-      # ~/.dotfiles on a fresh PVC and then runs the repo's own bootstrap
-      # (apt packages, mise tools, dotfiles, XFCE settings, apps) at every
-      # session start. subPath mounts, because mounting a whole ConfigMap over
-      # /etc/xdg/autostart would hide XFCE's own entries and break the session.
       dns:
         name: neko-dns
         type: configMap
@@ -187,21 +200,23 @@ spec:
               - path: /etc/coredns/Corefile
                 readOnly: true
                 subPath: Corefile
-      provision:
-        name: neko-provision
+      # components/dotfiles: fetched by the init container, run by the autostart
+      # entry inside the session (xfconf needs its D-Bus). subPath: a whole
+      # ConfigMap over /etc/xdg/autostart would hide XFCE's own entries.
+      dotfiles:
+        name: neko-dotfiles
         type: configMap
         advancedMounts:
           neko:
+            dotfiles:
+              - path: /opt/dotfiles
+                readOnly: true
             app:
-              - path: /usr/local/bin/neko-provision
+              - path: /opt/dotfiles
                 readOnly: true
-                subPath: neko-provision
-              - path: /etc/xdg/autostart/mise-bootstrap.desktop
+              - path: /etc/xdg/autostart/dotfiles-bootstrap.desktop
                 readOnly: true
-                subPath: mise-bootstrap.desktop
-              - path: /etc/xdg/autostart/neko-provision-fallback.desktop
-                readOnly: true
-                subPath: neko-provision-fallback.desktop
+                subPath: dotfiles-bootstrap.desktop
       # Only /home/neko survives a restart. Anything apt installs lands in
       # /usr and is lost on the next roll.
       home:

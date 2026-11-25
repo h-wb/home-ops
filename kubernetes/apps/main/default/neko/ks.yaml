@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
+    - ../../../../../components/dotfiles
     - ../../../../../components/gpu
     - ../../../../../components/kopiur/backup
     # Base only (no SecurityPolicy): neko does the OIDC login itself.
@@ -22,6 +23,7 @@ spec:
     substitute:
       APP: *app
       APP_NAMESPACE: *namespace
+      DOTFILES_ENV: neko
       KOPIUR_CAPACITY: 20Gi
       KOPIUR_SCHEDULE: "45 4 * * *"
       # k8s-gateway serves the internal records for ${SECRET_DOMAIN}; the DNS

@@ -36,11 +36,19 @@ spec:
             image: &image
               repository: ghcr.io/getpaseo/paseo
               tag: 0.17.0
-            command: ["mise"]
+            # Like components/dotfiles, a failed bootstrap never stops the pod.
+            command:
+              - /bin/sh
+              - -c
+              - 'mise "$@" || echo "dotfiles: bootstrap did not complete; starting anyway"'
+              - mise
             args:
+              - -E
+              - paseo,paseo-overlay
               - bootstrap
               - --from
-              - https://github.com/h-wb/dotfiles.git
+              - https://github.com/h-wb/dotfiles.git?ref=${DOTFILES_REF}
+              - --save-env
               - --from-dir
               - /home/paseo/.dotfiles
               - --config-dir
@@ -215,7 +223,7 @@ spec:
               - path: /opt/mise
                 readOnly: true
             app: *mise
-      # dotfiles reads this path: /etc/paseo selects its class, paseo.json is merged.
+      # dotfiles' paseo-overlay layer merges paseo.json from this path.
       config:
         type: configMap
         name: ${APP}-config
