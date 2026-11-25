@@ -19,7 +19,6 @@ Each app that needs PostgreSQL gets its own CloudNativePG `Cluster` named `postg
 cnpg/
 ├── base/        Cluster, ObjectStore, ScheduledBackup, ExternalSecret (no bootstrap)
 ├── initdb/      base + bootstrap an empty database
-├── import/      base + bootstrap from a live PostgreSQL (pg_dump | pg_restore)
 ├── restore/     base + bootstrap from the Barman backup
 ├── pooler/      opt-in PgBouncer Pooler
 └── extensions/
@@ -27,18 +26,17 @@ cnpg/
     └── vchord/  VectorChord mounted from an image (PostgreSQL 18)
 ```
 
-An app references exactly one of `initdb`, `import` or `restore`; each pulls in `base`. The bootstrap section only runs when the `Cluster` is created, so changing it on a running database does nothing until the database is recreated.
+An app references exactly one of `initdb` or `restore`; each pulls in `base`. The bootstrap section only runs when the `Cluster` is created, so changing it on a running database does nothing until the database is recreated.
 
 ```mermaid
 flowchart LR
   N[New app, no data] -->|initdb| B[First backup completes]
-  L[Data in another PostgreSQL] -->|import| B
   B -->|switch the component| R[restore: steady state]
   R -->|Cluster deleted or lost| R
 ```
 
 - New database: deploy with [`initdb`](initdb/README.md), wait for the first backup (`ScheduledBackup` uses `immediate: true`, then `@daily`), then switch to `restore`.
-- Existing data elsewhere: deploy with [`import`](import/README.md), cut the app over, wait for the first backup, then switch to `restore`.
+- Existing data in a PostgreSQL outside CNPG: no Component covers it today. The `cnpg/import` Component (`pg_dump | pg_restore` from a live source, with CrunchyData defaults) was removed in 2026-11 and is in git history.
 - Steady state: `restore`. A recreated `Cluster` recovers from the latest backup instead of coming back empty. If no backup exists yet, the `Cluster` fails to bootstrap.
 
 Check for a completed backup with `kubectl -n <ns> get backup -l cnpg.io/cluster=postgres-<app>`. To recover to an earlier point in time, see [RECOVERY.md](RECOVERY.md).
@@ -113,8 +111,6 @@ Set in the app's `postBuild.substitute`. Defaults are in the manifests.
 | `CNPG_DISABLED_SERVICES`                                                               | `['ro', 'r']`                                             |                                                                                      |
 | `CNPG_POOLER_MODE`, `CNPG_POOLER_INSTANCES`                                            | `session`, `2`                                            | `pooler` only                                                                        |
 | `CNPG_POOLER_REQUESTS_CPU`, `CNPG_POOLER_REQUESTS_MEMORY`, `CNPG_POOLER_LIMITS_MEMORY` | `10m`, `32Mi`, `64Mi`                                     | `pooler` only                                                                        |
-
-The `import` variables are in [import/README.md](import/README.md).
 
 ## When it goes wrong
 
