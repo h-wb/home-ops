@@ -1,0 +1,138 @@
+---
+# The sync pod holds the Obsidian account token: it may resolve names and reach Obsidian's
+# own servers (ob refuses any sync host outside *.obsidian.md), nothing else, and nothing
+# may connect to it: Seekstone reads the volume, never the pod.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: obsidian-vault
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: obsidian-vault
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s-app: kube-dns
+            k8s:io.kubernetes.pod.namespace: kube-system
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: ANY
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toFQDNs:
+        - matchName: obsidian.md
+        - matchPattern: "*.obsidian.md"
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: obsidian-vault
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: obsidian-vault
+  policyTypes:
+    - Ingress
+---
+# The Seekstone servers are private data. Each one's proxy answers only the
+# clients named below; its backend only ToolHive's own pods here (the proxies).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vault-tools
+spec:
+  podSelector:
+    matchLabels:
+      toolhive: "true"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              toolhive: "true"
+---
+# vault-ro and vault-inbox: the private and the assistant's gateways.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vault-private
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mcpserver
+    matchExpressions:
+      - key: app.kubernetes.io/instance
+        operator: In
+        values: [vault-ro, vault-inbox]
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: llm
+          podSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/instance
+                operator: In
+                values: [mcp-private, mcp-assistant]
+      ports:
+        - port: 8080
+          protocol: TCP
+---
+# TEMPORARY (2026-11), with seekstone-review.yaml: the general gateway.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vault-review
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mcpserver
+      app.kubernetes.io/instance: vault-review
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: llm
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: mcp-general
+      ports:
+        - port: 8080
+          protocol: TCP
+---
+# vault-n8n: n8n alone, which calls it directly. No gateway lists it.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vault-n8n
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mcpserver
+      app.kubernetes.io/instance: vault-n8n
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: automation
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: n8n
+              app.kubernetes.io/controller: n8n
+      ports:
+        - port: 8080
+          protocol: TCP

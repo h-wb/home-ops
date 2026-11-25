@@ -172,8 +172,9 @@ Agent Skills format), kept in git, so every agent here can read it.
   the general agents could not read it. The vault's `AGENTS.md` only concerns
   agents that write in the vault, and those are private.
 - The assistant writes in the vault through `vault-inbox`, limited to
-  `Notes/`, `AI/` and `Archives/`; every write asks. The cluster copy syncs
-  two ways, so the writes reach every device.
+  `Notes/`, `AI/` and `Archives/`; every write asks. The cluster copy
+  ([obsidian-vault](../default/obsidian-vault/README.md)) syncs two ways, so
+  the writes reach every device.
 - Claude Code reads `.claude/skills` only. dotfiles links the skills each place
   declares from `h-wb/skills` there as well as into `~/.agents/skills`, which
   Codex and OpenCode read. The assistant declares its own list in

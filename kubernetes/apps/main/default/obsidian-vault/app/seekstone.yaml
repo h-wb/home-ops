@@ -1,20 +1,15 @@
-# Seekstone over the synced vault, private tier only: a read-only
-# instance and a write instance (Notes/, AI/, Archives/), both on the vault volume. Each backend pod
-# installs Seekstone once in an init container, from the lockfiles pinned in git
-# (seekstone/; Renovate bumps them), into an emptyDir — the same generic-image +
-# git-pinned-source pattern as the task boards' `uv run --with`, with a full lockfile
-# instead of a bare version, and no shared tools PVC or install Job to keep in step.
-# A lockfile bump takes effect on the next backend pod start: kubectl rollout restart
-# statefulset -n llm vault-ro vault-inbox.
-# Privacy is the two gateways (llm/toolhive/config): mcp-private exposes this to the
-# private tier; mcp-general does not list these workloads, so general never sees the
-# vault, and networkpolicy.yaml only lets ToolHive pods talk to the backends.
-# The mcp container runs /tools/node_modules/.bin/seekstone; toolhive stamps that
-# container with its own hardened securityContext (uid 1000, read-only rootfs), so
-# npm's world-readable files (umask 022) work under either uid.
-# The mcp container runs /tools/node_modules/.bin/seekstone; toolhive stamps that
-# container with its own hardened securityContext (uid 1000, read-only rootfs), so
-# npm's world-readable files (umask 022) work under either uid.
+# Seekstone over the synced vault, on its volume: a read-only instance, the
+# assistant's write instance (Notes/, AI/, Archives/) and n8n's (Notes/,
+# References/). Each backend pod installs Seekstone once in an init container,
+# from the lockfiles pinned in git (seekstone/; Renovate bumps them), into an
+# emptyDir. A lockfile bump takes effect on the next backend pod start:
+# kubectl rollout restart statefulset -n default vault-ro vault-inbox vault-n8n.
+# Who reaches each one is networkpolicy.yaml. vault-ro and vault-inbox join the
+# private gateways through their MCPServerEntry in llm/toolhive/mcp-servers/vault;
+# vault-n8n is in no gateway. The mcp container runs
+# /tools/node_modules/.bin/seekstone; toolhive stamps that container with its
+# own hardened securityContext (uid 1000, read-only rootfs), so npm's
+# world-readable files (umask 022) work under either uid.
 ---
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServer
@@ -115,8 +110,6 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-  groupRef:
-    name: mcp-tools
 ---
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServer
@@ -221,5 +214,110 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-  groupRef:
-    name: mcp-tools
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: vault-n8n
+spec:
+  image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+  transport: stdio
+  proxyPort: 8080
+  env:
+    - name: SEEKSTONE_VAULT
+      value: /vault
+    - name: HOME
+      value: /tmp
+    - name: SEEKSTONE_CACHE_DIR
+      value: /tmp/seekstone
+    # n8n's workflows: the Paperless journal mirror (Notes/) and the place notes
+    # (References/, Notes/). They also read the category hubs and the templates.
+    # Nothing else is visible to them.
+    - name: SEEKSTONE_READ_PATHS
+      value: Notes/**,References/**,Categories/**,Templates/**
+    - name: SEEKSTONE_WRITE_PATHS
+      value: Notes/**,References/**
+    # No undo journal: it would live in <vault>/.seekstone and could end up synced.
+    - name: SEEKSTONE_HISTORY
+      value: "0"
+    - name: SEEKSTONE_AUDIT_FILE
+      value: /audit/vault-n8n.jsonl
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 768Mi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # The vault volume is block storage (one node): run beside the vault pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: obsidian-vault
+      initContainers:
+        - name: install-seekstone
+          image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+          command: [/bin/sh, -c]
+          args:
+            - >-
+              cp /src/package.json /src/package-lock.json /tools/ &&
+              cd /tools && npm ci --omit=dev --no-audit --no-fund
+          env:
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: src
+              mountPath: /src
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mcp
+          command:
+            - /tools/node_modules/.bin/seekstone
+          volumeMounts:
+            - name: vault
+              mountPath: /vault
+              subPath: vault
+              readOnly: false
+            - name: vault
+              mountPath: /audit
+              subPath: seekstone
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-vault
+        - name: src
+          configMap:
+            name: seekstone-src
+        - name: tools
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

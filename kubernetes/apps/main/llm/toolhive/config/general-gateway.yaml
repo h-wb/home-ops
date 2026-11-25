@@ -35,7 +35,7 @@ spec:
         # this block once the checks are done; the warehouse is private-tier data.
         - workload: metabase
         # TEMPORARY (2026-11): the vault's Notes/ folder, read-only
-        # (mcp-servers/vault/seekstone-review.yaml), to sort the homelab notes
+        # (default/obsidian-vault/app/seekstone-review.yaml), to sort the homelab notes
         # between the vault and this repo. Remove with that file.
         - workload: vault-review
     optimizer:
