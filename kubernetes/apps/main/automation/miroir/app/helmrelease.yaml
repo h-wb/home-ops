@@ -19,7 +19,7 @@ spec:
           app:
             image: &image
               repository: ghcr.io/h-wb/pipelines
-              tag: sha-3b79823271ccf3c9bd90e19bab5e1c5403550d66
+              tag: sha-c4685a033bc483d7131729eb0d1bbf2054d03038
             # Absolute interpreter path: no PATH lookup for the console script
             # (mutable-tag stale caches once made runc miss it on one node).
             command:
