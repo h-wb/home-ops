@@ -1,13 +1,5 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-# The Obsidian Sync side of the vault (see kustomization.yaml for the whole picture):
-# Belphemur's obsidian-headless-sync-docker image keeps a two-way copy of the
-# vault on the volume the Seekstone servers (seekstone.yaml) serve. It wraps the
-# official `ob` CLI with s6 setup (fix uid/gid, ob login, ob sync-setup, then
-# `ob sync --continuous`). The vault sits at /data/vault and the CLI state at
-# /data/state, both on the claim below; the image runs as uid/gid 1000
-# (PUID/PGID), the uid the Seekstone backends share the volume with. The local
-# writers are vault-inbox and vault-n8n.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -20,17 +12,12 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      # CoreDNS autopath answers api.obsidian.md.<namespace>.svc.cluster.local with Obsidian's IPs,
-      # so Cilium filed them under that name and the *.obsidian.md egress rule never matched.
-      # ndots 1 makes external names resolve as written first.
+      # Without ndots 1, CoreDNS autopath resolves *.obsidian.md inside the namespace and the egress rule never matches.
       dnsConfig:
         options:
           - name: ndots
             value: "1"
-      # s6-overlay starts as root (its init fixes the obsidian user and volume
-      # ownership, then s6-setuidgid drops to PUID/PGID before any ob command), so
-      # the pod cannot be runAsNonRoot. The sync service ends up as uid 1000 gid
-      # 1000, what the volume and Seekstone's mounts were built on.
+      # s6-overlay starts as root, then drops to PUID/PGID.
       securityContext:
         runAsNonRoot: false
         fsGroup: 1000
@@ -40,24 +27,16 @@ spec:
     controllers:
       obsidian-vault:
         replicas: 1
-        # The vault volume is RWO and `ob sync` is one writer: never two.
+        # RWO volume, one `ob sync` writer.
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
         containers:
           sync:
             image:
-              # Tags track the wrapped obsidian-headless CLI, so Renovate's image
-              # bumps are CLI bumps (check-obsidian-version.yml tags the repo in
-              # lockstep with the npm release it was built against).
               repository: ghcr.io/belphemur/obsidian-headless-sync-docker
               tag: "0.0.14"
             env:
-              # BWS item obsidian-headless (externalsecret.yaml): the account token,
-              # the remote vault's name and, for end-to-end encrypted vaults, its
-              # password. If the item goes missing the pod now fails to start
-              # (CreateContainerConfigError) instead of the old silent 300 s wait
-              # loop: an unconfigured sync is loud, not a quiet zombie.
               OBSIDIAN_AUTH_TOKEN:
                 valueFrom:
                   secretKeyRef:
@@ -68,8 +47,7 @@ spec:
                   secretKeyRef:
                     name: obsidian-headless
                     key: OBSIDIAN_VAULT
-              # Leave empty for any non-E2E vault: the image only passes the
-              # password on to `ob sync-setup`, which prompts without it.
+              # Empty for a vault without end-to-end encryption.
               VAULT_PASSWORD:
                 valueFrom:
                   secretKeyRef:
@@ -77,17 +55,10 @@ spec:
                     key: OBSIDIAN_VAULT_PASSWORD
               PUID: "1000"
               PGID: "1000"
-              # Where the volume is mounted and where the persisted ob state sits.
-              # The volume starts empty: sync-setup records these paths in the
-              # persisting CLI state, and the pull-only sync backfills the vault
-              # from the remote, so keeping the container paths stable across
-              # restarts is what avoids a re-setup and a new device entry.
+              # Keep these paths: a change means a new sync-setup and a new device.
               VAULT_PATH: /data/vault
               XDG_CONFIG_HOME: /data/state
-              # Two-way: what vault-inbox (the assistant, each write approved in
-              # chat) and vault-n8n (the workflows) write reaches every device.
-              # Seekstone's tool state (.seekstone) must never be vault content. The image re-applies these on every start, after
-              # its sync-setup pass; that pass only rewrites the config.
+              # .seekstone is Seekstone's state, never vault content.
               SYNC_MODE: bidirectional
               EXCLUDED_FOLDERS: .seekstone
               DEVICE_NAME: cluster-headless
@@ -113,11 +84,8 @@ spec:
         data:
           syncprobe: |-
             #!/bin/sh
-            # Readiness = sync progress, not the process (after chrisns/obsidian-server, MIT): `ob sync
-            # --continuous` stays up when its websocket wedges, and `ob sync-status` only prints config.
-            # The sync loop logs "Fully synced" about every 30 s while connected; fail if it went quiet.
-            # The timestamp is cut to whole seconds with the ISO T split off: this image's BusyBox date
-            # only parses plain "YYYY-MM-DD HH:MM:SS" (the old Debian image parsed the full ISO form).
+            # Readiness is sync progress: `ob sync --continuous` stays up when its websocket wedges.
+            # This image's BusyBox date parses only "YYYY-MM-DD HH:MM:SS".
             set -eu
             for log in "$XDG_CONFIG_HOME"/obsidian-headless/sync/*/sync.log; do break; done
             [ -f "$log" ] || { echo "no sync.log yet"; exit 1; }
@@ -128,8 +96,6 @@ spec:
             [ "$age" -lt "$1" ]
     persistence:
       vault:
-        # Vault notes, ob's SQLite state (WAL, so never NFS) and Seekstone's audit
-        # logs; the claim the Seekstone servers share.
         existingClaim: obsidian-vault
         globalMounts:
           - path: /data/vault
