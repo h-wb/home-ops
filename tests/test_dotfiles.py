@@ -110,6 +110,7 @@ class Hook(unittest.TestCase):
         self.assertEqual(self.head(), self.ref)
         self.assertEqual((self.dir / "marker").read_text(), "first\n")
         self.assertEqual(runs, [f"run code-server ref={self.ref} head={self.ref}"])
+        self.assertEqual(self.git("stash", "list", cwd=self.dir), "")  # a fresh clone has nothing to keep
 
     def test_a_new_pin_moves_the_clone_and_stashes_local_changes(self):
         self.run_hook()

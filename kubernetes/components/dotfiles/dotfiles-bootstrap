@@ -12,7 +12,7 @@ url=https://github.com/h-wb/dotfiles.git
 # A failed fetch keeps the commit already checked out (pod-bootstrap: `stale`).
 fetch() {
 	if [ ! -d "$dir/.git" ]; then
-		timeout 300 git clone -q --no-checkout "$url" "$dir" || { echo "dotfiles: fetch failed: no clone at $dir"; return 1; }
+		timeout 300 git clone -q "$url" "$dir" || { echo "dotfiles: fetch failed: no clone at $dir"; return 1; }
 	fi
 	timeout 300 git -C "$dir" fetch -q origin "$ref" ||
 		{ echo "dotfiles: fetch failed for $ref; keeping $(git -C "$dir" rev-parse --short HEAD 2>/dev/null)"; return 1; }
