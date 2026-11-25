@@ -119,6 +119,9 @@ skills:
     - /opt/hermes-routines/skills
     - /opt/shared-skills
   write_approval: true
+  # How much of each skill's description the model sees in the skill index. The
+  # default, 60 characters, cuts off the part that says when to use a skill.
+  index_desc_limit: 1024
 # Sub-agents get the parent's toolsets, so no shell there either.
 delegation:
   max_spawn_depth: 1
