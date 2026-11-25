@@ -71,7 +71,7 @@ spec:
               NFS_ADDR: "192.168.1.161"
               # The h-wb/dotfiles commit every pod bootstraps from (components/dotfiles).
               # renovate: dotfiles
-              DOTFILES_REF: "d4abddb3518dd58c18bebb1ca04c1dad5b530cd5"
+              DOTFILES_REF: "7779b330ddd448ea851693fff5e147da75c9cff0"
             substituteFrom:
               - name: cluster-secrets
                 kind: Secret

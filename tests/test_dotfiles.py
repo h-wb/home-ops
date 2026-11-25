@@ -122,6 +122,8 @@ class Hook(unittest.TestCase):
     def test_inputs_are_the_pin_and_the_apps_environment(self):
         self.assertIn(f"ref={PIN}\n", self.hook)
         self.assertIn("env=code-server\n", self.hook)
+        # A start must leave the checkout clean, or the next one cannot move it.
+        self.assertIn("export MISE_LOCKED=1\n", self.hook)
 
     def test_empty_home_gets_the_pin_the_link_and_the_environment(self):
         self.commit("later")  # the pin, not the default branch's tip
@@ -129,6 +131,7 @@ class Hook(unittest.TestCase):
         self.assertEqual(self.head(), self.ref)
         self.assertEqual((self.home / ".config/mise").resolve(), self.dir.resolve())
         self.assertEqual(runs, [self.applied(self.ref, self.ref)])
+        self.assertEqual(self.git("status", "--porcelain", cwd=self.dir), "")
         # Only the hook's own lines reach the pod's log; mise's go to the volume.
         self.assertEqual(result.stdout.splitlines(), [
             f"dotfiles: {self.ref} at {self.dir}",
