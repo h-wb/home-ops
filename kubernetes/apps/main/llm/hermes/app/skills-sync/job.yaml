@@ -31,13 +31,12 @@ spec:
             # space-separated.
             - name: SKILL_GROUPS
               value: core
-            # The head of h-wb/skills#2's branch, which adds the groups; moves to
-            # main once it merges. SKILLS_TAR_SHA256 is the codeload tarball for
-            # that ref; bump both together.
+            # h-wb/skills main. SKILLS_TAR_SHA256 is the codeload tarball for that
+            # ref; bump both together.
             - name: SKILLS_REF
-              value: 3a27eb3978a476e6f057a55acbbe7275a0626665
+              value: 85572b7015fdaf337cbfdb8d907a69e2ac74cecd
             - name: SKILLS_TAR_SHA256
-              value: a2fa294192775f9208ec12159029de121a94412a84d7b4a5fb276f397025b8a7
+              value: 893685ef8ae37dea347facd8b7fee8e48ed86f3a2bb11ab04e77a2240c74a02f
           resources:
             requests:
               cpu: 10m
