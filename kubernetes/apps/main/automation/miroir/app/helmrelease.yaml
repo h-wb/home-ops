@@ -38,8 +38,6 @@ spec:
               # Trust the ingress proxy's pod-network headers for HTTPS URLs/cookies.
               FORWARDED_ALLOW_IPS: 10.42.0.0/16
               RUNTIME__DLTHUB_TELEMETRY: "false"
-              # The metadata store: schema miroir_meta in postgres-miroir
-              # (the Cluster from the cnpg/restore component on this app).
               MIROIR_METADATA__HOST:
                 valueFrom: { secretKeyRef: { name: postgres-miroir-app, key: host } }
               MIROIR_METADATA__PORT:
