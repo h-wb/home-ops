@@ -1,7 +1,5 @@
 ---
-# The sync pod holds the Obsidian account token: it may resolve names and reach Obsidian's
-# own servers (ob refuses any sync host outside *.obsidian.md), nothing else, and nothing
-# may connect to it: Seekstone reads the volume, never the pod.
+# The sync pod: DNS and Obsidian's servers out, nothing in.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -41,8 +39,7 @@ spec:
   policyTypes:
     - Ingress
 ---
-# The Seekstone servers are private data. Each one's proxy answers only the
-# clients named below; its backend only ToolHive's own pods here (the proxies).
+# Backends answer the proxies only.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -59,7 +56,6 @@ spec:
             matchLabels:
               toolhive: "true"
 ---
-# vault-ro and vault-inbox: the private and the assistant's gateways.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -88,7 +84,7 @@ spec:
         - port: 8080
           protocol: TCP
 ---
-# TEMPORARY (2026-11), with seekstone-review.yaml: the general gateway.
+# TEMPORARY (2026-11), with seekstone-review.yaml.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -112,7 +108,6 @@ spec:
         - port: 8080
           protocol: TCP
 ---
-# vault-n8n: n8n alone, which calls it directly. No gateway lists it.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

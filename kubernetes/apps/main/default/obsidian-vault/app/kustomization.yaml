@@ -1,9 +1,5 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# The Obsidian vault's copy in the cluster: the headless sync (helmrelease.yaml)
-# keeps it two-way in sync with Obsidian Sync, and Seekstone serves it
-# (seekstone.yaml): to the private agents through ToolHive's gateways, and to n8n.
-# The volume is the kopiur component's (ks.yaml).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
@@ -14,9 +10,7 @@ resources:
   # TEMPORARY (2026-11), see the file.
   - ./seekstone-review.yaml
 configMapGenerator:
-  # Pinned npm sources for the Seekstone init containers. Referenced by literal name
-  # inside the MCPServer CRs (kustomize cannot rewrite references in arbitrary CRs),
-  # so the hash suffix stays off.
+  # Referenced by literal name inside the MCPServers: no hash suffix.
   - name: seekstone-src
     options:
       disableNameSuffixHash: true

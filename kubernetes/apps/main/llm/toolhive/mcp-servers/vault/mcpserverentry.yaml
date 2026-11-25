@@ -1,8 +1,5 @@
 ---
-# The vault's Seekstone servers live with the vault, in default/obsidian-vault
-# (seekstone.yaml); these entries put them in the gateways' group under the same
-# names, so tool names do not change. Who may call each proxy is that app's
-# networkpolicy.yaml.
+# The servers run in default/obsidian-vault; same names, so tool names don't change.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServerEntry
 metadata:

@@ -1,11 +1,6 @@
 ---
-# TEMPORARY (2026-11): a read-only view of the vault's Notes/ folder for the general
-# tier, so a general Paseo session can sort the homelab notes into what belongs in
-# this repo and what stays in the vault. The vault is private-tier data and every
-# general agent can call this server while it is listed on mcp-general: remove this
-# file, its line in kustomization.yaml, its network policy, its MCPServerEntry in
-# llm/toolhive/mcp-servers/vault and the mcp-general entry once the review is done.
-# Same pod shape as vault-ro (seekstone.yaml).
+# TEMPORARY (2026-11): Notes/ read-only for the general gateway, to sort the homelab notes.
+# Remove this file, its network policy, its MCPServerEntry and the mcp-general entry when done.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServer
 metadata:
@@ -23,10 +18,6 @@ spec:
       value: /tmp/seekstone
     - name: SEEKSTONE_READ_ONLY
       value: "1"
-    # Everything outside these paths is invisible: not indexed, not listed, not
-    # readable. Notes/, plus the vault's structure (its rules, entry page,
-    # templates and category hubs), to align the handbook's page header with it.
-    # Daily/, References/, Clippings/, Archives/ and AI/ stay out.
     - name: SEEKSTONE_READ_PATHS
       value: Notes/**,AGENTS.md,Home.md,Templates/**,Categories/**
   resources:
@@ -45,7 +36,7 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      # The vault volume is block storage (one node): run beside the vault pod.
+      # RWO block volume: run beside the sync pod.
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -54,8 +45,6 @@ spec:
                 matchLabels:
                   app.kubernetes.io/name: obsidian-vault
       initContainers:
-        # npm ci is ~1 s / 31 MB (better-sqlite3 has prebuilt binaries): cheap enough
-        # to run per backend pod start instead of prebaking a shared install.
         - name: install-seekstone
           image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
           command: [/bin/sh, -c]
@@ -100,9 +89,6 @@ spec:
         - name: vault
           persistentVolumeClaim:
             claimName: obsidian-vault
-        # Pinned npm sources from the configMapGenerator in ../kustomization.yaml.
-        # The literal name matters: kustomize cannot rewrite references inside CRs,
-        # so the generator disables its hash suffix.
         - name: src
           configMap:
             name: seekstone-src

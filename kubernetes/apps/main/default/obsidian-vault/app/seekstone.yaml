@@ -1,15 +1,5 @@
-# Seekstone over the synced vault, on its volume: a read-only instance, the
-# assistant's write instance (Notes/, AI/, Archives/) and n8n's (Notes/,
-# References/). Each backend pod installs Seekstone once in an init container,
-# from the lockfiles pinned in git (seekstone/; Renovate bumps them), into an
-# emptyDir. A lockfile bump takes effect on the next backend pod start:
-# kubectl rollout restart statefulset -n default vault-ro vault-inbox vault-n8n.
-# Who reaches each one is networkpolicy.yaml. vault-ro and vault-inbox join the
-# private gateways through their MCPServerEntry in llm/toolhive/mcp-servers/vault;
-# vault-n8n is in no gateway. The mcp container runs
-# /tools/node_modules/.bin/seekstone; toolhive stamps that container with its
-# own hardened securityContext (uid 1000, read-only rootfs), so npm's
-# world-readable files (umask 022) work under either uid.
+# A lockfile bump (seekstone/) takes effect at the next pod start:
+# kubectl rollout restart statefulset -n default vault-ro vault-inbox vault-n8n
 ---
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServer
@@ -45,7 +35,7 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      # The vault volume is block storage (one node): run beside the vault pod.
+      # RWO block volume: run beside the sync pod.
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -54,8 +44,6 @@ spec:
                 matchLabels:
                   app.kubernetes.io/name: obsidian-vault
       initContainers:
-        # npm ci is ~1 s / 31 MB (better-sqlite3 has prebuilt binaries): cheap enough
-        # to run per backend pod start instead of prebaking a shared install.
         - name: install-seekstone
           image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
           command: [/bin/sh, -c]
@@ -100,9 +88,6 @@ spec:
         - name: vault
           persistentVolumeClaim:
             claimName: obsidian-vault
-        # Pinned npm sources from the configMapGenerator in ../kustomization.yaml.
-        # The literal name matters: kustomize cannot rewrite references inside CRs,
-        # so the generator disables its hash suffix.
         - name: src
           configMap:
             name: seekstone-src
@@ -126,11 +111,9 @@ spec:
       value: /tmp
     - name: SEEKSTONE_CACHE_DIR
       value: /tmp/seekstone
-    # The vault's own folders for notes, model-written notes and finished work; Daily,
-    # References, Clippings and Templates stay read-only. Two-way sync uploads the writes.
     - name: SEEKSTONE_WRITE_PATHS
       value: Notes/**,AI/**,Archives/**
-    # No undo journal: it would live in <vault>/.seekstone and could end up synced.
+    # No undo journal: it would live in the vault and could be synced.
     - name: SEEKSTONE_HISTORY
       value: "0"
     - name: SEEKSTONE_AUDIT_FILE
@@ -151,7 +134,7 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      # The vault volume is block storage (one node): run beside the vault pod.
+      # RWO block volume: run beside the sync pod.
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -230,14 +213,11 @@ spec:
       value: /tmp
     - name: SEEKSTONE_CACHE_DIR
       value: /tmp/seekstone
-    # n8n's workflows: the Paperless journal mirror (Notes/) and the place notes
-    # (References/, Notes/). They also read the category hubs and the templates.
-    # Nothing else is visible to them.
     - name: SEEKSTONE_READ_PATHS
       value: Notes/**,References/**,Categories/**,Templates/**
     - name: SEEKSTONE_WRITE_PATHS
       value: Notes/**,References/**
-    # No undo journal: it would live in <vault>/.seekstone and could end up synced.
+    # No undo journal: it would live in the vault and could be synced.
     - name: SEEKSTONE_HISTORY
       value: "0"
     - name: SEEKSTONE_AUDIT_FILE
@@ -258,7 +238,7 @@ spec:
         fsGroup: 1000
         seccompProfile:
           type: RuntimeDefault
-      # The vault volume is block storage (one node): run beside the vault pod.
+      # RWO block volume: run beside the sync pod.
       affinity:
         podAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
