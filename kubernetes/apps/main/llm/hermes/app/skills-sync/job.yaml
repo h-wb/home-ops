@@ -27,15 +27,17 @@ spec:
             - /bin/sh
             - /scripts/sync.sh
           env:
-            # The skills the assistant takes from h-wb/skills, space-separated.
-            - name: SKILLS
-              value: handbook board tool-gateway
-            # h-wb/skills main, "Merge pull request #1" (the first catalogue).
-            # SKILLS_TAR_SHA256 is the codeload tarball for that ref; bump both together.
+            # The skill groups the assistant takes from h-wb/skills (groups/<group>/),
+            # space-separated.
+            - name: SKILL_GROUPS
+              value: core
+            # The head of h-wb/skills#2's branch, which adds the groups; moves to
+            # main once it merges. SKILLS_TAR_SHA256 is the codeload tarball for
+            # that ref; bump both together.
             - name: SKILLS_REF
-              value: e3ba194b9e42e8108cdc8b7aa7816822f54ddc0e
+              value: 3a27eb3978a476e6f057a55acbbe7275a0626665
             - name: SKILLS_TAR_SHA256
-              value: c19e411f77e6c19696cc969cc733a53880af3fb5722302a24982d88688cab04c
+              value: a2fa294192775f9208ec12159029de121a94412a84d7b4a5fb276f397025b8a7
           resources:
             requests:
               cpu: 10m

@@ -114,11 +114,11 @@ flowchart LR
 - Documentation: the shared `handbook` skill says how to find the one page
   that answers, and it reads pages from git through the GitHub tool. It holds
   no copy.
-- Shared skills: the names it declares (`SKILLS` in
-  `hermes/app/skills-sync/job.yaml`: `handbook`, `board`, `tool-gateway`) are
-  copied from `h-wb/skills` at a pinned commit by a Job into a volume mounted
-  read-only at `/opt/shared-skills`, listed in `skills.external_dirs` next to
-  the routines. The pod itself cannot reach GitHub
+- Shared skills: the skills of the groups it takes (`SKILL_GROUPS` in
+  `hermes/app/skills-sync/job.yaml`: `core`, which is `handbook`, `board`,
+  `tool-gateway`) are copied from `h-wb/skills` at a pinned commit by a Job into
+  a volume mounted read-only at `/opt/shared-skills`, listed in
+  `skills.external_dirs` next to the routines. The pod itself cannot reach GitHub
   ([hermes](../hermes/README.md#skills)).
 - Skills and sub-agents are on. Hermes's bundled skills are kept out, except
   the one about itself, which it always adds back. A skill it writes itself
