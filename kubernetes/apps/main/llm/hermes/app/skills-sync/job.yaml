@@ -30,12 +30,12 @@ spec:
             # The skills the assistant takes from h-wb/skills, space-separated.
             - name: SKILLS
               value: handbook board tool-gateway
-            # h-wb/skills, "feat: one catalogue of the homelab's skills" (h-wb/skills#1).
+            # h-wb/skills main, "Merge pull request #1" (the first catalogue).
             # SKILLS_TAR_SHA256 is the codeload tarball for that ref; bump both together.
             - name: SKILLS_REF
-              value: 72177c761caa7b156d1084a1bab4181614824c5c
+              value: e3ba194b9e42e8108cdc8b7aa7816822f54ddc0e
             - name: SKILLS_TAR_SHA256
-              value: 8e5bc31141d19637fd55c7cf4f31696b54b4e1638dda5778490a10fe104791b2
+              value: c19e411f77e6c19696cc969cc733a53880af3fb5722302a24982d88688cab04c
           resources:
             requests:
               cpu: 10m
