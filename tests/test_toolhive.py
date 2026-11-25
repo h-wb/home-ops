@@ -4,6 +4,7 @@ and through Envoy.
 Run with python3 -B -m unittest discover -s tests -p test_toolhive.py.
 """
 import json
+import re
 from pathlib import Path
 import subprocess
 import unittest
@@ -76,7 +77,7 @@ class ToolHiveScopes(unittest.TestCase):
 
     def test_general_gateway_never_lists_private_data(self):
         # Cloud models sit behind general; private's gateway serves everything.
-        private = {"vault-ro", "vault-inbox", "vault-review", "personal-tasks", "dawarich", "dawarich-ops", "metabase",
+        private = {"vault-ro", "vault-inbox", "vault-review", "dawarich", "dawarich-ops", "metabase",
                    "homeassistant", "ticktick"}
         aggregation = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]
         self.assertEqual("deny", aggregation["defaultToolVisibility"])
@@ -88,6 +89,50 @@ class ToolHiveScopes(unittest.TestCase):
         self.assertIn("\n  remoteUrl: https://mcp.ticktick.com\n", entry)
         self.assertIn('authorization: "Bearer {{ .TICKTICK_API_TOKEN }}"', (server / "externalsecret.yaml").read_text())
         self.assertIn("mcp-servers/ticktick\n", (ROOT / "kubernetes/apps/main/llm/toolhive/ks.yaml").read_text())
+
+    def test_the_private_side_reads_the_board_and_cannot_write_it(self):
+        read_only = ["get_task", "list_tasks", "list_task_statuses", "list_labels", "get_me"]
+        for gateway in ("mcp-assistant", "mcp-private"):
+            with self.subTest(gateway=gateway):
+                config = self.resource("VirtualMCPServer", gateway)["spec"]["config"]
+                # Hidden tools stay callable from composite tools, so there must be none.
+                self.assertNotIn("compositeTools", config)
+                self.assertNotIn("compositeToolRefs", self.resource("VirtualMCPServer", gateway)["spec"])
+                entries = [t for t in config["aggregation"]["tools"] if t["workload"].startswith("orbit")]
+                self.assertEqual([{"workload": "orbit", "filter": read_only}], entries)
+                self.assertEqual({"orbit": {"type": "externalAuthConfigRef",
+                                            "externalAuthConfigRef": {"name": "orbit-read"}}},
+                                 self.resource("VirtualMCPServer", gateway)["spec"]["outgoingAuth"]["backends"])
+        general = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]["tools"]
+        self.assertIn({"workload": "orbit"}, general)
+        self.assertNotIn("backends", self.resource("VirtualMCPServer", "mcp-general")["spec"]["outgoingAuth"])
+        server = ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/orbit"
+        entry = yaml_of(server / "mcpserverentry.yaml")["spec"]
+        self.assertEqual({"name": "orbit-write"}, entry["externalAuthConfigRef"])
+        self.assertNotIn("headerForward", entry)
+        docs = json.loads(subprocess.run(["yq", "eval-all", "-o=json", "-I=0", "[.]", str(server / "externalauthconfig.yaml")],
+                                         capture_output=True, text=True, timeout=60, check=True).stdout)
+        configs = {d["metadata"]["name"]: d["spec"]["headerInjection"]["valueSecretRef"]["key"] for d in docs}
+        self.assertEqual({"orbit-write": "authorization", "orbit-read": "read-authorization"}, configs)
+        self.assertIn('read-authorization: "Bearer {{ .ORBIT_READ_TOKEN }}"', (server / "externalsecret.yaml").read_text())
+        hermes = ROOT / "kubernetes/apps/main/llm/hermes/app"
+        named = set()
+        for path in [hermes / "SOUL.md", *sorted((hermes / "routines").glob("*/SKILL.md"))]:
+            named |= set(re.findall(r"orbit_(\w+)", path.read_text()))
+        self.assertTrue(named)
+        self.assertLessEqual(named, set(read_only))
+
+    def test_the_stand_in_task_boards_are_gone(self):
+        stand_ins = {"homelab-tasks", "homelab-tasks-ro", "personal-tasks"}
+        for gateway in ("mcp-assistant", "mcp-private", "mcp-general"):
+            tools = self.resource("VirtualMCPServer", gateway)["spec"]["config"]["aggregation"]["tools"]
+            self.assertFalse({t["workload"] for t in tools} & stand_ins, gateway)
+        self.assertFalse((ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/tasks").exists())
+        self.assertNotIn("mcp-servers/tasks", (ROOT / "kubernetes/apps/main/llm/toolhive/ks.yaml").read_text())
+        hermes = ROOT / "kubernetes/apps/main/llm/hermes/app"
+        for path in [hermes / "SOUL.md", *(hermes / "routines").glob("*/SKILL.md")]:
+            self.assertNotIn("homelab_tasks", path.read_text(), path.name)
+            self.assertNotIn("personal_tasks", path.read_text(), path.name)
 
     def test_dawarich_ops_entry_reuses_the_dawarich_header(self):
         # One user API key: the ops entry mounts the secret mcp-dawarich owns.

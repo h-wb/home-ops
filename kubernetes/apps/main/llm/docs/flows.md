@@ -75,16 +75,16 @@ sequenceDiagram
     end
     box rgba(120,174,252,0.18) General scope
         participant G as General workshop<br/>any model
-        participant X as Homelab<br/>monitoring, git host
+        participant X as Board<br/>the build's tasks
     end
     Note over H: scheduled job starts
-    X->>H: the assistant reads the open homelab tasks
+    X->>H: the assistant reads your ready steps
     T->>H: tasks and calendar
     T-->>H: mail
     H->>Y: the briefing
 ```
 
-In step 1 the assistant is the one acting: it fetches the homelab task list, so the briefing can cover the homelab too. The list moves from general to private, which is the allowed direction. Tasks and calendar events come from the task service today; mail is planned.
+In step 1 the assistant is the one acting: it reads the board's steps assigned to you that are in Todo, so the briefing covers the build too. They move from general to private, which is the allowed direction; its gateway gives it the board's read tools only, so nothing goes back. Tasks and calendar events come from the task service today; mail is planned.
 
 - Why it is safe: No prompt and no data cross to the general side.
 - What it costs: Mail needs a tool the catalogue does not have yet, and the calendar is only what the task service shows.

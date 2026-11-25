@@ -1,0 +1,24 @@
+---
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: MCPExternalAuthConfig
+metadata:
+  name: orbit-write
+spec:
+  type: headerInjection
+  headerInjection:
+    headerName: Authorization
+    valueSecretRef:
+      name: toolhive-orbit
+      key: authorization
+---
+apiVersion: toolhive.stacklok.dev/v1beta1
+kind: MCPExternalAuthConfig
+metadata:
+  name: orbit-read
+spec:
+  type: headerInjection
+  headerInjection:
+    headerName: Authorization
+    valueSecretRef:
+      name: toolhive-orbit
+      key: read-authorization

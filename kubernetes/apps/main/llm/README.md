@@ -46,6 +46,17 @@ The assistant has a third endpoint on the private side, `vmcp-mcp-assistant`: th
 same catalogue without the search optimizer, because Hermes searches tools itself
 and decides per tool name whether to ask first.
 
+The private gateways serve the whole catalogue but one part: the build board
+(Orbit). It is general, so information may flow from it to the private side and
+never back. Orbit enforces it: one entry, `orbit`, and each gateway picks the
+token it sends (`mcp-servers/orbit/externalauthconfig.yaml`). The private
+gateways send a token that can only read tasks (Bitwarden item `toolhive`, field
+`ORBIT_READ_TOKEN`) and never mount the writing one. They also list only its
+read-only task tools (`orbit_get_task`, `orbit_list_tasks`,
+`orbit_list_task_statuses`, `orbit_list_labels`, `orbit_get_me`), a second
+layer in `toolhive/config/`. The general gateway sends the writing token and
+lists all of it.
+
 ToolHive's gateways take callers anonymously, so who reaches each one is the
 boundary. In-cluster clients (Hermes, Paseo) call the service with no
 key, and `toolhive/config/networkpolicy.yaml` admits only that scope's pods.
@@ -87,7 +98,7 @@ flowchart TB
         end
         subgraph pshared[Its side of the shared services]
             PM[Models<br/>the models you trust with private data]
-            PT[Tools<br/>every tool: notes, tasks, location,<br/>home, cluster, jobs]
+            PT[Tools<br/>every tool: notes, tasks, location,<br/>home, cluster, jobs,<br/>the board read-only]
             PS[Memory<br/>private store]
         end
     end
@@ -97,7 +108,7 @@ flowchart TB
         end
         subgraph gshared[Its side of the shared services]
             GM[Models<br/>any model]
-            GT[Tools<br/>cluster, git host,<br/>homelab tasks, media]
+            GT[Tools<br/>cluster, git host,<br/>the board, media]
             GS[Memory<br/>general store]
         end
     end
@@ -149,6 +160,7 @@ Agent Skills format), kept in git, so every agent here can read it.
 | Facts about one repo                  | That repo's `AGENTS.md`       | Whoever opens the repo                                         |
 | A procedure for one repo              | That repo's `.agents/skills/` | Whoever opens the repo                                         |
 | The assistant's routines and skills   | `hermes/app/routines/`        | The assistant                                                  |
+| The build's tasks                     | The board, Orbit              | Every agent; the private side reads it and never writes it     |
 | The assistant's standing instructions | `hermes/app/SOUL.md`          | The assistant, in every chat                                   |
 | What is deployed, and this table      | This file                     | You; the assistant, through the `handbook` skill               |
 | Why it is built this way              | The handbook's `Decisions/`   | You; the assistant, through the `handbook` skill               |

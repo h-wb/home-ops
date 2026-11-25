@@ -95,6 +95,10 @@ flowchart LR
 - Its gateway serves the private catalogue without the search step: Hermes
   searches tools itself, and a call to any tool not marked read-only waits for
   your yes.
+- The board (Orbit) is general: the gateway lists its read-only task tools
+  only, so the assistant reads your ready steps for the briefing and cannot
+  write a task or read a document there. Build work you tell it, it drafts for
+  you to add.
 - Some servers mark no tool read-only (arr, kubesearch and overseerr when last counted, not
   checked again), so even their lookups ask until you approve a tool for good. Tools approved
   for good are `command_allowlist` in `hermes/app/config.yaml`.

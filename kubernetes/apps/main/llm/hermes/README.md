@@ -120,7 +120,7 @@ flowchart LR
   R["app/routines/"] -->|init container| H
 ```
 
-- The groups are `SKILL_GROUPS` in `app/skills-sync/job.yaml`: `core`, which is `handbook`, `board` and `tool-gateway` today. `handbook` is how it finds documentation: the one page that answers, read from git through the GitHub tool.
+- The groups are `SKILL_GROUPS` in `app/skills-sync/job.yaml`: `core`, which is `handbook`, `board` and `tool-gateway` today. `handbook` is how it finds documentation: the one page that answers, read from git through the GitHub tool. `board` is how it reads the build board; its gateway lists the board's read-only task tools only, so it never writes there ([Models, tools and memory](../README.md)).
 - The Job downloads the catalogue at `SKILLS_REF`, checks the tarball against `SKILLS_TAR_SHA256`, and swaps each skill of those groups into the volume, as the skill's folder rather than the group's link. A skill no longer in a taken group leaves the volume. A declared group missing from the catalogue, or a group entry that is not a skill, fails the Job before the volume changes. The pod itself cannot reach GitHub.
 - To take another group, add its name to `SKILL_GROUPS`. A skill added to a group in h-wb/skills arrives here when the pin moves past it. To move the pin, set `SKILLS_REF` to a commit of h-wb/skills and `SKILLS_TAR_SHA256` to the output of `curl -fsSL https://codeload.github.com/h-wb/skills/tar.gz/<sha> | sha256sum`. Either change reruns the Job.
 - The pin is the head of h-wb/skills#2's branch, which adds the groups, not `main`; it moves to `main` once that pull request merges (HOMEL-135).

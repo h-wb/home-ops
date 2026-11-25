@@ -7,9 +7,6 @@
 # refuses any other host name and any request that did not come through its
 # trusted proxy over HTTPS. That name does not resolve inside the cluster, so
 # the gateway pods carry a host alias for it (config/*-gateway.yaml).
-#
-# The gateway pods mount this entry's header secret themselves, so if the secret
-# is missing a gateway fails to start, not just this backend.
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServerEntry
 metadata:
@@ -18,11 +15,7 @@ spec:
   remoteUrl: https://orbit.${SECRET_DOMAIN}/mcp
   transport: streamable-http
   allowPrivateEndpoint: true
-  headerForward:
-    addHeadersFromSecret:
-      - headerName: Authorization
-        valueSecretRef:
-          name: toolhive-orbit
-          key: authorization
+  externalAuthConfigRef:
+    name: orbit-write
   groupRef:
     name: mcp-tools
