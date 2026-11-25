@@ -293,7 +293,7 @@ class HermesIsPrivateOnly(unittest.TestCase):
         # Nobody answers a scheduled run, so it must not be able to approve itself.
         self.assertEqual({"mode": "manual", "cron_mode": "deny"}, config["approvals"])
         self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills", "/opt/shared-skills"],
-                          "write_approval": True}, config["skills"])
+                          "write_approval": True, "index_desc_limit": 1024}, config["skills"])
         self.assertEqual(1, config["delegation"]["max_spawn_depth"])
         # Schedules and "today" are on the user's clock, and a routine's message can be answered.
         self.assertEqual("America/Toronto", config["timezone"])
