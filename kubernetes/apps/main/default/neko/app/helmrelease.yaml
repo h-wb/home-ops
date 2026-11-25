@@ -55,8 +55,7 @@ spec:
           reloader.stakater.com/auto: "true"
         initContainers:
           dotfiles:
-            # The dotfiles' mise, with git: the neko image has none (the
-            # session's run gets it from apt).
+            # It has git; the neko image has none.
             image: &mise
               repository: ghcr.io/jdx/mise
               tag: 2026.11.14-debian
@@ -78,7 +77,7 @@ spec:
               repository: ghcr.io/m1k1o/neko/intel-xfce
               tag: "3.2.0"
             env:
-              # mise from its image: the shims point at it.
+              # The image's mise first: the shims point at it.
               PATH: /opt/mise/usr/local/bin:/home/neko/.local/share/mise/shims:/home/neko/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
               # The 3.2 client is v3-only; legacy just exposes the v2 API.
               NEKO_LEGACY: "false"
@@ -203,9 +202,7 @@ spec:
               - path: /etc/coredns/Corefile
                 readOnly: true
                 subPath: Corefile
-      # components/dotfiles: fetched by the init container, run by the autostart
-      # entry inside the session (xfconf needs its D-Bus). subPath: a whole
-      # ConfigMap over /etc/xdg/autostart would hide XFCE's own entries.
+      # subPath: a whole ConfigMap over /etc/xdg/autostart would hide XFCE's entries.
       mise:
         type: image
         image: *mise

@@ -116,9 +116,7 @@ spec:
               interval: 5m
               rules:
                 - alert: DotfilesBootstrapIncomplete
-                  # A pod starts whatever its dotfiles bootstrap did, so a bad
-                  # pin only shows in these lines. neko's in-session run logs to
-                  # its home volume, not here.
+                  # neko's in-session run logs only to its volume, not here.
                   expr: |-
                     ("dotfiles: bootstrap did not complete" OR "dotfiles: fetch failed") | stats by (kubernetes.pod_namespace, kubernetes.pod_name) count() as hits | filter hits:>0
                   keep_firing_for: 6h
