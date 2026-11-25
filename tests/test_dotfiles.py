@@ -13,6 +13,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 URL = "https://github.com/h-wb/dotfiles.git"
+MISE = shutil.which("mise")
 CLUSTER = (ROOT / "kubernetes/clusters/main/ks.yaml").read_text()
 PIN = re.search(r'DOTFILES_REF: "([0-9a-f]{40})"', CLUSTER).group(1)
 
@@ -47,6 +48,20 @@ def one(docs, kind, name):
     return next(d for d in docs if d["kind"] == kind and d["metadata"]["name"] == name)
 
 
+# A stand-in for the dotfiles' apply task: what it was told, at which commit,
+# under which saved environment, and the status line the real one leaves.
+APPLY_TASK = """
+[tasks.apply]
+usage = 'flag "--unattended"'
+dir = "{{ mise_config_dir }}"  # as the real task: vars.repo
+run = \'\'\'
+echo "apply unattended={{ usage.unattended }} ref=$DOTFILES_REF head=$(git rev-parse HEAD) $(cat miserc.local.toml)" >> "$HOME/apply.runs"
+mkdir -p "$HOME/.local/state" && echo "ok secrets now $(git rev-parse HEAD)" > "$HOME/.local/state/dotfiles.status"
+exit "$(cat "$HOME/apply.exit" 2>/dev/null || echo 0)"
+\'\'\'
+"""
+
+
 class Hook(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -61,22 +76,19 @@ class Hook(unittest.TestCase):
         self.home = self.tmp / "home"
         self.home.mkdir()
         self.dir = self.home / ".dotfiles"
-        # GitHub's stand-in: a repo whose commits can be fetched by id.
+        # GitHub's stand-in: a dotfiles repo with an apply task.
         self.upstream = self.tmp / "dotfiles"
-        (self.upstream / "scripts").mkdir(parents=True)
+        self.upstream.mkdir()
+        self.url = f"file://{self.upstream}"
         self.git("init", "-q", "-b", "master", cwd=self.upstream)
-        self.git("config", "uploadpack.allowReachableSHA1InWant", "true", cwd=self.upstream)
         (self.upstream / ".gitignore").write_text("*.local.toml\n")
-        # pod-bootstrap records its argument, the pin it was told and the commit it runs.
-        self.ref = self.commit("first", 'echo "run $* ref=$DOTFILES_REF head=$(git -C "$HOME/.dotfiles" rev-parse HEAD)"'
-                                        ' >> "$HOME/bootstrap.runs"\n')
+        (self.upstream / "mise.toml").write_text(APPLY_TASK)
+        self.ref = self.commit("first")
 
     def git(self, *args, cwd):
         return run("git", "-c", "user.name=t", "-c", "user.email=t@example.test", *args, cwd=cwd).strip()
 
-    def commit(self, marker, body=None):
-        if body is not None:
-            (self.upstream / "scripts/pod-bootstrap").write_text(body)
+    def commit(self, marker):
         (self.upstream / "marker").write_text(marker + "\n")
         self.git("add", "-A", cwd=self.upstream)
         self.git("commit", "-q", "-m", marker, cwd=self.upstream)
@@ -86,13 +98,17 @@ class Hook(unittest.TestCase):
         self.assertEqual(self.hook.count(URL), 1)
         self.assertEqual(self.hook.count(f"ref={PIN}\n"), 1)
         script = self.tmp / "dotfiles-bootstrap"
-        # Real git; only the remote is a local repo, and the pin one of its commits.
-        script.write_text(self.hook.replace(URL, f"file://{self.upstream}")
-                          .replace(f"ref={PIN}\n", f"ref={ref or self.ref}\n"))
+        # Real mise and git; only the remote is a local repo, and the pin one of its commits.
+        script.write_text(self.hook.replace(URL, self.url).replace(f"ref={PIN}\n", f"ref={ref or self.ref}\n"))
+        env = {"HOME": str(self.home), "PATH": f"{Path(MISE).parent}:{os.environ['PATH']}", "MISE_YES": "1",
+               "MISE_CONFIG_DIR": "/mise", "MISE_DATA_DIR": "/mise",  # what the mise image sets
+               **{f"XDG_{d}_HOME": str(self.home / p) for d, p in
+                  (("CONFIG", ".config"), ("DATA", ".local/share"), ("STATE", ".local/state"), ("CACHE", ".cache"))}}
+        # From the sandbox: mise walks up from the cwd and would load a real ~/.config/mise.
         result = subprocess.run(["/bin/sh", str(script), *args], capture_output=True, text=True, timeout=120,
-                                env={"HOME": str(self.home), "PATH": os.environ["PATH"]})
+                                env=env, cwd=self.home)
         self.assertEqual(result.returncode, 0, result.stderr)  # the pod always starts
-        runs = self.home / "bootstrap.runs"
+        runs = self.home / "apply.runs"
         lines = runs.read_text().splitlines() if runs.exists() else []
         runs.unlink(missing_ok=True)
         return result, lines
@@ -100,38 +116,36 @@ class Hook(unittest.TestCase):
     def head(self):
         return self.git("rev-parse", "HEAD", cwd=self.dir)
 
+    def applied(self, ref, head):
+        return f'apply unattended=true ref={ref} head={head} env = ["code-server"]'
+
     def test_inputs_are_the_pin_and_the_apps_environment(self):
         self.assertIn(f"ref={PIN}\n", self.hook)
         self.assertIn("env=code-server\n", self.hook)
 
-    def test_empty_home_clones_the_pin_and_bootstraps(self):
+    def test_empty_home_gets_the_pin_the_link_and_the_environment(self):
         self.commit("later")  # the pin, not the default branch's tip
-        _, runs = self.run_hook()
+        result, runs = self.run_hook()
         self.assertEqual(self.head(), self.ref)
-        self.assertEqual((self.dir / "marker").read_text(), "first\n")
-        self.assertEqual(runs, [f"run code-server ref={self.ref} head={self.ref}"])
-        self.assertEqual(self.git("stash", "list", cwd=self.dir), "")  # a fresh clone has nothing to keep
+        self.assertEqual((self.home / ".config/mise").resolve(), self.dir.resolve())
+        self.assertEqual(runs, [self.applied(self.ref, self.ref)])
+        # Only the hook's own lines reach the pod's log; mise's go to the volume.
+        self.assertEqual(result.stdout.splitlines(), [
+            f"dotfiles: {self.ref} at {self.dir}",
+            f"dotfiles: ok secrets now {self.ref}; log: {self.home}/.local/state/dotfiles.log"])
 
-    def test_a_new_pin_moves_the_clone_and_stashes_local_changes(self):
+    def test_a_new_pin_moves_the_clone_and_an_old_one_moves_back(self):
         self.run_hook()
-        (self.dir / "marker").write_text("edited\n")
-        (self.dir / "local-work").write_text("untracked\n")
-        (self.dir / "config.local.toml").write_text("[vars]\n")
         new = self.commit("second")
         _, runs = self.run_hook(ref=new)
         self.assertEqual(self.head(), new)
-        self.assertEqual((self.dir / "marker").read_text(), "second\n")
-        self.assertFalse((self.dir / "local-work").exists())
-        self.assertTrue((self.dir / "config.local.toml").exists())  # ignored files stay
-        stash = self.git("stash", "list", cwd=self.dir)
-        self.assertIn(f"local changes before {new}", stash)
-        self.assertEqual(self.git("show", "stash@{0}:marker", cwd=self.dir), "edited")
-        self.assertEqual(self.git("show", "stash@{0}^3:local-work", cwd=self.dir), "untracked")
-        self.assertEqual(runs, [f"run code-server ref={new} head={new}"])
+        self.assertEqual(runs, [self.applied(new, new)])
+        _, runs = self.run_hook()
+        self.assertEqual(self.head(), self.ref)
 
     def test_a_clone_from_before_the_pin_is_moved_and_keeps_its_branch(self):
         # The old flow's clone: on master, maybe with commits never pushed.
-        run("git", "clone", "-q", str(self.upstream), str(self.dir))
+        run("git", "clone", "-q", self.url, str(self.dir))
         (self.dir / "unpushed").write_text("work\n")
         self.git("add", "unpushed", cwd=self.dir)
         self.git("commit", "-q", "-m", "unpushed", cwd=self.dir)
@@ -140,22 +154,23 @@ class Hook(unittest.TestCase):
         _, runs = self.run_hook(ref=new)
         self.assertEqual(self.head(), new)
         self.assertEqual(self.git("rev-parse", "master", cwd=self.dir), unpushed)
-        self.assertEqual(runs, [f"run code-server ref={new} head={new}"])
+        self.assertEqual(runs, [self.applied(new, new)])
 
-    def test_failed_fetch_runs_the_previous_commit_and_says_so(self):
+    def test_a_local_change_keeps_the_previous_commit_and_says_so(self):
         self.run_hook()
-        missing = "b" * 40
-        result, runs = self.run_hook(ref=missing)
-        self.assertIn(f"dotfiles: fetch failed for {missing}; keeping {self.ref[:7]}", result.stdout)
+        (self.dir / "marker").write_text("edited\n")
+        new = self.commit("second")
+        result, runs = self.run_hook(ref=new)
+        self.assertIn(f"dotfiles: fetch failed for {new}", result.stdout)
         self.assertEqual(self.head(), self.ref)
-        # pod-bootstrap is told the pin, so it reports the run as stale.
-        self.assertEqual(runs, [f"run code-server ref={missing} head={self.ref}"])
+        self.assertEqual((self.dir / "marker").read_text(), "edited\n")
+        # apply is told the pin, so it reports the run as stale.
+        self.assertEqual(runs, [self.applied(new, self.ref)])
 
-    def test_failed_clone_on_an_empty_home_still_starts_the_pod(self):
+    def test_failed_fetch_on_an_empty_home_still_starts_the_pod(self):
         shutil.rmtree(self.upstream)
         result, runs = self.run_hook()
         self.assertEqual(runs, [])
-        self.assertFalse(self.dir.exists())
         self.assertIn("dotfiles: fetch failed", result.stdout)
         self.assertIn("nothing to run", result.stdout)
 
@@ -165,10 +180,10 @@ class Hook(unittest.TestCase):
         self.assertEqual(self.head(), self.ref)
         shutil.rmtree(self.upstream)
         _, runs = self.run_hook("run")
-        self.assertEqual(runs, [f"run code-server ref={self.ref} head={self.ref}"])
+        self.assertEqual(runs, [self.applied(self.ref, self.ref)])
 
-    def test_failed_bootstrap_still_starts_the_pod(self):
-        self.ref = self.commit("broken", "exit 3\n")
+    def test_failed_apply_still_starts_the_pod(self):
+        (self.home / "apply.exit").write_text("3\n")
         result, _ = self.run_hook()
         self.assertIn("starting anyway", result.stdout)
 
@@ -186,6 +201,9 @@ class Pods(unittest.TestCase):
         controller = values["controllers"]["code-server"]
         init = controller["initContainers"]["bootstrap"]
         self.assertEqual(init["command"], ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap"])
+        # mise from its image in both containers, first on PATH: the shims point at it.
+        self.assertEqual(values["persistence"]["mise"]["globalMounts"], [{"path": "/opt/mise", "readOnly": True}])
+        self.assertTrue(init["env"]["PATH"].startswith("/opt/mise/usr/local/bin:"))
         mount = values["persistence"]["dotfiles"]
         self.assertEqual(mount["name"], "code-server-dotfiles")
         self.assertEqual(mount["advancedMounts"]["code-server"]["bootstrap"][0]["path"], "/opt/dotfiles")
@@ -211,8 +229,12 @@ class Pods(unittest.TestCase):
         # image has no git, so the fetch runs in a pinned git image.
         init = controller["initContainers"]["dotfiles"]
         self.assertEqual(init["command"], ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap", "fetch"])
-        self.assertEqual(init["image"]["repository"], "mirror.gcr.io/alpine/git")
-        self.assertRegex(init["image"]["tag"], r"@sha256:[0-9a-f]{64}$")
+        self.assertEqual(init["image"]["repository"], "ghcr.io/jdx/mise")
+        # The session's run uses the same mise, from the image mounted in the app.
+        self.assertEqual(values["persistence"]["mise"]["image"], init["image"])
+        self.assertEqual(values["persistence"]["mise"]["advancedMounts"]["neko"]["app"],
+                         [{"path": "/opt/mise", "readOnly": True}])
+        self.assertTrue(app["env"]["PATH"].startswith("/opt/mise/usr/local/bin:"))
         self.assertEqual((init["securityContext"]["runAsUser"], init["env"]["HOME"]), (1000, "/home/neko"))
         self.assertEqual(values["persistence"]["home"]["globalMounts"], [{"path": "/home/neko"}])
         mounts = values["persistence"]["dotfiles"]

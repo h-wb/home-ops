@@ -55,10 +55,11 @@ spec:
           reloader.stakater.com/auto: "true"
         initContainers:
           dotfiles:
-            # The neko image has no git; the session's run gets it from apt.
-            image:
-              repository: mirror.gcr.io/alpine/git
-              tag: 2.54.1@sha256:29cff25811f790b9f72fc266bf8009a5a911714c0e03c31c47339c50909d9aef
+            # The dotfiles' mise, with git: the neko image has none (the
+            # session's run gets it from apt).
+            image: &mise
+              repository: ghcr.io/jdx/mise
+              tag: 2026.11.14-debian
             command: ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap", "fetch"]
             env:
               HOME: /home/neko
@@ -77,6 +78,8 @@ spec:
               repository: ghcr.io/m1k1o/neko/intel-xfce
               tag: "3.2.0"
             env:
+              # mise from its image: the shims point at it.
+              PATH: /opt/mise/usr/local/bin:/home/neko/.local/share/mise/shims:/home/neko/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
               # The 3.2 client is v3-only; legacy just exposes the v2 API.
               NEKO_LEGACY: "false"
               NEKO_DESKTOP_SCREEN: 1920x1080@60
@@ -203,6 +206,14 @@ spec:
       # components/dotfiles: fetched by the init container, run by the autostart
       # entry inside the session (xfconf needs its D-Bus). subPath: a whole
       # ConfigMap over /etc/xdg/autostart would hide XFCE's own entries.
+      mise:
+        type: image
+        image: *mise
+        advancedMounts:
+          neko:
+            app:
+              - path: /opt/mise
+                readOnly: true
       dotfiles:
         name: neko-dotfiles
         type: configMap

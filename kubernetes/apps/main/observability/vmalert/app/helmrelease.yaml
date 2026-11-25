@@ -129,7 +129,7 @@ spec:
                       {{ index .Labels "kubernetes.pod_namespace" }}/{{ index .Labels "kubernetes.pod_name" }}
                       started without a complete dotfiles bootstrap.
                     description: >-
-                      Read the pod's init container log, then ~/.local/state/pod-bootstrap.log
+                      Read the pod's init container log, then ~/.local/state/dotfiles.log
                       in the pod (`mise doctor project` reports the same). Revert
                       the pin only to a revision using the same bootstrap contract.
                       For the first rollout, use components/dotfiles/README.md to
