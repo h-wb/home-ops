@@ -2,7 +2,7 @@
 
 One board per process (TASKS_BOARD), stored in SQLite under /data. With TASKS_READ_ONLY=1 the
 write tools are never registered, so a read-only instance cannot write even if a caller names a
-hidden tool: that is how private gets homelab tasks read-only, whatever ToolHive's filters do.
+hidden tool. Only the personal board runs today, read-write.
 Alert-driven tasks carry a fingerprint, so a repeated alert updates its open task instead of
 adding another.
 """

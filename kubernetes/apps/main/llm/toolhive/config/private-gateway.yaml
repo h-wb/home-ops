@@ -21,6 +21,14 @@ spec:
       conflictResolutionConfig:
         prefixFormat: "{workload}_"
       tools:
+        # The board's read-only task tools only, for the reason on mcp-assistant.
+        - workload: orbit
+          filter:
+            - get_task
+            - list_tasks
+            - list_task_statuses
+            - list_labels
+            - get_me
         # Its own description is 2494 tokens, over the embedder's 2048-token limit:
         # the indexing request failed whole and the gateway had no tool search.
         - workload: homeassistant

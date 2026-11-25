@@ -1,5 +1,5 @@
 ---
-# Both task boards (one SQLite file each); the read-only instance mounts it read-only.
+# The board's SQLite file. homelab.db, left from the retired stand-in, is unused.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

@@ -19,6 +19,18 @@ spec:
       conflictResolutionConfig:
         prefixFormat: "{workload}_"
       tools:
+        # The build board is general and this gateway is private: information may
+        # flow from the board here, never back. Its token can also write tasks and
+        # read and write every document of the workspace, so only these read-only
+        # task tools are listed, by their names before the prefix. ToolHive refuses
+        # a call to a tool its filter hides (core.CallTool, v0.68.0).
+        - workload: orbit
+          filter:
+            - get_task
+            - list_tasks
+            - list_task_statuses
+            - list_labels
+            - get_me
         # Same short description as on mcp-private; the original is 8.6k characters.
         - workload: homeassistant
           overrides:
