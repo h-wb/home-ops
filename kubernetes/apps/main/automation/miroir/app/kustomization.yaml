@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# The CNPG cluster comes from the cnpg/initdb component on the parent
+# The CNPG cluster comes from the cnpg/restore component on the parent
 # Kustomization (ks.yaml). The Miroir server (web UI/API) runs here.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

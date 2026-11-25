@@ -11,7 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    - ../../../../../components/cnpg/initdb
+    - ../../../../../components/cnpg/restore
     - ../../../../../components/cnpg/extensions/vchord
     - ../../../../../components/oidc
   dependsOn:

@@ -14,8 +14,9 @@ spec:
     # Miroir's own metadata database (schema miroir_meta): operations, attempts,
     # the artifact registry, and encrypted connection secrets — decoupled from
     # postgres-metabase, where the warehouse data and dashboards stay
-    # (pipelines decision 015). Net-new cluster, Barman backups via the plugin.
-    - ../../../../../components/cnpg/initdb
+    # (pipelines decision 015). Barman backups via the plugin; a recreated
+    # Cluster restores from the latest one.
+    - ../../../../../components/cnpg/restore
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
