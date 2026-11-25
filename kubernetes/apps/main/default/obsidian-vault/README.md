@@ -32,8 +32,8 @@ flowchart LR
   - `vault-ro` reads everything.
   - `vault-inbox` writes `Notes/`, `AI/` and `Archives/`: the assistant, each
     write approved in chat.
-  - `vault-n8n` writes `Notes/` and `References/`, and sees only those plus
-    `Categories/` and `Templates/`: the journal and place-note workflows.
+  - `vault-n8n` reads everything and writes `Notes/` and `References/`: the
+    journal and place-note workflows.
 - Who may call each one is `app/networkpolicy.yaml`. The private and
   assistant gateways list `vault-ro` and `vault-inbox` through MCPServerEntries
   of the same names in `llm/toolhive/mcp-servers/vault`, so tool names never
