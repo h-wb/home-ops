@@ -70,7 +70,7 @@ spec:
             substitute:
               NFS_ADDR: "192.168.1.161"
               # renovate: dotfiles
-              DOTFILES_REF: "6734bba69e0719b8dbabd21b531200c9f3244c3a"
+              DOTFILES_REF: "55670af0e88cc35e15fdb9ebddca788503174d68"
             substituteFrom:
               - name: cluster-secrets
                 kind: Secret
