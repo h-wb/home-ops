@@ -48,10 +48,13 @@ and decides per tool name whether to ask first.
 
 The private gateways serve the whole catalogue but one part: the build board
 (Orbit). It is general, so information may flow from it to the private side and
-never back. Both list only its read-only task tools (`orbit_get_task`,
-`orbit_list_tasks`, `orbit_list_task_statuses`, `orbit_list_labels`,
-`orbit_get_me`), with a per-workload `filter` in `toolhive/config/`; the general
-gateway lists all of it. ToolHive refuses a call to a tool its filter hides.
+never back. Orbit enforces it: the private side reaches it through its own
+entry, `orbit-ro`, whose token can only read tasks (Bitwarden item `toolhive`,
+field `ORBIT_READ_TOKEN`). Both private gateways hide the writing entry, `orbit`,
+and list `orbit-ro`'s read-only task tools only (`orbit-ro_get_task`,
+`orbit-ro_list_tasks`, `orbit-ro_list_task_statuses`, `orbit-ro_list_labels`,
+`orbit-ro_get_me`), a second layer in `toolhive/config/`. The general gateway
+lists `orbit`, all of it.
 
 ToolHive's gateways take callers anonymously, so who reaches each one is the
 boundary. In-cluster clients (Hermes, Paseo) call the service with no

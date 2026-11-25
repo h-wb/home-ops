@@ -101,16 +101,23 @@ class ToolHiveScopes(unittest.TestCase):
                 # Hidden tools stay callable from composite tools, so there must be none.
                 self.assertNotIn("compositeTools", config)
                 self.assertNotIn("compositeToolRefs", self.resource("VirtualMCPServer", gateway)["spec"])
-                entries = [t for t in config["aggregation"]["tools"] if t["workload"] == "orbit"]
-                self.assertEqual([{"workload": "orbit", "filter": read_only}], entries)
+                entries = [t for t in config["aggregation"]["tools"] if t["workload"].startswith("orbit")]
+                self.assertEqual([{"workload": "orbit", "excludeAll": True},
+                                  {"workload": "orbit-ro", "filter": read_only}], entries)
         # The general gateway, the board's own scope, lists all of it.
         general = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]["tools"]
         self.assertIn({"workload": "orbit"}, general)
+        self.assertNotIn("orbit-ro", [t["workload"] for t in general])
+        # Orbit itself refuses a write from there: the private side's entry carries a read token.
+        server = ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/orbit"
+        self.assertIn("{{ .ORBIT_READ_TOKEN }}", (server / "externalsecret-ro.yaml").read_text())
+        self.assertIn("name: toolhive-orbit-ro", (server / "mcpserverentry-ro.yaml").read_text())
         # The assistant's instructions name no Orbit tool beyond those.
         hermes = ROOT / "kubernetes/apps/main/llm/hermes/app"
         named = set()
         for path in [hermes / "SOUL.md", *sorted((hermes / "routines").glob("*/SKILL.md"))]:
-            named |= set(re.findall(r"orbit_(\w+)", path.read_text()))
+            named |= set(re.findall(r"orbit-ro_(\w+)", path.read_text()))
+            self.assertNotRegex(path.read_text(), r"orbit_\w", path.name)
         self.assertTrue(named)
         self.assertLessEqual(named, set(read_only))
 

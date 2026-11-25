@@ -22,7 +22,10 @@ spec:
         prefixFormat: "{workload}_"
       tools:
         # The board's read-only task tools only, for the reason on mcp-assistant.
+        # The writing token's entry, hidden; the read-only one below is listed.
         - workload: orbit
+          excludeAll: true
+        - workload: orbit-ro
           filter:
             - get_task
             - list_tasks
