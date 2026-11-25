@@ -292,8 +292,8 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertFalse({"skills", "delegation"} & off)
         # Nobody answers a scheduled run, so it must not be able to approve itself.
         self.assertEqual({"mode": "manual", "cron_mode": "deny"}, config["approvals"])
-        self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
-                          "write_approval": True}, config["skills"])
+        self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills", "/opt/shared-skills"],
+                          "write_approval": True, "index_desc_limit": 1024}, config["skills"])
         self.assertEqual(1, config["delegation"]["max_spawn_depth"])
         # Schedules and "today" are on the user's clock, and a routine's message can be answered.
         self.assertEqual("America/Toronto", config["timezone"])
@@ -329,33 +329,108 @@ class HermesIsPrivateOnly(unittest.TestCase):
                 scheduled.append(name)
         self.assertIn("daily-briefing", scheduled)
 
-    def test_dotfiles_skills_are_synced_pinned_and_read_only(self):
-        # The shared skills folder in h-wb/dotfiles (conf.d/ai/skills) reaches the pod
-        # the way the Memini plugin does: a Job fetches the repo at a pinned, checksummed
-        # ref into a volume mounted read-only. The pod's egress never sees GitHub.
+    def test_shared_skills_are_declared_synced_pinned_and_read_only(self):
+        # The skill groups the assistant takes, from h-wb/skills, reach the pod the
+        # way the Memini plugin does: a Job fetches the repo at a pinned,
+        # checksummed ref into a volume mounted read-only. The pod's egress never
+        # sees GitHub.
         config = yaml_of(ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml")
-        self.assertEqual(["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
+        self.assertEqual(["/opt/hermes-routines/skills", "/opt/shared-skills"],
                          config["skills"]["external_dirs"])
         values = next(d for d in self.docs if d["kind"] == "HelmRelease")["spec"]["values"]
-        mount = values["persistence"]["dotfiles-skills"]
+        mount = values["persistence"]["shared-skills"]
         self.assertEqual("hermes-skills", mount["existingClaim"])
-        self.assertEqual([{"path": "/opt/dotfiles-skills", "readOnly": True}], mount["globalMounts"])
+        self.assertEqual([{"path": "/opt/shared-skills", "readOnly": True}], mount["globalMounts"])
+        env = self.skills_sync_env()
+        self.assertEqual(["core"], env["SKILL_GROUPS"].split())
+        self.assertNotIn("SKILLS", env)  # groups, not names
+        self.assertRegex(env["SKILLS_REF"], r"^[0-9a-f]{40}$")  # a commit sha
+        self.assertRegex(env["SKILLS_TAR_SHA256"], r"^[0-9a-f]{64}$")  # sha256 of the tarball
         job = next(d for d in self.docs if d["kind"] == "Job" and d["metadata"]["name"] == "hermes-skills-sync")
-        env = {e["name"]: e["value"] for e in job["spec"]["template"]["spec"]["containers"][0]["env"]}
-        self.assertEqual(40, len(env["DOTFILES_REF"]))  # a commit sha
-        self.assertEqual(64, len(env["DOTFILES_TAR_SHA256"]))  # sha256 of the tarball
         volumes = {v["name"]: v for v in job["spec"]["template"]["spec"]["volumes"]}
         self.assertEqual("hermes-skills", volumes["skills"]["persistentVolumeClaim"]["claimName"])
         self.assertTrue(volumes["scripts"]["configMap"]["name"].startswith("hermes-skills-sync"))
-        script = next(d for d in self.docs if d["kind"] == "ConfigMap"
-                      and d["metadata"]["name"].startswith("hermes-skills-sync"))["data"]["sync.sh"]
+        script = self.skills_sync_script()
         self.assertNotIn("${", script)  # Flux would substitute it
-        self.assertIn("codeload.github.com/h-wb/dotfiles", script)
-        self.assertIn("conf.d/ai/skills", script)
+        self.assertIn("codeload.github.com/h-wb/skills", script)
         self.assertIn("sha256sum -c", script)
         pvc = next(d for d in self.docs if d["kind"] == "PersistentVolumeClaim"
                    and d["metadata"]["name"] == "hermes-skills")
         self.assertEqual(["ReadWriteMany"], pvc["spec"]["accessModes"])
+        # A routine is never named like a skill of the catalogue: the handbook
+        # skill replaced system-docs.
+        routines = ROOT / "kubernetes/apps/main/llm/hermes/app/routines"
+        self.assertFalse((routines / "system-docs").exists())
+        self.assertFalse({d.name for d in routines.iterdir() if d.is_dir()}
+                         & {"handbook", "board", "tool-gateway", "orchestrate", "paseo-workspace-hygiene"})
+
+    def skills_sync_env(self):
+        job = next(d for d in self.docs if d["kind"] == "Job" and d["metadata"]["name"] == "hermes-skills-sync")
+        return {e["name"]: e["value"] for e in job["spec"]["template"]["spec"]["containers"][0]["env"]}
+
+    def skills_sync_script(self):
+        return next(d for d in self.docs if d["kind"] == "ConfigMap"
+                    and d["metadata"]["name"].startswith("hermes-skills-sync"))["data"]["sync.sh"]
+
+    def run_skills_sync(self, work, groups, catalogue):
+        """Run sync.sh as the Job does, with /tmp and /skills moved under `work`
+        and curl serving a tarball built from `catalogue` ({group: [names]},
+        plus "skills": the catalogue's folders)."""
+        import hashlib, re, tarfile
+        ref = "0" * 40
+        top = work / "src" / f"skills-{ref}"
+        for name in catalogue["skills"]:
+            (top / "skills" / name).mkdir(parents=True)
+            (top / "skills" / name / "SKILL.md").write_text(f"---\nname: {name}\n---\n")
+        for group, names in catalogue.items():
+            if group == "skills":
+                continue
+            (top / "groups" / group).mkdir(parents=True)
+            for name in names:
+                (top / "groups" / group / name).symlink_to(f"../../skills/{name}")
+        tarball = work / "skills.tar.gz"
+        with tarfile.open(tarball, "w:gz") as tar:
+            tar.add(top, arcname=top.name)
+        bin_dir = work / "bin"
+        bin_dir.mkdir(exist_ok=True)
+        (bin_dir / "curl").write_text(f'#!/bin/sh\ncp "{tarball}" "$2"\n')  # curl -fsSLo <out> <url>
+        (bin_dir / "curl").chmod(0o755)
+        (work / "tmp").mkdir(exist_ok=True)
+        script = self.skills_sync_script().replace("/tmp/", f"{work}/tmp/")
+        script = re.sub(r'(?<=[\s"])/skills', str(work / "volume"), script)
+        env = {"PATH": f"{bin_dir}:/usr/bin:/bin", "SKILL_GROUPS": groups, "SKILLS_REF": ref,
+               "SKILLS_TAR_SHA256": hashlib.sha256(tarball.read_bytes()).hexdigest()}
+        return subprocess.run(["sh", "-c", script], env=env, capture_output=True, text=True, timeout=60)
+
+    def test_skills_sync_copies_the_groups_skills_and_refuses_an_unknown_one(self):
+        import shutil, tempfile
+        catalogue = {"skills": ["handbook", "board", "orchestrate", "spare"],
+                     "core": ["handbook", "board"], "workshop": ["orchestrate"], "both": ["board"]}
+        for groups, expected in (("core", ["board", "handbook"]),
+                                 ("core both", ["board", "handbook"]),  # a skill in two groups, once
+                                 ("workshop", ["orchestrate"])):
+            with self.subTest(groups=groups), tempfile.TemporaryDirectory() as tmp:
+                work = Path(tmp)
+                volume = work / "volume"
+                (volume / "retired").mkdir(parents=True)  # a skill no taken group has
+                result = self.run_skills_sync(work, groups, catalogue)
+                self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+                self.assertEqual(expected, sorted(p.name for p in volume.iterdir()))
+                for name in expected:
+                    # The skill itself, not the group's link, which would dangle there.
+                    self.assertFalse((volume / name).is_symlink(), name)
+                    self.assertEqual(f"---\nname: {name}\n---\n", (volume / name / "SKILL.md").read_text())
+        for groups, broken in (("core nope", {}), ("core", {"core": ["handbook", "board", "gone"]})):
+            with self.subTest(groups=groups, broken=broken), tempfile.TemporaryDirectory() as tmp:
+                work = Path(tmp)
+                volume = work / "volume"
+                (volume / "handbook").mkdir(parents=True)
+                (volume / "handbook" / "SKILL.md").write_text("before\n")
+                result = self.run_skills_sync(work, groups, {**catalogue, **broken})
+                self.assertNotEqual(0, result.returncode)
+                self.assertEqual(["handbook"], [p.name for p in volume.iterdir()])  # untouched
+                self.assertEqual("before\n", (volume / "handbook" / "SKILL.md").read_text())
+        self.assertTrue(shutil.which("sha256sum"))
 
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
         keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]
