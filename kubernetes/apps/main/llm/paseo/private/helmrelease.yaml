@@ -27,6 +27,12 @@ spec:
                   secretKeyRef:
                     name: paseo-private-agents
                     key: MEMINI_GENERAL_API_KEY
+              # Vibe signs in with it and calls Mistral directly (README).
+              MISTRAL_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: paseo-private-agents
+                    key: MISTRAL_API_KEY
     # Hermes' exec token (llm/hermes/app/rbac.yaml), app container only.
     persistence:
       kube-api-token:

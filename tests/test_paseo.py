@@ -9,6 +9,11 @@ import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+# Vibe's own model, offered without a definition, and its ACP session modes.
+VIBE_DEFAULT_MODEL = "mistral-medium-3.5"
+VIBE_MODES = {"ask", "accept-edits", "auto-approve"}
+# The read-only mode of each provider: Vibe has none, and `ask` waits for a yes on anything but reads.
+READ_ONLY_MODE = {"claude": "plan", "opencode": "plan", "mistral-vibe": "ask"}
 
 
 class PaseoRendering(unittest.TestCase):
@@ -160,6 +165,14 @@ class PaseoRendering(unittest.TestCase):
                     if profile["provider"] == "claude":
                         self.assertIn("anthropic/*", key["models"], name)
                         continue
+                    if profile["provider"] == "mistral-vibe":
+                        vibe = paseo["agents"]["providers"]["mistral-vibe"]
+                        models = {m["alias"] for m in json.loads(vibe["env"]["VIBE_MODELS"])}
+                        self.assertIn(profile["model"], models | {VIBE_DEFAULT_MODEL}, name)
+                        self.assertIn(profile["modeId"], VIBE_MODES, name)
+                        # Paseo sets thinking through an ACP thought_level option, which Vibe lacks.
+                        self.assertNotIn("thinkingOptionId", profile, name)
+                        continue
                     self.assertEqual("opencode", profile["provider"], name)
                     gateway, _, model = profile["model"].partition("/")
                     self.assertEqual("litellm", gateway, name)
@@ -174,8 +187,8 @@ class PaseoRendering(unittest.TestCase):
                     if options or "thinkingOptionId" in profile:
                         self.assertIn(profile.get("thinkingOptionId", options[0]), options, name)
                 # Plan, Explore and Review must not edit; Review is a second opinion, so not Build's model.
-                readers = {"plan", "explore", "review"} & set(profiles)
-                self.assertEqual({"plan"}, {profiles[name]["modeId"] for name in readers})
+                for name in {"plan", "explore", "review"} & set(profiles):
+                    self.assertEqual(READ_ONLY_MODE[profiles[name]["provider"]], profiles[name]["modeId"], name)
                 self.assertNotEqual(profiles["build"]["model"], profiles["review"]["model"])
         data = self.resource("general", "ConfigMap", "paseo-config")["data"]
         profiles = {p["id"]: p for p in json.loads(data["paseo.json"])["daemon"]["agentProfiles"]}
@@ -186,10 +199,41 @@ class PaseoRendering(unittest.TestCase):
         self.assertNotEqual(profiles["build"]["model"], profiles["explore"]["model"])
         self.assertNotEqual(agents["build"]["model"], agents["explorer"]["model"].partition("#")[0])
         private = json.loads(self.resource("private", "ConfigMap", "paseo-private-config")["data"]["paseo.json"])
-        self.assertEqual({"opencode"}, {p["provider"] for p in private["daemon"]["agentProfiles"]})
+        self.assertEqual({"mistral-vibe"}, {p["provider"] for p in private["daemon"]["agentProfiles"]})
         # No agent in private starts or prompts another one (the assistant is a provider there).
-        self.assertEqual({"disabledTools": ["create_agent", "send_agent_prompt"]},
-                         private["agents"]["providers"]["opencode"]["paseoTools"])
+        for provider in ("opencode", "mistral-vibe"):
+            self.assertEqual({"disabledTools": ["create_agent", "send_agent_prompt"]},
+                             private["agents"]["providers"][provider]["paseoTools"], provider)
+
+    def test_mistral_profiles_run_on_vibe(self):
+        # A Mistral plan used through another harness counts as API use; Vibe over ACP
+        # keeps the Vibe allowance, and calls Mistral directly with the workshop's key.
+        for scope, app, secret, item in (("general", "paseo", "paseo-agents", "paseo-general"),
+                                         ("private", "paseo-private", "paseo-private-agents", "paseo-private")):
+            with self.subTest(scope=scope):
+                data = self.resource(scope, "ConfigMap", f"{app}-config")["data"]
+                paseo = json.loads(data["paseo.json"])
+                vibe = paseo["agents"]["providers"]["mistral-vibe"]
+                # Not a built-in provider: without these Paseo skips the entry.
+                self.assertEqual(("acp", ["vibe-acp"], True), (vibe["extends"], vibe["command"], vibe["enabled"]))
+                self.assertTrue(vibe["label"])
+                profiles = paseo["daemon"]["agentProfiles"]
+                self.assertTrue(any(p["provider"] == "mistral-vibe" for p in profiles))
+                for profile in profiles:
+                    self.assertFalse(profile.get("model", "").startswith("litellm/mistral/"), profile["id"])
+                # Vibe's extra models are Mistral API ids, the same the gateway serves.
+                key = next(d for d in self.rendered[scope] if d.get("kind") == "LiteLLMVirtualKey")["spec"]
+                for model in json.loads(vibe["env"]["VIBE_MODELS"]):
+                    self.assertEqual("mistral", model["provider"])
+                    self.assertIn(f"mistral/{model['name']}", key["models"])
+                # The key comes from the workshop's own item, into the app container only.
+                spec = self.resource(scope, "ExternalSecret", secret)["spec"]
+                self.assertEqual("{{ .MISTRAL_API_KEY }}", spec["target"]["template"]["data"]["MISTRAL_API_KEY"])
+                self.assertIn({"extract": {"key": item}}, spec["dataFrom"])
+                runtime = self.resource(scope, "HelmRelease", app)["spec"]["values"]["controllers"][app]
+                ref = runtime["containers"]["app"]["env"]["MISTRAL_API_KEY"]["valueFrom"]["secretKeyRef"]
+                self.assertEqual({"name": secret, "key": "MISTRAL_API_KEY"}, ref)
+                self.assertNotIn("MISTRAL_API_KEY", runtime["initContainers"]["tools"].get("env", {}))
 
     def test_general_has_no_direct_kubernetes_credentials_or_grants(self):
         values = self.resource("general", "HelmRelease", "paseo")["spec"]["values"]

@@ -39,28 +39,26 @@
       {
         "id": "explore",
         "name": "Explore",
-        "provider": "opencode",
-        "model": "litellm/mistral/mistral-medium-latest",
-        "modeId": "plan",
-        "thinkingOptionId": "none",
-        "notes": "Where and how is X: finds the code and reports paths and line numbers. Cheap; makes no edits. Not for design questions: use Plan. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-terra`, mode `plan`."
+        "provider": "mistral-vibe",
+        "model": "mistral-medium-3.5",
+        "modeId": "ask",
+        "notes": "Where and how is X: finds the code and reports paths and line numbers. Cheap; reads only, and any other command waits for a yes. Not for design questions: use Plan. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.1-terra`, mode `plan`."
       },
       {
         "id": "build",
         "name": "Build",
-        "provider": "opencode",
-        "model": "litellm/mistral/mistral-large-4",
-        "modeId": "build",
+        "provider": "mistral-vibe",
+        "model": "mistral-large-4",
+        "modeId": "auto-approve",
         "notes": "A well-specified change: the goal, the files and the check to pass are already known. Not for open questions. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.2-sol`, mode `build`."
       },
       {
         "id": "review",
         "name": "Review",
-        "provider": "opencode",
-        "model": "litellm/mistral/zai-glm-5-3",
-        "modeId": "plan",
-        "thinkingOptionId": "high",
-        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Makes no edits. Runs on GLM, a different model family from the Plan and Build profiles. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.2-sol`, mode `plan`."
+        "provider": "mistral-vibe",
+        "model": "glm-5.3",
+        "modeId": "ask",
+        "notes": "An independent read of a diff or a plan: correctness, missing tests, needless complexity. Reads only, and any other command waits for a yes. Runs on GLM, a different model family from the Plan and Build profiles. Fallback when Mistral is rate-limited: `opencode/litellm/chatgpt/gpt-6.2-sol`, mode `plan`."
       }
     ]
   },
@@ -70,7 +68,15 @@
       "claude": { "enabled": true },
       "opencode": { "enabled": true },
       "codex": { "enabled": false },
-      "mistral-vibe": { "enabled": false },
+      "mistral-vibe": {
+        "extends": "acp",
+        "label": "Mistral Vibe",
+        "enabled": true,
+        "command": ["vibe-acp"],
+        "env": {
+          "VIBE_MODELS": "[{\"name\":\"mistral-large-4\",\"provider\":\"mistral\",\"alias\":\"mistral-large-4\",\"display_name\":\"Mistral Large 4\"},{\"name\":\"zai-glm-5-3\",\"provider\":\"mistral\",\"alias\":\"glm-5.3\",\"display_name\":\"GLM 5.3\"}]"
+        }
+      },
       "copilot": { "enabled": false },
       "pi": { "enabled": false },
       "muse": { "enabled": false },
