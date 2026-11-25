@@ -17,13 +17,14 @@ The [assistant](https://github.com/h-wb/handbook/blob/main/Systems/Assistant.md)
 `hermes-private-0` in `llm`. Surrounding services, scopes and routines are in
 [Models, tools and memory](../README.md); how it connects, in [wiring](../docs/wiring.md#the-assistant).
 
-| Path                           | What it holds                                     |
-| ------------------------------ | ------------------------------------------------- |
-| `app/config.yaml`              | Models, tools, approvals, dashboard; read-only    |
-| `app/helmrelease.yaml`         | The pod, its messaging settings and the dashboard |
-| `app/externalsecret.yaml`      | Messaging, dashboard and workshop credentials     |
-| `app/networkpolicy.yaml`       | What the pod may reach, and who may reach it      |
-| `app/SOUL.md`, `app/routines/` | Standing instructions and scheduled routines      |
+| Path                           | What it holds                                       |
+| ------------------------------ | --------------------------------------------------- |
+| `app/config.yaml`              | Models, tools, approvals, dashboard; read-only      |
+| `app/helmrelease.yaml`         | The pod, its messaging settings and the dashboard   |
+| `app/externalsecret.yaml`      | Messaging, dashboard and workshop credentials       |
+| `app/networkpolicy.yaml`       | What the pod may reach, and who may reach it        |
+| `app/SOUL.md`, `app/routines/` | Standing instructions and scheduled routines        |
+| `app/skills-sync/`             | The skills it takes from h-wb/skills, and their Job |
 
 ## Messaging
 
@@ -106,6 +107,24 @@ Inbox, Chat and Homelab are free-response rooms (`MATRIX_FREE_RESPONSE_ROOMS`):
 Hermes answers allowed senders without an @mention, even with both your local
 and Beeper accounts joined. Other group rooms still require a mention. New
 assistant rooms must be added to that room-ID list explicitly.
+
+## Skills
+
+Hermes reads two folders (`skills.external_dirs` in `app/config.yaml`), both read-only in the pod: its routines, `app/routines/`, laid out by the `routines` init container; and the skills it declares from [h-wb/skills](https://github.com/h-wb/skills), at `/opt/shared-skills`.
+
+```mermaid
+flowchart LR
+  S["h-wb/skills at SKILLS_REF"] -->|"tarball, SKILLS_TAR_SHA256"| J["hermes-skills-sync Job"]
+  J -->|"only the names in SKILLS"| V[("hermes-skills volume")]
+  V -->|"/opt/shared-skills, read-only"| H[Hermes]
+  R["app/routines/"] -->|init container| H
+```
+
+- The list is `SKILLS` in `app/skills-sync/job.yaml`: `handbook`, `board`, `tool-gateway`. `handbook` is how it finds documentation: the one page that answers, read from git through the GitHub tool.
+- The Job downloads the catalogue at `SKILLS_REF`, checks the tarball against `SKILLS_TAR_SHA256`, and swaps each declared skill into the volume. A name no longer declared leaves the volume; a declared name missing from the catalogue fails the Job before the volume changes. The pod itself cannot reach GitHub.
+- To take a skill, add its name to `SKILLS`. To move the pin, set `SKILLS_REF` to a commit of h-wb/skills and `SKILLS_TAR_SHA256` to the output of `curl -fsSL https://codeload.github.com/h-wb/skills/tar.gz/<sha> | sha256sum`. Either change reruns the Job.
+- The pin is the head of h-wb/skills#1's branch, not `main` (HOMEL-135).
+- A routine is a skill only the assistant runs, kept beside it here; a skill other agents use goes to h-wb/skills.
 
 ## Dashboard
 

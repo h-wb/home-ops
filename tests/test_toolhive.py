@@ -292,7 +292,7 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertFalse({"skills", "delegation"} & off)
         # Nobody answers a scheduled run, so it must not be able to approve itself.
         self.assertEqual({"mode": "manual", "cron_mode": "deny"}, config["approvals"])
-        self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
+        self.assertEqual({"external_dirs": ["/opt/hermes-routines/skills", "/opt/shared-skills"],
                           "write_approval": True}, config["skills"])
         self.assertEqual(1, config["delegation"]["max_spawn_depth"])
         # Schedules and "today" are on the user's clock, and a routine's message can be answered.
@@ -329,33 +329,38 @@ class HermesIsPrivateOnly(unittest.TestCase):
                 scheduled.append(name)
         self.assertIn("daily-briefing", scheduled)
 
-    def test_dotfiles_skills_are_synced_pinned_and_read_only(self):
-        # The shared skills folder in h-wb/dotfiles (conf.d/ai/skills) reaches the pod
-        # the way the Memini plugin does: a Job fetches the repo at a pinned, checksummed
-        # ref into a volume mounted read-only. The pod's egress never sees GitHub.
+    def test_shared_skills_are_declared_synced_pinned_and_read_only(self):
+        # The skills the assistant declares, from h-wb/skills, reach the pod the way
+        # the Memini plugin does: a Job fetches the repo at a pinned, checksummed ref
+        # into a volume mounted read-only. The pod's egress never sees GitHub.
         config = yaml_of(ROOT / "kubernetes/apps/main/llm/hermes/app/config.yaml")
-        self.assertEqual(["/opt/hermes-routines/skills", "/opt/dotfiles-skills"],
+        self.assertEqual(["/opt/hermes-routines/skills", "/opt/shared-skills"],
                          config["skills"]["external_dirs"])
         values = next(d for d in self.docs if d["kind"] == "HelmRelease")["spec"]["values"]
-        mount = values["persistence"]["dotfiles-skills"]
+        mount = values["persistence"]["shared-skills"]
         self.assertEqual("hermes-skills", mount["existingClaim"])
-        self.assertEqual([{"path": "/opt/dotfiles-skills", "readOnly": True}], mount["globalMounts"])
+        self.assertEqual([{"path": "/opt/shared-skills", "readOnly": True}], mount["globalMounts"])
         job = next(d for d in self.docs if d["kind"] == "Job" and d["metadata"]["name"] == "hermes-skills-sync")
         env = {e["name"]: e["value"] for e in job["spec"]["template"]["spec"]["containers"][0]["env"]}
-        self.assertEqual(40, len(env["DOTFILES_REF"]))  # a commit sha
-        self.assertEqual(64, len(env["DOTFILES_TAR_SHA256"]))  # sha256 of the tarball
+        self.assertEqual(["handbook", "board", "tool-gateway"], env["SKILLS"].split())
+        self.assertEqual(40, len(env["SKILLS_REF"]))  # a commit sha
+        self.assertEqual(64, len(env["SKILLS_TAR_SHA256"]))  # sha256 of the tarball
         volumes = {v["name"]: v for v in job["spec"]["template"]["spec"]["volumes"]}
         self.assertEqual("hermes-skills", volumes["skills"]["persistentVolumeClaim"]["claimName"])
         self.assertTrue(volumes["scripts"]["configMap"]["name"].startswith("hermes-skills-sync"))
         script = next(d for d in self.docs if d["kind"] == "ConfigMap"
                       and d["metadata"]["name"].startswith("hermes-skills-sync"))["data"]["sync.sh"]
         self.assertNotIn("${", script)  # Flux would substitute it
-        self.assertIn("codeload.github.com/h-wb/dotfiles", script)
-        self.assertIn("conf.d/ai/skills", script)
+        self.assertIn("codeload.github.com/h-wb/skills", script)
+        self.assertIn("for name in $SKILLS", script)  # only the declared names
         self.assertIn("sha256sum -c", script)
         pvc = next(d for d in self.docs if d["kind"] == "PersistentVolumeClaim"
                    and d["metadata"]["name"] == "hermes-skills")
         self.assertEqual(["ReadWriteMany"], pvc["spec"]["accessModes"])
+        # A routine never duplicates a shared skill: the handbook one replaced system-docs.
+        routines = ROOT / "kubernetes/apps/main/llm/hermes/app/routines"
+        self.assertFalse({d.name for d in routines.iterdir() if d.is_dir()} & set(env["SKILLS"].split()))
+        self.assertFalse((routines / "system-docs").exists())
 
     def test_key_grants_no_cloud_model_and_only_private_paseo_may_exec(self):
         keys = [d for d in self.docs if d["kind"] == "LiteLLMVirtualKey"]

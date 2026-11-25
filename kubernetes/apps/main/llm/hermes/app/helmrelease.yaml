@@ -169,12 +169,12 @@ spec:
           - path: /data/hermes/plugins/memini
             subPath: memini
             readOnly: true
-      # The shared dotfiles skills (skills-sync/): each skill as <name>/SKILL.md,
-      # read-only, so the assistant can load one and cannot rewrite one.
-      dotfiles-skills:
+      # The skills it takes from h-wb/skills (skills-sync/): each skill as
+      # <name>/SKILL.md, read-only, so the assistant can load one and cannot rewrite one.
+      shared-skills:
         existingClaim: hermes-skills
         globalMounts:
-          - path: /opt/dotfiles-skills
+          - path: /opt/shared-skills
             readOnly: true
       soul:
         type: configMap

@@ -1,5 +1,6 @@
 ---
-# The shared dotfiles skills; written by the sync Job, mounted read-only by Hermes.
+# The skills the assistant takes from h-wb/skills; written by the sync Job, mounted
+# read-only by Hermes.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
