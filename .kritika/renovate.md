@@ -53,7 +53,7 @@ CI on the new commit
 one check run per job of its `test` workflow).
 Report as **blocking (p0)** no check runs on the new commit, or any that did not
 conclude `success` (or `skipped`), and a change
-to `scripts/pod-bootstrap`, `miserc.toml` or `[env_sets]` that home-ops' callers
+to the `apply` task or its `--unattended` flag, `miserc.toml` or `[env_sets]` that home-ops' callers
 (`components/dotfiles`, `paseo/common/helmrelease.yaml`) do not match. Having read the
 commits counts as having read the changelog.
 

@@ -1,35 +1,38 @@
 #!/bin/sh
-# README.md. `fetch` moves the ~/.dotfiles git clone to the pinned commit, `run`
-# runs its scripts/pod-bootstrap, no argument does both. Always exits 0: a failed
-# bootstrap must not stop the pod's own program. Flux substitutes the two
-# variables below; nothing else here may use braces.
+# README.md. The dotfiles' two steps, at the cluster's pin: `fetch` checks the
+# commit out at ~/.dotfiles and saves the pod's environment, `run` applies it
+# (`mise run apply --unattended`); no argument does both. Always exits 0: a
+# failed bootstrap must not stop the pod's own program. Flux substitutes the
+# two variables below; nothing else here may use braces.
 set -u
 ref=${DOTFILES_REF}
 env=${DOTFILES_ENV}
 dir="$HOME/.dotfiles"
 url=https://github.com/h-wb/dotfiles.git
+state="$HOME/.local/state"
+log="$state/dotfiles.log"
+# mise from the ghcr.io/jdx/mise image (mounted at /opt/mise, or the image
+# itself); its own MISE_* settings point at /mise, not this home.
+unset MISE_CONFIG_DIR MISE_DATA_DIR MISE_CACHE_DIR MISE_ENV
+export PATH="/opt/mise/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"
+mkdir -p "$state"
 
-# A failed fetch keeps the commit already checked out (pod-bootstrap: `stale`).
+# A failed fetch, or a local change in the way, keeps the commit already
+# checked out (the dotfiles report it `stale`). Only these lines reach the
+# pod's log; mise's output goes to the volume.
 fetch() {
-	if [ ! -d "$dir/.git" ]; then
-		timeout 300 git clone -q "$url" "$dir" || { echo "dotfiles: fetch failed: no clone at $dir"; return 1; }
-	fi
-	timeout 300 git -C "$dir" fetch -q origin "$ref" ||
-		{ echo "dotfiles: fetch failed for $ref; keeping $(git -C "$dir" rev-parse --short HEAD 2>/dev/null)"; return 1; }
-	# Local changes go to a stash, not away: develop in ~/Repositories/dotfiles.
-	if [ -n "$(git -C "$dir" status --porcelain)" ]; then
-		git -C "$dir" -c user.name=dotfiles-bootstrap -c user.email=dotfiles-bootstrap@localhost \
-			stash push -q -u -m "dotfiles-bootstrap: local changes before $ref" ||
-			{ echo "dotfiles: fetch failed: could not stash local changes"; return 1; }
-	fi
-	git -C "$dir" checkout -q --force --detach "$ref" || { echo "dotfiles: fetch failed: checkout of $ref"; return 1; }
+	timeout 600 mise -E "$env" bootstrap --from "$url?ref=$ref" --update --from-dir "$dir" \
+		--config-dir . --save-env --yes --only final-hook >>"$log" 2>&1 ||
+		{ echo "dotfiles: fetch failed for $ref; see $log"; return 1; }
 	echo "dotfiles: $ref at $dir"
 }
 
 run() {
-	[ -f "$dir/scripts/pod-bootstrap" ] || { echo "dotfiles: no checkout at $dir; nothing to run"; return 1; }
-	DOTFILES_REF="$ref" timeout 3300 sh "$dir/scripts/pod-bootstrap" "$env" ||
+	[ -d "$dir/.git" ] || { echo "dotfiles: no checkout at $dir; nothing to run"; return 1; }
+	cd "$dir" || return 1
+	DOTFILES_REF="$ref" timeout 3300 mise run apply --unattended >>"$log" 2>&1 ||
 		echo "dotfiles: bootstrap did not complete; starting anyway"
+	echo "dotfiles: $(cat "$state/dotfiles.status" 2>/dev/null || echo "no status"); log: $log"
 }
 
 case "$*" in

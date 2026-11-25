@@ -25,34 +25,45 @@ and nothing else about what gets installed or configured:
    pod only (`code-server`, `neko`, `neko,extra-layer`).
 
 The Component adds a ConfigMap `${APP}-dotfiles` with `dotfiles-bootstrap` and
-`dotfiles-bootstrap.desktop`. The app mounts it at `/opt/dotfiles` and decides
-when it runs:
+`dotfiles-bootstrap.desktop`. The hook runs the dotfiles' two steps, the ones
+every dotfiles machine runs ([dotfiles' docs/mise.md](https://github.com/h-wb/dotfiles/blob/master/docs/mise.md#one-bootstrap-two-steps)).
+The app mounts it at `/opt/dotfiles` and decides when each step runs:
 
-- `sh /opt/dotfiles/dotfiles-bootstrap fetch` moves the `~/.dotfiles` git
-  clone to that commit (detached), cloning it on an empty volume. Local changes
-  go to a stash, never away: develop in `~/Repositories/dotfiles`. Ignored files
-  (`miserc.local.toml`, `config.local.toml`) and local branches stay. A failed
-  fetch keeps the commit already checked out.
-- `... run` runs that checkout's `scripts/pod-bootstrap $DOTFILES_ENV` by path.
+- `sh /opt/dotfiles/dotfiles-bootstrap fetch`: `mise -E $DOTFILES_ENV bootstrap
+  --from https://github.com/h-wb/dotfiles.git?ref=$DOTFILES_REF --update
+  --save-env --only final-hook` moves the `~/.dotfiles` clone to the pin
+  (cloning it on an empty volume), links `~/.config/mise` to it and saves the
+  environment. Local branches and ignored files (`*.local.toml`) stay. A local
+  change in the way stops the move, and so does a failed fetch: the pod then
+  runs the commit already there, reported `stale`. Develop in
+  `~/Repositories/dotfiles`.
+- `... run`: `mise run apply --unattended` in that checkout, with a live
+  Proton Pass session or without one (the dotfiles' `fresh` and `protect`).
 - No argument does both. It always exits 0: the pod's own program starts anyway.
 
-The dotfiles own everything after that: the log and status in
-`~/.local/state/pod-bootstrap.{log,status}` and the `pod-bootstrap` doctor
-check (`mise doctor project`), which also fails when the last start applied a
-commit other than the pin (`stale`: the fetch failed).
+mise is the `ghcr.io/jdx/mise` image, the same as the Paseo pods': mounted at
+`/opt/mise` and first on `PATH`, because the shims point at it. neko's `fetch`
+runs on that image itself, since the neko image has no git. Its tag (Renovate)
+must stay at or above the dotfiles' `min_version`.
 
-| Pod         | `DOTFILES_ENV` | Trigger                                                                                                                                                                      |
-| ----------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| code-server | `code-server`  | the `bootstrap` init container, no argument                                                                                                                                  |
-| neko        | `neko`         | `fetch` in the `dotfiles` init container (a pinned git image: the neko image has none); `run` from the system XFCE autostart entry (xfconf, apt and `/etc` need the session) |
+Only the hook's own lines reach the pod's log; mise's output goes to
+`~/.local/state/dotfiles.log` on the volume. The dotfiles own the status,
+`~/.local/state/dotfiles.status`, and the `pod-start` doctor check (`mise
+doctor project`), which also fails when the last start applied a commit other
+than the pin.
 
-The Paseo pods use the same two inputs without this hook: their `tools` init
-container runs `mise -E paseo,paseo-overlay bootstrap --from
-https://github.com/h-wb/dotfiles.git?ref=${DOTFILES_REF} --save-env` into an
-`emptyDir`, fresh at every start and read-only in the app container (mise from
-an image volume; no secrets session to protect). `tests/test_dotfiles.py`
-renders the hook as Flux does and runs it against scratch homes with a local
-remote; `tests/test_paseo.py` checks the Paseo arguments.
+| Pod         | `DOTFILES_ENV` | Trigger                                                                                                                        |
+| ----------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| code-server | `code-server`  | the `bootstrap` init container, no argument                                                                                    |
+| neko        | `neko`         | `fetch` in the `dotfiles` init container; `run` from the system XFCE autostart entry (xfconf, apt and `/etc` need the session) |
+
+The Paseo pods run step 1 alone in their `tools` init container, `mise -E
+paseo,paseo-overlay bootstrap --from
+https://github.com/h-wb/dotfiles.git?ref=${DOTFILES_REF} --save-env` without
+`--only`, into an `emptyDir` that is fresh at every start and read-only in the
+app container. They hold no secrets, so there is no step 2. `tests/test_dotfiles.py`
+renders the hook as Flux does and runs it with real mise and git against a
+local remote; `tests/test_paseo.py` checks the Paseo arguments.
 
 ## When a pin goes bad
 
@@ -64,10 +75,10 @@ on neko the n8n workflow "Anki → Nextcloud: Korean Vocabulary" (hourly at :10)
 Revert the `DOTFILES_REF` update to a known-good commit. This rolls every
 consumer.
 
-Before this hook took an environment, the old ones ran a `scripts/pod-bootstrap`
-without arguments from a clone on `master`. To go back to them, revert both
-pull requests (dotfiles first: Paseo and neko read its `master`), then on neko
-and code-server, before the old hooks run:
+Before this hook, the old ones ran a `scripts/pod-bootstrap` without
+arguments from a clone on `master`. To go back to them, revert both pull
+requests (dotfiles first: Paseo and neko read its `master`), then on neko and
+code-server, before the old hooks run:
 
 ```sh
 git -C ~/.dotfiles switch master && git -C ~/.dotfiles pull --ff-only
