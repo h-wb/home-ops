@@ -1,21 +1,41 @@
 #!/bin/sh
-# Bootstrap this pod from the owner's dotfiles: clone them when the script is
-# missing, then run their scripts/pod-bootstrap by path with this script's
-# arguments. Always exits 0: a failed bootstrap must not stop the pod's own
-# program from starting. No braces around variables: Flux substitutes those.
+# README.md. `fetch` moves the ~/.dotfiles git clone to the pinned commit, `run`
+# runs its scripts/pod-bootstrap, no argument does both. Always exits 0: a failed
+# bootstrap must not stop the pod's own program. Flux substitutes the two
+# variables below; nothing else here may use braces.
 set -u
-url=https://github.com/h-wb/dotfiles.git
+ref=${DOTFILES_REF}
+env=${DOTFILES_ENV}
 dir="$HOME/.dotfiles"
-script="$dir/scripts/pod-bootstrap"
+url=https://github.com/h-wb/dotfiles.git
 
-if [ ! -f "$script" ]; then
-	# The neko image ships no git; code-server's does.
-	command -v git >/dev/null 2>&1 ||
-		{ sudo -n apt-get update -qq && sudo -n apt-get install -y -qq --no-install-recommends git; }
-	# No script means a cut-off clone (or not a checkout of ours): keep it aside.
-	[ ! -e "$dir" ] || mv "$dir" "$dir.broken-$(date +%Y%m%d%H%M%S)"
-	rm -rf "$dir.clone"
-	timeout 300 git clone --quiet "$url" "$dir.clone" && mv "$dir.clone" "$dir"
-fi
-timeout 3300 sh "$script" "$@" || echo "dotfiles bootstrap did not complete; starting anyway"
+# A failed fetch keeps the commit already checked out (pod-bootstrap: `stale`).
+fetch() {
+	if [ ! -d "$dir/.git" ]; then
+		timeout 300 git clone -q --no-checkout "$url" "$dir" || { echo "dotfiles: fetch failed: no clone at $dir"; return 1; }
+	fi
+	timeout 300 git -C "$dir" fetch -q origin "$ref" ||
+		{ echo "dotfiles: fetch failed for $ref; keeping $(git -C "$dir" rev-parse --short HEAD 2>/dev/null)"; return 1; }
+	# Local changes go to a stash, not away: develop in ~/Repositories/dotfiles.
+	if [ -n "$(git -C "$dir" status --porcelain)" ]; then
+		git -C "$dir" -c user.name=dotfiles-bootstrap -c user.email=dotfiles-bootstrap@localhost \
+			stash push -q -u -m "dotfiles-bootstrap: local changes before $ref" ||
+			{ echo "dotfiles: fetch failed: could not stash local changes"; return 1; }
+	fi
+	git -C "$dir" checkout -q --force --detach "$ref" || { echo "dotfiles: fetch failed: checkout of $ref"; return 1; }
+	echo "dotfiles: $ref at $dir"
+}
+
+run() {
+	[ -f "$dir/scripts/pod-bootstrap" ] || { echo "dotfiles: no checkout at $dir; nothing to run"; return 1; }
+	DOTFILES_REF="$ref" timeout 3300 sh "$dir/scripts/pod-bootstrap" "$env" ||
+		echo "dotfiles: bootstrap did not complete; starting anyway"
+}
+
+case "$*" in
+fetch) fetch ;;
+run) run ;;
+"") fetch; run ;;
+*) echo "usage: dotfiles-bootstrap [fetch|run]" ;;
+esac
 exit 0

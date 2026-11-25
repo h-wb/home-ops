@@ -110,5 +110,29 @@ spec:
                       is replacing the cable or moving switch port. Do NOT force
                       speed 1000 - 100BASE-TX uses 2 pairs where 1000/2500 need 4,
                       so forcing it on a damaged cable drops the link entirely.
+
+            - name: dotfiles-bootstrap
+              type: vlogs
+              interval: 5m
+              rules:
+                - alert: DotfilesBootstrapIncomplete
+                  # A pod starts whatever its dotfiles bootstrap did, so a bad
+                  # pin only shows in these lines. neko's in-session run logs to
+                  # its home volume, not here.
+                  expr: |-
+                    ("dotfiles: bootstrap did not complete" OR "dotfiles: fetch failed") | stats by (kubernetes.pod_namespace, kubernetes.pod_name) count() as hits | filter hits:>0
+                  keep_firing_for: 6h
+                  labels:
+                    severity: warning
+                  annotations:
+                    summary: >-
+                      {{ index .Labels "kubernetes.pod_namespace" }}/{{ index .Labels "kubernetes.pod_name" }}
+                      started without a complete dotfiles bootstrap.
+                    description: >-
+                      Read the pod's init container log, then ~/.local/state/pod-bootstrap.log
+                      in the pod (`mise doctor project` reports the same). Revert
+                      the pin only to a revision using the same bootstrap contract.
+                      For the first rollout, use components/dotfiles/README.md to
+                      roll back both repos and restore the pod checkouts.
     serviceMonitor:
       enabled: true

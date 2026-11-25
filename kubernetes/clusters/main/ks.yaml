@@ -28,13 +28,13 @@ spec:
       - kind: Secret
         name: cluster-secrets
   patches:
-    - # Add Kustomization defaults for all child Kustomizations
-      # Level 2 substitution: injected into every child KS's own postBuild.
-      # Runs when each child KS processes its app resources (HelmReleases, etc.).
-      # Variables here are available inside helmrelease values, httproutes, etc.
-      # Does NOT affect how cluster-apps resolves values in the child ks.yaml files
-      # themselves — that is handled by the Level 1 postBuild above.
-      patch: |-
+    # Add Kustomization defaults for all child Kustomizations
+    # Level 2 substitution: injected into every child KS's own postBuild.
+    # Runs when each child KS processes its app resources (HelmReleases, etc.).
+    # Variables here are available inside helmrelease values, httproutes, etc.
+    # Does NOT affect how cluster-apps resolves values in the child ks.yaml files
+    # themselves — that is handled by the Level 1 postBuild above.
+    - patch: |-
         apiVersion: kustomize.toolkit.fluxcd.io/v1
         kind: Kustomization
         metadata:
@@ -69,6 +69,9 @@ spec:
           postBuild:
             substitute:
               NFS_ADDR: "192.168.1.161"
+              # The h-wb/dotfiles commit every pod bootstraps from (components/dotfiles).
+              # renovate: dotfiles
+              DOTFILES_REF: "72ce2ecec9890aa923c6be314b151e334616b704"
             substituteFrom:
               - name: cluster-secrets
                 kind: Secret

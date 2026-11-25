@@ -16,7 +16,7 @@ Set `CLUSTER=edge` or `CLUSTER=main` in the shell or `.mise.toml` to switch `KUB
 
 ## GitOps
 
-After a push, Flux fetches Git and reconciles `cluster-apps` at `kubernetes/clusters/${CLUSTER}/ks.yaml`. Its postBuild substitution resolves values in child `ks.yaml` files first. Each child then builds its app resources and runs its own postBuild substitution with inherited cluster values and app overrides before applying HelmReleases and raw manifests. `${SECRET_DOMAIN}`, `${NFS_ADDR}` and `${CLUSTER}` are cluster-level inputs.
+After a push, Flux fetches Git and reconciles `cluster-apps` at `kubernetes/clusters/${CLUSTER}/ks.yaml`. Its postBuild substitution resolves values in child `ks.yaml` files first. Each child then builds its app resources and runs its own postBuild substitution with inherited cluster values and app overrides before applying HelmReleases and raw manifests. `${SECRET_DOMAIN}`, `${NFS_ADDR}`, `${CLUSTER}` and `${DOTFILES_REF}` are cluster-level inputs. `${DOTFILES_REF}` is the one dotfiles commit every pod bootstraps from; a pod declares only its `DOTFILES_ENV` (`kubernetes/components/dotfiles/README.md`).
 
 The parent strategic-merge patch supplies Helm install and upgrade defaults and replaces the child `spec.patches` list. Put app resource patches in a Kustomize Component referenced under `components`; the Component's own `patches` run in the child build.
 
