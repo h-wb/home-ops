@@ -1,6 +1,6 @@
 ---
 name: midday-nudge
-description: Send the midday nudge (what is still open today). Use when the midday-nudge routine runs.
+description: Send the midday nudge (what is still open today, the focus included). Use when the midday-nudge routine runs.
 metadata:
   schedule: "30 12 * * *"
   model: mistral/mistral-medium-latest
@@ -19,16 +19,18 @@ Call these tools by their exact names with `tool_call`.
    still open today.
 2. `mcp__tools__ticktick_filter_tasks` with `filter: {status: [0]}` and
    `client_timezone: "America/Toronto"`: every open task. Keep those with a
-   `dueDate` before today, however old: what is overdue. Drop any that step 1
-   already returned.
+   `dueDate` before today, however old: what is overdue. Keep also those with
+   priority 5 and no `dueDate`, not tagged `waiting`: the focus confirmed
+   without a date. Drop any that step 1 already returned.
 
-If nothing is open today and nothing is overdue, reply with only `[SILENT]`.
+If nothing is open today, in focus or overdue, reply with only `[SILENT]`.
 
 ## Write
 
 ```
 Still open today
 - <time if it has one> <task>
+- <undated focus task> (focus)
 
 Overdue: <N>, oldest: <task> (due <date>)
 ```

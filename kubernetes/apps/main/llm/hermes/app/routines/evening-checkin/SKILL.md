@@ -1,6 +1,6 @@
 ---
 name: evening-checkin
-description: Send the evening check-in (ask which of today's tasks got done, list what is overdue, suggest a list for each inbox task). Use when the evening-checkin routine runs.
+description: Send the evening check-in (ask which of today's tasks got done, list what is overdue, suggest where each inbox task goes). Use when the evening-checkin routine runs.
 metadata:
   schedule: "30 20 * * *"
   model: mistral/mistral-large-4
@@ -23,6 +23,8 @@ Call these tools by their exact names with `tool_call`.
    - Overdue: a `dueDate` before today, however old. Drop any that step 1
      already returned.
    - Inbox: a `projectId` that starts with `inbox`.
+   - Undated focus: priority 5, no `dueDate`, not tagged `waiting`. Drop any
+     that step 1 already returned.
 3. For each task of steps 1 and 2 that has a due date, at most ten:
    `mcp__tools__ticktick_get_comment` with its `project_id` and `task_id`. A
    comment that starts with `Postponed` gives how many times it was moved. If
@@ -31,7 +33,7 @@ Call these tools by their exact names with `tool_call`.
    `search: {startDate: today at 00:00, endDate: now}` and
    `client_timezone: "America/Toronto"`: what got done today.
 
-If all three lists of steps 1 and 2 are empty, write the done line and
+If all four lists of steps 1 and 2 are empty, write the done line and
 "Everything due today is done." and stop.
 
 ## Write
@@ -52,15 +54,18 @@ Inbox, where do these go?
 ```
 
 - The done line comes first. Leave it out when nothing got done: no blame.
-- Focus tasks (priority 5) first, marked `(focus)`.
+- Focus tasks (priority 5), the undated ones included, first under "Did you
+  get to these?", marked `(focus)`.
 - One numbering across all sections, so the user can answer "1 and 3 done,
   2 tomorrow, inbox ok".
 - At most ten tasks in the first two sections, then "and N more". At most five
   inbox tasks.
 - For each inbox task, suggest one list from its title: Admin (money, papers,
-  accounts), Health, Growth (learning, work), Homelab (servers, software),
-  Life (home, people, errands, trips). Suggest `drop` for a bare link or
-  something already past.
+  accounts), Health, Growth (learning, work), Life (home, people, errands,
+  trips), or `Someday` for an undated task worth keeping but not now. Build
+  work (servers, software, the assistant) gets `board`: it goes on the build
+  board, not a list. Suggest `drop` for a bare link or something already
+  past.
 - For a task postponed three times or more, add on its own line:
   "<task> has slipped <N> times: drop it, make it smaller, or block a time?"
 - Leave a section out when it is empty. Nothing else: no advice, no summary.
