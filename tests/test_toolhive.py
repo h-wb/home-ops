@@ -77,7 +77,7 @@ class ToolHiveScopes(unittest.TestCase):
 
     def test_general_gateway_never_lists_private_data(self):
         # Cloud models sit behind general; private's gateway serves everything.
-        private = {"vault-ro", "vault-inbox", "vault-review", "personal-tasks", "dawarich", "dawarich-ops", "metabase",
+        private = {"vault-ro", "vault-inbox", "vault-review", "dawarich", "dawarich-ops", "metabase",
                    "homeassistant", "ticktick"}
         aggregation = self.resource("VirtualMCPServer", "mcp-general")["spec"]["config"]["aggregation"]
         self.assertEqual("deny", aggregation["defaultToolVisibility"])
@@ -115,19 +115,17 @@ class ToolHiveScopes(unittest.TestCase):
         self.assertLessEqual(named, set(read_only))
 
     def test_the_stand_in_task_boards_are_gone(self):
-        # The build's tasks are on the board; only the synthetic personal board remains.
+        # The build's tasks are on the board, the owner's in TickTick: no synthetic board stays.
+        stand_ins = {"homelab-tasks", "homelab-tasks-ro", "personal-tasks"}
         for gateway in ("mcp-assistant", "mcp-private", "mcp-general"):
             tools = self.resource("VirtualMCPServer", gateway)["spec"]["config"]["aggregation"]["tools"]
-            self.assertFalse({t["workload"] for t in tools} & {"homelab-tasks", "homelab-tasks-ro"}, gateway)
-        built = subprocess.run(["kustomize", "build", "kubernetes/apps/main/llm/toolhive/mcp-servers/tasks"],
-                               cwd=ROOT, capture_output=True, text=True, timeout=60, check=True).stdout
-        servers = [d["metadata"]["name"] for d in json.loads(subprocess.run(
-            ["yq", "eval-all", "-o=json", "-I=0", "[.]", "-"], input=built, capture_output=True, text=True,
-            timeout=60, check=True).stdout) if d["kind"] == "MCPServer"]
-        self.assertEqual(["personal-tasks"], servers)
+            self.assertFalse({t["workload"] for t in tools} & stand_ins, gateway)
+        self.assertFalse((ROOT / "kubernetes/apps/main/llm/toolhive/mcp-servers/tasks").exists())
+        self.assertNotIn("mcp-servers/tasks", (ROOT / "kubernetes/apps/main/llm/toolhive/ks.yaml").read_text())
         hermes = ROOT / "kubernetes/apps/main/llm/hermes/app"
         for path in [hermes / "SOUL.md", *(hermes / "routines").glob("*/SKILL.md")]:
             self.assertNotIn("homelab_tasks", path.read_text(), path.name)
+            self.assertNotIn("personal_tasks", path.read_text(), path.name)
 
     def test_dawarich_ops_entry_reuses_the_dawarich_header(self):
         # One user API key: the ops entry mounts the secret mcp-dawarich owns.
