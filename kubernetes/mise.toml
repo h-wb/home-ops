@@ -174,7 +174,7 @@ run = '''
 #!/usr/bin/env bash
 # Interactive: you type the Obsidian password and 2FA code into ob itself. Nothing is printed
 # or kept: ob's state lives in a temp dir removed on exit, and bws output is discarded
-# because it echoes the stored value. The vault sync pod (apps/main/llm/toolhive/mcp-servers/vault)
+# because it echoes the stored value. The vault sync pod (apps/main/default/obsidian-vault)
 # reads OBSIDIAN_AUTH_TOKEN, OBSIDIAN_VAULT and OBSIDIAN_VAULT_PASSWORD from this item.
 set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
