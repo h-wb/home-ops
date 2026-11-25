@@ -36,7 +36,7 @@ Secrets are not in these backups: they live in Bitwarden Secrets Manager and Pro
 ## How it comes back
 
 - An app volume: nothing to do. The Component creates the PVC from a kopiur `Restore`, so when Flux recreates an app its volume is filled from the latest snapshot. With no snapshot it starts empty (`onMissingSnapshot: Continue`), which is what a new app needs.
-- A Postgres cluster on `cnpg/restore`: nothing to do, it recovers from the latest backup when recreated. A cluster on `cnpg/initdb` comes back empty (HOMEL-63). To go back to a moment in time: [recover a CNPG database](../kubernetes/components/cnpg/RECOVERY.md).
+- A Postgres cluster: nothing to do. Every running cluster is on `cnpg/restore` and recovers from the latest backup when recreated; a cluster on `cnpg/initdb` would come back empty. To go back to a moment in time: [recover a CNPG database](../kubernetes/components/cnpg/RECOVERY.md).
 - Garage: [restore with contents, or a fresh node](../docker/truenas/README.md#restore-with-contents). On a fresh node the buckets are empty, so the two rows above are lost with it: the offsite copy is what protects them.
 
 ## What is not covered today

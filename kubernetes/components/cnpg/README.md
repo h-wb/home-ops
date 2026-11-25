@@ -64,7 +64,7 @@ spec:
       APP: myapp
 ```
 
-`plugin-barman-cloud` depends on the CloudNativePG operator, so the one `dependsOn` covers both. Extensions come after the bootstrap Component: `postgis` patches `bootstrap.initdb` and needs the PostGIS image (`CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis`, `CNPG_VERSION: 18-3-system-trixie`, as in `reitti`); `vchord` keeps the standard image and mounts the extension from `ghcr.io/tensorchord/vchord-scratch` (as in `immich`).
+`plugin-barman-cloud` depends on the CloudNativePG operator, so the one `dependsOn` covers both. Extensions come after the bootstrap Component: `postgis` patches `bootstrap.initdb` and needs the PostGIS image (`CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis`, `CNPG_VERSION: 18-3-system-trixie`, the image dawarich runs; no app uses `postgis` today); `vchord` keeps the standard image and mounts the extension from `ghcr.io/tensorchord/vchord-scratch` (as in `immich`).
 
 Component patches run before Flux substitution, so the `Cluster` is still literally `postgres-${APP}` when they apply. Target it by group and kind.
 
