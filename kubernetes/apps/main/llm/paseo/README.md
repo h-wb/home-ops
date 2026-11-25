@@ -2,7 +2,7 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-reviewed: 2026-11-24
+reviewed: 2026-11-25
 summary: Explains how the two Paseo environments are configured and how to check their access, credentials and storage.
 topics:
   - "[[Workshop]]"
@@ -34,10 +34,10 @@ Edit `ks.yaml` for names, scope, credential item, hostnames and backup
 settings; `common/helmrelease.yaml` for shared pod settings; the overlay's
 `helmrelease.yaml` for environment-specific values.
 
-| Environment | Agents                          | Models (LiteLLM key)                         | Tools and data                                                                             |
-| ----------- | ------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| General     | Claude Code, OpenCode           | Claude subscription, ChatGPT, Mistral, local | `toolhive` (mcp-general gateway), `memini` (memini-general), NFS, Tailscale                |
-| Private     | OpenCode, Hermes (`llm/hermes`) | Mistral, local                               | `toolhive` (mcp-private gateway), `memini` (memini-private), Obsidian; no NFS or Tailscale |
+| Environment | Agents                                | Models                                                                            | Tools and data                                                                             |
+| ----------- | ------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| General     | Claude Code, OpenCode, Vibe           | LiteLLM key: Claude subscription, ChatGPT, Mistral, local; Vibe: Mistral directly | `toolhive` (mcp-general gateway), `memini` (memini-general), NFS, Tailscale                |
+| Private     | OpenCode, Vibe, Hermes (`llm/hermes`) | LiteLLM key: Mistral, local; Vibe: Mistral directly                               | `toolhive` (mcp-private gateway), `memini` (memini-private), Obsidian; no NFS or Tailscale |
 
 ## Agent config
 
@@ -55,7 +55,8 @@ mounted read-only at `/etc/paseo/config`:
   OpenCode layers it over dotfiles' `~/.config/opencode/opencode.json` and
   merges both, so the MCP servers stay out of it.
 - `paseo.json`: merged into `~/.paseo/config.json`, where Paseo also keeps its
-  own state. Our keys win; everything else is kept.
+  own state. Our keys win; everything else is kept. It also defines Vibe's
+  provider and models (below).
 
 ## Profiles
 
@@ -64,15 +65,16 @@ pick one in the model picker; an agent that delegates reads the notes
 (`list_profiles`) and launches the worker that fits. They are declared in
 `paseo.json` (`daemon.agentProfiles`):
 
-| Profile     | For                                                       | General                             | Private                            |
-| ----------- | --------------------------------------------------------- | ----------------------------------- | ---------------------------------- |
-| Orchestrate | A change of more than one step: plans, delegates, decides | Claude Code, Fable, auto mode       | None                               |
-| Plan        | Hard design or debugging questions; no edits              | Claude Code, Opus, plan mode        | OpenCode, Mistral Large, plan mode |
-| Explore     | Where and how is X: paths and line numbers; no edits      | OpenCode, Mistral Medium, plan mode | None                               |
-| Build       | A well-specified change                                   | OpenCode, Mistral Large             | OpenCode, Mistral Large            |
-| Review      | An independent read of a diff or plan; no edits           | OpenCode, GLM, plan mode            | OpenCode, GLM, plan mode           |
+| Profile     | For                                                       | General                               | Private                               |
+| ----------- | --------------------------------------------------------- | ------------------------------------- | ------------------------------------- |
+| Orchestrate | A change of more than one step: plans, delegates, decides | Claude Code, Fable, auto mode         | None                                  |
+| Plan        | Hard design or debugging questions; no edits              | Claude Code, Opus, plan mode          | Vibe, Mistral Large 4, `ask`          |
+| Explore     | Where and how is X: paths and line numbers; no edits      | Vibe, Mistral Medium 3.5, `ask`       | None                                  |
+| Build       | A well-specified change                                   | Vibe, Mistral Large 4, `auto-approve` | Vibe, Mistral Large 4, `auto-approve` |
+| Review      | An independent read of a diff or plan; no edits           | Vibe, GLM 5.3, `ask`                  | Vibe, GLM 5.3, `ask`                  |
 
-Plan mode is the read-only one in both agents.
+Plan mode is the read-only one in Claude Code and OpenCode. Vibe has none: in
+`ask` it reads and runs read-only commands, and waits for a yes on anything else.
 
 - Orchestrate is [flow H](../docs/flows.md#h-a-larger-change-orchestrated): the
   strongest model takes the few turns that plan and decide, and starts Explore,
@@ -90,18 +92,38 @@ Plan mode is the read-only one in both agents.
   `orchestrate` skill starts the same prompt there once. Private has none: its
   data stays on Mistral.
 - Private has no Orchestrate or Explore: no agent there starts another, so you
-  pick the profile, and OpenCode's own Plan mode is the cheap reader.
+  pick the profile, and Plan is the reader.
 - Review runs on a different model family from Plan and Build, so it does not
   share their blind spots.
 - The list is an array, and the merge replaces an array whole: a profile made
   in the app is gone at the next pod start. Add it here.
 - In general, agents can act on the notes: Paseo's tools are injected there (an
   app setting, **Settings → host → Agents → Enable Paseo tools**). In private
-  they are not, and OpenCode's `create_agent` and `send_agent_prompt` stay
+  they are not, and OpenCode's and Vibe's `create_agent` and `send_agent_prompt` stay
   disabled, so no agent there starts or prompts another one, the assistant
   included. The profiles are for you to pick.
 - Paseo's own skills (`/paseo-advisor`, `/paseo-committee`, `/paseo-handoff`)
   read the same notes before they choose a worker.
+
+### Vibe
+
+Every profile on a Mistral model runs on Mistral Vibe over ACP (`mistral-vibe`).
+From 2026-12-01 a Mistral plan used through another harness, OpenCode included,
+counts toward the plan's API allowance; Vibe keeps the Vibe allowance, also over
+ACP. OpenCode keeps its Mistral models through LiteLLM for anything else.
+
+- Vibe calls Mistral directly, not through LiteLLM: an [accepted exception](https://github.com/h-wb/handbook/blob/main/Decisions/2026-11-05%20Every%20model%20call%20goes%20through%20one%20gateway.md).
+  It signs in with `MISTRAL_API_KEY` (below), so its model list is not fenced by
+  a gateway key. In private that is still trusted: Vibe reaches Mistral only.
+- Paseo 0.17 has no built-in Vibe: `paseo.json` defines it (`extends: acp`,
+  `vibe-acp`). Its models are Vibe's own Medium 3.5 and the two in the
+  provider's `VIBE_MODELS`, Large 4 and GLM 5.3, by their Mistral API ids.
+- Paseo sets thinking through an ACP `thought_level` option, which Vibe does
+  not expose, so its profiles set none and take the model's level.
+- Its tool and memory servers come from dotfiles (`~/.vibe/config.toml`), like
+  every agent's. Dotfiles also trusts `~/Repositories` and `~/.paseo/worktrees`
+  for Vibe, which reads a repo's `AGENTS.md` and skills only in a trusted folder.
+- No memory plugin: Vibe has memini as a server and calls it when it chooses.
 
 Provisioning is the `tools` init container, on the app's image: `mise bootstrap
 --from` the dotfiles repo into `~/.dotfiles`, an `emptyDir` cloned fresh at every
@@ -127,7 +149,8 @@ Separation is enforced by what each pod can reach, not by request inspection:
 - Each pod has its own LiteLLM and Memini keys, and only its own scope's ToolHive
   gateway admits it (NetworkPolicy, no key). Only `paseo-general`'s
   LiteLLM key lists models outside the trusted set (`anthropic/*`, `chatgpt/*`); private's key
-  has local and Mistral models only.
+  has local and Mistral models only. Vibe holds a Mistral key and reaches
+  Mistral only, a trusted provider.
 - General cannot reach the private gateway and has no private Memini credentials;
   private has no GitHub token.
 - Pasted text is not covered: don't paste private data into general.
@@ -164,9 +187,11 @@ secret or the cluster CAs.
 ## Credentials and identities
 
 Bitwarden JSON items `paseo-general` and `paseo-private` hold the human
-credentials `GIT_EMAIL`, `PROTON_PASS_TOKEN` and `PASEO_PASSWORD`. Old `KEYSEED`
-(the removed sshd), `MCP_API_KEY` (the pods reach ToolHive without a key) and
-`MISTRAL_API_KEY` (every model call goes through LiteLLM) fields are unused.
+credentials `GIT_EMAIL`, `PROTON_PASS_TOKEN` and `PASEO_PASSWORD`. Their
+`MISTRAL_API_KEY` signs Vibe in: each pod's `*-agents` Secret takes it from the
+workshop's item, bound in the app container only. It must be a key of the
+account on the Vibe plan. Old `KEYSEED` (the removed sshd) and `MCP_API_KEY`
+(the pods reach ToolHive without a key) fields are unused.
 General additionally holds `OPENCODE_API_KEY` and `GH_TOKEN` (the owner's
 personal token, no longer in the pod; see below).
 The LiteLLM virtual key never passes through Bitwarden: the litellm-operator

@@ -2,7 +2,7 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-reviewed: 2026-11-24
+reviewed: 2026-11-25
 summary: Shows how deployed clients reach models, tools and memory and where they differ from the design.
 topics:
   - "[[Model gateway]]"
@@ -30,6 +30,8 @@ explained under [Differs from the design](#differs-from-the-design).
 | Claude Code                 | General workshop | General | Model gateway, which forwards its subscription login | General gateway, in-cluster   | General store                                      |
 | OpenCode                    | General workshop | General | Model gateway                                        | General gateway, in-cluster   | General store, server + plugin                     |
 | OpenCode                    | Private workshop | Private | Model gateway                                        | Private gateway, in-cluster   | Private store, server + plugin; general, read-only |
+| Vibe                        | General workshop | General | Mistral directly, the workshop's key                 | General gateway, in-cluster   | General store, server                              |
+| Vibe                        | Private workshop | Private | Mistral directly, the workshop's key                 | Private gateway, in-cluster   | Private store, server; general, read-only          |
 | Claude Code, Claude Desktop | Workstation      | General | Anthropic directly, own login                        | General gateway, from outside | General store, from outside                        |
 | Codex                       | Workstation      | General | OpenAI directly, own login                           | General gateway, from outside | General store, from outside                        |
 | Vibe                        | Workstation      | Private | Mistral directly, own key                            | Private gateway, from outside | Private store, from outside                        |
@@ -176,7 +178,8 @@ flowchart LR
 ```
 
 - Roles today: coordinator on ChatGPT; build, plan and explorer on Mistral
-  models; the reviewer on a GLM model.
+  models; the reviewer on a GLM model. The workshop's Mistral profiles run on
+  [Vibe](#vibe-in-the-workshops) instead.
 - The pod also holds a key for OpenCode's own hosted models. No profile or mode uses them.
 
 ## OpenCode in the private workshop
@@ -206,6 +209,35 @@ flowchart LR
   hosted models, which need no key, are switched off here.
 - General memory is a second server it can only look things up in: its key is
   read-only on the store, which refuses every write.
+
+## Vibe in the workshops
+
+Both workshops, each in its own scope. Every profile on a Mistral model runs on
+Vibe over ACP: from 2026-12-01 a Mistral plan used through another harness
+counts toward its API allowance, and Vibe keeps the Vibe allowance
+([paseo/README.md](../paseo/README.md#vibe)).
+
+```mermaid
+flowchart LR
+    A["Vibe<br/>either workshop"]:::shared
+    MI["Mistral's API<br/>Mistral and GLM models"]:::outside
+    T["The scope's tool gateway"]:::shared
+    M["The scope's memory<br/>Memini"]:::shared
+    A -.->|"workshop's key, direct"| MI
+    A -->|"no key, network rule"| T
+    A -->|"client key, server"| M
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    classDef shared fill:#eef1f4,stroke:#5a6876,color:#17212b
+    classDef outside fill:#fbfcfd,stroke:#17212b,color:#17212b
+    linkStyle 0 stroke:#c0271d,stroke-width:2px,stroke-dasharray:2 5
+```
+
+- The key is `MISTRAL_API_KEY` from the workshop's own Bitwarden item, in the
+  app container only. Its model list is Vibe's, not a gateway key's: Mistral
+  Medium 3.5, Large 4 and GLM 5.3, all served by Mistral, a trusted provider.
+- Private also gets general memory read-only, as OpenCode does. Vibe has no
+  memory plugin: it calls memini when it chooses.
 
 ## Claude Code, Claude Desktop and Codex on a workstation
 
@@ -275,6 +307,9 @@ Not agents, but they hold a model gateway key too.
    in-cluster only. Accepted: tool use is meant to happen in the workshops.
 4. **The general workshop holds a key for OpenCode's hosted models.** A second
    path next to the gateway. Accepted for the general workshop only.
+5. **Vibe in the workshops calls Mistral directly.** Through the gateway, its
+   use would count as API use of the Mistral plan. Accepted on 2026-11-25:
+   Mistral is trusted in both scopes, and the key reaches nothing else.
 
 Closed on 2026-11-09:
 

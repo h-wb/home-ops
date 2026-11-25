@@ -39,6 +39,12 @@ spec:
                   secretKeyRef:
                     name: paseo-agents
                     key: OPENCODE_API_KEY
+              # Vibe signs in with it and calls Mistral directly (README).
+              MISTRAL_API_KEY:
+                valueFrom:
+                  secretKeyRef:
+                    name: paseo-agents
+                    key: MISTRAL_API_KEY
             envFrom:
               - secretRef:
                   name: ${APP}-secret

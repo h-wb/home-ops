@@ -2,7 +2,7 @@
 area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
-reviewed: 2026-11-24
+reviewed: 2026-11-25
 summary: Records the deployed places, scopes, model, tool and memory wiring, and what deployments must preserve.
 topics:
   - "[[Model gateway]]"
@@ -198,12 +198,13 @@ whose skill is gone is removed. Read that container's log to see it.
 
 Agents use the Service, `http://litellm.llm.svc.cluster.local:4000`, like every other in-cluster client.
 
-| Client      | Route                    | Provider credentials                                                                                                                         |
-| ----------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Claude Code | Root URL, `anthropic/*`  | Claude Code owns its subscription login; LiteLLM forwards it. `ANTHROPIC_CUSTOM_HEADERS` carries the LiteLLM key                             |
-| OpenCode    | `/v1`, explicit aliases  | LiteLLM owns everything: the shared `chatgpt/*` login, local/Qwen, and Mistral's API (Mistral and GLM models). The pods hold no provider key |
-| Codex       | `/v1`, `gpt-*`/`codex-*` | Codex owns its subscription sign-in, LiteLLM forwards it; requests without one ride the shared `chatgpt/*` login                             |
-| Hermes      | In-cluster `/v1`         | Private only, its own key, Mistral only                                                                                                      |
+| Client      | Route                    | Provider credentials                                                                                                                                           |
+| ----------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code | Root URL, `anthropic/*`  | Claude Code owns its subscription login; LiteLLM forwards it. `ANTHROPIC_CUSTOM_HEADERS` carries the LiteLLM key                                               |
+| OpenCode    | `/v1`, explicit aliases  | LiteLLM owns everything: the shared `chatgpt/*` login, local/Qwen, and Mistral's API (Mistral and GLM models). OpenCode reads no provider key in the pods      |
+| Codex       | `/v1`, `gpt-*`/`codex-*` | Codex owns its subscription sign-in, LiteLLM forwards it; requests without one ride the shared `chatgpt/*` login                                               |
+| Hermes      | In-cluster `/v1`         | Private only, its own key, Mistral only                                                                                                                        |
+| Vibe        | None: Mistral directly   | The workshops' Mistral profiles, signed in with the workshop's `MISTRAL_API_KEY`, so Mistral bills the Vibe plan; [accepted exception](./paseo/README.md#vibe) |
 
 Claude's URL and header are injected into general's containers. Keep
 `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN` and `apiKeyHelper` unset. The gateway
