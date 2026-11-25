@@ -14,6 +14,8 @@ log="$state/dotfiles.log"
 # mise from the ghcr.io/jdx/mise image (mounted at /opt/mise, or the image
 # itself); its own MISE_* settings point at /mise, not this home.
 unset MISE_CONFIG_DIR MISE_DATA_DIR MISE_CACHE_DIR MISE_ENV
+# A pod never rewrites its checkout: no lockfile writes, so the next start can move it.
+export MISE_LOCKED=1
 export PATH="/opt/mise/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"
 mkdir -p "$state"
 
