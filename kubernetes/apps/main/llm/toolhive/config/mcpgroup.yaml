@@ -4,4 +4,4 @@ kind: MCPGroup
 metadata:
   name: mcp-tools
 spec:
-  description: Tool servers aggregated by the mcp-private VirtualMCPServer
+  description: Tool servers aggregated by the mcp-general, mcp-private and mcp-assistant gateways
