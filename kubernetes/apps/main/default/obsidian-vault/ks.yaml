@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: &app obsidian-vault
+  namespace: &namespace default
+spec:
+  targetNamespace: *namespace
+  commonMetadata:
+    labels:
+      app.kubernetes.io/name: *app
+  components:
+    # The volume (vault, sync state, Seekstone's audit log), restored from the
+    # latest snapshot when it is recreated.
+    - ../../../../../components/kopiur/backup
+  # The Seekstone servers are ToolHive MCPServers.
+  dependsOn:
+    - name: toolhive
+      namespace: llm
+  interval: 30m
+  path: ./kubernetes/apps/main/default/obsidian-vault/app
+  postBuild:
+    substitute:
+      APP: *app
+      APP_NAMESPACE: *namespace
+      KOPIUR_CAPACITY: 5Gi
+      KOPIUR_SCHEDULE: "31 * * * *"
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  timeout: 5m

@@ -1,0 +1,38 @@
+---
+# The vault's Seekstone servers live with the vault, in default/obsidian-vault
+# (seekstone.yaml); these entries put them in the gateways' group under the same
+# names, so tool names do not change. Who may call each proxy is that app's
+# networkpolicy.yaml.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: vault-ro
+spec:
+  remoteUrl: http://mcp-vault-ro-proxy.default.svc.cluster.local:8080/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  groupRef:
+    name: mcp-tools
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: vault-inbox
+spec:
+  remoteUrl: http://mcp-vault-inbox-proxy.default.svc.cluster.local:8080/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  groupRef:
+    name: mcp-tools
+---
+# TEMPORARY (2026-11), with the app's seekstone-review.yaml.
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServerEntry
+metadata:
+  name: vault-review
+spec:
+  remoteUrl: http://mcp-vault-review-proxy.default.svc.cluster.local:8080/mcp
+  transport: streamable-http
+  allowPrivateEndpoint: true
+  groupRef:
+    name: mcp-tools

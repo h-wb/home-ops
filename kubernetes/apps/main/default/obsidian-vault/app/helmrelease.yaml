@@ -2,12 +2,12 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
 # The Obsidian Sync side of the vault (see kustomization.yaml for the whole picture):
 # Belphemur's obsidian-headless-sync-docker image keeps a two-way copy of the
-# vault on the volume the Seekstone servers (seekstone.yaml) serve through
-# toolhive. It wraps the official `ob` CLI with s6 setup (fix uid/gid, ob login,
-# ob sync-setup, then `ob sync --continuous`). The vault sits at /data/vault and
-# the CLI state at /data/state, both on the claim below; the image runs as
-# uid/gid 1000 (PUID/PGID), the uid the Seekstone backends share the volume
-# with. The only local writer is vault-inbox (Notes/, AI/, Archives/).
+# vault on the volume the Seekstone servers (seekstone.yaml) serve. It wraps the
+# official `ob` CLI with s6 setup (fix uid/gid, ob login, ob sync-setup, then
+# `ob sync --continuous`). The vault sits at /data/vault and the CLI state at
+# /data/state, both on the claim below; the image runs as uid/gid 1000
+# (PUID/PGID), the uid the Seekstone backends share the volume with. The local
+# writers are vault-inbox and vault-n8n.
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
@@ -20,7 +20,7 @@ spec:
   dependsOn: []
   values:
     defaultPodOptions:
-      # CoreDNS autopath answers api.obsidian.md.llm.svc.cluster.local with Obsidian's IPs,
+      # CoreDNS autopath answers api.obsidian.md.<namespace>.svc.cluster.local with Obsidian's IPs,
       # so Cilium filed them under that name and the *.obsidian.md egress rule never matched.
       # ndots 1 makes external names resolve as written first.
       dnsConfig:
@@ -29,9 +29,8 @@ spec:
             value: "1"
       # s6-overlay starts as root (its init fixes the obsidian user and volume
       # ownership, then s6-setuidgid drops to PUID/PGID before any ob command), so
-      # the pod cannot be runAsNonRoot. The bridge to the old Deployment's security:
-      # the sync service ends up as uid 1000 gid 1000, exactly what the volume and
-      # Seekstone's mounts were built on. PSA baseline on the namespace allows this.
+      # the pod cannot be runAsNonRoot. The sync service ends up as uid 1000 gid
+      # 1000, what the volume and Seekstone's mounts were built on.
       securityContext:
         runAsNonRoot: false
         fsGroup: 1000
@@ -85,14 +84,13 @@ spec:
               # restarts is what avoids a re-setup and a new device entry.
               VAULT_PATH: /data/vault
               XDG_CONFIG_HOME: /data/state
-              # Two-way since 2026-11-11: the assistant's vault writes (vault-inbox,
-              # each one approved in chat) reach every device. Seekstone's tool
-              # state (.seekstone, the inbox instance's audit log) must never be
-              # vault content. The image re-applies these on every start, after
+              # Two-way: what vault-inbox (the assistant, each write approved in
+              # chat) and vault-n8n (the workflows) write reaches every device.
+              # Seekstone's tool state (.seekstone) must never be vault content. The image re-applies these on every start, after
               # its sync-setup pass; that pass only rewrites the config.
               SYNC_MODE: bidirectional
               EXCLUDED_FOLDERS: .seekstone
-              DEVICE_NAME: llm-headless
+              DEVICE_NAME: cluster-headless
             probes:
               readiness:
                 enabled: true
@@ -130,8 +128,8 @@ spec:
             [ "$age" -lt "$1" ]
     persistence:
       vault:
-        # Vault notes, ob's SQLite state (WAL, so never NFS) and Seekstone state;
-        # the same claim the old Deployment and the Seekstone servers share.
+        # Vault notes, ob's SQLite state (WAL, so never NFS) and Seekstone's audit
+        # logs; the claim the Seekstone servers share.
         existingClaim: obsidian-vault
         globalMounts:
           - path: /data/vault

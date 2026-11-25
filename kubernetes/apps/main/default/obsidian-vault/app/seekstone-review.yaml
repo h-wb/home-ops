@@ -3,8 +3,9 @@
 # tier, so a general Paseo session can sort the homelab notes into what belongs in
 # this repo and what stays in the vault. The vault is private-tier data and every
 # general agent can call this server while it is listed on mcp-general: remove this
-# file, its line in kustomization.yaml and the mcp-general entry once the review is
-# done. Same pod shape as vault-ro (seekstone.yaml).
+# file, its line in kustomization.yaml, its network policy, its MCPServerEntry in
+# llm/toolhive/mcp-servers/vault and the mcp-general entry once the review is done.
+# Same pod shape as vault-ro (seekstone.yaml).
 apiVersion: toolhive.stacklok.dev/v1alpha1
 kind: MCPServer
 metadata:
@@ -109,5 +110,3 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
-  groupRef:
-    name: mcp-tools
