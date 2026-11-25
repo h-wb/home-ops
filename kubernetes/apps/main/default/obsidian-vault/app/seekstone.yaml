@@ -213,8 +213,7 @@ spec:
       value: /tmp
     - name: SEEKSTONE_CACHE_DIR
       value: /tmp/seekstone
-    - name: SEEKSTONE_READ_PATHS
-      value: Notes/**,References/**,Categories/**,Templates/**
+    # Reads everything: the journal workflow finds its notes wherever they were moved.
     - name: SEEKSTONE_WRITE_PATHS
       value: Notes/**,References/**
     # No undo journal: it would live in the vault and could be synced.
