@@ -74,7 +74,6 @@ class ObsidianVault(unittest.TestCase):
         self.assertEqual("Notes/**,AI/**,Archives/**", self.env("vault-inbox")["SEEKSTONE_WRITE_PATHS"])
         n8n = self.env("vault-n8n")
         self.assertEqual("Notes/**,References/**", n8n["SEEKSTONE_WRITE_PATHS"])
-        # It reads everything, as the REST API it replaces did: a moved journal note must be found.
         self.assertNotIn("SEEKSTONE_READ_PATHS", n8n)
         self.assertEqual("/audit/vault-n8n.jsonl", n8n["SEEKSTONE_AUDIT_FILE"])
         for name in ("vault-inbox", "vault-n8n"):
