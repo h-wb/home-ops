@@ -69,8 +69,7 @@ flag "--warn" help="Print only the certificates that expire within 30 days, with
 quiet = true
 run = '''
 #!/usr/bin/env bash
-# Reads the talosconfig and kubeconfigs on this machine: this checkout's copies
-# and the ones dotfiles renders from Proton Pass. Renew: docs/admin-certificates.md.
+# This checkout's talosconfig and kubeconfig, and the ~/.kube copy dotfiles renders from Proton Pass.
 set -uo pipefail
 command -v openssl >/dev/null || exit 0
 repo=$(cd "{{config_root}}/.." && pwd)
@@ -106,7 +105,7 @@ for cluster in main edge; do
     done
 done
 for cluster in ${due[@]+"${due[@]}"}; do
-    printf 'Admin certificates of %s are due. Renew: CLUSTER=%s mise run //talos:renew-certs (docs/admin-certificates.md)\n' "$cluster" "$cluster"
+    printf 'Admin certificates of %s are due. Renew: CLUSTER=%s mise run //talos:renew-certs\n' "$cluster" "$cluster"
 done
 exit 0
 '''
