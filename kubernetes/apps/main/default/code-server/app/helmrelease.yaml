@@ -39,7 +39,7 @@ spec:
             env: &env
               HOME: /home/coder
               TZ: Europe/Paris
-              # mise from its image: the shims point at it, in both containers.
+              # The image's mise first: the shims point at it.
               PATH: /opt/mise/usr/local/bin:/home/coder/.local/share/mise/shims:/home/coder/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
             envFrom: &envFrom # Optional, like the token in it: the pod starts without it.
               - secretRef:
@@ -96,7 +96,7 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /home/coder
-      # The dotfiles' mise, pinned by tag (at or above their min_version).
+      # At or above the dotfiles' min_version.
       mise:
         type: image
         image:

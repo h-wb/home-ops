@@ -1,9 +1,6 @@
 #!/bin/sh
-# README.md. The dotfiles' two steps, at the cluster's pin: `fetch` checks the
-# commit out at ~/.dotfiles and saves the pod's environment, `run` applies it
-# (`mise run apply --unattended`); no argument does both. Always exits 0: a
-# failed bootstrap must not stop the pod's own program. Flux substitutes the
-# two variables below; nothing else here may use braces.
+# README.md. Always exits 0: the pod starts anyway. Flux substitutes the two
+# variables below; nothing else here may use braces.
 set -u
 ref=${DOTFILES_REF}
 env=${DOTFILES_ENV}
@@ -11,17 +8,13 @@ dir="$HOME/.dotfiles"
 url=https://github.com/h-wb/dotfiles.git
 state="$HOME/.local/state"
 log="$state/dotfiles.log"
-# mise from the ghcr.io/jdx/mise image (mounted at /opt/mise, or the image
-# itself); its own MISE_* settings point at /mise, not this home.
+# The mise image's MISE_* point at /mise, not this home.
 unset MISE_CONFIG_DIR MISE_DATA_DIR MISE_CACHE_DIR MISE_ENV
-# A pod never rewrites its checkout: no lockfile writes, so the next start can move it.
+# A start must not dirty the checkout the next one moves.
 export MISE_LOCKED=1
 export PATH="/opt/mise/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"
 mkdir -p "$state"
 
-# A failed fetch, or a local change in the way, keeps the commit already
-# checked out (the dotfiles report it `stale`). Only these lines reach the
-# pod's log; mise's output goes to the volume.
 fetch() {
 	timeout 600 mise -E "$env" bootstrap --from "$url?ref=$ref" --update --from-dir "$dir" \
 		--config-dir . --save-env --yes --only final-hook >>"$log" 2>&1 ||
