@@ -2,13 +2,11 @@
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
 apiVersion: kustomize.config.k8s.io/v1alpha1
 kind: Component
-# The hook that bootstraps a workstation pod from the owner's dotfiles. The app
-# decides when it runs (code-server: an init container) by mounting
-# ${APP}-dotfiles and calling `sh <mount>/dotfiles-bootstrap [pod-bootstrap
-# options]`; the dotfiles' scripts/pod-bootstrap decides what it does.
+# No name hash: the app mounts it by name; Reloader rolls the pod on a new pin.
 configMapGenerator:
   - name: ${APP}-dotfiles
     files:
       - dotfiles-bootstrap
+      - dotfiles-bootstrap.desktop
     options:
       disableNameSuffixHash: true

@@ -80,7 +80,7 @@ spec:
     supportsVision: true
     supportsFunctionCalling: true
 ---
-# GLM models served by Mistral's API: trusted with private data like Mistral's own (../../../DESIGN.md).
+# GLM models served by Mistral's API: trusted with private data like Mistral's own (../../../README.md).
 apiVersion: litellm.home-operations.com/v1alpha1
 kind: LiteLLMModel
 metadata:

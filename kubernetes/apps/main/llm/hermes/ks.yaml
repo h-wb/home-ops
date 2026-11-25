@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/kustomize.toolkit.fluxcd.io/kustomization_v1.json
-# The assistant (../DESIGN.md): one hardened pod in the private scope, its tools
+# The assistant (../README.md): one hardened pod in the private scope, its tools
 # through the private ToolHive gateway, its memories in the private Memini, its
 # models through its own LiteLLM key.
 apiVersion: kustomize.toolkit.fluxcd.io/v1

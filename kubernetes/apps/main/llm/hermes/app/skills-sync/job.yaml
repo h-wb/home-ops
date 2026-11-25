@@ -27,12 +27,16 @@ spec:
             - /bin/sh
             - /scripts/sync.sh
           env:
-            # h-wb/dotfiles origin/master, "feat(ai): shared paseo-workspace-hygiene skill (#22)".
-            # DOTFILES_TAR_SHA256 is the codeload tarball for that ref; bump both together.
-            - name: DOTFILES_REF
-              value: aee21dd9b0be69afc0a6845f986cd3ea89b2b1ee
-            - name: DOTFILES_TAR_SHA256
-              value: 33c2a0b92cfe65557928b70302db1651d482858e31be8f7e546727ec5820ddb8
+            # The skill groups the assistant takes from h-wb/skills (groups/<group>/),
+            # space-separated.
+            - name: SKILL_GROUPS
+              value: core
+            # h-wb/skills main. SKILLS_TAR_SHA256 is the codeload tarball for that
+            # ref; bump both together.
+            - name: SKILLS_REF
+              value: 85572b7015fdaf337cbfdb8d907a69e2ac74cecd
+            - name: SKILLS_TAR_SHA256
+              value: 893685ef8ae37dea347facd8b7fee8e48ed86f3a2bb11ab04e77a2240c74a02f
           resources:
             requests:
               cpu: 10m

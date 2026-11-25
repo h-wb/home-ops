@@ -28,13 +28,16 @@ spec:
         - workload: talos
         - workload: anki
         - workload: excel
-        # Private tier data (vault, personal tasks) never appears in this list: general
-        # gets the shared board, private gets the whole catalogue via mcp-private.
-        - workload: homelab-tasks
+        # No private data in this list.
+        - workload: orbit
         # TEMPORARY (2026-11): cross-check of the Miroir imports (browser history,
         # Messages) from a general Paseo session, counts and schema only. Revert
         # this block once the checks are done; the warehouse is private-tier data.
         - workload: metabase
+        # TEMPORARY (2026-11): the vault's Notes/ folder, read-only
+        # (mcp-servers/vault/seekstone-review.yaml), to sort the homelab notes
+        # between the vault and this repo. Remove with that file.
+        - workload: vault-review
     optimizer:
       embeddingModel: embed
       embeddingProvider: openai
@@ -65,6 +68,12 @@ spec:
       key: password
   podTemplateSpec:
     spec:
+      # Orbit answers only on its public origin, through the internal gateway
+      # (mcp-servers/orbit); that name does not resolve inside the cluster.
+      hostAliases:
+        - ip: ${SVC_GATEWAY_INTERNAL}
+          hostnames:
+            - orbit.${SECRET_DOMAIN}
       containers:
         - name: vmcp
           env:

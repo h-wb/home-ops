@@ -11,11 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
-    # Miroir's own metadata database (schema miroir_meta): operations, attempts,
-    # the artifact registry, and encrypted connection secrets — decoupled from
-    # postgres-metabase, where the warehouse data and dashboards stay
-    # (pipelines decision 015). Net-new cluster, Barman backups via the plugin.
-    - ../../../../../components/cnpg/initdb
+    - ../../../../../components/cnpg/restore
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database

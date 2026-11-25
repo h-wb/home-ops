@@ -1,16 +1,26 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+reviewed: 2026-11-24
+summary: Shows how deployed clients reach models, tools and memory and where they differ from the design.
+topics:
+  - "[[Model gateway]]"
+  - "[[Tool gateway]]"
+  - "[[Agent memory]]"
+created: 2026-11-09T22:07
+---
+
 # Wiring
 
 How each agent is connected today: which path its model calls take, where its
-tools come from, and where it remembers things. The design it should match is
-[DESIGN.md](../DESIGN.md); the flows are in [flows.md](./flows.md).
+tools come from, and where it remembers things. The design it should match is in the
+handbook's [Decisions](https://github.com/h-wb/handbook/tree/main/Decisions); the flows are in
+[flows.md](./flows.md).
 
-Read a diagram left to right. A solid arrow is as designed. A dotted arrow
-differs from the design, and is explained under
-[Differs from the design](#differs-from-the-design).
-
-Each drawing is made by `build.py` from the Mermaid text folded under it. Edit
-the text, keep to the arrow and node forms already used, run the script, and
-commit both.
+Read a diagram left to right. Orange boxes are private, blue general, grey shared, white
+outside. A solid arrow is as designed. A dotted red arrow differs from the design, and is
+explained under [Differs from the design](#differs-from-the-design).
 
 ## At a glance
 
@@ -34,13 +44,8 @@ servers are defined once, in dotfiles (`conf.d/ai/`), and rendered per scope.
 Hermes, in its own pod, private scope. Its network rules allow the
 destinations below and DNS, nothing else. You reach it in the messaging app,
 or through its dashboard on the internal gateway. The private workshop can
-also open a chat into it through an exec bridge, which goes once the
-messaging app is in daily use.
-
-![Wiring: The assistant](./img/wiring-the-assistant.svg)
-
-<details>
-<summary>The same diagram as text</summary>
+also open a chat into it through an exec bridge (`hermes/app/rbac.yaml`, the
+`hermes-private` provider in `paseo/private/config/paseo.json`), still deployed.
 
 ```mermaid
 flowchart LR
@@ -63,66 +68,68 @@ flowchart LR
     D -->|"password; envoy-internal only"| A
     A -->|"daemon password; every start asks"| GW
     A -->|"daemon password; every start asks"| PW
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    classDef shared fill:#eef1f4,stroke:#5a6876,color:#17212b
+    classDef outside fill:#fbfcfd,stroke:#17212b,color:#17212b
 ```
-
-</details>
 
 - Workshops: it can look at either daemon's profiles, workspaces and agents
   freely, and start an agent or send one a prompt after you approve that one
-  call. The prompt is on the approval card. Nothing else of the daemon is
-  registered: no terminal, no browser, no schedules.
+  call. The approval card shows the prompt's first 1200 characters; a longer
+  prompt is cut off on your screen, not in what is sent. Seven tools per daemon
+  are registered and nothing else: no terminal, no browser, no schedules. The
+  daemon password itself would open the rest.
 - Matrix: the only messaging app. The bot is on our own homeserver
   (`default/continuwuity`), reached in-cluster; the homeserver, not the pod,
   federates with Beeper. It requires end-to-end encryption and answers the
-  Matrix IDs on its allow list; approvals are reactions. Routines deliver to
+  Matrix IDs on its allow list; approvals are answered with a reaction (not checked). Routines deliver to
   the Inbox room. Telegram is switched off, and the pod's network rules allow
   no destination on the internet.
-- Dashboard: `hermes.<domain>` on `envoy-internal`, password sign-in; the only
+- Dashboard: `hermes.${SECRET_DOMAIN}` on `envoy-internal`, password sign-in; the only
   inbound connection the pod's rules allow. The iOS apps use the same address.
-- Key: `hermes-private`, four models served by Mistral's API: Mistral Medium
-  (the default), Small, Large 4 and GLM 5.3. You switch per chat. Small does
-  the background jobs; it is too weak to work the tools from a plain request.
+- Key: `hermes-private`, five models served by Mistral's API: Mistral Medium
+  (the default), Small, Large 4, GLM 5.3, and Voxtral for voice notes. You switch
+  per chat. Small does the background jobs; it is too weak to work the tools from a
+  plain request.
 - Its gateway serves the private catalogue without the search step: Hermes
   searches tools itself, and a call to any tool not marked read-only waits for
   your yes.
-- Of the 690 tools, 401 are marked read-only by their servers. Three servers
-  mark none (arr, kubesearch, overseerr), so even their lookups ask until you
-  approve a tool for good.
+- The board (Orbit) is general: the gateway lists its read-only task tools
+  only, so the assistant reads your ready steps for the briefing and cannot
+  write a task or read a document there. Build work you tell it, it drafts for
+  you to add.
+- Some servers mark no tool read-only (arr, kubesearch and overseerr when last counted, not
+  checked again), so even their lookups ask until you approve a tool for good. Tools approved
+  for good are `command_allowlist` in `hermes/app/config.yaml`.
 - Its memory plugin recalls before a turn and records after it, like the
   workshops' one. General memory it can only read.
 - Routines: skills in `hermes/app/routines/`, mounted read-only. One whose
   front matter has a schedule gets a job when the pod starts, on Toronto time,
-  delivered to the Inbox room on Matrix: the briefing at 07:00, a nudge at 12:30, a check-in
-  at 20:30, reminders every half hour from 08:00 to 21:30, silent when
-  nothing is coming up, and a weekly review on Sunday at 18:00. The briefing and check-in see every overdue task, not
-  only the last week. The briefing proposes up to three focus tasks (high
-  priority once you confirm) and offers one old undated task a day; the
-  check-in opens with what got done and suggests a list for each inbox task. A routine's message joins
-  the chat, so you can answer it; the `task-followup` skill then completes,
-  moves, drops or files the tasks and notes each postponement as a comment on
-  the task.
+  delivered to the Inbox room on Matrix: the briefing at 07:00, a location review
+  at 08:30, a nudge at 12:30, a check-in at 20:30, reminders every half hour from
+  08:00 to 21:30, and a weekly review on Sunday at 18:00. What each does is in its
+  `SKILL.md`. A routine's message joins the chat, so you can answer it; the
+  `task-followup` skill then acts on the tasks.
 - A scheduled run has nobody to ask, so a call that needs a yes is refused.
-  The TickTick task writes approved for good need none, so a scheduled run
-  could make them; the routines are written to read only, which is an
-  instruction and not a lock.
-- Documentation: its `system-docs` skill lists these pages, and it reads them
-  from git through the GitHub tool. It holds no copy.
-- Shared skills: the general skills folder in dotfiles (`conf.d/ai/skills`) is
-  synced by a Job (`hermes/app/skills-sync/`) at a pinned dotfiles commit into
-  a volume mounted read-only at `/opt/dotfiles-skills`, listed in
-  `skills.external_dirs` next to the routines. The pod itself cannot reach
-  GitHub.
+  The TickTick task writes and the location review's day pass are approved for
+  good, so a scheduled run can make them; the other routines are written to read
+  only, which is an instruction and not a lock.
+- Documentation: the shared `handbook` skill says how to find the one page
+  that answers, and it reads pages from git through the GitHub tool. It holds
+  no copy.
+- Shared skills: the skills of the groups it takes (`SKILL_GROUPS` in
+  `hermes/app/skills-sync/job.yaml`: `core`, which is `handbook`, `board`,
+  `tool-gateway`) are copied from `h-wb/skills` at a pinned commit by a Job into
+  a volume mounted read-only at `/opt/shared-skills`, listed in
+  `skills.external_dirs` next to the routines. The pod itself cannot reach GitHub
+  ([hermes](../hermes/README.md#skills)).
 - Skills and sub-agents are on. Hermes's bundled skills are kept out, except
   the one about itself, which it always adds back. A skill it writes itself
   waits for your yes. Sub-agents get the assistant's tools and no others. It
   cannot schedule jobs by itself.
 
 ## Claude Code in the general workshop
-
-![Wiring: Claude Code in the general workshop](./img/wiring-claude-code-in-the-general-workshop.svg)
-
-<details>
-<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -135,20 +142,17 @@ flowchart LR
     L -->|"passes it on"| AN
     A -->|"no key, network rule"| T
     A -->|"client key"| M
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    classDef shared fill:#eef1f4,stroke:#5a6876,color:#17212b
+    classDef outside fill:#fbfcfd,stroke:#17212b,color:#17212b
 ```
-
-</details>
 
 - The gateway holds no Anthropic key: a request without the subscription login
   fails instead of being billed.
 - The pod has no Kubernetes credentials; cluster work goes through the tools.
 
 ## OpenCode in the general workshop
-
-![Wiring: OpenCode in the general workshop](./img/wiring-opencode-in-the-general-workshop.svg)
-
-<details>
-<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -165,20 +169,17 @@ flowchart LR
     L --> LO
     A -->|"no key, network rule"| T
     A -->|"client key, server and plugin"| M
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    classDef shared fill:#eef1f4,stroke:#5a6876,color:#17212b
+    classDef outside fill:#fbfcfd,stroke:#17212b,color:#17212b
 ```
-
-</details>
 
 - Roles today: coordinator on ChatGPT; build, plan and explorer on Mistral
   models; the reviewer on a GLM model.
-- The pod also holds a key for OpenCode's own hosted models. None is in use.
+- The pod also holds a key for OpenCode's own hosted models. No profile or mode uses them.
 
 ## OpenCode in the private workshop
-
-![Wiring: OpenCode in the private workshop](./img/wiring-opencode-in-the-private-workshop.svg)
-
-<details>
-<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -195,9 +196,11 @@ flowchart LR
     A -->|"no key, network rule"| T
     A -->|"client key, server and plugin"| M
     A -->|"read-only key, lookups only"| G
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    classDef shared fill:#eef1f4,stroke:#5a6876,color:#17212b
+    classDef outside fill:#fbfcfd,stroke:#17212b,color:#17212b
 ```
-
-</details>
 
 - The gateway is the only provider its config allows. OpenCode's own free
   hosted models, which need no key, are switched off here.
@@ -206,12 +209,8 @@ flowchart LR
 
 ## Claude Code, Claude Desktop and Codex on a workstation
 
-General scope. Keys come from Proton Pass through fnox when the agent starts.
-
-![Wiring: Claude Code, Claude Desktop and Codex on a workstation](./img/wiring-claude-code-claude-desktop-and-codex-on-a-workstation.svg)
-
-<details>
-<summary>The same diagram as text</summary>
+General scope. Keys come from Proton Pass through fnox when the agent starts. The workstation
+side is defined in dotfiles and not checked from here.
 
 ```mermaid
 flowchart LR
@@ -222,18 +221,16 @@ flowchart LR
     A -.->|"own login, direct"| V
     A -->|"through Envoy, key per scope"| T
     A -->|"client key"| M
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    classDef shared fill:#eef1f4,stroke:#5a6876,color:#17212b
+    classDef outside fill:#fbfcfd,stroke:#17212b,color:#17212b
+    linkStyle 0 stroke:#c0271d,stroke-width:2px,stroke-dasharray:2 5
 ```
-
-</details>
 
 ## Vibe on a workstation
 
 Private scope.
-
-![Wiring: Vibe on a workstation](./img/wiring-vibe-on-a-workstation.svg)
-
-<details>
-<summary>The same diagram as text</summary>
 
 ```mermaid
 flowchart LR
@@ -244,9 +241,12 @@ flowchart LR
     A -.->|"own key, direct"| MI
     A -->|"through Envoy, key per scope"| T
     A -->|"client key"| M
+    classDef private fill:#fbe9cf,stroke:#9a5200,color:#17212b
+    classDef general fill:#dde9fa,stroke:#1c58b0,color:#17212b
+    classDef shared fill:#eef1f4,stroke:#5a6876,color:#17212b
+    classDef outside fill:#fbfcfd,stroke:#17212b,color:#17212b
+    linkStyle 0 stroke:#c0271d,stroke-width:2px,stroke-dasharray:2 5
 ```
-
-</details>
 
 ## Services that call models
 
@@ -256,20 +256,21 @@ Not agents, but they hold a model gateway key too.
 | ----------------------------- | -------------------------------------- |
 | Both memory stores            | In-cluster embeddings                  |
 | Both tool gateways            | In-cluster embeddings, for tool search |
-| Paperless and its OCR helper  | Local models, in-cluster embeddings    |
+| Paperless                     | Local models, in-cluster embeddings    |
+| Paperless GPT (OCR helper)    | Local models                           |
 | Karakeep                      | ChatGPT, in-cluster embeddings         |
-| Kritika (pull request review) | ChatGPT, in-cluster embeddings         |
+| Kritika (pull request review) | ChatGPT, Mistral Large 4, embeddings   |
 | Lingarr                       | ChatGPT                                |
 
 ## Differs from the design
 
 1. **The private workshop has open internet.** With a shell and private data,
-   a tricked agent could send data out. Kept as it is for now; an open
-   decision.
-2. **The general gateway reports itself unhealthy.** It health-checks every
-   server in the shared catalogue, the Home Assistant one included, which it
-   is rightly not allowed to reach. ToolHive has no setting to skip one.
-   Harmless.
+   a tricked agent could send data out. Kept as it is for now; whether it gets
+   an allowlist is HOMEL-61 on the board.
+2. **The general gateway reports itself Degraded** (22 of 23 backends on
+   2026-11-24). It health-checks every server in the shared catalogue, the Home
+   Assistant one included, which it is rightly not allowed to reach. ToolHive has
+   no setting to skip one. Harmless.
 3. **Workstation agents call their vendors directly.** The gateway is
    in-cluster only. Accepted: tool use is meant to happen in the workshops.
 4. **The general workshop holds a key for OpenCode's hosted models.** A second

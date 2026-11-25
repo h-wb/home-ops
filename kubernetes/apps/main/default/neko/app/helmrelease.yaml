@@ -53,12 +53,32 @@ spec:
         strategy: Recreate
         annotations:
           reloader.stakater.com/auto: "true"
+        initContainers:
+          dotfiles:
+            # It has git; the neko image has none.
+            image: &mise
+              repository: ghcr.io/jdx/mise
+              tag: 2026.11.14-debian
+            command: ["/bin/sh", "/opt/dotfiles/dotfiles-bootstrap", "fetch"]
+            env:
+              HOME: /home/neko
+            securityContext:
+              runAsUser: 1000
+              runAsGroup: 1000
+            resources:
+              requests:
+                cpu: 10m
+                memory: 32Mi
+              limits:
+                memory: 256Mi
         containers:
           app:
             image:
               repository: ghcr.io/m1k1o/neko/intel-xfce
               tag: "3.2.0"
             env:
+              # The image's mise first: the shims point at it.
+              PATH: /opt/mise/usr/local/bin:/home/neko/.local/share/mise/shims:/home/neko/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
               # The 3.2 client is v3-only; legacy just exposes the v2 API.
               NEKO_LEGACY: "false"
               NEKO_DESKTOP_SCREEN: 1920x1080@60
@@ -173,11 +193,6 @@ spec:
           - name: envoy-external
             namespace: network
     persistence:
-      # Provisioning entrypoint: a system-wide autostart entry that clones
-      # ~/.dotfiles on a fresh PVC and then runs the repo's own bootstrap
-      # (apt packages, mise tools, dotfiles, XFCE settings, apps) at every
-      # session start. subPath mounts, because mounting a whole ConfigMap over
-      # /etc/xdg/autostart would hide XFCE's own entries and break the session.
       dns:
         name: neko-dns
         type: configMap
@@ -187,21 +202,29 @@ spec:
               - path: /etc/coredns/Corefile
                 readOnly: true
                 subPath: Corefile
-      provision:
-        name: neko-provision
-        type: configMap
+      # subPath: a whole ConfigMap over /etc/xdg/autostart would hide XFCE's entries.
+      mise:
+        type: image
+        image: *mise
         advancedMounts:
           neko:
             app:
-              - path: /usr/local/bin/neko-provision
+              - path: /opt/mise
                 readOnly: true
-                subPath: neko-provision
-              - path: /etc/xdg/autostart/mise-bootstrap.desktop
+      dotfiles:
+        name: neko-dotfiles
+        type: configMap
+        advancedMounts:
+          neko:
+            dotfiles:
+              - path: /opt/dotfiles
                 readOnly: true
-                subPath: mise-bootstrap.desktop
-              - path: /etc/xdg/autostart/neko-provision-fallback.desktop
+            app:
+              - path: /opt/dotfiles
                 readOnly: true
-                subPath: neko-provision-fallback.desktop
+              - path: /etc/xdg/autostart/dotfiles-bootstrap.desktop
+                readOnly: true
+                subPath: dotfiles-bootstrap.desktop
       # Only /home/neko survives a restart. Anything apt installs lands in
       # /usr and is lost on the next roll.
       home:

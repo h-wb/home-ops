@@ -18,7 +18,6 @@ resources:
   - ./karakeep/ks.yaml
   - ./photon/ks.yaml
   - ./dawarich/ks.yaml
-  # - ./reitti/ks.yaml
   - ./paperless/ks.yaml
   # - ./strava-statistics/ks.yaml
   # - ./fusion/ks.yaml
@@ -26,4 +25,5 @@ resources:
   - ./neko/ks.yaml
   - ./nextcloud/ks.yaml
   - ./obsidian/ks.yaml
+  - ./orbit/ks.yaml
   - ./smart-life-webapp/ks.yaml

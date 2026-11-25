@@ -1,3 +1,15 @@
+---
+area: "[[Homelab]]"
+categories:
+  - "[[Resources]]"
+reviewed: 2026-11-24
+summary: Kritika's rule for reviewing a Renovate pull request here, whose approval auto-merges it.
+topics:
+  - "[[Workshop]]"
+  - "[[Cluster]]"
+created: 2026-10-03T18:04
+---
+
 # Reviewing a Renovate dependency upgrade
 
 This is a Flux GitOps repository for home Kubernetes clusters. A Renovate pull request
@@ -5,6 +17,8 @@ bumps a container image, a Helm chart (HelmRelease / OCIRepository), a GitHub Ac
 tool version. The diff is usually one line, so the review is about what that upgrade does
 to this repository, not about the line itself. An approval lets the pull request
 auto-merge, so do the research before deciding.
+
+[joryirving/home-ops](https://github.com/joryirving/home-ops) is a reference for Renovate and pull request review patterns. Compare effort with value before borrowing a pattern.
 
 ## 1. Identify the upgrade
 
@@ -26,6 +40,23 @@ Use `gh` and `curl`. Cover every version between old and new, not only the newes
 
 If nothing can be found, say so in the summary rather than guessing.
 
+### The dotfiles pin
+
+A bump of `DOTFILES_REF` in `kubernetes/clusters/main/ks.yaml` moves every pod that
+bootstraps from h-wb/dotfiles (neko, code-server, both Paseo pods)
+to a new commit of that repository's `master`. It has no release notes: the commits are
+the changelog. Read them with
+`gh api repos/h-wb/dotfiles/compare/<old>...<new> --jq '.commits[].commit.message'` and
+`gh api repos/h-wb/dotfiles/compare/<old>...<new> --jq '.files[].filename'`, and check the
+CI on the new commit
+(`gh api repos/h-wb/dotfiles/commits/<new>/check-runs --jq '.check_runs[] | [.name, .conclusion]'`:
+one check run per job of its `test` workflow).
+Report as **blocking (p0)** no check runs on the new commit, or any that did not
+conclude `success` (or `skipped`), and a change
+to the `apply` task or its `--unattended` flag, `miserc.toml` or `[env_sets]` that home-ops' callers
+(`components/dotfiles`, `paseo/common/helmrelease.yaml`) do not match. Having read the
+commits counts as having read the changelog.
+
 ## 3. Check what it means here
 
 Read the files in this repository that use the upgraded component: the HelmRelease
@@ -41,8 +72,8 @@ changed or removed one as **important (p1)**, naming the patch file.
 
 konflate renders the pull request's Flux manifests before and after and reports the
 result on the pull request: one comment per cluster from `bot-dupond[bot]`
-(`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` check
-runs on the head commit (`gh api repos/<owner>/<repo>/commits/<sha>/check-runs`). Use it
+(`gh pr view <number> --comments`) and the `Konflate (main)` / `Konflate (edge)` commit
+statuses on the head commit (`gh api repos/<owner>/<repo>/commits/<sha>/status`). Use it
 to judge blast radius: a bump that rewrites many resources, touches a StatefulSet's volume
 claims or selectors, or changes RBAC deserves a closer read than one that only moves an
 image tag.

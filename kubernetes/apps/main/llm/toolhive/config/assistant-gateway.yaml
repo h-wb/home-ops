@@ -19,6 +19,14 @@ spec:
       conflictResolutionConfig:
         prefixFormat: "{workload}_"
       tools:
+        # Read-only: the board flows here, never back.
+        - workload: orbit
+          filter:
+            - get_task
+            - list_tasks
+            - list_task_statuses
+            - list_labels
+            - get_me
         # Same short description as on mcp-private; the original is 8.6k characters.
         - workload: homeassistant
           overrides:
@@ -30,6 +38,11 @@ spec:
     type: anonymous
   outgoingAuth:
     source: discovered
+    backends:
+      orbit:
+        type: externalAuthConfigRef
+        externalAuthConfigRef:
+          name: orbit-read
   telemetryConfigRef:
     name: prometheus
   sessionStorage:
@@ -41,6 +54,12 @@ spec:
       key: password
   podTemplateSpec:
     spec:
+      # Orbit answers only on its public origin, through the internal gateway
+      # (mcp-servers/orbit); that name does not resolve inside the cluster.
+      hostAliases:
+        - ip: ${SVC_GATEWAY_INTERNAL}
+          hostnames:
+            - orbit.${SECRET_DOMAIN}
       containers:
         - name: vmcp
           resources:

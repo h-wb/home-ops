@@ -1,160 +1,45 @@
-# home-ops — AI Assistant Guide
+# home-ops
 
-Home Kubernetes monorepo managed with GitOps. Read this before suggesting changes to the repo.
+Home Kubernetes and NAS GitOps monorepo; start with the [handbook](https://github.com/h-wb/handbook).
 
-The personal system that runs on it (assistant, data warehouse, collectors) has one map:
-[docs/system.md](./docs/system.md). Read it before working on any of those parts, and update
-its row for a part you change.
+Private data only reaches trusted models. This repository is public and general: do not write personal details, private domain names, addresses, or secrets here. Use `${SECRET_DOMAIN}` for the deployment domain.
 
-## Repository layout
+## Layout and cluster selection
 
-```
-home-ops/
-├── kubernetes/
-│   ├── apps/            # per-namespace apps, split per cluster
-│   │   ├── main/        # main cluster (3x Talos: tal0s/1s/2s, all control-plane)
-│   │   └── edge/        # edge cluster
-│   ├── clusters/        # one dir per cluster, holds cluster-apps Flux Kustomization
-│   │   ├── main/
-│   │   └── edge/
-│   └── components/      # reusable kustomize Components consumed by app ks.yaml's
-├── docker/truenas/      # NAS docker-compose stacks deployed by doco-cd (see its README.md)
-├── hosts/edge-mac/      # the Mac under the edge VM: power settings + LaunchAgents (see its README.md)
-├── talos/               # Talos Linux machine configs (one dir per cluster)
-├── bootstrap/           # one-time cluster bootstrap (helmfile.d + mise tasks)
-├── .mise.toml           # tool versions, env (KUBECONFIG from $CLUSTER), root tasks; monorepo config_roots
-├── fnox.toml            # bootstrap secrets from ProtonPass (Bitwarden token, Talos CAs, age key)
-└── age.key              # SOPS age private key (gitignored in spirit; managed locally)
-```
+- `kubernetes/apps/${CLUSTER}/`: apps by namespace; `kubernetes/clusters/${CLUSTER}/`: Flux entry points; `kubernetes/components/`: reusable Kustomize Components.
+- `talos/`: machine configs; `bootstrap/`: one-time cluster setup (Helmfile and mise); [hosts/edge-mac](hosts/edge-mac/README.md): edge host power settings and LaunchAgents.
+- [docker/truenas](docker/truenas/README.md): NAS Compose stacks; doco-cd deploys from `main`, so merging can deploy or remove a stack.
+- [`.mise.toml`](.mise.toml): tool versions, environment and tasks; [bootstrap and secret tools](kubernetes/apps/main/external-secrets/external-secrets/app/README.md#bootstrap-and-local-secret-tools): fnox, Proton Pass, Bitwarden and local `age.key`.
+- See the [README](README.md#kubernetes) for the cluster topology and platform stack.
 
-## Clusters
+Set `CLUSTER=edge` or `CLUSTER=main` in the shell or `.mise.toml` to switch `KUBECONFIG`, `TALOSCONFIG` and the apps tree seen by mise.
 
-| Cluster  | Nodes                                                                       | Purpose                                              |
-| -------- | --------------------------------------------------------------------------- | ---------------------------------------------------- |
-| **main** | 3× Talos (tal0s, tal1s, tal2s — all control-plane, NVMe storage, Rook/Ceph) | Production homelab — auth, photos, media, automation |
-| **edge** | 1× Talos VM (UTM on an Intel Mac, `hosts/edge-mac/`)                        | Edge services / lighter workloads                    |
+## GitOps
 
-Switch clusters by setting `CLUSTER=edge` (or `main`) in the shell or `.mise.toml`. That swaps `KUBECONFIG`, `TALOSCONFIG`, and the apps tree mise sees.
+After a push, Flux fetches Git and reconciles `cluster-apps` at `kubernetes/clusters/${CLUSTER}/ks.yaml`. Its postBuild substitution resolves values in child `ks.yaml` files first. Each child then builds its app resources and runs its own postBuild substitution with inherited cluster values and app overrides before applying HelmReleases and raw manifests. `${SECRET_DOMAIN}`, `${NFS_ADDR}`, `${CLUSTER}` and `${DOTFILES_REF}` are cluster-level inputs. `${DOTFILES_REF}` is the one dotfiles commit every pod bootstraps from; a pod declares only its `DOTFILES_ENV` (`kubernetes/components/dotfiles/README.md`).
 
-## Key technologies
+The parent strategic-merge patch supplies Helm install and upgrade defaults and replaces the child `spec.patches` list. Put app resource patches in a Kustomize Component referenced under `components`; the Component's own `patches` run in the child build.
 
-| Category            | Tool                                                                                              | Notes                                                           |
-| ------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| OS                  | Talos Linux                                                                                       | configs in `talos/`                                             |
-| GitOps              | Flux                                                                                              | recursive scan of `kubernetes/apps/${CLUSTER}/`                 |
-| Networking          | Cilium (eBPF)                                                                                     | CNI                                                             |
-| Gateway             | Envoy Gateway                                                                                     | `envoy-internal` + `envoy-external` Gateways in `network` ns    |
-| DNS                 | external-dns                                                                                      | syncs HTTPRoutes to Cloudflare / k8s-gateway                    |
-| Secrets             | external-secrets + **Bitwarden Secrets Manager** (`bitwarden-secrets-manager` ClusterSecretStore) | not 1Password                                                   |
-| Sensitive Git files | SOPS + age (`age.key` at repo root)                                                               |                                                                 |
-| Postgres            | **CloudNativePG** + plugin-barman-cloud                                                           | migrated off CrunchyData PGO in 2026-05                         |
-| Caches/KV           | Dragonfly                                                                                         | redis-compatible                                                |
-| Block storage       | Rook-Ceph (`ceph-block`, `ceph-filesystem`, `ceph-bucket`)                                        | hyper-converged on the 3 Talos nodes                            |
-| Local hostpath      | `local-hostpath` storage class (`WaitForFirstConsumer`)                                           | used by CNPG, etc.                                              |
-| Backup              | kopiur (Kopia repo on Garage S3), CNPG → Barman → Garage S3                                       |                                                                 |
-| Object storage      | Garage on the NAS (`s3.${SECRET_DOMAIN}`, `garage.storage.svc`)                                   | selector-less Service → NAS; for CNPG Barman + kopiur           |
-| OCI mirror          | spegel                                                                                            | per-node local image cache                                      |
-| CI                  | Renovate + GitHub Actions                                                                         |                                                                 |
-| App chart           | bjw-s `app-template` (v5.x)                                                                       | shared OCIRepository at `components/common/repos/app-template/` |
+## New apps
 
-## GitOps flow
+- Use `kubernetes/apps/${CLUSTER}/${ns}/${app}/ks.yaml` and `app/{helmrelease.yaml,kustomization.yaml,...}`. Match the Flux Kustomization name to the app name and use the enclosing namespace.
+- Most apps use a HelmRelease with bjw-s `app-template` v5.x and the [shared OCIRepository](kubernetes/components/common/repos/app-template/). Reference Components by relative path. Apps that need an upstream chart use it directly.
+- Set explicit `requests.memory` lower than `limits.memory`. Without a request, Kubernetes uses the limit as the request, which can overcommit the cluster and block scheduling.
+- Keep `cnpg/restore` for steady-state databases; see the [CNPG reference](kubernetes/components/cnpg/README.md) for bootstrap, recovery and scheduling.
+- Use `mise run encrypt` and `mise run decrypt` for SOPS files. Bootstrap and Talos tasks that need the `Machines` vault are workstation-only.
 
-```
-git push → Flux GitRepository fetches → cluster-apps Kustomization reconciles →
-  child ks.yaml's reconcile → HelmReleases / raw manifests → k8s resources
-```
+## Check a change
 
-- Cluster entry point: `kubernetes/clusters/${CLUSTER}/ks.yaml` (the `cluster-apps` Flux Kustomization).
-- That parent does **postBuild substitution** (Level 1) for variables that appear in child `ks.yaml` files themselves.
-- It also applies a **strategic-merge patch** to every child Kustomization that injects defaults — including `spec.patches` (with HelmRelease default install/upgrade settings).
-- ⚠️ **Gotcha**: because of that parent patch, **`spec.patches` you set in a child `ks.yaml` gets overwritten** (kustomize replaces the list, doesn't merge). If you need to patch a kustomize resource, do it via a **Component** (`components: [...]`), not via `spec.patches` in the child ks. (Components' own `patches:` blocks survive — they're applied during the kustomize build, before the parent override touches anything.)
+- Find scoped tasks with `mise tasks ls --all`; run them as `mise run //bootstrap:default` or `mise run //docker/truenas:garage:bootstrap`. Config roots also include `hosts/edge-mac`, `kubernetes` and `talos`.
+- On a workstation, check `flux get all -A` and `kubectl get events -A --sort-by=.lastTimestamp | tail`. For an unhealthy app, inspect `kubectl get hr -n <ns> <app>`, then pod logs and events.
+- Reconcile the Git source with `flux -n flux-system reconcile source git flux-system` and an app with `flux -n <ns> reconcile kustomization <name>`. Use `flux -n <ns> reconcile helmrelease <name> --force` only when forcing a Helm release action is intended.
+- A workshop pod has no kubeconfig. Use the [ToolHive tool gateway](kubernetes/apps/main/llm/paseo/README.md#general-cluster-access-through-toolhive), not bare `kubectl` or `flux`.
 
-## Postgres (CNPG, post-2026-05 migration)
+## Pitfalls
 
-`kubernetes/components/cnpg/` — vrozaksen-style structure:
+- Kustomize patch targets use literal names before Flux substitution. Omit `name` and match by group and kind only if that selects the intended resource.
+- `local-hostpath` uses `WaitForFirstConsumer`: if a pod cannot schedule, its PVC stays Pending.
+- Helm values may not overwrite app-generated config on persistent volumes; use the app's own override mechanism. See the [Nextcloud example](kubernetes/components/cnpg/README.md#when-it-goes-wrong).
+- Do not add `# renovate:` comments to NAS Compose files; the [Compose manager](docker/truenas/README.md) already tracks their images. See [upgrade review](.kritika/renovate.md) before approving Renovate PRs.
 
-```
-cnpg/
-├── base/              # Cluster (no bootstrap), ObjectStore, ScheduledBackup, ExternalSecret
-├── initdb/            # bootstrap.initdb (plain empty DB) — for net-new apps
-├── import/            # bootstrap.initdb.import (one-shot live import from external Postgres)
-├── restore/           # bootstrap.recovery from Barman ← default for steady-state apps
-├── pooler/            # opt-in PgBouncer Pooler
-└── extensions/
-    └── vchord/        # PG 18 extension-mount for VectorChord (immich)
-```
-
-Apps pick the bootstrap mode by directory reference:
-
-```yaml
-# kubernetes/apps/main/<ns>/<app>/ks.yaml
-components:
-  - ../../../../../components/cnpg/restore # production default
-dependsOn:
-  - name: plugin-barman-cloud # gates transitively on cloudnative-pg
-    namespace: database
-healthCheckExprs:
-  - apiVersion: postgresql.cnpg.io/v1
-    kind: Cluster
-    failed: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'False')
-    current: status.conditions.filter(e, e.type == 'Ready').all(e, e.status == 'True')
-postBuild:
-  substitute:
-    APP: <app>
-    # Optional: CNPG_IMAGE, CNPG_VERSION, CNPG_SIZE, CNPG_POOLER_MODE, etc.
-```
-
-- Cluster names: `postgres-${APP}`. Generated app secret: `postgres-${APP}-app` with `uri`, `host`, `password`, `username`, `port`, `dbname`, `pgpass`, `jdbc-uri`.
-- Connect direct via `postgres-${APP}-rw.${NS}.svc`. Pooler (when present) is `pooler-${APP}-rw`.
-- Extensions: standard CNPG postgres image is used; per-app extension `.so` files are mounted from separate `vchord-scratch`-style images via `spec.postgresql.extensions` (PG 18 feature). See `cnpg/extensions/vchord/` for the pattern — it's a Component you reference alongside `cnpg/restore` and the Cluster picks up the patch.
-- Image override (PostGIS, etc.): pass `CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis` + `CNPG_VERSION: 18-3-system-trixie` in the app's `postBuild.substitute`. No variant Component needed.
-
-## TrueNAS (doco-cd)
-
-- NAS containers (Plex, exporters, Garage) are GitOps-deployed from `docker/truenas/NN-name/docker-compose.yaml` by doco-cd (single instance, `SELF_UPDATE_ENABLED`). No TrueNAS catalog apps; app data in `/mnt/ssd-storage/docker/<app>`.
-- Per-stack secrets: plain Bitwarden SM secret **IDs** in the stack's `.doco-cd.yaml` (`external_secrets`). doco-cd can't read fields from the JSON-per-app secrets.
-- Don't add `# renovate:` comments to compose files — the built-in docker-compose manager handles them and the generic regex would misparse `image:` lines.
-- Rebuild / Garage restore runbook: `docker/truenas/README.md`.
-
-## Secrets
-
-- **Bitwarden Secrets Manager** is the ClusterSecretStore. Per-app secrets are usually `ExternalSecret`s under each app's `app/externalsecret.yaml`, extracting from a Bitwarden item by name.
-- The CNPG component's S3 creds (`postgresql-bucket` Bitwarden item) are shared across all apps.
-- SOPS-encrypted secrets in Git use the age key at `age.key`. `mise run encrypt` / `mise run decrypt` handle `*.sops.yaml`.
-- Bootstrap-time secrets (the Bitwarden machine token, Talos CAs) come from ProtonPass via `fnox` (`fnox.toml`), so they work with the cluster down.
-- Inside this repo, pass-cli/fnox use a separate session (`PROTON_PASS_SESSION_DIR` in `.mise.toml`). On macOS, its `home-ops` agent token lives in Keychain (`pass-cli-home-ops`) and must have viewer access to the `Machines` vault, where the bootstrap items live; expires 2027-10 → `pass-cli agent renew` outside the repo, then `mise run pass:login`.
-- `pass:login` extends dotfiles' global `proton-login` mise task template. Install/update dotfiles first. It reads `pass-cli-home-ops` from Keychain on macOS or the pod's `PROTON_PASS_TOKEN` on Linux. Session storage is separate; the selected token's grants determine access (the pod token has no `Machines` grant, so bootstrap and Talos tasks fail in pods by design). Secret-consuming tasks depend on login.
-- Hand-run `bws`: `mise run //docker/truenas:bws -- <args>` (token from fnox `BWS_ACCESS_TOKEN`, Pass item `Machines/bws-cli`; never put it in `.mise.local.toml`).
-
-## Conventions
-
-- One directory per app: `kubernetes/apps/${CLUSTER}/${ns}/${app}/{ks.yaml, app/{helmrelease.yaml, kustomization.yaml, ...}}`.
-- App namespace and Flux Kustomization name match the app name.
-- Almost everything is a `HelmRelease`, mostly using bjw-s `app-template` v5.x (shared OCIRepository at `components/common/repos/app-template/`). A few use upstream charts (nextcloud, cloudnative-pg, kube-prometheus-stack, etc.).
-- Reusable Components live at `kubernetes/components/{anubis,cnpg,common,dotfiles,dragonfly,gpu,kopiur,oidc,tailscale,zeroscaler}/`. App ks.yaml's reference them via relative paths.
-- `${SECRET_DOMAIN}`, `${NFS_ADDR}`, `${CLUSTER}` come from cluster-level postBuild substitution.
-- Memory: set **explicit `requests.memory`** lower than `limits.memory`. Kubernetes defaults request=limit if request is omitted, which over-commits the scheduler. (Learned the hard way after `Cluster has overcommitted memory` alert.)
-
-## Operations
-
-- **From a Paseo pod there is no kubeconfig** (token automount off, API egress denied, `kubernetes/clusters/*/kubeconfig` is gitignored/workstation-only) — bare `kubectl`/`flux` fall back to localhost:8080. Use the ToolHive MCP tools instead (`kubectl_kubectl_get`, `flux_reconcile_flux_resource`, …); see `kubernetes/apps/main/llm/paseo/README.md` → "General cluster access through ToolHive". The CLI commands below are the workstation flow.
-- **Status**: `flux get all -A` ; `kubectl get events -A --sort-by=.lastTimestamp | tail`
-- **Reconcile a thing**: `flux -n <ns> reconcile kustomization <name>` (use `--force` for `HelmRelease`)
-- **Fetch latest git**: `flux -n flux-system reconcile source git flux-system`
-- **App in trouble**: check `kubectl get hr -n <ns> <app>`, then pod logs, then events.
-- **Mise tasks**: `mise tasks ls --all`. Monorepo config roots (`bootstrap`, `docker/truenas`, `hosts/edge-mac`, `kubernetes`, `talos`) — run as `mise run //bootstrap:default`, `mise run //docker/truenas:garage:bootstrap`, etc.
-- **Stale pod blocking PVC**: usually `kubectl delete pod -n <ns> <pod>` and CNPG/whoever owns it will recreate. For wedged CNPG bootstrap, `kubectl delete pvc -l cnpg.io/cluster=<cluster>` and the operator re-bootstraps.
-
-## Common pitfalls
-
-- **Helm-managed config files persist** beyond chart values. Apps like Nextcloud write to `config.php` on the persistent volume during _initial install only_ — later `externalDatabase.host` changes in the HR are ignored. Override via the app's own `local.config.php` (or equivalent) instead of relying on Helm regenerating.
-- **`spec.patches` on child Kustomizations doesn't stick** (see Gotcha above). Use a Component.
-- **JSON Patch target name** in kustomize patches uses the _literal pre-substitution_ name. The Cluster's `metadata.name` is `postgres-${APP}` during kustomize, before Flux postBuild. Target by group+kind (and skip `name:`) to avoid this footgun.
-- **`local-hostpath` is `WaitForFirstConsumer`**: PVCs stay Pending until a pod is scheduled. If the pod can't schedule (memory pressure, anti-affinity), the PVC also hangs.
-- **Pod anti-affinity `required`** on CNPG instances forces one-per-node. If a node is full and the cluster has 3 instances, instance 3 will be unschedulable. Either soften to `preferred` per-app (`CNPG_ANTI_AFFINITY: preferred` substitute) or free memory.
-
-## When in doubt
-
-- Mirror conventions from existing apps under the same namespace.
-- Reference `vrozaksen/home-ops` (vrozaksen) for vrozaksen's CNPG patterns; `joryirving/home-ops` (jory) for renovate/PR-review patterns. Both cloned at `~/Repositories/{jory,vrozaksen}` locally.
-- Don't introduce a pattern just because it's elsewhere. Compare effort vs value before adopting.
+When in doubt, mirror the neighbouring app.

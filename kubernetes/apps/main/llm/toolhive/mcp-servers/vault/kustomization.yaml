@@ -12,6 +12,8 @@ resources:
   - ./helmrelease.yaml
   - ./networkpolicy.yaml
   - ./seekstone.yaml
+  # TEMPORARY (2026-11), see the file.
+  - ./seekstone-review.yaml
 configMapGenerator:
   # Pinned npm sources for the Seekstone init containers. Referenced by literal name
   # inside the MCPServer CRs (kustomize cannot rewrite references in arbitrary CRs),

@@ -1,6 +1,6 @@
 ---
 name: weekly-review
-description: Send the weekly review (wins, inbox, overdue, waiting, each active project's next step, the next seven days, one idea from the vault). Use when the weekly-review routine runs or when asked for the weekly review.
+description: Send the weekly review (wins, inbox, overdue, waiting, each active project's next step, the next seven days, one idea from the vault, tasks that could be parked in Someday). Use when the weekly-review routine runs or when asked for the weekly review.
 metadata:
   schedule: "0 18 * * 0"
   model: mistral/mistral-large-4
@@ -40,6 +40,12 @@ found, search for the part after `mcp__tools__`. The timezone is
    `categories` contains `Ideas` and whose `status` contains `seed`, oldest
    `modified` first. Take the one whose position, counted from 0, is this
    week's number modulo how many there are.
+7. Could park: `mcp__tools__ticktick_list_projects` gives the ids of the
+   lists `Someday` and the Inbox. From step 2, the tasks outside both with
+   no `dueDate`, `startDate`, `repeatFlag` or `parentId`, not priority 5,
+   not tagged `waiting`, not a project's step from step 4, and a
+   `modifiedTime` more than 30 days ago. The three oldest. If the list call
+   fails, leave this out. Nothing moves from here.
 
 If a call fails, go on with the others and say which source is missing.
 
@@ -71,14 +77,17 @@ Next seven days
 One idea
 6. <idea> (seed since <date>): task, project, or leave it?
 
-Answer with numbers, for example "1 ok, 2 drop, 5 book flights Friday, 6 leave".
+Could park in Someday
+7. <task> (in <list>, untouched since <date>)
+
+Answer with numbers, for example "1 ok, 2 drop, 5 book flights Friday, 6 leave, park 7".
 ```
 
 - Number only the items that need an answer, in one sequence. Done tasks,
   the vault inbox line and the next seven days get a dash.
 - Done this week: the count, then at most five titles, the most recent first.
-- For each inbox task, suggest a list as the evening check-in does: Admin,
-  Health, Growth, Homelab, Life, or `drop`.
+- For each inbox task, suggest where it goes as the evening check-in does.
+- Could park needs no answer: a task moves only on `park` and its number.
 - A project with a `url` and no `ticktick` keeps its steps in a repo: write
   "<project>: steps in the repo", without a number.
 - More than three active projects: add "More than three active: which goes

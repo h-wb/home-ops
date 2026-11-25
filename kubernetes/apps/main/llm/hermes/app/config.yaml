@@ -111,14 +111,20 @@ agent:
     - file
     - browser
     - computer_use
-# Routines (./routines) and the shared dotfiles skills (skills-sync/), both
-# mounted read-only. A skill the assistant writes itself waits for a yes in
+# Routines (./routines) and the skills it takes from h-wb/skills (skills-sync/),
+# both mounted read-only. A skill the assistant writes itself waits for a yes in
 # chat (/skills pending).
 skills:
   external_dirs:
     - /opt/hermes-routines/skills
-    - /opt/dotfiles-skills
+    - /opt/shared-skills
   write_approval: true
+  # How much of each skill's description the model sees in the skill index. The
+  # default, 60 characters, cuts off the part that says when to use a skill.
+  index_desc_limit: 1024
+tools:
+  tool_search:
+    enabled: "on"
 # Sub-agents get the parent's toolsets, so no shell there either.
 delegation:
   max_spawn_depth: 1

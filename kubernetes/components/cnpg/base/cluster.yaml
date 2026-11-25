@@ -29,7 +29,7 @@ spec:
     size: ${CNPG_SIZE:=2Gi}
     storageClass: ${CNPG_STORAGECLASS:=local-hostpath}
   enableSuperuserAccess: true
-  # Bootstrap method must be provided by a component (initdb, import, or restore)
+  # Bootstrap method must be provided by a component (initdb or restore)
   # AFFINITY configuration - controls pod placement across nodes
   affinity:
     enablePodAntiAffinity: true

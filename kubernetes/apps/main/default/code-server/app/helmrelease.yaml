@@ -39,6 +39,8 @@ spec:
             env: &env
               HOME: /home/coder
               TZ: Europe/Paris
+              # The image's mise first: the shims point at it.
+              PATH: /opt/mise/usr/local/bin:/home/coder/.local/share/mise/shims:/home/coder/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
             envFrom: &envFrom # Optional, like the token in it: the pod starts without it.
               - secretRef:
                   name: code-server-secret
@@ -94,6 +96,15 @@ spec:
         existingClaim: *app
         globalMounts:
           - path: /home/coder
+      # At or above the dotfiles' min_version.
+      mise:
+        type: image
+        image:
+          repository: ghcr.io/jdx/mise
+          tag: 2026.11.14-debian
+        globalMounts:
+          - path: /opt/mise
+            readOnly: true
       dotfiles:
         type: configMap
         name: code-server-dotfiles

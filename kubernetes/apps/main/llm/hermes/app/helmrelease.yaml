@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
-# The assistant (../../DESIGN.md): private scope only. The pod name stays
+# The assistant (../../README.md): private scope only. The pod name stays
 # hermes-private-0, which the Paseo provider execs into (rbac.yaml).
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
@@ -47,7 +47,7 @@ spec:
           routines:
             image: &image
               repository: docker.io/nousresearch/hermes-agent
-              tag: v0.23.3@sha256:3e9fe4c6ef36490f43aa0d0d80f9df64e9c92a576eee3042f1a97c8813c05355
+              tag: v0.23.4@sha256:ef0650d523ee1b5ab32c779acabc446d9936869a9932591553688a62bcf0c42f
             command: ["/bin/sh", "/opt/hermes-routines/src/sync.sh"]
             env:
               HERMES_HOME: &home /data/hermes
@@ -169,12 +169,12 @@ spec:
           - path: /data/hermes/plugins/memini
             subPath: memini
             readOnly: true
-      # The shared dotfiles skills (skills-sync/): each skill as <name>/SKILL.md,
-      # read-only, so the assistant can load one and cannot rewrite one.
-      dotfiles-skills:
+      # The skills it takes from h-wb/skills (skills-sync/): each skill as
+      # <name>/SKILL.md, read-only, so the assistant can load one and cannot rewrite one.
+      shared-skills:
         existingClaim: hermes-skills
         globalMounts:
-          - path: /opt/dotfiles-skills
+          - path: /opt/shared-skills
             readOnly: true
       soul:
         type: configMap
