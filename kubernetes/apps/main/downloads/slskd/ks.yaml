@@ -31,6 +31,5 @@ spec:
       # slskd runs with SLSKD_NO_AUTH.
       OIDC_DISPLAY_NAME: slskd
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"
       KOPIUR_SCHEDULE: "28 * * * *"
       KOPIUR_CAPACITY: 5Gi

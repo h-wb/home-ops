@@ -33,5 +33,4 @@ spec:
       KOPIUR_CAPACITY: 10Gi
       OIDC_DISPLAY_NAME: Sonarr Anime
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"
       OIDC_IMAGE_NAME: sonarr

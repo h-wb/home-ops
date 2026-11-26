@@ -33,4 +33,3 @@ spec:
       KOPIUR_CAPACITY: 2Gi
       OIDC_DISPLAY_NAME: Bazarr
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"

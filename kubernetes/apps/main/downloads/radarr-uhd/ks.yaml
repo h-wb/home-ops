@@ -33,5 +33,4 @@ spec:
       KOPIUR_CAPACITY: 5Gi
       OIDC_DISPLAY_NAME: Radarr UHD
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"
       OIDC_IMAGE_NAME: radarr
