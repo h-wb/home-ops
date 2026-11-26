@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./miroir-externalsecret.yaml
+  - ./miroir-media-externalsecret.yaml
   - ./miroir-job-template.yaml
   - ./miroir-rbac.yaml
   - ./helmrelease.yaml
