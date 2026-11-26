@@ -1,7 +1,7 @@
 ---
 # Garage runs on the NAS (docker/truenas/20-garage, deployed by doco-cd).
 # Selector-less Service + EndpointSlice keep garage.storage.svc working for
-# in-cluster consumers (kopiur, Prometheus, garage-webui).
+# in-cluster consumers (CNPG backups, kopiur, Prometheus, garage-webui).
 apiVersion: v1
 kind: Service
 metadata:

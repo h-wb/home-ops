@@ -87,7 +87,7 @@ No app uses it today. Reference `../../../../../components/cnpg/pooler` beside t
 
 ## Backups
 
-The `ObjectStore` writes base backups and WAL to `s3://postgresql/${APP}` on Garage at `https://s3.${SECRET_DOMAIN}` (WAL zstd, data bzip2), kept for `CNPG_RETENTION_POLICY`. The `ExternalSecret` `${APP}-cnpg-secret` takes `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from the Bitwarden item `postgresql-bucket`, shared by every app; the bucket is created by the [Garage bootstrap](../../../docker/truenas/README.md).
+The `ObjectStore` writes base backups and WAL to `s3://postgresql/${APP}` on Garage at `http://garage.storage.svc.cluster.local:3900`, the NAS reached over the LAN (WAL zstd, data bzip2), kept for `CNPG_RETENTION_POLICY`. The `ExternalSecret` `${APP}-cnpg-secret` takes `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from the Bitwarden item `postgresql-bucket`, shared by every app; the bucket is created by the [Garage bootstrap](../../../docker/truenas/README.md).
 
 ## Variables
 
