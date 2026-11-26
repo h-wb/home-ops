@@ -81,6 +81,8 @@ spec:
     route:
       app:
         annotations:
+          gatus.home-operations.com/endpoint: |-
+            url: https://romm.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/app: romm
           gethomepage.dev/group: Library
