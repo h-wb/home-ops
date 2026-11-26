@@ -169,6 +169,10 @@ spec:
             - name: envoy-internal
               namespace: network
       prometheusSpec:
+        podMetadata:
+          labels:
+            # No login; its LoadBalancer is for the edge cluster only.
+            ingress.home.arpa/lan: deny
         externalLabels:
           cluster: main
         resources:
