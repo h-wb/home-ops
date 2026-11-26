@@ -38,9 +38,16 @@ spec:
                   secretKeyRef:
                     name: postgres-dawarich-app
                     key: password
+              OIDC_ISSUER: https://idm.${SECRET_DOMAIN}/oauth2/openid/dawarich
+              OIDC_REDIRECT_URI: https://dawarich.${SECRET_DOMAIN}/users/auth/openid_connect/callback
+              OIDC_PKCE_ENABLED: "true"
+              OIDC_PROVIDER_NAME: Kanidm
+              OIDC_AUTO_REGISTER: "false"
             envFrom:
               - secretRef:
                   name: dawarich-secret
+              - secretRef:
+                  name: kanidm-dawarich-oidc
             probes:
               liveness: &probe
                 enabled: true
