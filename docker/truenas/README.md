@@ -51,7 +51,7 @@ On the NAS side, from notes of 2025 and 2026 (not checked against the NAS, HOMEL
 The cluster reaches this S3 store at `garage.storage.svc`, a selector-less
 Service with an EndpointSlice pointing to the NAS
 ([`kubernetes/apps/main/storage/garage`](../../kubernetes/apps/main/storage/garage/app/service.yaml)). The external endpoint is `s3.${SECRET_DOMAIN}`.
-CNPG Barman and kopiur use separate buckets in the same store.
+CNPG Barman and kopiur use separate buckets in the same store, both through that Service.
 
 Offsite copy: Cloud Sync task 3 (not checked) on `/mnt/tank/backup/garage`:
 `data/` (blocks), `snapshots/` (daily metadata snapshots) and `identity/`
