@@ -63,6 +63,8 @@ spec:
               # Remote User Auth
               PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: "false"
               PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: "false"
+              PAPERLESS_DISABLE_REGULAR_LOGIN: "true"
+              PAPERLESS_REDIRECT_LOGIN_TO_SSO: "true"
               # Folders
               PAPERLESS_CONSUMPTION_DIR: /data/paperless/consume
               PAPERLESS_DATA_DIR: /data/paperless/data
@@ -128,6 +130,20 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /admin
+            filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: gateway.envoyproxy.io
+                  kind: HTTPRouteFilter
+                  name: paperless-no-admin
+          - backendRefs:
+              - identifier: app
+                port: http
     networkpolicies:
       egress:
         type: cilium
