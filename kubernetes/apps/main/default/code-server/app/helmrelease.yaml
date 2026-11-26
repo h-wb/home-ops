@@ -17,6 +17,9 @@ spec:
     defaultPodOptions:
       automountServiceAccountToken: false
       enableServiceLinks: false
+      labels:
+        # --auth none: the login is on the route, so only that gateway may connect.
+        ingress.home.arpa/envoy-external: allow
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
