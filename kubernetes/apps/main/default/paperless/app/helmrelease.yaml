@@ -134,6 +134,13 @@ spec:
           - matches:
               - path:
                   type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: http
+          - matches:
+              - path:
+                  type: PathPrefix
                   value: /admin
             filters:
               - type: ExtensionRef
@@ -141,9 +148,6 @@ spec:
                   group: gateway.envoyproxy.io
                   kind: HTTPRouteFilter
                   name: paperless-no-admin
-          - backendRefs:
-              - identifier: app
-                port: http
     networkpolicies:
       egress:
         type: cilium
