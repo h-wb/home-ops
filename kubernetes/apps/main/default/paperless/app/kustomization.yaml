@@ -5,6 +5,7 @@ kind: Kustomization
 resources:
   - ./externalsecret.yaml
   - ./helmrelease.yaml
+  - ./httproutefilter.yaml
 configMapGenerator:
   - name: paperless-ai-prompt
     files:

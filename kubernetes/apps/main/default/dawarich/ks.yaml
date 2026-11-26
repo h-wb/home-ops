@@ -15,6 +15,7 @@ spec:
     - ../../../../../components/dragonfly/lua-undeclared-keys
     - ../../../../../components/kopiur/backup
     - ../../../../../components/cnpg/restore
+    - ../../../../../components/oidc
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
@@ -33,6 +34,12 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
+      OIDC_DISPLAY_NAME: Dawarich
+      OIDC_CALLBACK: /users/auth/openid_connect/callback
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_CLIENT_ID_KEY: OIDC_CLIENT_ID
+      OIDC_CLIENT_SECRET_KEY: OIDC_CLIENT_SECRET
       KOPIUR_SCHEDULE: "5 * * * *"
       KOPIUR_CAPACITY: 1Gi
       CNPG_IMAGE: ghcr.io/cloudnative-pg/postgis

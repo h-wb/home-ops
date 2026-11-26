@@ -243,7 +243,8 @@ class HermesIsPrivateOnly(unittest.TestCase):
         releases = [d for d in self.docs if d["kind"] == "HelmRelease"]
         self.assertEqual(["hermes-private"], [r["metadata"]["name"] for r in releases])
         main = releases[0]["spec"]["values"]["controllers"]["main"]
-        self.assertEqual({"assistant.scope": "private"}, main["pod"]["labels"])
+        self.assertEqual({"assistant.scope": "private", "ingress.home.arpa/envoy-internal": "allow"},
+                         main["pod"]["labels"])
         self.assertNotIn("labels", main)
 
     def test_general_memory_is_read_only_for_the_private_side(self):
@@ -261,24 +262,18 @@ class HermesIsPrivateOnly(unittest.TestCase):
         self.assertIn("MEMINI_GENERAL_URL: *general-memory", release)
         self.assertIn("key: MEMINI_GENERAL_API_KEY", release)
 
-    def test_egress_is_the_named_services_and_telegram(self):
-        # The pod holds private data: everything it may reach is listed here.
+    def test_egress_is_the_named_services(self):
+        # The pod holds private data: everything it may reach is listed here. Who may
+        # reach it is its gateway label (test_ingress_labels.py).
         policy = next(d for d in self.docs if d["kind"] == "NetworkPolicy")["spec"]
-        self.assertEqual(["Ingress", "Egress"], policy["policyTypes"])
+        self.assertEqual(["Egress"], policy["policyTypes"])
         self.assertNotIn("ingress", policy)
         reach = {(next(iter(peer["podSelector"]["matchLabels"].values())), port["port"])
                  for rule in policy["egress"] for peer in rule["to"] for port in rule["ports"]}
         self.assertEqual({("kube-dns", 53), ("litellm", 4000), ("memini", 8080), ("memini-code", 8080),
-                          ("mcp-assistant", 4483), ("paseo", 6767), ("paseo-private", 6767)}, reach)
-        cilium = [d["spec"] for d in self.docs if d["kind"] == "CiliumNetworkPolicy"]
-        self.assertEqual(1, len(cilium))
-        self.assertEqual({"app.kubernetes.io/name": "hermes-private", "assistant.scope": "private"},
-                         cilium[0]["endpointSelector"]["matchLabels"])
-        self.assertNotIn("ingress", cilium[0])
-        dns, internet = cilium[0]["egress"]
-        self.assertEqual(["toEndpoints", "toPorts"], sorted(dns))
-        self.assertEqual({"toFQDNs": [{"matchName": "api.telegram.org"}],
-                          "toPorts": [{"ports": [{"port": "443", "protocol": "TCP"}]}]}, internet)
+                          ("mcp-assistant", 4483), ("paseo", 6767), ("paseo-private", 6767),
+                          ("continuwuity", 8080)}, reach)
+        self.assertFalse([d for d in self.docs if d["kind"] == "CiliumNetworkPolicy"])
 
     def test_workshop_handoffs_ask_every_time_and_bring_no_shell(self):
         # The daemons serve terminals, a browser and schedules too. The assistant registers

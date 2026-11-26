@@ -22,7 +22,7 @@ The [assistant](https://github.com/h-wb/handbook/blob/main/Systems/Assistant.md)
 | `app/config.yaml`              | Models, tools, approvals, dashboard; read-only            |
 | `app/helmrelease.yaml`         | The pod, its messaging settings and the dashboard         |
 | `app/externalsecret.yaml`      | Messaging, dashboard and workshop credentials             |
-| `app/networkpolicy.yaml`       | What the pod may reach, and who may reach it              |
+| `app/networkpolicy.yaml`       | What the pod may reach (who may reach it: its pod label)  |
 | `app/SOUL.md`, `app/routines/` | Standing instructions and scheduled routines              |
 | `app/skills-sync/`             | The skill groups it takes from h-wb/skills, and their Job |
 

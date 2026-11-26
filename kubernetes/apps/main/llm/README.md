@@ -253,6 +253,5 @@ access paths. The tool servers answer only ToolHive's own pods, so the gateways 
 
 Paseo is the interactive interface. Open WebUI's HelmRelease, app route, stateless Dragonfly
 instance, LiteLLM grants, app manifests and presets are removed; Git history keeps them.
-`open-webui/ks.yaml` remains a data retention Kustomization: its PostgreSQL cluster, uploaded
-files, encryption key, OIDC identity and backups stay managed. Do not remove it until the data
-is retired on purpose.
+Its data retention Kustomization (PostgreSQL cluster, uploaded files, encryption key, OIDC
+client) was removed on 2026-11-26; only the backups already taken remain.

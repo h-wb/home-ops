@@ -26,7 +26,6 @@ spec:
       KOPIUR_SCHEDULE: "35 4 * * *"
       OIDC_DISPLAY_NAME: Code Server
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"
       # Not `users`: a session here is a shell with the owner's credentials.
       OIDC_GROUP: admins
   prune: true

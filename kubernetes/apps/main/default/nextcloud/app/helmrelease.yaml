@@ -27,6 +27,8 @@ spec:
     name: nextcloud
   dependsOn: []
   values:
+    podLabels:
+      policy.home.arpa/egress: internet
     deploymentAnnotations:
       reloader.stakater.com/auto: "true"
     global:

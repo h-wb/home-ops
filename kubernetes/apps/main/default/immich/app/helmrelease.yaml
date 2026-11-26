@@ -110,6 +110,15 @@ spec:
           - backendRefs:
               - identifier: server
                 port: *port
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controllers: [server, microservices]
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toControllers: [machine-learning]
     persistence:
       data:
         enabled: true

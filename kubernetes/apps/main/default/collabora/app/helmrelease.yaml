@@ -80,3 +80,15 @@ spec:
                 port: http
             timeouts:
               request: 0s
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controller: collabora
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/name: nextcloud
+                  app.kubernetes.io/component: app

@@ -33,4 +33,3 @@ spec:
       KOPIUR_CAPACITY: 15Gi
       OIDC_DISPLAY_NAME: Radarr
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"

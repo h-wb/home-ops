@@ -43,10 +43,8 @@ spec:
                     name: postgres-romm-app
                     key: password
               HASHEOUS_API_ENABLED: "true"
-              # OIDC via Kanidm (kanidm-provision writes kanidm-romm-oidc into this ns).
-              # RomM has no PKCE; the client sets allowInsecureClientDisablePkce. Userpass
-              # login stays enabled (DISABLE_USERPASS_LOGIN=false) as a fallback.
               OIDC_ENABLED: "true"
+              DISABLE_USERPASS_LOGIN: "true"
               OIDC_PROVIDER: pocket-id
               OIDC_REDIRECT_URI: https://romm.${SECRET_DOMAIN}/api/oauth/openid
               OIDC_SERVER_APPLICATION_URL: https://idm.${SECRET_DOMAIN}/oauth2/openid/romm
@@ -64,6 +62,8 @@ spec:
               limits:
                 memory: 3500Mi
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -81,6 +81,8 @@ spec:
     route:
       app:
         annotations:
+          gatus.home-operations.com/endpoint: |-
+            url: https://romm.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/app: romm
           gethomepage.dev/group: Library
@@ -96,6 +98,30 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+        rules:
+          - matches:
+              - headers:
+                  - type: RegularExpression
+                    name: Authorization
+                    value: "^[Bb][Aa][Ss][Ii][Cc] "
+              - path:
+                  type: Exact
+                  value: /api/token
+              - path:
+                  type: Exact
+                  value: /api/forgot-password
+              - path:
+                  type: Exact
+                  value: /api/reset-password
+            filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: gateway.envoyproxy.io
+                  kind: HTTPRouteFilter
+                  name: romm-no-password
+          - backendRefs:
+              - identifier: app
+                port: http
     persistence:
       config:
         type: configMap

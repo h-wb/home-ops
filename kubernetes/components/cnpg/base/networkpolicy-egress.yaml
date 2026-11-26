@@ -1,0 +1,19 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: ${APP}-postgres-egress
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: ${APP}
+      policy.home.arpa/egress: internet
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: postgres-${APP}
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP

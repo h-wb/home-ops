@@ -15,6 +15,7 @@ spec:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
     - ../../../../../components/cnpg/restore
+    - ../../../../../components/oidc
   dependsOn:
     - name: plugin-barman-cloud
       namespace: database
@@ -40,6 +41,10 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: *namespace
+      APP_NAMESPACE: *namespace
+      OIDC_DISPLAY_NAME: Paperless
+      OIDC_CALLBACK: /accounts/oidc/kanidm/login/callback/
+      OIDC_SHORT_USERNAME: "true"
       KOPIUR_SCHEDULE: "10 * * * *"
       KOPIUR_CAPACITY: 15Gi
 ---
