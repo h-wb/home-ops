@@ -120,7 +120,8 @@ spec:
             namespace: network
     networkpolicies:
       # Beyond the internet label, database and cache (their Components): Photon
-      # for reverse geocoding (PHOTON_API_HOST).
+      # for reverse geocoding (PHOTON_API_HOST), and the Immich and AirTrail
+      # integrations, set to their internal addresses in Dawarich's settings.
       egress:
         type: cilium
         suffix: egress
@@ -132,6 +133,13 @@ spec:
           - toEndpoints:
               - matchLabels:
                   app.kubernetes.io/name: photon
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/instance: immich
+                  app.kubernetes.io/controller: server
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/instance: airtrail
     persistence:
       data:
         existingClaim: dawarich
