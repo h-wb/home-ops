@@ -28,8 +28,6 @@ spec:
         - "--min-chunk-size=5MB"
         - "--read-timeout=120"
     destinationPath: s3://postgresql/${APP}
-    # Garage on the NAS, straight over the LAN. The public S3 hostname
-    # sent every WAL segment out through Cloudflare and back.
     endpointURL: http://garage.storage.svc.cluster.local:3900
     s3Credentials:
       region:
