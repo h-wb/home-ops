@@ -131,15 +131,10 @@ spec:
           policy.home.arpa/egress: internet
         egress:
           - toEndpoints:
-              - matchLabels:
-                  app.kubernetes.io/name: photon
-          - toEndpoints:
-              - matchLabels:
-                  app.kubernetes.io/instance: immich
-                  app.kubernetes.io/controller: server
-          - toEndpoints:
-              - matchLabels:
-                  app.kubernetes.io/instance: airtrail
+              - matchExpressions:
+                  - key: app.kubernetes.io/instance
+                    operator: In
+                    values: [photon, immich, airtrail]
     persistence:
       data:
         existingClaim: dawarich
