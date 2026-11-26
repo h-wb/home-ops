@@ -132,10 +132,6 @@ spec:
           - toEndpoints:
               - matchLabels:
                   app.kubernetes.io/name: photon
-            toPorts:
-              - ports:
-                  - port: "2322"
-                    protocol: TCP
     persistence:
       data:
         existingClaim: dawarich

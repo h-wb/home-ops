@@ -16,7 +16,3 @@ spec:
     - toEndpoints:
         - matchLabels:
             app.kubernetes.io/name: collabora
-      toPorts:
-        - ports:
-            - port: "9980"
-              protocol: TCP

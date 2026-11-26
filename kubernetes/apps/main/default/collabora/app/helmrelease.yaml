@@ -94,7 +94,3 @@ spec:
               - matchLabels:
                   app.kubernetes.io/name: nextcloud
                   app.kubernetes.io/component: app
-            toPorts:
-              - ports:
-                  - port: "80"
-                    protocol: TCP

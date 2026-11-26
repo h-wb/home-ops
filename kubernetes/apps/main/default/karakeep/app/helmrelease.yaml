@@ -185,24 +185,11 @@ spec:
         extraSelectorLabels:
           policy.home.arpa/egress: internet
         egress:
-          - toControllers: [meilisearch]
-            toPorts:
-              - ports:
-                  - port: "7700"
-                    protocol: TCP
-          - toControllers: [chrome]
-            toPorts:
-              - ports:
-                  - port: "9222"
-                    protocol: TCP
+          - toControllers: [meilisearch, chrome]
           - toEndpoints:
               - matchLabels:
                   app.kubernetes.io/name: litellm
                   k8s:io.kubernetes.pod.namespace: llm
-            toPorts:
-              - ports:
-                  - port: "4000"
-                    protocol: TCP
     persistence:
       data:
         existingClaim: karakeep
