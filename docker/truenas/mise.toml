@@ -84,5 +84,22 @@ else
     fi
     garage bucket allow --read --write miroir-media --key "${media_id}" >/dev/null
 fi
+
+# 5. Miroir's viewer: a key that can only read the media bucket (package split
+#    step 10), so the process that serves the timeline never holds a write key.
+#    Skipped until the BWS item `miroir` carries the two fields.
+view_id=$(jq -r '.MIROIR_VIEW_MEDIA_ACCESS_KEY_ID // empty' <<<"${miroir}")
+view_secret=$(jq -r '.MIROIR_VIEW_MEDIA_SECRET_ACCESS_KEY // empty' <<<"${miroir}")
+if [[ -z "${view_id}" || -z "${view_secret}" ]]; then
+    mise //:log info "No Miroir viewer key in BWS, skipping it" item miroir
+elif garage bucket info miroir-media &>/dev/null; then
+    if garage key info "${view_id}" &>/dev/null; then
+        mise //:log info "Key already present" key "${view_id}"
+    else
+        garage key import --yes -n miroir_view "${view_id}" "${view_secret}" >/dev/null
+        mise //:log info "Key imported" key "${view_id}"
+    fi
+    garage bucket allow --read miroir-media --key "${view_id}" >/dev/null
+fi
 mise //:log info "Garage bootstrap complete"
 '''
