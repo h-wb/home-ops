@@ -29,6 +29,7 @@ spec:
               - --config
               - /miroir/data/miroir/miroir.json
               - serve
+              - --without-viewer
               - --host
               - 0.0.0.0
               - --port
@@ -48,18 +49,6 @@ spec:
                 valueFrom: { secretKeyRef: { name: postgres-miroir-app, key: username } }
               MIROIR_METADATA__PASSWORD:
                 valueFrom: { secretKeyRef: { name: postgres-miroir-app, key: password } }
-              # The timeline's read-only view of the warehouse (postgres-metabase),
-              # as the role from timeline-reader.yaml. An older image ignores these.
-              MIROIR_TIMELINE_DATABASE__HOST:
-                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: host } }
-              MIROIR_TIMELINE_DATABASE__PORT:
-                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: port } }
-              MIROIR_TIMELINE_DATABASE__DATABASE:
-                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: dbname } }
-              MIROIR_TIMELINE_DATABASE__USERNAME:
-                valueFrom: { secretKeyRef: { name: miroir-timeline-reader, key: username } }
-              MIROIR_TIMELINE_DATABASE__PASSWORD:
-                valueFrom: { secretKeyRef: { name: miroir-timeline-reader, key: password } }
               # Execution settings (pool, flow-run image, namespace) live in
               # miroir.json. Only the worker-visible config path is environmental.
               PREFECT_API_URL: "http://prefect.automation:4200/api"
@@ -82,9 +71,69 @@ spec:
               limits:
                 cpu: 500m
                 memory: 512Mi
+      # The viewer alone (pipelines package split step 10): the timeline, its
+      # API and the /media view route. It holds the warehouse reader, the
+      # login token and a read-only media key, and nothing of the control
+      # plane: no metadata store, master key, Prefect or warehouse writer.
+      viewer:
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          app:
+            image: *image
+            command:
+              - /app/.venv/bin/python
+              - -m
+              - src.cli
+              - --config
+              - /miroir/data/miroir/miroir.json
+              - view
+              - --host
+              - 0.0.0.0
+              - --port
+              - "8765"
+            env:
+              TZ: Europe/Paris
+              FORWARDED_ALLOW_IPS: 10.42.0.0/16
+              # The timeline's read-only view of the warehouse (postgres-metabase),
+              # as the role from timeline-reader.yaml.
+              MIROIR_TIMELINE_DATABASE__HOST:
+                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: host } }
+              MIROIR_TIMELINE_DATABASE__PORT:
+                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: port } }
+              MIROIR_TIMELINE_DATABASE__DATABASE:
+                valueFrom: { secretKeyRef: { name: postgres-metabase-app, key: dbname } }
+              MIROIR_TIMELINE_DATABASE__USERNAME:
+                valueFrom: { secretKeyRef: { name: miroir-timeline-reader, key: username } }
+              MIROIR_TIMELINE_DATABASE__PASSWORD:
+                valueFrom: { secretKeyRef: { name: miroir-timeline-reader, key: password } }
+              # The same login as the server, so one session opens both.
+              MIROIR_API_TOKEN:
+                valueFrom: { secretKeyRef: { name: miroir-secret, key: MIROIR_API_TOKEN } }
+            # MIROIR_MEDIA_* from the read-only key (miroir-view-media); optional,
+            # so the timeline runs, without images, until that key exists.
+            envFrom:
+              - secretRef:
+                  name: miroir-view-media
+                  optional: true
+            securityContext:
+              allowPrivilegeEscalation: false
+              capabilities: { drop: ["ALL"] }
+            resources:
+              requests:
+                cpu: 25m
+                memory: 96Mi
+              limits:
+                cpu: 500m
+                memory: 384Mi
     service:
       server:
         controller: server
+        ports:
+          http:
+            port: 8765
+      viewer:
+        controller: viewer
         ports:
           http:
             port: 8765
@@ -108,6 +157,26 @@ spec:
         parentRefs:
           - name: envoy-internal
             namespace: network
+        # The viewer answers these prefixes (pipelines docs/architecture.md
+        # "Processes"); a prefix matches by path segment, so /timelinex is
+        # the server's. Everything else, the collector's routes included, goes
+        # to the server.
+        rules:
+          - matches:
+              - path:
+                  value: /timeline
+              - path:
+                  value: /api/timeline
+              - path:
+                  value: /media
+              - path:
+                  value: /static/viewer
+            backendRefs:
+              - identifier: viewer
+                port: 8765
+          - backendRefs:
+              - identifier: server
+                port: 8765
     persistence:
       data:
         enabled: true
@@ -118,3 +187,8 @@ spec:
           server:
             app:
               - path: /miroir/data
+          # The configuration, read only: the viewer writes nothing.
+          viewer:
+            app:
+              - path: /miroir/data
+                readOnly: true
