@@ -37,12 +37,20 @@ spec:
     lapi:
       envFrom:
         - secretRef:
-            name: &secret crowdsec-secret
+            name: crowdsec-secret
       podAnnotations:
-        secret.reloader.stakater.com/reload: *secret
+        secret.reloader.stakater.com/reload: crowdsec-secret,crowdsec-console
       env:
         - name: USE_WAL
           value: "true"
+        - name: ENROLL_KEY
+          valueFrom:
+            secretKeyRef:
+              name: crowdsec-console
+              key: ENROLL_KEY
+              optional: true
+        - name: ENROLL_INSTANCE_NAME
+          value: home-ops-main
       persistentVolume:
         data:
           storageClassName: ceph-block
