@@ -33,6 +33,8 @@ spec:
         pod:
           annotations:
             reloader.stakater.com/auto: "true"
+          labels:
+            policy.home.arpa/egress: internet
         containers:
           app:
             image:
