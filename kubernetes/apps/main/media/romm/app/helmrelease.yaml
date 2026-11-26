@@ -98,6 +98,13 @@ spec:
             namespace: network
         rules:
           - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: http
+          - matches:
               - headers:
                   - type: RegularExpression
                     name: Authorization
@@ -117,9 +124,6 @@ spec:
                   group: gateway.envoyproxy.io
                   kind: HTTPRouteFilter
                   name: romm-no-password
-          - backendRefs:
-              - identifier: app
-                port: http
     persistence:
       config:
         type: configMap
