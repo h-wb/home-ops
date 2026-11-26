@@ -25,6 +25,9 @@ spec:
   interval: 1h
   values:
     fullnameOverride: *app
+    grafana:
+      dashboard:
+        enabled: true
     resources:
       requests:
         cpu: 10m
