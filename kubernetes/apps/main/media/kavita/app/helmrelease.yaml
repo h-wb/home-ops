@@ -15,44 +15,6 @@ spec:
       kavita:
         annotations:
           reloader.stakater.com/auto: "true"
-        initContainers:
-          oidc:
-            image:
-              repository: docker.io/alpine/k8s
-              tag: 1.37.2
-            env:
-              OIDC_AUTHORITY: https://idm.${SECRET_DOMAIN}/oauth2/openid/{{ .Release.Name }}
-              OIDC_CLIENT_ID:
-                valueFrom:
-                  secretKeyRef:
-                    name: "kanidm-{{ .Release.Name }}-oidc"
-                    key: client-id
-              OIDC_SECRET:
-                valueFrom:
-                  secretKeyRef:
-                    name: "kanidm-{{ .Release.Name }}-oidc"
-                    key: client-secret
-            # Kavita reads its OIDC client from appsettings.json only; set those three keys, keep the rest.
-            command:
-              - /bin/sh
-              - -ec
-              - |
-                f=/kavita/config/appsettings.json
-                [ -f "$f" ] || exit 0
-                jq --arg a "$OIDC_AUTHORITY" --arg c "$OIDC_CLIENT_ID" --arg s "$OIDC_SECRET" \
-                  '.OpenIdConnectSettings = ((.OpenIdConnectSettings // {}) + {Authority: $a, ClientId: $c, Secret: $s})' \
-                  "$f" > "$f.new"
-                mv "$f.new" "$f"
-            resources:
-              requests:
-                cpu: 10m
-                memory: 32Mi
-              limits:
-                memory: 128Mi
-            securityContext:
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-              capabilities: { drop: ["ALL"] }
         containers:
           app:
             image:
