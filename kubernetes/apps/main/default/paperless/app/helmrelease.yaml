@@ -11,6 +11,9 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
     controllers:
       paperless:
         annotations:
@@ -114,6 +117,18 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controller: paperless
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/name: litellm
+                  k8s:io.kubernetes.pod.namespace: llm
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"
