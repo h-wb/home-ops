@@ -14,4 +14,3 @@ resources:
   - ./toolhive/ks.yaml
   - ./hermes/ks.yaml
   - ./paseo/ks.yaml
-  - ./open-webui/ks.yaml
