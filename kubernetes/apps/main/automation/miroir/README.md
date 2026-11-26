@@ -106,6 +106,7 @@ The warehouse is private scope as a whole ([the one rule](https://github.com/h-w
 
 - `miroir.${SECRET_DOMAIN}` is on `envoy-internal` only. A device delivers from the LAN or the VPN and keeps its batch until it can.
 - A delivery token can only add data to its own connection. A device holds no storage key: files go to links the server signs for a few minutes.
+- Those links, uploads and views alike, point at `s3.${SECRET_DOMAIN}`, also on `envoy-internal` only: a picture opens on the LAN or the VPN, and nothing passes through Cloudflare.
 - The timeline reads the warehouse as `miroir_timeline`, a role that can only read the timeline's tables, with a time limit per query (`app/timeline-reader.yaml`).
 - Metabase's tools belong on the private and assistant tool gateways only. The temporary `metabase` entry on the general gateway, for the 2026-11 cross-checks (counts and schema only), is removed by home-ops#5130.
 - Screenshots and attachments sit unencrypted in Garage's data folder and in its offsite copy.

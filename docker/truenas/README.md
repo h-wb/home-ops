@@ -50,10 +50,10 @@ On the NAS side, from notes of 2025 and 2026 (not checked against the NAS, HOMEL
 
 The cluster reaches this S3 store at `garage.storage.svc`, a selector-less
 Service with an EndpointSlice pointing to the NAS
-([`kubernetes/apps/main/storage/garage`](../../kubernetes/apps/main/storage/garage/app/service.yaml)). The external endpoint is `s3.${SECRET_DOMAIN}`.
+([`kubernetes/apps/main/storage/garage`](../../kubernetes/apps/main/storage/garage/app/service.yaml)). `s3.${SECRET_DOMAIN}` is on `envoy-internal` only, for the LAN and the VPN.
 CNPG Barman and kopiur use separate buckets in the same store, both through that Service.
 
-Offsite copy: Cloud Sync task 3 (not checked) on `/mnt/tank/backup/garage`:
+Offsite copy: Cloud Sync task 3 (runs, per the owner on 2026-11-26) on `/mnt/tank/backup/garage`:
 `data/` (blocks), `snapshots/` (daily metadata snapshots) and `identity/`
 (node key + layout; recopy from `/mnt/ssd-storage/docker/garage/meta` after
 any layout change). The live metadata on the SSD is not synced on purpose.
