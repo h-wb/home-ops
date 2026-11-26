@@ -37,7 +37,7 @@ spec:
       APP_NAMESPACE: default
       OIDC_DISPLAY_NAME: Immich
       OIDC_CALLBACK: /auth/login
-      OIDC_EXTRA_CALLBACKS: '["https://immich.${SECRET_DOMAIN}/user-settings", "https://immich.${SECRET_DOMAIN}/api/oauth/mobile-redirect"]'
+      OIDC_EXTRA_CALLBACKS: ', "https://immich.${SECRET_DOMAIN}/user-settings", "https://immich.${SECRET_DOMAIN}/api/oauth/mobile-redirect"'
       OIDC_SHORT_USERNAME: "true"
   prune: true
   retryInterval: 1m
