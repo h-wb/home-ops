@@ -1,9 +1,5 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumclusterwidenetworkpolicy_v2.json
-# Opt-in: a pod labelled `ingress.home.arpa/envoy-internal: allow` takes
-# connections from that gateway only; every other pod is refused. For apps that
-# trust the gateway: the login on the route, forwarded headers. Allows add up, so
-# a pod may carry both labels, or a NetworkPolicy beside it for other callers.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:
@@ -34,10 +30,6 @@ spec:
             gateway.envoyproxy.io/owning-gateway-name: envoy-external
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumclusterwidenetworkpolicy_v2.json
-# `ingress.home.arpa/lan: deny` keeps a LoadBalancer with no login off the LAN.
-# Cilium runs DSR, so a LAN client keeps its address and is `world`; the edge
-# cluster arrives through the network/tailscale pod and stays allowed. Other
-# callers are untouched: this rule denies, it locks nothing.
 apiVersion: cilium.io/v2
 kind: CiliumClusterwideNetworkPolicy
 metadata:

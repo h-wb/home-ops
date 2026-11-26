@@ -81,12 +81,10 @@ spec:
             timeouts:
               request: 0s
     networkpolicies:
-      # Beyond the internet label: WOPI calls to Nextcloud's pod.
       egress:
         type: cilium
         suffix: egress
         controller: collabora
-        # Only labelled pods: a rule on an unlabelled pod would cut it off the internet.
         extraSelectorLabels:
           policy.home.arpa/egress: internet
         egress:

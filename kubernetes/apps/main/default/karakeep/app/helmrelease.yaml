@@ -176,12 +176,10 @@ spec:
               - identifier: app
                 port: *port
     networkpolicies:
-      # Beyond the internet label: its index, its browser and LiteLLM for tagging.
       egress:
         type: cilium
         suffix: egress
         controller: karakeep
-        # Only labelled pods: a rule on an unlabelled pod would cut it off the internet.
         extraSelectorLabels:
           policy.home.arpa/egress: internet
         egress:

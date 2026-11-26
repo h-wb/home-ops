@@ -119,14 +119,10 @@ spec:
           - name: envoy-external
             namespace: network
     networkpolicies:
-      # Beyond the internet label, database and cache (their Components): Photon
-      # for reverse geocoding (PHOTON_API_HOST), and the Immich and AirTrail
-      # integrations, set to their internal addresses in Dawarich's settings.
       egress:
         type: cilium
         suffix: egress
         controller: dawarich
-        # Only labelled pods: a rule on an unlabelled pod would cut it off the internet.
         extraSelectorLabels:
           policy.home.arpa/egress: internet
         egress:

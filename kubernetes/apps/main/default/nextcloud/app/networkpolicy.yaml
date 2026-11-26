@@ -1,8 +1,5 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# Beyond the internet label, database and cache (their Components): Collabora
-# (the WOPI address is a setting in Nextcloud's database, so both names work).
-# The upstream chart has no networkpolicies value, hence this file.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:

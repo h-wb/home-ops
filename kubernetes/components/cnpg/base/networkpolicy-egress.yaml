@@ -1,7 +1,5 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# An app's pods labelled `policy.home.arpa/egress: internet` may still reach their
-# own database. Unlabelled pods are not selected, so this changes nothing for them.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
