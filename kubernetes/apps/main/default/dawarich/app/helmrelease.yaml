@@ -90,6 +90,8 @@ spec:
                 memory: "6Gi"
                 cpu: "3000m"
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

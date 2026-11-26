@@ -1,0 +1,27 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Beyond the internet (policy.home.arpa/egress): its database and cache.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: romm
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: romm
+      policy.home.arpa/egress: internet
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: postgres-romm
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: romm-dragonfly
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP

@@ -64,6 +64,8 @@ spec:
               limits:
                 memory: 3500Mi
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000

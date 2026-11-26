@@ -1,0 +1,35 @@
+---
+# yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
+# Beyond the internet (policy.home.arpa/egress): its database, its cache and Photon
+# for reverse geocoding.
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: dawarich
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/instance: dawarich
+      policy.home.arpa/egress: internet
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            cnpg.io/cluster: postgres-dawarich
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app: dawarich-dragonfly
+      toPorts:
+        - ports:
+            - port: "6379"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            app.kubernetes.io/name: photon
+      toPorts:
+        - ports:
+            - port: "2322"
+              protocol: TCP

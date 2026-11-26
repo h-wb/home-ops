@@ -25,6 +25,8 @@ spec:
     name: minecraft
   dependsOn: []
   values:
+    podLabels:
+      policy.home.arpa/egress: internet
     fullnameOverride: *app
     image:
       repository: ghcr.io/itzg/minecraft-server
