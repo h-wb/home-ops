@@ -118,6 +118,19 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controller: dawarich
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toEndpoints:
+              - matchExpressions:
+                  - key: app.kubernetes.io/instance
+                    operator: In
+                    values: [photon, immich, airtrail]
     persistence:
       data:
         existingClaim: dawarich

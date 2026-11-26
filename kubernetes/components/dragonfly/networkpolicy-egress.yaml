@@ -1,21 +1,19 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# Beyond the internet (policy.home.arpa/egress): WOPI calls to Nextcloud's Service.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: collabora
+  name: ${APP}-dragonfly-egress
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/instance: collabora
+      app.kubernetes.io/instance: ${APP}
       policy.home.arpa/egress: internet
   egress:
     - toEndpoints:
         - matchLabels:
-            app.kubernetes.io/name: nextcloud
-            app.kubernetes.io/component: app
+            app: ${APP}-dragonfly
       toPorts:
         - ports:
-            - port: "80"
+            - port: "6379"
               protocol: TCP

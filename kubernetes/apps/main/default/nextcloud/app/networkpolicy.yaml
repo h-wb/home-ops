@@ -1,8 +1,5 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# Beyond the internet (policy.home.arpa/egress): its database, its cache and Collabora
-# (the WOPI address is a setting in Nextcloud's database, so both names are allowed).
-# Selects the app pod and the cron pods; NFS is mounted by the node, not the pod.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
@@ -15,22 +12,4 @@ spec:
   egress:
     - toEndpoints:
         - matchLabels:
-            cnpg.io/cluster: postgres-nextcloud
-      toPorts:
-        - ports:
-            - port: "5432"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
-            app: nextcloud-dragonfly
-      toPorts:
-        - ports:
-            - port: "6379"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
             app.kubernetes.io/name: collabora
-      toPorts:
-        - ports:
-            - port: "9980"
-              protocol: TCP

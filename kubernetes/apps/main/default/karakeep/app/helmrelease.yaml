@@ -175,6 +175,19 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controller: karakeep
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toControllers: [meilisearch, chrome]
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/name: litellm
+                  k8s:io.kubernetes.pod.namespace: llm
     persistence:
       data:
         existingClaim: karakeep

@@ -32,7 +32,6 @@ spec:
     retentionPeriod: 14d
     server:
       podLabels:
-        # No login; its LoadBalancer is for the edge cluster only.
         ingress.home.arpa/lan: deny
       persistentVolume:
         enabled: true
