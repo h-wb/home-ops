@@ -131,6 +131,8 @@ spec:
               limits:
                 memory: 1Gi
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000

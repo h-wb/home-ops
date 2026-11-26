@@ -10,6 +10,8 @@ spec:
     name: echo
   interval: 30m
   values:
+    podLabels:
+      policy.home.arpa/egress: internet
     # 1s (the k8s default) is too tight on the edge VM: with only a 10m CPU
     # request this container gets near-minimum cgroup weight, so it loses
     # scheduling races and answers its probes late.
