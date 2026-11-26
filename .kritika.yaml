@@ -19,6 +19,6 @@ tools:
   # renovate: datasource=github-releases depName=sharkdp/fd
   aqua:sharkdp/fd: v10.5.2
   # renovate: datasource=github-releases depName=BurntSushi/ripgrep
-  aqua:BurntSushi/ripgrep: 15.2.0
+  aqua:BurntSushi/ripgrep: 16.0.0
   # renovate: datasource=github-releases depName=mikefarah/yq
   aqua:mikefarah/yq: v4.54.3
