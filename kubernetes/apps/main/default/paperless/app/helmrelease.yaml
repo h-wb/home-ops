@@ -142,6 +142,16 @@ spec:
               - path:
                   type: PathPrefix
                   value: /admin
+              - headers:
+                  - type: RegularExpression
+                    name: Authorization
+                    value: "^[Bb][Aa][Ss][Ii][Cc] "
+              - path:
+                  type: Exact
+                  value: /api/token/
+              - path:
+                  type: Exact
+                  value: /api/token
             filters:
               - type: ExtensionRef
                 extensionRef:
