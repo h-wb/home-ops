@@ -32,4 +32,3 @@ spec:
       APP_NAMESPACE: *namespace
       OIDC_DISPLAY_NAME: Karma
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"

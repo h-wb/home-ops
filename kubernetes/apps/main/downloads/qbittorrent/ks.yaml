@@ -28,6 +28,5 @@ spec:
       # had no login at all. The arr apps and qui use the Service.
       OIDC_DISPLAY_NAME: qBittorrent
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"
       KOPIUR_SCHEDULE: "20 * * * *"
       KOPIUR_CAPACITY: 2Gi

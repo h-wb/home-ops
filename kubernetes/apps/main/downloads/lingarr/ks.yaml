@@ -40,4 +40,3 @@ spec:
       KOPIUR_CAPACITY: 1Gi
       OIDC_DISPLAY_NAME: Lingarr
       OIDC_SHORT_USERNAME: "true"
-      OIDC_DISABLE_PKCE: "true"
