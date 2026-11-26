@@ -9,6 +9,7 @@ spec:
   components:
     - ../../../../../components/zeroscaler
     - ../../../../../components/kopiur/backup
+    - ../../../../../components/oidc
   path: ./kubernetes/apps/main/media/kavita/app
   prune: true
   sourceRef:
@@ -22,5 +23,10 @@ spec:
     substitute:
       APP: *app
       NAMESPACE: media
+      APP_NAMESPACE: media
+      OIDC_DISPLAY_NAME: Kavita
+      OIDC_CALLBACK: /signin-oidc
+      OIDC_SHORT_USERNAME: "true"
+      OIDC_SCOPES: '["openid", "profile", "email", "offline_access", "roles"]'
       KOPIUR_SCHEDULE: "33 * * * *"
       KOPIUR_CAPACITY: 2Gi
