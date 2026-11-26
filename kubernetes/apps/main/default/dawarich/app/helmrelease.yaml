@@ -118,6 +118,24 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+    networkpolicies:
+      # Beyond the internet label, database and cache (their Components): Photon
+      # for reverse geocoding (PHOTON_API_HOST).
+      egress:
+        type: cilium
+        suffix: egress
+        controller: dawarich
+        # Only labelled pods: a rule on an unlabelled pod would cut it off the internet.
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/name: photon
+            toPorts:
+              - ports:
+                  - port: "2322"
+                    protocol: TCP
     persistence:
       data:
         existingClaim: dawarich

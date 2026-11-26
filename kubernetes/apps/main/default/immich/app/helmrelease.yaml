@@ -110,6 +110,22 @@ spec:
           - backendRefs:
               - identifier: server
                 port: *port
+    networkpolicies:
+      # Beyond the internet label, database and cache (their Components): the
+      # server and the worker call machine learning.
+      egress:
+        type: cilium
+        suffix: egress
+        controllers: [server, microservices]
+        # Only labelled pods: a rule on an unlabelled pod would cut it off the internet.
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toControllers: [machine-learning]
+            toPorts:
+              - ports:
+                  - port: "3003"
+                    protocol: TCP
     persistence:
       data:
         enabled: true

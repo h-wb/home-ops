@@ -1,21 +1,21 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# Beyond the internet (policy.home.arpa/egress): WOPI calls to Nextcloud's Service.
+# An app's pods labelled `policy.home.arpa/egress: internet` may still reach their
+# own database. Unlabelled pods are not selected, so this changes nothing for them.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: collabora
+  name: ${APP}-postgres-egress
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/instance: collabora
+      app.kubernetes.io/instance: ${APP}
       policy.home.arpa/egress: internet
   egress:
     - toEndpoints:
         - matchLabels:
-            app.kubernetes.io/name: nextcloud
-            app.kubernetes.io/component: app
+            cnpg.io/cluster: postgres-${APP}
       toPorts:
         - ports:
-            - port: "80"
+            - port: "5432"
               protocol: TCP

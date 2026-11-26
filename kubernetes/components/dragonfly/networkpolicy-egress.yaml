@@ -1,26 +1,20 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/cilium.io/ciliumnetworkpolicy_v2.json
-# Beyond the internet (policy.home.arpa/egress): its database and cache.
+# An app's pods labelled `policy.home.arpa/egress: internet` may still reach their
+# own cache. Unlabelled pods are not selected, so this changes nothing for them.
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: romm
+  name: ${APP}-dragonfly-egress
 spec:
   endpointSelector:
     matchLabels:
-      app.kubernetes.io/instance: romm
+      app.kubernetes.io/instance: ${APP}
       policy.home.arpa/egress: internet
   egress:
     - toEndpoints:
         - matchLabels:
-            cnpg.io/cluster: postgres-romm
-      toPorts:
-        - ports:
-            - port: "5432"
-              protocol: TCP
-    - toEndpoints:
-        - matchLabels:
-            app: romm-dragonfly
+            app: ${APP}-dragonfly
       toPorts:
         - ports:
             - port: "6379"

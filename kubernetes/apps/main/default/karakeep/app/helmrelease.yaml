@@ -175,6 +175,34 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    networkpolicies:
+      # Beyond the internet label: its index, its browser and LiteLLM for tagging.
+      egress:
+        type: cilium
+        suffix: egress
+        controller: karakeep
+        # Only labelled pods: a rule on an unlabelled pod would cut it off the internet.
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toControllers: [meilisearch]
+            toPorts:
+              - ports:
+                  - port: "7700"
+                    protocol: TCP
+          - toControllers: [chrome]
+            toPorts:
+              - ports:
+                  - port: "9222"
+                    protocol: TCP
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/name: litellm
+                  k8s:io.kubernetes.pod.namespace: llm
+            toPorts:
+              - ports:
+                  - port: "4000"
+                    protocol: TCP
     persistence:
       data:
         existingClaim: karakeep
