@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=dotfiles bootstrap
+Comment=Provision this desktop from the pinned dotfiles inside the session (components/dotfiles)
+Exec=/bin/sh /opt/dotfiles/dotfiles-bootstrap run
+Icon=preferences-system
+Terminal=false
+StartupNotify=false
+X-XFCE-Autostart-Override=true

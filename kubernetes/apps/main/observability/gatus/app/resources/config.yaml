@@ -71,7 +71,6 @@ endpoints:
   - { name: bazarr,        group: *ag, url: "https://bazarr.${SECRET_DOMAIN}/",        interval: *agi, client: *agc, conditions: *agcond }
   - { name: lingarr,       group: *ag, url: "https://lingarr.${SECRET_DOMAIN}/",       interval: *agi, client: *agc, conditions: *agcond }
   - { name: code-server,   group: *ag, url: "https://code-server.${SECRET_DOMAIN}/",   interval: *agi, client: *agc, conditions: *agcond }
-  - { name: obsidian,      group: *ag, url: "https://obsidian.${SECRET_DOMAIN}/",      interval: *agi, client: *agc, conditions: *agcond }
   - { name: prefect,       group: *ag, url: "https://prefect.${SECRET_DOMAIN}/",       interval: *agi, client: *agc, conditions: *agcond }
   - { name: qbittorrent,   group: *ag, url: "https://qbittorrent.${SECRET_DOMAIN}/",   interval: *agi, client: *agc, conditions: *agcond }
   - { name: slskd,         group: *ag, url: "https://slskd.${SECRET_DOMAIN}/",         interval: *agi, client: *agc, conditions: *agcond }

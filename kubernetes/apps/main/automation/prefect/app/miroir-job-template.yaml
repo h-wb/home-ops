@@ -12,9 +12,11 @@
 # value is the Miroir master key in miroir-secret (owned by the `miroir`
 # ExternalSecret once its Bitwarden item exists). The Kubernetes worker keeps
 # valueFrom entries and merges them with per-deployment env. The media bucket
-# key (also in miroir-secret) lets a flow run read stored files and write their
-# thumbnails (pipelines decision 040); optional, so a missing key only stops
-# thumbnail runs. Applied by the
+# key is not in this shared environment: only Miroir's media deployment, which
+# runs every derive (thumbnails, backfill walks), names the miroir-media secret
+# in its `env_from` variable (empty by default; pipelines decision 033
+# amendment), so a sync, import or build Job never holds a key to the bucket.
+# Applied by the
 # miroir-worker init container on every start: prefect work-pool create ...
 # creates the pool or updates its template.
 apiVersion: v1
@@ -50,6 +52,7 @@ data:
                 "containers": [
                   {
                     "args": "{{ command }}",
+                    "envFrom": "{{ env_from }}",
                     "env": [
                       {
                         "name": "TZ",
@@ -169,26 +172,6 @@ data:
                             "key": "MIROIR_SECRET_KEY"
                           }
                         }
-                      },
-                      {
-                        "name": "MIROIR_MEDIA_ACCESS_KEY_ID",
-                        "valueFrom": {
-                          "secretKeyRef": {
-                            "name": "miroir-secret",
-                            "key": "MIROIR_MEDIA_ACCESS_KEY_ID",
-                            "optional": true
-                          }
-                        }
-                      },
-                      {
-                        "name": "MIROIR_MEDIA_SECRET_ACCESS_KEY",
-                        "valueFrom": {
-                          "secretKeyRef": {
-                            "name": "miroir-secret",
-                            "key": "MIROIR_MEDIA_SECRET_ACCESS_KEY",
-                            "optional": true
-                          }
-                        }
                       }
                     ],
                     "image": "{{ image }}",
@@ -264,6 +247,15 @@ data:
             "description": "Environment variables to set when starting a flow run.",
             "title": "Environment Variables",
             "type": "object"
+          },
+          "env_from": {
+            "default": [],
+            "description": "Secrets whose keys become environment variables of the flow run's container (envFrom). Miroir's media deployment names miroir-media here; every other deployment keeps the empty default.",
+            "items": {
+              "type": "object"
+            },
+            "title": "Environment From Secrets",
+            "type": "array"
           },
           "labels": {
             "additionalProperties": {
@@ -432,7 +424,7 @@ data:
                 "type": "null"
               }
             ],
-            "default": null,
+            "default": "512Mi",
             "description": "The memory resource request for the Kubernetes job container. Uses Kubernetes resource quantity format (e.g. '128Mi', '1Gi'). If not provided, no memory request is configured.",
             "title": "Memory Request"
           },
@@ -445,7 +437,7 @@ data:
                 "type": "null"
               }
             ],
-            "default": null,
+            "default": "2Gi",
             "description": "The memory resource limit for the Kubernetes job container. Uses Kubernetes resource quantity format (e.g. '128Mi', '1Gi'). If not provided, no memory limit is configured.",
             "title": "Memory Limit"
           }

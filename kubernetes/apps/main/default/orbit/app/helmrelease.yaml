@@ -21,7 +21,7 @@ spec:
               tag: 0.4.1@sha256:5193908ece7f08ea08e40a0c04a81a323dcd5d382b819459c43840bf7ab58dff
             env:
               ORBIT_PUBLIC_ORIGIN: https://orbit.${SECRET_DOMAIN}
-              # Envoy uses pod IPs; only it can reach the backend (NetworkPolicy).
+              # Envoy uses pod IPs; only it can reach the backend (ingress.home.arpa label).
               # Loopback is for the Orbit healthcheck.
               ORBIT_TRUSTED_PROXIES: 127.0.0.1/32,10.42.0.0/16
               ORBIT_OPEN_REGISTRATION: "false"
@@ -63,6 +63,8 @@ spec:
                 memory: 512Mi
     defaultPodOptions:
       automountServiceAccountToken: false
+      labels:
+        ingress.home.arpa/envoy-internal: allow
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532

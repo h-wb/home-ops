@@ -1,0 +1,301 @@
+# A lockfile bump (seekstone/) takes effect at the next pod start:
+# kubectl rollout restart statefulset -n default vault-ro vault-inbox vault-n8n
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: vault-ro
+spec:
+  image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+  transport: stdio
+  proxyPort: 8080
+  env:
+    - name: SEEKSTONE_VAULT
+      value: /vault
+    - name: HOME
+      value: /tmp
+    - name: SEEKSTONE_CACHE_DIR
+      value: /tmp/seekstone
+    # The write tools are unregistered and refused, and the vault is mounted read-only too.
+    - name: SEEKSTONE_READ_ONLY
+      value: "1"
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 768Mi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # RWO block volume: run beside the sync pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: obsidian-vault
+      initContainers:
+        - name: install-seekstone
+          image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+          command: [/bin/sh, -c]
+          args:
+            - >-
+              cp /src/package.json /src/package-lock.json /tools/ &&
+              cd /tools && npm ci --omit=dev --no-audit --no-fund
+          env:
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: src
+              mountPath: /src
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mcp
+          command:
+            - /tools/node_modules/.bin/seekstone
+          volumeMounts:
+            - name: vault
+              mountPath: /vault
+              subPath: vault
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-vault
+        - name: src
+          configMap:
+            name: seekstone-src
+        - name: tools
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: vault-inbox
+spec:
+  image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+  transport: stdio
+  proxyPort: 8080
+  env:
+    - name: SEEKSTONE_VAULT
+      value: /vault
+    - name: HOME
+      value: /tmp
+    - name: SEEKSTONE_CACHE_DIR
+      value: /tmp/seekstone
+    - name: SEEKSTONE_WRITE_PATHS
+      value: Notes/**,AI/**,Archives/**
+    # No undo journal: it would live in the vault and could be synced.
+    - name: SEEKSTONE_HISTORY
+      value: "0"
+    - name: SEEKSTONE_AUDIT_FILE
+      value: /audit/vault-inbox.jsonl
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 768Mi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # RWO block volume: run beside the sync pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: obsidian-vault
+      initContainers:
+        - name: install-seekstone
+          image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+          command: [/bin/sh, -c]
+          args:
+            - >-
+              cp /src/package.json /src/package-lock.json /tools/ &&
+              cd /tools && npm ci --omit=dev --no-audit --no-fund
+          env:
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: src
+              mountPath: /src
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mcp
+          command:
+            - /tools/node_modules/.bin/seekstone
+          volumeMounts:
+            - name: vault
+              mountPath: /vault
+              subPath: vault
+              readOnly: false
+            - name: vault
+              mountPath: /audit
+              subPath: seekstone
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-vault
+        - name: src
+          configMap:
+            name: seekstone-src
+        - name: tools
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: toolhive.stacklok.dev/v1alpha1
+kind: MCPServer
+metadata:
+  name: vault-n8n
+spec:
+  image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+  transport: stdio
+  proxyPort: 8080
+  env:
+    - name: SEEKSTONE_VAULT
+      value: /vault
+    - name: HOME
+      value: /tmp
+    - name: SEEKSTONE_CACHE_DIR
+      value: /tmp/seekstone
+    - name: SEEKSTONE_WRITE_PATHS
+      value: Notes/**,References/**
+    # No undo journal: it would live in the vault and could be synced.
+    - name: SEEKSTONE_HISTORY
+      value: "0"
+    - name: SEEKSTONE_AUDIT_FILE
+      value: /audit/vault-n8n.jsonl
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      memory: 768Mi
+  podTemplateSpec:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      # RWO block volume: run beside the sync pod.
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: obsidian-vault
+      initContainers:
+        - name: install-seekstone
+          image: docker.io/library/node:26-bookworm-slim@sha256:0042e17d232a87a2cd485be1da7900fca4d10a4ad11b29e9285da1d2e54798c9
+          command: [/bin/sh, -c]
+          args:
+            - >-
+              cp /src/package.json /src/package-lock.json /tools/ &&
+              cd /tools && npm ci --omit=dev --no-audit --no-fund
+          env:
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/npm-cache
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          volumeMounts:
+            - name: src
+              mountPath: /src
+              readOnly: true
+            - name: tools
+              mountPath: /tools
+            - name: tmp
+              mountPath: /tmp
+      containers:
+        - name: mcp
+          command:
+            - /tools/node_modules/.bin/seekstone
+          volumeMounts:
+            - name: vault
+              mountPath: /vault
+              subPath: vault
+              readOnly: false
+            - name: vault
+              mountPath: /audit
+              subPath: seekstone
+            - name: tools
+              mountPath: /tools
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: vault
+          persistentVolumeClaim:
+            claimName: obsidian-vault
+        - name: src
+          configMap:
+            name: seekstone-src
+        - name: tools
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}

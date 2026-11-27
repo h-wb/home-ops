@@ -40,6 +40,23 @@ Use `gh` and `curl`. Cover every version between old and new, not only the newes
 
 If nothing can be found, say so in the summary rather than guessing.
 
+### The dotfiles pin
+
+A bump of `DOTFILES_REF` in `kubernetes/clusters/main/ks.yaml` moves every pod that
+bootstraps from h-wb/dotfiles (neko, code-server, both Paseo pods)
+to a new commit of that repository's `master`. It has no release notes: the commits are
+the changelog. Read them with
+`gh api repos/h-wb/dotfiles/compare/<old>...<new> --jq '.commits[].commit.message'` and
+`gh api repos/h-wb/dotfiles/compare/<old>...<new> --jq '.files[].filename'`, and check the
+CI on the new commit
+(`gh api repos/h-wb/dotfiles/commits/<new>/check-runs --jq '.check_runs[] | [.name, .conclusion]'`:
+one check run per job of its `test` workflow).
+Report as **blocking (p0)** no check runs on the new commit, or any that did not
+conclude `success` (or `skipped`), and a change
+to the `apply` task or its `--unattended` flag, `miserc.toml` or `[env_sets]` that home-ops' callers
+(`components/dotfiles`, `paseo/common/helmrelease.yaml`) do not match. Having read the
+commits counts as having read the changelog.
+
 ## 3. Check what it means here
 
 Read the files in this repository that use the upgraded component: the HelmRelease

@@ -45,10 +45,8 @@ spec:
               OAUTH_PROVIDER_NAME: Kanidm
               OAUTH_WELLKNOWN_URL: "https://idm.${SECRET_DOMAIN}/oauth2/openid/karakeep/.well-known/openid-configuration"
               OAUTH_SCOPE: "openid email profile"
-              # NextAuth refuses to link OIDC to an existing password account by email
-              # unless this is set — needed to sign into the pre-existing admin account.
-              OAUTH_ALLOW_DANGEROUS_EMAIL_ACCOUNT_LINKING: "true"
-              DISABLE_PASSWORD_AUTH: false
+              OAUTH_AUTO_REDIRECT: true
+              DISABLE_PASSWORD_AUTH: true
               DISABLE_SIGNUPS: true
               DISABLE_NEW_RELEASE_CHECK: true
               # FIXME: Remove this when the following PR is merged and released https://github.com/karakeep-app/karakeep/pull/969/files
@@ -131,6 +129,8 @@ spec:
               limits:
                 memory: 1Gi
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -173,6 +173,19 @@ spec:
           - backendRefs:
               - identifier: app
                 port: *port
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controller: karakeep
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toControllers: [meilisearch, chrome]
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/name: litellm
+                  k8s:io.kubernetes.pod.namespace: llm
     persistence:
       data:
         existingClaim: karakeep

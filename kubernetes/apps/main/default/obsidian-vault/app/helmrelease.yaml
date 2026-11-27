@@ -1,0 +1,107 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/bjw-s-labs/helm-charts/main/charts/other/app-template/schemas/helmrelease-helm-v2.schema.json
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: obsidian-vault
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: app-template
+  dependsOn: []
+  values:
+    defaultPodOptions:
+      # Without ndots 1, CoreDNS autopath resolves *.obsidian.md inside the namespace and the egress rule never matches.
+      dnsConfig:
+        options:
+          - name: ndots
+            value: "1"
+      # s6-overlay starts as root, then drops to PUID/PGID.
+      securityContext:
+        runAsNonRoot: false
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+    controllers:
+      obsidian-vault:
+        replicas: 1
+        # RWO volume, one `ob sync` writer.
+        strategy: Recreate
+        annotations:
+          reloader.stakater.com/auto: "true"
+        containers:
+          sync:
+            image:
+              repository: ghcr.io/belphemur/obsidian-headless-sync-docker
+              tag: "0.0.14"
+            env:
+              OBSIDIAN_AUTH_TOKEN:
+                valueFrom:
+                  secretKeyRef:
+                    name: obsidian-headless
+                    key: OBSIDIAN_AUTH_TOKEN
+              VAULT_NAME:
+                valueFrom:
+                  secretKeyRef:
+                    name: obsidian-headless
+                    key: OBSIDIAN_VAULT
+              # Empty for a vault without end-to-end encryption.
+              VAULT_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: obsidian-headless
+                    key: OBSIDIAN_VAULT_PASSWORD
+              PUID: "1000"
+              PGID: "1000"
+              # Keep these paths: a change means a new sync-setup and a new device.
+              VAULT_PATH: /data/vault
+              XDG_CONFIG_HOME: /data/state
+              # .seekstone is Seekstone's state, never vault content.
+              SYNC_MODE: bidirectional
+              EXCLUDED_FOLDERS: .seekstone
+              DEVICE_NAME: cluster-headless
+            probes:
+              readiness:
+                enabled: true
+                type: COMMAND
+                command:
+                  - /bin/sh
+                  - /scripts/syncprobe
+                  - "900"
+                spec:
+                  periodSeconds: 60
+                  timeoutSeconds: 10
+            resources:
+              requests:
+                cpu: 20m
+                memory: 128Mi
+              limits:
+                memory: 512Mi
+    configMaps:
+      vault-scripts:
+        data:
+          syncprobe: |-
+            #!/bin/sh
+            # Readiness is sync progress: `ob sync --continuous` stays up when its websocket wedges.
+            # This image's BusyBox date parses only "YYYY-MM-DD HH:MM:SS".
+            set -eu
+            for log in "$XDG_CONFIG_HOME"/obsidian-headless/sync/*/sync.log; do break; done
+            [ -f "$log" ] || { echo "no sync.log yet"; exit 1; }
+            ts=$(tail -c 200000 "$log" | grep -a 'Fully synced' | tail -1 | cut -c2-20 | tr 'T' ' ')
+            [ -n "$ts" ] || { echo "never reached Fully synced"; exit 1; }
+            age=$(($(date -u +%s) - $(date -u -d "$ts" +%s)))
+            echo "last full sync $age s ago (threshold $1 s)"
+            [ "$age" -lt "$1" ]
+    persistence:
+      vault:
+        existingClaim: obsidian-vault
+        globalMounts:
+          - path: /data/vault
+            subPath: vault
+          - path: /data/state
+            subPath: state
+      scripts:
+        type: configMap
+        identifier: vault-scripts

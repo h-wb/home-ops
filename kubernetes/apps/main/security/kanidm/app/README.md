@@ -27,7 +27,7 @@ Add a Component to the app's `ks.yaml`:
 
 The Component creates a Flux Kustomization `kanidm-${APP}-oidc` in `security`, which renders a ConfigMap of the same name for the provisioner. The provisioner writes the Secret `kanidm-${APP}-oidc` into `${APP_NAMESPACE}`, with the client id and secret under `client-id` and `client-secret` (`OIDC_CLIENT_ID_KEY`, `OIDC_CLIENT_SECRET_KEY` rename them). The issuer is `https://idm.${SECRET_DOMAIN}/oauth2/openid/${APP}`.
 
-The app sets `APP_NAMESPACE` and the `OIDC_*` variables in `postBuild.substitute`. The usual ones are `OIDC_DISPLAY_NAME`, `OIDC_CALLBACK` (default `/oauth2/callback`), `OIDC_SHORT_USERNAME`, `OIDC_DISABLE_PKCE` for clients without PKCE, `OIDC_GROUP` (default `users`) and `OIDC_CLAIM_MAPS`; all of them, with defaults, are in [`components/oidc/base/ks.yaml`](../../../../../components/oidc/base/ks.yaml). Check the callback against the app's real redirect URL before enabling login.
+The app sets `APP_NAMESPACE` and the `OIDC_*` variables in `postBuild.substitute`. The usual ones are `OIDC_DISPLAY_NAME`, `OIDC_CALLBACK` (default `/oauth2/callback`), `OIDC_SHORT_USERNAME`, `OIDC_EXTRA_CALLBACKS` for more redirect addresses (each quoted, each after a comma: `', "https://a/cb", "https://b/cb"'`; the provisioner replaces lists when it merges, so they must sit in the same list), `OIDC_DISABLE_PKCE` for clients without PKCE, `OIDC_GROUP` (default `users`) and `OIDC_CLAIM_MAPS`; all of them, with defaults, are in [`components/oidc/base/ks.yaml`](../../../../../components/oidc/base/ks.yaml). Check the callback against the app's real redirect URL before enabling login.
 
 Provisioning cannot set passwords; credentials are self-service.
 

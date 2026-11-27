@@ -35,6 +35,7 @@ spec:
         pod:
           labels:
             assistant.scope: private
+            ingress.home.arpa/envoy-internal: allow
         statefulset:
           volumeClaimTemplates:
             - name: data

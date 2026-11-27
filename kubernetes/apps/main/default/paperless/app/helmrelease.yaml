@@ -11,6 +11,9 @@ spec:
     name: app-template
   dependsOn: []
   values:
+    defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
     controllers:
       paperless:
         annotations:
@@ -22,7 +25,18 @@ spec:
               tag: 3.5.1
             env:
               # Application
-              #PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+              PAPERLESS_APPS: allauth.socialaccount.providers.openid_connect
+              PAPERLESS_OIDC_CLIENT_SECRET:
+                valueFrom:
+                  secretKeyRef:
+                    name: "kanidm-{{ .Release.Name }}-oidc"
+                    key: client-secret
+              PAPERLESS_SOCIALACCOUNT_PROVIDERS:
+                dependsOn: PAPERLESS_OIDC_CLIENT_SECRET
+                value: >-
+                  {"openid_connect": {"OAUTH_PKCE_ENABLED": true, "APPS": [{"provider_id": "kanidm", "name": "Kanidm",
+                  "client_id": "{{ .Release.Name }}", "secret": "$(PAPERLESS_OIDC_CLIENT_SECRET)",
+                  "settings": {"server_url": "https://idm.${SECRET_DOMAIN}/oauth2/openid/{{ .Release.Name }}/.well-known/openid-configuration"}}]}}
               PAPERLESS_URL: "https://{{ .Release.Name }}.${SECRET_DOMAIN}"
               # Since 3.5.0, PAPERLESS_URL alone restricts Host to that name, so
               # in-cluster callers (n8n, paperless-gpt, homepage) need listing.
@@ -49,6 +63,8 @@ spec:
               # Remote User Auth
               PAPERLESS_ACCOUNT_ALLOW_SIGNUPS: "false"
               PAPERLESS_SOCIALACCOUNT_ALLOW_SIGNUPS: "false"
+              PAPERLESS_DISABLE_REGULAR_LOGIN: "true"
+              PAPERLESS_REDIRECT_LOGIN_TO_SSO: "true"
               # Folders
               PAPERLESS_CONSUMPTION_DIR: /data/paperless/consume
               PAPERLESS_DATA_DIR: /data/paperless/data
@@ -99,6 +115,8 @@ spec:
     route:
       app:
         annotations:
+          gatus.home-operations.com/endpoint: |-
+            url: https://paperless.${SECRET_DOMAIN}
           gethomepage.dev/enabled: "true"
           gethomepage.dev/app: paperless
           gethomepage.dev/group: Personal
@@ -114,6 +132,46 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+        rules:
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /
+            backendRefs:
+              - identifier: app
+                port: http
+          - matches:
+              - path:
+                  type: PathPrefix
+                  value: /admin
+              - headers:
+                  - type: RegularExpression
+                    name: Authorization
+                    value: "^[Bb][Aa][Ss][Ii][Cc] .+"
+              - path:
+                  type: Exact
+                  value: /api/token/
+              - path:
+                  type: Exact
+                  value: /api/token
+            filters:
+              - type: ExtensionRef
+                extensionRef:
+                  group: gateway.envoyproxy.io
+                  kind: HTTPRouteFilter
+                  name: paperless-no-admin
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controller: paperless
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toEndpoints:
+              - matchLabels:
+                  app.kubernetes.io/name: litellm
+                  k8s:io.kubernetes.pod.namespace: llm
     persistence:
       config:
         existingClaim: "{{ .Release.Name }}"

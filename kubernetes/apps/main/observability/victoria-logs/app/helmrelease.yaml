@@ -31,6 +31,8 @@ spec:
     fullnameOverride: victoria-logs
     retentionPeriod: 14d
     server:
+      podLabels:
+        ingress.home.arpa/lan: deny
       persistentVolume:
         enabled: true
         storageClassName: ceph-block

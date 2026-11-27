@@ -2,7 +2,7 @@
 # Hermes may reach DNS, LiteLLM (its key picks the models), both Memini stores (the
 # general one read-only), its own ToolHive gateway, the two workshop daemons and
 # the Matrix homeserver. Messaging is Matrix-only and in-cluster: of the internet,
-# nothing. Only envoy-internal may connect to it, on the dashboard port (Paseo
+# nothing. Who may connect is its `ingress.home.arpa/envoy-internal` label (Paseo
 # uses the API server's exec).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -14,19 +14,7 @@ spec:
       app.kubernetes.io/name: hermes-private
       assistant.scope: private
   policyTypes:
-    - Ingress
     - Egress
-  ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: network
-          podSelector:
-            matchLabels:
-              gateway.envoyproxy.io/owning-gateway-name: envoy-internal
-      ports:
-        - port: 9119
-          protocol: TCP
   egress:
     - to:
         - namespaceSelector:

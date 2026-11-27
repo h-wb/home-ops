@@ -5,10 +5,13 @@ Run with python3 -B -m unittest discover -s tests -p test_paseo.py.
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
+PIN = re.search(r'DOTFILES_REF: "([0-9a-f]{40})"',
+                (ROOT / "kubernetes/clusters/main/ks.yaml").read_text()).group(1)
 
 
 class PaseoRendering(unittest.TestCase):
@@ -37,7 +40,7 @@ class PaseoRendering(unittest.TestCase):
     def setUpClass(cls):
         parent = cls.run_tool("kustomize", "build", "kubernetes/apps/main/llm",
                               "--load-restrictor=LoadRestrictionsNone")
-        variables = {"CLUSTER": "main", "SECRET_DOMAIN": "example.com"}
+        variables = {"CLUSTER": "main", "SECRET_DOMAIN": "example.com", "DOTFILES_REF": PIN}
         children = cls.documents(cls.substitute(parent, variables))
         cls.rendered = {}
         for child in children:
@@ -309,14 +312,20 @@ class PaseoRendering(unittest.TestCase):
                 tools = runtime["initContainers"]["tools"]
                 # No script: the app's own image, mise from an image volume.
                 self.assertEqual(runtime["containers"]["app"]["image"], tools["image"])
-                self.assertEqual(["mise"], tools["command"])
+                # A failed bootstrap logs a line and the pod starts, as with components/dotfiles.
+                self.assertEqual(["/bin/sh", "-c",
+                                  'mise "$@" || echo "dotfiles: bootstrap did not complete; starting anyway"',
+                                  "mise"], tools["command"])
                 args = tools["args"]
-                self.assertEqual("bootstrap", args[0])
-                for flag in ("--from", "--from-dir", "--config-dir",
+                # The environment is declared, and saved for the app container.
+                self.assertEqual(["-E", "paseo,paseo-overlay", "bootstrap"], args[:3])
+                for flag in ("--from", "--from-dir", "--config-dir", "--save-env",
                              "--yes", "--force-dotfiles", "--skip-dirty", "--locked"):
                     self.assertIn(flag, args)
                 self.assertNotIn("--update", args)
-                self.assertIn("https://github.com/h-wb/dotfiles.git", args)
+                # The cluster's one pin, never a branch.
+                self.assertEqual(f"https://github.com/h-wb/dotfiles.git?ref={PIN}",
+                                 args[args.index("--from") + 1])
                 self.assertEqual("/home/paseo/.dotfiles", args[args.index("--from-dir") + 1])
                 self.assertEqual(".", args[args.index("--config-dir") + 1])
                 self.assertFalse(any(k.startswith("MISE_") for k in tools["env"]))

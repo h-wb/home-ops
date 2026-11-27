@@ -28,7 +28,7 @@ spec:
         - "--min-chunk-size=5MB"
         - "--read-timeout=120"
     destinationPath: s3://postgresql/${APP}
-    endpointURL: https://s3.${SECRET_DOMAIN}
+    endpointURL: http://garage.storage.svc.cluster.local:3900
     s3Credentials:
       region:
         name: &secret ${APP}-cnpg-secret

@@ -10,6 +10,8 @@ spec:
     name: kromgo
   interval: 1h
   values:
+    podLabels:
+      policy.home.arpa/egress: internet
     config:
       prometheus: http://prometheus-operated.{{ .Release.Namespace }}.svc.cluster.local:9090
       badges:

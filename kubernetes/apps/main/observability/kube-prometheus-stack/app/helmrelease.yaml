@@ -169,6 +169,9 @@ spec:
             - name: envoy-internal
               namespace: network
       prometheusSpec:
+        podMetadata:
+          labels:
+            ingress.home.arpa/lan: deny
         externalLabels:
           cluster: main
         resources:

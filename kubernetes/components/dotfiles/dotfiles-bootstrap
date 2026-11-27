@@ -1,21 +1,39 @@
 #!/bin/sh
-# Bootstrap this pod from the owner's dotfiles: clone them when the script is
-# missing, then run their scripts/pod-bootstrap by path with this script's
-# arguments. Always exits 0: a failed bootstrap must not stop the pod's own
-# program from starting. No braces around variables: Flux substitutes those.
+# README.md. Always exits 0: the pod starts anyway. Flux substitutes the two
+# variables below; nothing else here may use braces.
 set -u
-url=https://github.com/h-wb/dotfiles.git
+ref=${DOTFILES_REF}
+env=${DOTFILES_ENV}
 dir="$HOME/.dotfiles"
-script="$dir/scripts/pod-bootstrap"
+url=https://github.com/h-wb/dotfiles.git
+state="$HOME/.local/state"
+log="$state/dotfiles.log"
+# The mise image's MISE_* point at /mise, not this home.
+unset MISE_CONFIG_DIR MISE_DATA_DIR MISE_CACHE_DIR MISE_ENV
+# A start must not dirty the checkout the next one moves.
+export MISE_LOCKED=1
+export PATH="/opt/mise/usr/local/bin:$HOME/.local/share/mise/shims:$PATH"
+mkdir -p "$state"
 
-if [ ! -f "$script" ]; then
-	# The neko image ships no git; code-server's does.
-	command -v git >/dev/null 2>&1 ||
-		{ sudo -n apt-get update -qq && sudo -n apt-get install -y -qq --no-install-recommends git; }
-	# No script means a cut-off clone (or not a checkout of ours): keep it aside.
-	[ ! -e "$dir" ] || mv "$dir" "$dir.broken-$(date +%Y%m%d%H%M%S)"
-	rm -rf "$dir.clone"
-	timeout 300 git clone --quiet "$url" "$dir.clone" && mv "$dir.clone" "$dir"
-fi
-timeout 3300 sh "$script" "$@" || echo "dotfiles bootstrap did not complete; starting anyway"
+fetch() {
+	timeout 600 mise -E "$env" bootstrap --from "$url?ref=$ref" --update --from-dir "$dir" \
+		--config-dir . --save-env --yes --only final-hook >>"$log" 2>&1 ||
+		{ echo "dotfiles: fetch failed for $ref; see $log"; return 1; }
+	echo "dotfiles: $ref at $dir"
+}
+
+run() {
+	[ -d "$dir/.git" ] || { echo "dotfiles: no checkout at $dir; nothing to run"; return 1; }
+	cd "$dir" || return 1
+	DOTFILES_REF="$ref" timeout 3300 mise run apply --unattended >>"$log" 2>&1 ||
+		echo "dotfiles: bootstrap did not complete; starting anyway"
+	echo "dotfiles: $(cat "$state/dotfiles.status" 2>/dev/null || echo "no status"); log: $log"
+}
+
+case "$*" in
+fetch) fetch ;;
+run) run ;;
+"") fetch; run ;;
+*) echo "usage: dotfiles-bootstrap [fetch|run]" ;;
+esac
 exit 0

@@ -38,9 +38,17 @@ spec:
                   secretKeyRef:
                     name: postgres-dawarich-app
                     key: password
+              OIDC_ISSUER: https://idm.${SECRET_DOMAIN}/oauth2/openid/dawarich
+              OIDC_REDIRECT_URI: https://dawarich.${SECRET_DOMAIN}/users/auth/openid_connect/callback
+              OIDC_PKCE_ENABLED: "true"
+              OIDC_PROVIDER_NAME: Kanidm
+              OIDC_AUTO_REGISTER: "false"
+              ALLOW_EMAIL_PASSWORD_LOGIN: "false"
             envFrom:
               - secretRef:
                   name: dawarich-secret
+              - secretRef:
+                  name: kanidm-dawarich-oidc
             probes:
               liveness: &probe
                 enabled: true
@@ -90,6 +98,8 @@ spec:
                 memory: "6Gi"
                 cpu: "3000m"
     defaultPodOptions:
+      labels:
+        policy.home.arpa/egress: internet
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -116,6 +126,19 @@ spec:
         parentRefs:
           - name: envoy-external
             namespace: network
+    networkpolicies:
+      egress:
+        type: cilium
+        suffix: egress
+        controller: dawarich
+        extraSelectorLabels:
+          policy.home.arpa/egress: internet
+        egress:
+          - toEndpoints:
+              - matchExpressions:
+                  - key: app.kubernetes.io/instance
+                    operator: In
+                    values: [photon, immich, airtrail]
     persistence:
       data:
         existingClaim: dawarich

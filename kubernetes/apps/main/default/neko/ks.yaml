@@ -11,6 +11,7 @@ spec:
     labels:
       app.kubernetes.io/name: *app
   components:
+    - ../../../../../components/dotfiles
     - ../../../../../components/gpu
     - ../../../../../components/kopiur/backup
     # Base only (no SecurityPolicy): neko does the OIDC login itself.
@@ -22,6 +23,7 @@ spec:
     substitute:
       APP: *app
       APP_NAMESPACE: *namespace
+      DOTFILES_ENV: neko
       KOPIUR_CAPACITY: 20Gi
       KOPIUR_SCHEDULE: "45 4 * * *"
       # k8s-gateway serves the internal records for ${SECRET_DOMAIN}; the DNS
@@ -32,7 +34,7 @@ spec:
       OIDC_SHORT_USERNAME: "true"
       OIDC_IMAGE_NAME: xfce
       OIDC_CALLBACK: /api/oauth/callback
-      OIDC_EXTRA_CALLBACKS: '["https://nkd.${SECRET_DOMAIN}/api/oauth/callback"]'
+      OIDC_EXTRA_CALLBACKS: ', "https://nkd.${SECRET_DOMAIN}/api/oauth/callback"'
       # Not `users`: neko lets any authenticated user take control.
       OIDC_GROUP: admins
       OIDC_SCOPE_MAPS: '{"guests":["openid","profile","email"]}'
