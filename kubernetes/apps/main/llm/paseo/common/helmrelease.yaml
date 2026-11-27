@@ -35,7 +35,7 @@ spec:
           tools:
             image: &image
               repository: ghcr.io/getpaseo/paseo
-              tag: 0.17.0
+              tag: 0.18.1
             # Like components/dotfiles, a failed bootstrap never stops the pod.
             command:
               - /bin/sh
