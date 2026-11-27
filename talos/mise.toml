@@ -68,7 +68,7 @@ run = '''
 set -euo pipefail
 mise run //talos:gen-talosconfig
 mise run //bootstrap:kubeconfig
-# dotfiles renders ~/.kube/<cluster>.yaml on every workstation from this field.
+# The other workstations render ~/.kube/<cluster>.yaml from this field.
 if gum confirm "Write the new kubeconfig to Proton Pass (Machines/kubeconfig, field ${CLUSTER})?" --default="Yes"; then
     if pass-cli item update --vault-name Machines --item-title kubeconfig --field "${CLUSTER}=$(cat "${KUBECONFIG}")" >/dev/null; then
         mise //:log info "Updated Proton Pass" item "Machines/kubeconfig" field "${CLUSTER}"
@@ -80,7 +80,7 @@ expiry() { printf '%s' "$1" | base64 -d | openssl x509 -noout -enddate | cut -d=
 mise //:log info "New certificates" cluster "${CLUSTER}" \
     talosconfig "$(expiry "$(yq -r '.contexts[].crt' "${TALOSCONFIG}" | head -1)")" \
     kubeconfig "$(expiry "$(yq -r '.users[0].user."client-certificate-data"' "${KUBECONFIG}")")"
-mise //:log info "Next: mise run apply in dotfiles on each workstation" machines "MacBook, code-server, neko, CachyOS"
+mise //:log info "Next: mise run apply in dotfiles on the other workstations" machines "MacBook, code-server, neko, CachyOS"
 '''
 
 [tasks.render-config]

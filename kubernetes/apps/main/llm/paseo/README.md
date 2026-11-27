@@ -149,7 +149,7 @@ update Flux resource specs, so it is still administrative in effect. GitHub
 credentials and GitOps writes are another operational path.
 
 In the pod there is **no kubeconfig**: token automounting is off, Cilium denies the
-API, and `kubernetes/clusters/*/kubeconfig` is gitignored (workstation-only), so the
+API, and the `~/.kube/<cluster>.yaml` files are rendered only on workstations, so the
 `KUBECONFIG` that `.mise.toml` sets points at nothing and bare `kubectl`/`flux`
 fall back to localhost:8080. Run cluster operations through the ToolHive MCP tools
 instead (`kubectl_kubectl_generic`, `flux_get_kubernetes_resources`,
