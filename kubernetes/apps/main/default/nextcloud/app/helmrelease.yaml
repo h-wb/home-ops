@@ -72,6 +72,8 @@ spec:
             'skeletondirectory' => '',
             // Photos live in Immich; no preview cache (was 48 GiB of thumbnails).
             'enable_previews' => false,
+            'log_type' => 'errorlog',
+            'loglevel' => 2,
           );
       extraVolumes:
         - name: nfs-tank
