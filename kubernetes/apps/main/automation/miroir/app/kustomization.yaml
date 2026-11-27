@@ -6,4 +6,3 @@ resources:
   - ./helmrelease.yaml
   - ./prometheusrule.yaml
   - ./timeline-reader.yaml
-  - ./view-media-externalsecret.yaml

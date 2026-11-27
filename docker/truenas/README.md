@@ -96,8 +96,3 @@ The Miroir server reads the same two fields from its environment
 (`miroir-secret`). These objects are private screen captures, stored
 unencrypted in `data/`, so they are in the offsite copy above; whether that copy
 is encrypted is not checked here.
-
-Miroir's viewer, the process that serves the timeline, gets a key of its own
-that can only read `miroir-media`. The task imports it once the same item also
-has `MIROIR_VIEW_MEDIA_ACCESS_KEY_ID` and `MIROIR_VIEW_MEDIA_SECRET_ACCESS_KEY`,
-made with the same two commands.
