@@ -8,8 +8,11 @@ spec:
   transport: stdio
   proxyMode: streamable-http
   proxyPort: 8080
-  # Not read-only: the PAT grants write on issues and pull requests only, so tools
-  # can open/comment on issues and PRs but cannot push code (contents is read).
+  # Read-only: the gateways only read here (the assistant reads pages). Agents write
+  # through `gh` in their pod, as the bot-tintin app, never with this token.
+  env:
+    - name: GITHUB_READ_ONLY
+      value: "1"
   secrets:
     - name: toolhive-github
       key: token
