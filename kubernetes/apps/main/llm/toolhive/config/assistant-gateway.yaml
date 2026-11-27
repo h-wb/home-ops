@@ -27,6 +27,12 @@ spec:
             - list_task_statuses
             - list_labels
             - get_me
+        # Reads handbook pages (the handbook skill); never writes as the bot.
+        # Hides the other tools from the list only; they stay routable.
+        - workload: github
+          filter:
+            - get_file_contents
+            - search_code
         # Same short description as on mcp-private; the original is 8.6k characters.
         - workload: homeassistant
           overrides:
