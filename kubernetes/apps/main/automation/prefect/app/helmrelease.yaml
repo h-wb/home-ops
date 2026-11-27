@@ -132,10 +132,6 @@ spec:
               # scoped here so the namespaced Role below is enough (default is
               # cluster-wide).
               PREFECT_INTEGRATIONS_KUBERNETES_OBSERVER_NAMESPACES: automation
-              # Only the client login, not all of prefect-secret: the worker copies
-              # every Prefect setting it holds into each Job, so the server's
-              # login must not be one. The Jobs reference this one from the
-              # secret instead of carrying its value in their spec.
               PREFECT_API_AUTH_STRING: *prefect-login
               PREFECT_INTEGRATIONS_KUBERNETES_WORKER_API_AUTH_STRING_SECRET_NAME: prefect-secret
               PREFECT_INTEGRATIONS_KUBERNETES_WORKER_API_AUTH_STRING_SECRET_KEY: PREFECT_API_AUTH_STRING
