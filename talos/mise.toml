@@ -61,55 +61,6 @@ talosctl --talosconfig "${TALOS_DIR}/talosconfig" config node "${nodes[@]}"
 mise //:log info "Generated talosconfig" cluster "${CLUSTER}"
 '''
 
-[tasks.certs]
-description = "Show when the admin client certificates of both clusters expire"
-usage = '''
-flag "--warn" help="Print only the certificates that expire within 30 days, with the renew command"
-'''
-quiet = true
-run = '''
-#!/usr/bin/env bash
-# This checkout's talosconfig and kubeconfig, and the ~/.kube copy dotfiles renders from Proton Pass.
-set -uo pipefail
-command -v openssl >/dev/null || exit 0
-repo=$(cd "{{config_root}}/.." && pwd)
-tilde="~"
-window=$((30 * 24 * 3600))
-warn="${usage_warn:-false}"
-due=()
-show() { local f="${1#"$repo"/}"; printf '%s' "${f/#$HOME/$tilde}"; }
-check() { # cluster, file, base64 certificate
-    local pem end state
-    pem=$(printf '%s' "$3" | base64 -d 2>/dev/null) || return 0
-    end=$(openssl x509 -noout -enddate <<<"$pem" 2>/dev/null | cut -d= -f2) || return 0
-    [[ -n "$end" ]] || return 0
-    if openssl x509 -noout -checkend "$window" <<<"$pem" >/dev/null; then
-        [[ "$warn" == true ]] || printf 'ok       %-5s %s  %s\n' "$1" "$end" "$(show "$2")"
-        return 0
-    fi
-    state="expires"
-    openssl x509 -noout -checkend 0 <<<"$pem" >/dev/null || state="expired"
-    printf '%-8s %-5s %s  %s\n' "$state" "$1" "$end" "$(show "$2")"
-    [[ " ${due[*]} " == *" $1 "* ]] || due+=("$1")
-}
-for cluster in main edge; do
-    file="$repo/talos/$cluster/talosconfig"
-    if [[ -s "$file" ]]; then
-        while read -r crt; do [[ -n "$crt" && "$crt" != null ]] && check "$cluster" "$file" "$crt"; done \
-            < <(yq -r '.contexts[].crt' "$file" 2>/dev/null)
-    fi
-    for file in "$repo/kubernetes/clusters/$cluster/kubeconfig" "$HOME/.kube/$cluster.yaml"; do
-        [[ -s "$file" ]] || continue
-        while read -r crt; do [[ -n "$crt" && "$crt" != null ]] && check "$cluster" "$file" "$crt"; done \
-            < <(yq -r '.users[].user."client-certificate-data"' "$file" 2>/dev/null)
-    done
-done
-for cluster in ${due[@]+"${due[@]}"}; do
-    printf 'Admin certificates of %s are due. Renew: CLUSTER=%s mise run //talos:renew-certs\n' "$cluster" "$cluster"
-done
-exit 0
-'''
-
 [tasks.renew-certs]
 description = "Renew the admin client certificates of $CLUSTER: talosconfig, kubeconfig and its Proton Pass copy"
 run = '''
@@ -125,8 +76,11 @@ if gum confirm "Write the new kubeconfig to Proton Pass (Machines/kubeconfig, fi
         mise //:log warn "Proton Pass not updated: paste the file into the field by hand" file "${KUBECONFIG}" item "Machines/kubeconfig" field "${CLUSTER}"
     fi
 fi
+expiry() { printf '%s' "$1" | base64 -d | openssl x509 -noout -enddate | cut -d= -f2; }
+mise //:log info "New certificates" cluster "${CLUSTER}" \
+    talosconfig "$(expiry "$(yq -r '.contexts[].crt' "${TALOSCONFIG}" | head -1)")" \
+    kubeconfig "$(expiry "$(yq -r '.users[0].user."client-certificate-data"' "${KUBECONFIG}")")"
 mise //:log info "Next: mise run apply in dotfiles on each workstation" machines "MacBook, code-server, neko, CachyOS"
-mise run //talos:certs
 '''
 
 [tasks.render-config]
