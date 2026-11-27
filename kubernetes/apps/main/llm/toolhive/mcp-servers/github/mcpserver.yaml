@@ -8,9 +8,6 @@ spec:
   transport: stdio
   proxyMode: streamable-http
   proxyPort: 8080
-  # As the GitHub App bot-tintin: the server mints and renews its own installation
-  # token (github-mcp-server docs/github-app-auth.md). The bot cannot merge without
-  # the owner's approval. Only the general gateway lists its write tools.
   env:
     - name: GITHUB_APP_PRIVATE_KEY_PATH
       value: /var/run/secrets/github/private-key.pem
@@ -36,7 +33,6 @@ spec:
             items:
               - key: private-key.pem
                 path: private-key.pem
-            # fsGroup 1000 is the server's group; 0400 would leave it unreadable.
             defaultMode: 0440
   resources:
     requests:
