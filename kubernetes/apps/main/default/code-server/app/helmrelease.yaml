@@ -65,6 +65,7 @@ spec:
               - 0.0.0.0:8080
               - --disable-telemetry
               - --disable-update-check
+              - /home/coder/Repositories
             env: *env
             envFrom: *envFrom
             resources:

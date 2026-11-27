@@ -214,7 +214,8 @@ class Pods(unittest.TestCase):
         self.assertEqual(controller["annotations"]["reloader.stakater.com/auto"], "true")
         app = controller["containers"]["app"]
         self.assertNotIn("--disable-workspace-trust", app["args"])
-        self.assertFalse(any(arg.startswith("/") for arg in app["args"]), app["args"])
+        # It opens the folder the dotfiles' repo list fills, never one repo.
+        self.assertEqual([arg for arg in app["args"] if arg.startswith("/")], ["/home/coder/Repositories"])
         for container in (app, init):
             self.assertEqual(container["envFrom"], [{"secretRef": {"name": "code-server-secret", "optional": True}}])
         template = one(docs, "ExternalSecret", "code-server")["spec"]["target"]["template"]["data"]
