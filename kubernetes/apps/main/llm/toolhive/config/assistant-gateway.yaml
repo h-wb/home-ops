@@ -27,6 +27,10 @@ spec:
             - list_task_statuses
             - list_labels
             - get_me
+        - workload: github
+          filter:
+            - get_file_contents
+            - search_code
         # Same short description as on mcp-private; the original is 8.6k characters.
         - workload: homeassistant
           overrides:

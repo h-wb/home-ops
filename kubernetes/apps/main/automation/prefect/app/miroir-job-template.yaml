@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://json.schemastore.org/kustomization
-# Base job template for the Miroir Kubernetes work pool (pipelines decision 012).
+# Base job template for the Miroir Kubernetes work pool (Miroir decision 012).
 # The default prefect-kubernetes template extended with: the NFS data export
 # mounted at a fixed path (/miroir/data, where Miroir keeps its configuration and
 # artifacts, so recorded storage paths resolve identically in
@@ -14,7 +14,7 @@
 # valueFrom entries and merges them with per-deployment env. The media bucket
 # key is not in this shared environment: only Miroir's media deployment, which
 # runs every derive (thumbnails, backfill walks), names the miroir-media secret
-# in its `env_from` variable (empty by default; pipelines decision 033
+# in its `env_from` variable (empty by default; Miroir decision 033
 # amendment), so a sync, import or build Job never holds a key to the bucket.
 # Applied by the
 # miroir-worker init container on every start: prefect work-pool create ...

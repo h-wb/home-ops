@@ -8,12 +8,32 @@ spec:
   transport: stdio
   proxyMode: streamable-http
   proxyPort: 8080
-  # Not read-only: the PAT grants write on issues and pull requests only, so tools
-  # can open/comment on issues and PRs but cannot push code (contents is read).
+  env:
+    - name: GITHUB_APP_PRIVATE_KEY_PATH
+      value: /var/run/secrets/github/private-key.pem
   secrets:
     - name: toolhive-github
-      key: token
-      targetEnvName: GITHUB_PERSONAL_ACCESS_TOKEN
+      key: app-id
+      targetEnvName: GITHUB_APP_ID
+    - name: toolhive-github
+      key: installation-id
+      targetEnvName: GITHUB_APP_INSTALLATION_ID
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: mcp
+          volumeMounts:
+            - name: app-key
+              mountPath: /var/run/secrets/github
+              readOnly: true
+      volumes:
+        - name: app-key
+          secret:
+            secretName: toolhive-github
+            items:
+              - key: private-key.pem
+                path: private-key.pem
+            defaultMode: 0440
   resources:
     requests:
       cpu: 25m

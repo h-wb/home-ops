@@ -18,8 +18,8 @@ spec:
         containers:
           app:
             image: &image
-              repository: ghcr.io/h-wb/pipelines
-              tag: sha-969012f96043831550cb607919b601e95169f648
+              repository: ghcr.io/h-wb/miroir
+              tag: sha-f78a77fc9a30d0877f00ca9968bdc93241cc8f1d
             # Absolute interpreter path: no PATH lookup for the console script
             # (mutable-tag stale caches once made runc miss it on one node).
             command:

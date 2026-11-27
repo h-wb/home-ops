@@ -62,7 +62,7 @@ for bucket in postgresql kopiur; do
     garage bucket allow --read --write --owner "${bucket}" --key "${key_id}" >/dev/null
 done
 
-# 4. Miroir media (pipelines decision 033): its own key, on its own bucket only.
+# 4. Miroir media (Miroir decision 033): its own key, on its own bucket only.
 #    Skipped until the BWS item `miroir` carries the two fields.
 miroir=$(bws secret list "${BWS_PROJECT_ID}" -o json | jq -er '.[] | select(.key == "miroir") | .value')
 media_id=$(jq -r '.MIROIR_MEDIA_ACCESS_KEY_ID // empty' <<<"${miroir}")

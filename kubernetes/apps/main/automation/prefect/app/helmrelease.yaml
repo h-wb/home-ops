@@ -68,10 +68,10 @@ spec:
               limits:
                 cpu: 2000m
                 memory: 6Gi
-      # Miroir worker (pipelines decision 012): each miroir flow run is its
-      # own Job from the versioned pipelines image. The legacy deployments above
+      # Miroir worker (Miroir decision 012): each miroir flow run is its
+      # own Job from the versioned Miroir image. The legacy deployments above
       # stay on local-pool until their connection is cut over.
-      # NB: ghcr.io/h-wb/pipelines is built from the pipelines repo's main branch;
+      # NB: ghcr.io/h-wb/miroir is built from the miroir repo's main branch;
       # merge this only after that image exists (Renovate pins the digest).
       miroir-worker:
         annotations:
@@ -87,8 +87,8 @@ spec:
           # --overwrite makes it idempotent against an existing pool.
           pool:
             image: &miroir-image
-              repository: ghcr.io/h-wb/pipelines
-              tag: sha-969012f96043831550cb607919b601e95169f648
+              repository: ghcr.io/h-wb/miroir
+              tag: sha-f78a77fc9a30d0877f00ca9968bdc93241cc8f1d
             command:
               - /app/.venv/bin/python
               - -m

@@ -1,5 +1,5 @@
 ---
-# Namespaced access for the miroir Kubernetes worker (pipelines decision 012):
+# Namespaced access for the miroir Kubernetes worker (Miroir decision 012):
 # it manages the flow-run Jobs in this namespace and watches their pods and logs.
 # The HelmRelease attaches this ServiceAccount to the miroir-worker controller
 # by name (serviceAccount.name); flow-run Jobs use the default ServiceAccount —
