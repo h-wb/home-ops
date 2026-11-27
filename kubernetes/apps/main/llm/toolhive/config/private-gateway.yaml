@@ -29,6 +29,10 @@ spec:
             - list_task_statuses
             - list_labels
             - get_me
+        # GitHub writes as the bot to public repos: private data must not reach it.
+        # Hides the tools from the list only; they stay routable.
+        - workload: github
+          excludeAll: true
         # Its own description is 2494 tokens, over the embedder's 2048-token limit:
         # the indexing request failed whole and the gateway had no tool search.
         - workload: homeassistant

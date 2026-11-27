@@ -8,15 +8,36 @@ spec:
   transport: stdio
   proxyMode: streamable-http
   proxyPort: 8080
-  # Read-only: the gateways only read here (the assistant reads pages). Agents write
-  # through `gh` in their pod, as the bot-tintin app, never with this token.
+  # As the GitHub App bot-tintin: the server mints and renews its own installation
+  # token (github-mcp-server docs/github-app-auth.md). The bot cannot merge without
+  # the owner's approval. Only the general gateway lists its write tools.
   env:
-    - name: GITHUB_READ_ONLY
-      value: "1"
+    - name: GITHUB_APP_PRIVATE_KEY_PATH
+      value: /var/run/secrets/github/private-key.pem
   secrets:
     - name: toolhive-github
-      key: token
-      targetEnvName: GITHUB_PERSONAL_ACCESS_TOKEN
+      key: app-id
+      targetEnvName: GITHUB_APP_ID
+    - name: toolhive-github
+      key: installation-id
+      targetEnvName: GITHUB_APP_INSTALLATION_ID
+  podTemplateSpec:
+    spec:
+      containers:
+        - name: mcp
+          volumeMounts:
+            - name: app-key
+              mountPath: /var/run/secrets/github
+              readOnly: true
+      volumes:
+        - name: app-key
+          secret:
+            secretName: toolhive-github
+            items:
+              - key: private-key.pem
+                path: private-key.pem
+            # fsGroup 1000 is the server's group; 0400 would leave it unreadable.
+            defaultMode: 0440
   resources:
     requests:
       cpu: 25m
