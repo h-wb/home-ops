@@ -69,8 +69,7 @@ spec:
           postBuild:
             substitute:
               NFS_ADDR: "192.168.1.161"
-              # renovate: dotfiles
-              DOTFILES_REF: "4a75922c4b74ccf7cd5a589364873eb1c843c963"
+              DOTFILES_REF: "master"
             substituteFrom:
               - name: cluster-secrets
                 kind: Secret

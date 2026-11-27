@@ -104,7 +104,7 @@ Plan mode is the read-only one in both agents.
   read the same notes before they choose a worker.
 
 Provisioning is the `tools` init container, on the app's image: `mise -E
-paseo,paseo-overlay bootstrap --from` the dotfiles at the cluster's pinned commit
+paseo,paseo-overlay bootstrap --from` the dotfiles at the cluster's `DOTFILES_REF`
 (`DOTFILES_REF`, `components/dotfiles/README.md`) into `~/.dotfiles`, an
 `emptyDir` cloned fresh at every start and read-only in the app container;
 `--save-env` keeps the declared environment for the app container. A failed

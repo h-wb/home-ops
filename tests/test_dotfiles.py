@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 URL = "https://github.com/h-wb/dotfiles.git"
 MISE = shutil.which("mise")
 CLUSTER = (ROOT / "kubernetes/clusters/main/ks.yaml").read_text()
-PIN = re.search(r'DOTFILES_REF: "([0-9a-f]{40})"', CLUSTER).group(1)
+PIN = re.search(r'DOTFILES_REF: "([^"]+)"', CLUSTER).group(1)
 
 
 def run(*args, text=None, env=None, cwd=ROOT):
@@ -254,24 +254,9 @@ class Pods(unittest.TestCase):
 
 
 class Pin(unittest.TestCase):
-    def test_one_pin_and_renovate_finds_it(self):
-        renovate = (ROOT / ".renovaterc.json5").read_text()
-        manager = re.search(r"""matchStrings: \[\s*'(# renovate: dotfiles[^']*)',?\s*\]""", renovate).group(1)
-        # JSON5 string -> the regex Renovate compiles (named groups in Python's spelling).
-        pattern = manager.replace("\\\\", "\\").replace("(?<", "(?P<")
-        matches = re.findall(pattern, CLUSTER)
-        self.assertEqual(matches, [PIN])
-        self.assertIn('packageNameTemplate: "https://github.com/h-wb/dotfiles"', renovate)
-        self.assertIn('datasourceTemplate: "git-refs"', renovate)
-        # The rule that batches it matches the depName: packageName is the URL,
-        # and Renovate's package-name matcher reads only that.
-        dep = re.search(r'depNameTemplate: "([^"]+)"', renovate).group(1)
-        rule = renovate[renovate.index('description: "The dotfiles pin'):]
-        rule = rule[:rule.index("}")]
-        self.assertIn(f'matchDepNames: ["{dep}"]', rule)
-        self.assertNotIn("matchPackageNames", rule)
-        for setting in ("automerge: false", 'schedule: ["* 0-1 * * *"]'):
-            self.assertIn(setting, rule)
+    def test_pods_follow_master_and_renovate_leaves_it(self):
+        self.assertEqual(PIN, "master")
+        self.assertNotIn("h-wb/dotfiles", (ROOT / ".renovaterc.json5").read_text())
 
     def test_every_consumer_reads_the_pin(self):
         # Nothing else in kubernetes/ names a dotfiles commit or fetches the
