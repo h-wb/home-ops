@@ -82,18 +82,16 @@ spec:
         # falls back to mistral/mistral-large-4 (routerSettings.fallbacks in
         # llm/litellm/app/litellmproxy.yaml), so the review still runs.
         model: litellm/chatgpt/gpt-6-luna-max
-        # kritika is the approval the main-require-review ruleset needs (it replaced
-        # the Claude Code "Renovate PR Review" workflow on 2026-10-03): a review with
-        # nothing blocking or important approves the pull request, a later one that
-        # finds something withdraws it. Majors and high-blast-radius packages still
-        # wait for a human, because Renovate does not auto-merge them. Set here, not
-        # in .kritika.yaml, so open pull requests based before it are approved too.
-        # Sento's main protection requires one approving review, satisfied the
-        # same way; the merge click stays human.
+        # A clean review approves Renovate's pull requests only, so its approval is
+        # the one the default-branch ruleset needs for them to auto-merge. Every
+        # other pull request, agents' included, waits for the owner. Set here, not
+        # in .kritika.yaml, so a pull request cannot change it.
         approve:
           when:
-            - { name: home-ops, expr: pr.url.startsWith("https://github.com/h-wb/home-ops/") }
-            - { name: sento, expr: pr.url.startsWith("https://github.com/h-wb/sento/") }
+            - name: home-ops-renovate
+              expr: pr.url.startsWith("https://github.com/h-wb/home-ops/") && pr.author.startsWith("bot-dupond") && pr.headRef.startsWith("renovate/")
+            - name: sento-renovate
+              expr: pr.url.startsWith("https://github.com/h-wb/sento/") && pr.author.startsWith("renovate") && pr.headRef.startsWith("renovate/")
       trigger:
         # Big generated diffs aren't worth the context; `@<bot> review` still forces one.
         exclude:
