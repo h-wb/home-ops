@@ -16,6 +16,9 @@
 # runs every derive (thumbnails, backfill walks), names the miroir-media secret
 # in its `env_from` variable (empty by default; Miroir decision 033
 # amendment), so a sync, import or build Job never holds a key to the bucket.
+# The Prefect login is referenced from prefect-secret by the worker (see the
+# miroir-worker env in helmrelease.yaml), never written into a Job. Finished
+# Jobs are deleted after 7 days (finished_job_ttl); logs stay in VictoriaLogs.
 # Applied by the
 # miroir-worker init container on every start: prefect work-pool create ...
 # creates the pool or updates its template.
@@ -348,7 +351,7 @@ data:
                 "type": "null"
               }
             ],
-            "default": null,
+            "default": 604800,
             "description": "The number of seconds to retain jobs after completion. If set, finished jobs will be cleaned up by Kubernetes after the given delay. If not set, jobs will be retained indefinitely.",
             "title": "Finished Job TTL"
           },
