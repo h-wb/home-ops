@@ -424,7 +424,7 @@ data:
                 "type": "null"
               }
             ],
-            "default": null,
+            "default": "512Mi",
             "description": "The memory resource request for the Kubernetes job container. Uses Kubernetes resource quantity format (e.g. '128Mi', '1Gi'). If not provided, no memory request is configured.",
             "title": "Memory Request"
           },
@@ -437,7 +437,7 @@ data:
                 "type": "null"
               }
             ],
-            "default": null,
+            "default": "2Gi",
             "description": "The memory resource limit for the Kubernetes job container. Uses Kubernetes resource quantity format (e.g. '128Mi', '1Gi'). If not provided, no memory limit is configured.",
             "title": "Memory Limit"
           }
