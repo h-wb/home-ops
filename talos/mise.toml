@@ -62,25 +62,37 @@ mise //:log info "Generated talosconfig" cluster "${CLUSTER}"
 '''
 
 [tasks.renew-certs]
-description = "Renew the admin client certificates of $CLUSTER: talosconfig, kubeconfig and its Proton Pass copy"
+description = "Renew the admin certificates of $CLUSTER and save its kubeconfig to Proton Pass"
+run = [
+  { task = "//talos:gen-talosconfig" },
+  { task = "//bootstrap:kubeconfig" },
+  { task = "//talos:_certs:expiry" },
+  { task = "//talos:_certs:save" },
+]
+
+[tasks."_certs:expiry"]
+description = "Print when the admin certificates of $CLUSTER expire (private)"
+hide = true
+quiet = true
 run = '''
 #!/usr/bin/env bash
 set -euo pipefail
-mise run //talos:gen-talosconfig
-mise run //bootstrap:kubeconfig
-# The other workstations render ~/.kube/<cluster>.yaml from this field.
-if gum confirm "Write the new kubeconfig to Proton Pass (Machines/kubeconfig, field ${CLUSTER})?" --default="Yes"; then
-    if pass-cli item update --vault-name Machines --item-title kubeconfig --field "${CLUSTER}=$(cat "${KUBECONFIG}")" >/dev/null; then
-        mise //:log info "Updated Proton Pass" item "Machines/kubeconfig" field "${CLUSTER}"
-    else
-        mise //:log warn "Proton Pass not updated: paste the file into the field by hand" file "${KUBECONFIG}" item "Machines/kubeconfig" field "${CLUSTER}"
-    fi
-fi
 expiry() { printf '%s' "$1" | base64 -d | openssl x509 -noout -enddate | cut -d= -f2; }
-mise //:log info "New certificates" cluster "${CLUSTER}" \
-    talosconfig "$(expiry "$(yq -r '.contexts[].crt' "${TALOSCONFIG}" | head -1)")" \
-    kubeconfig "$(expiry "$(yq -r '.users[0].user."client-certificate-data"' "${KUBECONFIG}")")"
-mise //:log info "Next: mise run apply in dotfiles on the other workstations" machines "MacBook, code-server, neko, CachyOS"
+printf '%s talosconfig expires %s\n' "${CLUSTER}" "$(expiry "$(yq -r '.contexts[].crt' "${TALOSCONFIG}" | head -1)")"
+printf '%s kubeconfig expires %s\n' "${CLUSTER}" "$(expiry "$(yq -r '.users[0].user."client-certificate-data"' "${KUBECONFIG}")")"
+'''
+
+[tasks."_certs:save"]
+description = "Save the kubeconfig of $CLUSTER to Proton Pass, where the workstations render it from (private)"
+hide = true
+confirm = "Write the new kubeconfig to Proton Pass (Machines/kubeconfig, field {{env.CLUSTER}})?"
+depends = ["//:pass:login"]
+run = '''
+#!/usr/bin/env bash
+set -euo pipefail
+pass-cli item update --vault-name Machines --item-title kubeconfig --field "${CLUSTER}=$(cat "${KUBECONFIG}")" >/dev/null ||
+    mise //:log fatal "Proton Pass not updated: paste the file into the field by hand" file "${KUBECONFIG}" item "Machines/kubeconfig" field "${CLUSTER}"
+mise //:log info "Saved; next: mise run apply in dotfiles on the other workstations" item "Machines/kubeconfig" field "${CLUSTER}"
 '''
 
 [tasks.render-config]
