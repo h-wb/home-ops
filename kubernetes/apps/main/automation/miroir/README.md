@@ -117,7 +117,7 @@ The warehouse is private scope as a whole ([the one rule](https://github.com/h-w
 ### The image
 
 The server is not released; it ships as
-`ghcr.io/h-wb/pipelines:sha-<commit>`. The same tag is named in three places,
+`ghcr.io/h-wb/miroir:sha-<commit>`. The same tag is named in three places,
 and they move together:
 
 | Where                                               | For            |
