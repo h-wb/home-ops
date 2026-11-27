@@ -11,7 +11,6 @@ _.python.venv = { path = "{{config_root}}/.venv", create = true }
 CLUSTER = "{{ get_env(name=\"CLUSTER\", default=\"main\") }}"
 SHARED_APPS = "{{config_root}}/kubernetes/apps/main"
 CLUSTER_APPS = "{{config_root}}/kubernetes/apps/{{env.CLUSTER}}"
-# The file dotfiles renders from Proton Pass on each workstation (Machines/kubeconfig).
 KUBECONFIG = "{{env.HOME}}/.kube/{{env.CLUSTER}}.yaml"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
