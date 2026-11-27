@@ -1,5 +1,5 @@
 ---
-# The timeline (pipelines decision 040) reads the warehouse as its own role on
+# The timeline (Miroir decision 040) reads the warehouse as its own role on
 # postgres-metabase: login only, no rights by default. The timeline's dbt package
 # grants it USAGE on its schema and SELECT on its tables; the server also opens
 # every session read-only with a statement time limit.

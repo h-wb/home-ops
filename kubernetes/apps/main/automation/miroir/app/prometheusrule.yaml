@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://k8s-schemas.home-operations.com/monitoring.coreos.com/prometheusrule_v1.json
-# What the collectors on the machines report after each run (pipelines
+# What the collectors on the machines report after each run (Miroir
 # decision 039, docs/observability.md there). One sample per connection.
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule

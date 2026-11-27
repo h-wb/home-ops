@@ -13,18 +13,18 @@ created: 2026-11-23T08:25
 
 # Miroir deployment
 
-Miroir mirrors every source into one Postgres, the [warehouse](https://github.com/h-wb/handbook/blob/main/Systems/Warehouse.md). Its code and its own documentation are in [h-wb/pipelines](https://github.com/h-wb/pipelines); this page is what is deployed here and how to operate it.
+Miroir mirrors every source into one Postgres, the [warehouse](https://github.com/h-wb/handbook/blob/main/Systems/Warehouse.md). Its code and its own documentation are in [h-wb/miroir](https://github.com/h-wb/miroir); this page is what is deployed here and how to operate it.
 
-| Document                                                                                         | What it holds                                                                                 |
-| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| [pipelines: flows](https://github.com/h-wb/pipelines/blob/main/docs/miroir/flows.md)             | How data moves, one diagram per flow                                                          |
-| [pipelines: operations](https://github.com/h-wb/pipelines/blob/main/docs/operations.md)          | Adding a source or an analysis, builds, what to look at when something is wrong               |
-| [pipelines: architecture](https://github.com/h-wb/pipelines/blob/main/docs/architecture.md)      | The parts of the code, the ways data gets in, the words used                                  |
-| [pipelines: Miroir reference](https://github.com/h-wb/pipelines/blob/main/docs/miroir/README.md) | What Miroir is; configuration, runs, analyses, media, timeline and API on the pages beside it |
-| [pipelines: decisions](https://github.com/h-wb/pipelines/blob/main/docs/miroir/decisions.md)     | Why it is built this way, numbered                                                            |
-| [pipelines: sources](https://github.com/h-wb/pipelines/tree/main/docs/sources)                   | One page per source: tables, keys, what is masked                                             |
-| [pipelines: observability](https://github.com/h-wb/pipelines/blob/main/docs/observability.md)    | What Miroir knows about each connection; metrics                                              |
-| dotfiles, `conf.d/macos-miroir-collector/`                                                       | The collector on the MacBook: install, sources, schedule, tokens                              |
+| Document                                                                                   | What it holds                                                                                 |
+| ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
+| [miroir: flows](https://github.com/h-wb/miroir/blob/main/docs/miroir/flows.md)             | How data moves, one diagram per flow                                                          |
+| [miroir: operations](https://github.com/h-wb/miroir/blob/main/docs/operations.md)          | Adding a source or an analysis, builds, what to look at when something is wrong               |
+| [miroir: architecture](https://github.com/h-wb/miroir/blob/main/docs/architecture.md)      | The parts of the code, the ways data gets in, the words used                                  |
+| [miroir: Miroir reference](https://github.com/h-wb/miroir/blob/main/docs/miroir/README.md) | What Miroir is; configuration, runs, analyses, media, timeline and API on the pages beside it |
+| [miroir: decisions](https://github.com/h-wb/miroir/blob/main/docs/miroir/decisions.md)     | Why it is built this way, numbered                                                            |
+| [miroir: sources](https://github.com/h-wb/miroir/tree/main/docs/sources)                   | One page per source: tables, keys, what is masked                                             |
+| [miroir: observability](https://github.com/h-wb/miroir/blob/main/docs/observability.md)    | What Miroir knows about each connection; metrics                                              |
+| dotfiles, `conf.d/macos-miroir-collector/`                                                 | The collector on the MacBook: install, sources, schedule, tokens                              |
 
 A connection is one source feeding the warehouse; an analysis is a dbt package built on connections into schemas of its own; the collector (`miroir-collector`) runs on a device and delivers a local source.
 
@@ -78,7 +78,7 @@ flowchart LR
 
 | Part                 | Its job                                                                                                                                                               | Runs as                                               | Defined in                                                                         |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Collector            | On a device: read a local source, mask and withhold, deliver, upload files, report                                                                                    | A launchd job, hourly                                 | Code: pipelines `collector/`. Install: dotfiles                                    |
+| Collector            | On a device: read a local source, mask and withhold, deliver, upload files, report                                                                                    | A launchd job, hourly                                 | Code: miroir `collector/`. Install: dotfiles                                       |
 | Server               | Interface, API, receiving URL; signs media links; asks for runs; the timeline                                                                                         | Deployment `miroir`, one container                    | `app/helmrelease.yaml`                                                             |
 | Worker               | Turns each requested run into a Kubernetes Job, on the pool `miroir-k8s`                                                                                              | `miroir-worker`, in the Prefect app                   | `../prefect/app/`                                                                  |
 | Flow run             | One load, one analysis build or one batch of thumbnails                                                                                                               | A Job from the pinned image, then gone                | `../prefect/app/miroir-job-template.yaml`; the image is named in the configuration |
@@ -98,11 +98,11 @@ holds the data. Flow runs write to both; nothing else writes to the warehouse.
 Which connections exist, their schedules and the analyses they feed are configuration, not deployment: `miroir.json` holds them, the interface at `miroir.${SECRET_DOMAIN}` edits it, and no repo keeps a copy. Read them there.
 
 - What feeds the warehouse, source by source: the [handbook's map](https://github.com/h-wb/handbook/blob/main/Map.md).
-- How each source is read, its tables and what is masked: [pipelines: sources](https://github.com/h-wb/pipelines/tree/main/docs/sources).
+- How each source is read, its tables and what is masked: [miroir: sources](https://github.com/h-wb/miroir/tree/main/docs/sources).
 
 ## Privacy here
 
-The warehouse is private scope as a whole ([the one rule](https://github.com/h-wb/handbook#the-one-rule)); masking on the device is described in pipelines. What this deployment adds:
+The warehouse is private scope as a whole ([the one rule](https://github.com/h-wb/handbook#the-one-rule)); masking on the device is described in miroir. What this deployment adds:
 
 - `miroir.${SECRET_DOMAIN}` is on `envoy-internal` only. A device delivers from the LAN or the VPN and keeps its batch until it can.
 - A delivery token can only add data to its own connection. A device holds no storage key: files go to links the server signs for a few minutes.
@@ -110,7 +110,7 @@ The warehouse is private scope as a whole ([the one rule](https://github.com/h-w
 - The timeline reads the warehouse as `miroir_timeline`, a role that can only read the timeline's tables, with a time limit per query (`app/timeline-reader.yaml`).
 - Metabase's tools belong on the private and assistant tool gateways only. The temporary `metabase` entry on the general gateway, for the 2026-11 cross-checks (counts and schema only), is removed by home-ops#5130.
 - Screenshots and attachments sit unencrypted in Garage's data folder and in its offsite copy.
-- pipelines and home-ops are public: no personal export, address or count belongs in either.
+- miroir and home-ops are public: no personal export, address or count belongs in either.
 
 ## Deployment
 
@@ -184,7 +184,7 @@ kubectl -n automation exec deploy/miroir -- /app/.venv/bin/python -m src.cli \
 
 ### Roll out a new image
 
-1. Wait for the image build of the commit on pipelines' main.
+1. Wait for the image build of the commit on miroir's main.
 2. If the metadata schema changed (the pull request says so): let running loads
    finish first. An older program refuses a newer schema, and there is no way
    back without a restore.
@@ -206,7 +206,7 @@ ones again; `--retry failed,unreadable` those two kinds.
 
 ### When something looks wrong
 
-What to look at for a source that stopped arriving, a failed load or a stale dashboard is in [pipelines: operations](https://github.com/h-wb/pipelines/blob/main/docs/operations.md#when-something-looks-wrong). On the cluster side:
+What to look at for a source that stopped arriving, a failed load or a stale dashboard is in [miroir: operations](https://github.com/h-wb/miroir/blob/main/docs/operations.md#when-something-looks-wrong). On the cluster side:
 
 | Symptom                    | Look at                                                                  |
 | -------------------------- | ------------------------------------------------------------------------ |
