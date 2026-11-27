@@ -82,10 +82,6 @@ spec:
         # falls back to mistral/mistral-large-4 (routerSettings.fallbacks in
         # llm/litellm/app/litellmproxy.yaml), so the review still runs.
         model: litellm/chatgpt/gpt-6-luna-max
-        # A clean review approves Renovate's pull requests only, so its approval is
-        # the one the default-branch ruleset needs for them to auto-merge. Every
-        # other pull request, agents' included, waits for the owner. Set here, not
-        # in .kritika.yaml, so a pull request cannot change it.
         approve:
           when:
             - name: home-ops-renovate
