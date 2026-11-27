@@ -11,7 +11,7 @@ _.python.venv = { path = "{{config_root}}/.venv", create = true }
 CLUSTER = "{{ get_env(name=\"CLUSTER\", default=\"main\") }}"
 SHARED_APPS = "{{config_root}}/kubernetes/apps/main"
 CLUSTER_APPS = "{{config_root}}/kubernetes/apps/{{env.CLUSTER}}"
-KUBECONFIG = "{{config_root}}/kubernetes/clusters/{{env.CLUSTER}}/kubeconfig"
+KUBECONFIG = "{{env.HOME}}/.kube/{{env.CLUSTER}}.yaml"
 MINIJINJA_CONFIG_FILE = "{{config_root}}/.minijinja.toml"
 SOPS_AGE_KEY_FILE = "{{config_root}}/age.key"
 TALOSCONFIG = "{{config_root}}/talos/{{env.CLUSTER}}/talosconfig"

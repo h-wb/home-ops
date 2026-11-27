@@ -53,6 +53,7 @@ run = '''
 #!/usr/bin/env bash
 controller=$(talosctl config info -o yaml | yq -e '.endpoints[0]')
 mise //:log info "Running stage..." stage "$0"
+mkdir -p "$(dirname "${KUBECONFIG}")"
 if ! talosctl kubeconfig -n "${controller}" -f --force-context-name "${CLUSTER}" "${KUBECONFIG}"; then
     mise //:log fatal "Failed to fetch kubeconfig" stage "$0"
 fi
