@@ -30,18 +30,6 @@
       ],
       datasourceTemplate: "docker",
     },
-    {
-      customType: "regex",
-      description: "The dotfiles commit every pod bootstraps from",
-      managerFilePatterns: ["/^kubernetes/clusters/main/ks\\.yaml$/"],
-      matchStrings: [
-        '# renovate: dotfiles\\n[ \\t]*DOTFILES_REF: "(?<currentDigest>[0-9a-f]{40})"',
-      ],
-      depNameTemplate: "h-wb/dotfiles",
-      packageNameTemplate: "https://github.com/h-wb/dotfiles",
-      currentValueTemplate: "master",
-      datasourceTemplate: "git-refs",
-    },
   ],
   packageRules: [
     {
@@ -109,15 +97,6 @@
       automergeType: "pr",
       matchUpdateTypes: ["minor", "patch"],
       ignoreTests: false,
-    },
-    {
-      // The pinned code runs with the pod's credentials; review the exact commit.
-      description: "The dotfiles pin: scheduled PRs, manual merge",
-      matchDepNames: ["h-wb/dotfiles"],
-      automerge: false,
-      schedule: ["* 0-1 * * *"],
-      ignoreTests: false,
-      commitMessageTopic: "dotfiles pin",
     },
     // --- Gates: override the global automerge:true. Kept last so they win. ---
     {

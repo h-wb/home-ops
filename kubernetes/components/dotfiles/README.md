@@ -3,7 +3,7 @@ area: "[[Homelab]]"
 categories:
   - "[[Resources]]"
 reviewed: 2026-11-25
-summary: The Component that moves a workstation pod's dotfiles clone to the cluster's pinned commit and bootstraps it, when it runs, and how it fails safe.
+summary: The Component that moves a workstation pod's dotfiles clone to the cluster's DOTFILES_REF and bootstraps it, when it runs, and how it fails safe.
 topics:
   - "[[Workshop]]"
 created: 2026-11-16T11:13
@@ -14,12 +14,11 @@ created: 2026-11-16T11:13
 Bootstraps a pod from the owner's dotfiles. home-ops states two things per pod
 and nothing else about what gets installed or configured:
 
-1. **Which commit**: `DOTFILES_REF`, one value for the cluster, substituted into
-   every child Kustomization by `kubernetes/clusters/main/ks.yaml`. Renovate
-   proposes the head of dotfiles `master` in a scheduled PR. Review the exact
-   SHA and its CI before merging. Do not enable auto-merge without owner review
-   and required checks enforced on dotfiles `master`. Keep the pin reachable
-   from a branch so the Paseo pods can clone it.
+1. **Which ref**: `DOTFILES_REF`, one value for the cluster, substituted into
+   every child Kustomization by `kubernetes/clusters/main/ks.yaml`: `master`.
+   Every pod takes the newest `master` at its next start; nothing restarts a
+   pod when `master` moves. dotfiles `master` takes a pull request and the
+   owner's approval (ruleset `default-branch`).
 2. **Which environment**: `DOTFILES_ENV` in the app's `ks.yaml`, a set from the
    dotfiles' `miserc.toml` `[env_sets]`, optionally followed by layers for this
    pod only (`code-server`, `neko`, `neko,extra-layer`).
@@ -31,11 +30,11 @@ The app mounts it at `/opt/dotfiles` and decides when each step runs:
 
 - `sh /opt/dotfiles/dotfiles-bootstrap fetch`: `mise -E $DOTFILES_ENV bootstrap
   --from https://github.com/h-wb/dotfiles.git?ref=$DOTFILES_REF --update
-  --save-env --only final-hook` moves the `~/.dotfiles` clone to the pin
+  --save-env --only final-hook` moves the `~/.dotfiles` clone to that ref
   (cloning it on an empty volume), links `~/.config/mise` to it and saves the
   environment. Local branches and ignored files (`*.local.toml`) stay. A local
   change in the way stops the move, and so does a failed fetch: the pod then
-  runs the commit already there, reported `stale`. Develop in
+  runs the commit already there, and the hook logs `fetch failed`. Develop in
   `~/Repositories/dotfiles`.
 - `... run`: `mise run apply --unattended` in that checkout, with a live
   Proton Pass session or without one (the dotfiles' `fresh` and `protect`).
@@ -49,8 +48,8 @@ must stay at or above the dotfiles' `min_version`.
 Only the hook's own lines reach the pod's log; mise's output goes to
 `~/.local/state/dotfiles.log` on the volume. The dotfiles own the status,
 `~/.local/state/dotfiles.status`, and the `pod-start` doctor check (`mise
-doctor project`), which also fails when the last start applied a commit other
-than the pin.
+doctor project`), which also fails when `DOTFILES_REF` is a commit and the last
+start applied another.
 
 | Pod         | `DOTFILES_ENV` | Trigger                                                                                                                        |
 | ----------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -65,15 +64,16 @@ app container. They hold no secrets, so there is no step 2. `tests/test_dotfiles
 renders the hook as Flux does and runs it with real mise and git against a
 local remote; `tests/test_paseo.py` checks the Paseo arguments.
 
-## When a pin goes bad
+## When dotfiles goes bad
 
 A pod never stops starting because of the dotfiles. The signals: the
 `DotfilesBootstrapIncomplete` alert (vmalert on the pods' logs; neko's
 in-session run only logs to its volume), `mise doctor project` in the pod, and
 on neko the n8n workflow "Anki → Nextcloud: Korean Vocabulary" (hourly at :10).
 
-Revert the `DOTFILES_REF` update to a known-good commit. This rolls every
-consumer.
+Revert the change in dotfiles: each pod takes it at its next start. To hold
+every pod on a known-good commit meanwhile, set `DOTFILES_REF` to that commit;
+this rolls every consumer.
 
 Before this hook, the old ones ran a `scripts/pod-bootstrap` without
 arguments from a clone on `master`. To go back to them, revert both pull

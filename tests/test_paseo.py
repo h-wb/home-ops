@@ -10,7 +10,7 @@ import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-PIN = re.search(r'DOTFILES_REF: "([0-9a-f]{40})"',
+PIN = re.search(r'DOTFILES_REF: "([^"]+)"',
                 (ROOT / "kubernetes/clusters/main/ks.yaml").read_text()).group(1)
 
 
@@ -323,7 +323,7 @@ class PaseoRendering(unittest.TestCase):
                              "--yes", "--force-dotfiles", "--skip-dirty", "--locked"):
                     self.assertIn(flag, args)
                 self.assertNotIn("--update", args)
-                # The cluster's one pin, never a branch.
+                # The cluster's one ref, DOTFILES_REF.
                 self.assertEqual(f"https://github.com/h-wb/dotfiles.git?ref={PIN}",
                                  args[args.index("--from") + 1])
                 self.assertEqual("/home/paseo/.dotfiles", args[args.index("--from-dir") + 1])
