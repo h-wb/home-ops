@@ -147,7 +147,7 @@ spec:
               - headers:
                   - type: RegularExpression
                     name: Authorization
-                    value: "^[Bb][Aa][Ss][Ii][Cc] "
+                    value: "^[Bb][Aa][Ss][Ii][Cc] .+"
               - path:
                   type: Exact
                   value: /api/token/
