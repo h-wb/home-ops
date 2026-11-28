@@ -1,6 +1,6 @@
 {
   "private": true,
   "dependencies": {
-    "seekstone": "0.27.1"
+    "seekstone": "0.28.1"
   }
 }
